@@ -1,0 +1,27 @@
+{
+  "name": "camera-chess",
+  "description": "Camera Chess web app",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "deploy": "gh-pages -d dist"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@tensorflow/tfjs": "^4.2.0",
+    "kokopu-react": "^3.0.0",
+    "normalize.css": "^8.0.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-draggable": "^4.4.5"
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.24",
+    "@types/react-dom": "^18.0.8",
+    "@vitejs/plugin-react": "^2.2.0",
+    "gh-pages": "^5.0.0",
+    "vite": "^3.2.3"
+  }
+}
