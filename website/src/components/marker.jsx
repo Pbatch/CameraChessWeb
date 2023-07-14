@@ -22,8 +22,8 @@ const Marker = ({name, x, y, cornersRef}) => {
     defaultPosition={{"x": x, "y": y}}
     nodeRef={nodeRef}
     onStop={(e, data) => {
-      const cornerX = (data.x + (size / 2)) / Constants.Y_RATIO;
-      const cornerY = (Constants.VIDEO_HEIGHT + data.y + (size / 2)) / Constants.X_RATIO;
+      const cornerX = (data.x + (size / 2));
+      const cornerY = (Constants.MODEL_HEIGHT + data.y + (size / 2) + 6);
       console.log('cornerX', cornerX, 'cornerY', cornerY)
       cornersRef.current = {...cornersRef.current, [name]: {"x": cornerX, "y": cornerY}}
     }}

@@ -1,24 +1,31 @@
-import labels from "./labels.json";
+const LABELS = ["b", "k", "n", "p", "q", "r", "B", "K", "N", "P", "Q", "R"]
 
-export const renderBoxes = (canvasRef, bbox_conf_cls) => {
+export const renderBoxes = (canvasRef, bbox_conf_cls, fps) => {
   const ctx = canvasRef.getContext("2d");
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height); // clean canvas
 
   const colors = new Colors();
 
   // font configs
-  const font = `${Math.max(
-    Math.round(Math.max(ctx.canvas.width, ctx.canvas.height) / 40),
-    14
-  )}px Arial`;
+  const font = `${Math.max(Math.round(Math.max(ctx.canvas.width, ctx.canvas.height) / 40), 14)}px Arial`;
   ctx.font = font;
   ctx.textBaseline = "top";
+  ctx.lineWidth = Math.max(Math.min(ctx.canvas.width, ctx.canvas.height) / 200, 2.5);
+  const textHeight = parseInt(font, 10);
+
+  // fps box
+  const text = `FPS:${fps}`;
+  const textWidth = ctx.measureText(text).width;
+  ctx.fillStyle = "#333333"
+  ctx.fillRect(0, 0, textWidth + ctx.lineWidth, textHeight + ctx.lineWidth);
+  ctx.fillStyle = "#ffffff";
+  ctx.fillText(text, 0, 0);
+
   for (let i = 0; i < bbox_conf_cls.length; ++i) {
     let [x1, y1, x2, y2, conf, cls, square] = bbox_conf_cls[i];
     // filter based on class threshold
-    const klass = labels[cls];
+    const klass = LABELS[cls];
     const color = colors.get(cls);
-    const score = (conf * 100).toFixed(0);
     const width = x2 - x1;
     const height = y2 - y1;
 
@@ -28,13 +35,12 @@ export const renderBoxes = (canvasRef, bbox_conf_cls) => {
 
     // draw border box.
     ctx.strokeStyle = color;
-    ctx.lineWidth = Math.max(Math.min(ctx.canvas.width, ctx.canvas.height) / 200, 2.5);
     ctx.strokeRect(x1, y1, width, height);
 
     // Draw the label background.
     ctx.fillStyle = color;
-    const textWidth = ctx.measureText(klass + " - " + score + "%").width;
-    const textHeight = parseInt(font, 10); // base 10
+    const text = `${klass}${square}`;
+    const textWidth = ctx.measureText(text).width;
     const yText = y1 - (textHeight + ctx.lineWidth);
     ctx.fillRect(
       x1 - 1,
@@ -45,12 +51,11 @@ export const renderBoxes = (canvasRef, bbox_conf_cls) => {
 
     // Draw labels
     ctx.fillStyle = "#ffffff";
-    ctx.fillText(`${klass} - ${score}% - ${square}`, x1 - 1, yText < 0 ? 0 : yText);
+    ctx.fillText(text, x1 - 1, yText < 0 ? 0 : yText);
   }
 };
 
 class Colors {
-  // ultralytics color palette https://ultralytics.com/
   constructor() {
     this.palette = [
       "#FF3838",

@@ -16,13 +16,16 @@ class State:
         self.game = chess.pgn.Game()
         self.node = self.game
         self.change = False
-        self.last_move = ""
+        self.moves = []
+        self.lichess_url = "https://lichess.org/analysis/pgn"
 
     def _play_move(self, move):
+        self.moves.append(self.board.san(move))
         self.board.push(move)
         self.node = self.node.add_variation(move)
         self.change = True
-        self.last_move = str(move)
+        self.fen = self.board.fen()
+        self.lichess_url = f'https://lichess.org/analysis/pgn/{"_".join(self.moves)}'
 
     def update(self, tracks):
         self.change = False

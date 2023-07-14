@@ -1,15 +1,15 @@
-import { detectVideo } from "../utils/detect";
+import Button from 'react-bootstrap/Button';
 
 const RecordButton = ({ recording, setRecording }) => {
   const text = recording ? "Stop Recording" : "Start Recording";
   return (
-    <button
+    <Button
       onClick={() => {
         setRecording(!recording);
       }}
     >
     {text}
-    </button>
+    </Button>
   );
 };
 

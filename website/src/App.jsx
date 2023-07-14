@@ -2,15 +2,20 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import * as tf from "@tensorflow/tfjs";
 import "@tensorflow/tfjs-backend-webgl";
 import RecordButton from "./components/recordButton";
+import LichessButton from "./components/lichessButton"
 import Corners from "./components/corners";
 import Video from "./components/video";
-import Board from "./components/board"
+import Board from "./components/board";
 import * as Constants from "./utils/constants.js";
-import "./style/App.css";
+import 'bootstrap/dist/css/bootstrap.min.css';
+import Container from 'react-bootstrap/Container';
+import Row from 'react-bootstrap/Row';
+import Col from 'react-bootstrap/Col';
 
 const App = () => {
   const [recording, setRecording] = useState(false);
-  const [fen, setFen] = useState("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq - 0 1");
+  const [fen, setFen] = useState("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+  const [lichessURL, setLichessURL] = useState("https://lichess.org/analysis/pgn");
 
   const webcamRef = useRef(null);
   const canvasRef = useRef(null);
@@ -27,7 +32,7 @@ const App = () => {
 
   useEffect(() => {
     tf.ready().then(async () => {
-      const yolov8 = await tf.loadGraphModel("480S_web_model/model.json");
+      const yolov8 = await tf.loadGraphModel("480S_pruned_web_model/model.json");
 
       modelRef.current = {
         net: yolov8,
@@ -43,24 +48,29 @@ const App = () => {
   }, [recording]);
 
   return (
-    <div id="App">
-      <div id="video" display="flex">
-          <Video modelRef={modelRef} webcamRef={webcamRef} canvasRef={canvasRef}
-          cornersRef={cornersRef} recordingRef={recordingRef} setFen={setFen} />
-          <canvas ref={canvasRef} height={Constants.MODEL_HEIGHT} width={Constants.MODEL_WIDTH} />
-          <Corners cornersRef={cornersRef} />
-      </div>
+    <Container id="container" className="m-3">
+      <Row className="m-3">
+        <Col className="d-flex align-items-center justify-content-center">
+          <div style={{"position": "relative", "height": Constants.MODEL_HEIGHT, "width": Constants.MODEL_WIDTH}}>
+            <Video modelRef={modelRef} webcamRef={webcamRef} canvasRef={canvasRef}
+            cornersRef={cornersRef} recordingRef={recordingRef} setFen={setFen} setLichessURL={setLichessURL} />
+            <Corners cornersRef={cornersRef} />
+          </div>
+        </Col>
+        <Col id="board" className="d-flex align-items-center justify-content-center">
+          <Board fen={fen} />
+        </Col>
+      </Row>
 
-      <div id="buttons">
-        <RecordButton recording={recording} setRecording={setRecording} />
-      </div>
-
-      <div id="board">
-         <Board fen={fen} />
-      </div>
-
-
-    </div>
+      <Row>
+        <Col className="d-flex align-items-center justify-content-center">
+          <RecordButton recording={recording} setRecording={setRecording} />
+        </Col>
+        <Col className="d-flex align-items-center justify-content-center">
+          <LichessButton lichessURL={lichessURL} />
+        </Col>
+      </Row>
+    </Container>
   );
 };
 

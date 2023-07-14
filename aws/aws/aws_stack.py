@@ -26,15 +26,11 @@ class AwsStack(Stack):
     def setup_bucket(self):
         bucket = s3.Bucket(self, 'my_website_bucket',
                            bucket_name=self.site_domain,
-                           public_read_access=True,
-                           block_public_access=s3.BlockPublicAccess(block_public_acls=False,
-                                                                    block_public_policy=False,
-                                                                    ignore_public_acls=False,
-                                                                    restrict_public_buckets=False),
+                           public_read_access=False,
+                           block_public_access=s3.BlockPublicAccess.BLOCK_ALL,
                            removal_policy=RemovalPolicy.DESTROY,
-                           auto_delete_objects=True,
-                           website_index_document='index.html',
-                           website_error_document='index.html')
+                           auto_delete_objects=True)
+
         return bucket
 
     def setup_bucket_deployment(self):
@@ -47,10 +43,8 @@ class AwsStack(Stack):
         return deployment
 
     def setup_zone(self):
-        # zone = route53.HostedZone.from_lookup(self, 'my_zone',
-        #                                       domain_name=self.DOMAIN_NAME)
-        zone = route53.HostedZone(self, 'my_zone',
-                                  zone_name=self.DOMAIN_NAME)
+        zone = route53.PublicHostedZone(self, 'my_zone',
+                                        zone_name=self.DOMAIN_NAME)
         return zone
 
     def setup_route53_record(self):
@@ -70,9 +64,10 @@ class AwsStack(Stack):
         distribution = cloudfront.Distribution(self, 'my_distribution',
                                                default_behavior=default_behavior,
                                                domain_names=[self.site_domain],
-                                               minimum_protocol_version=cloudfront.SecurityPolicyProtocol.TLS_V1_2_2019,
+                                               minimum_protocol_version=cloudfront.SecurityPolicyProtocol.TLS_V1_2_2021,
                                                ssl_support_method=cloudfront.SSLMethod.SNI,
-                                               certificate=certificate
+                                               certificate=certificate,
+                                               default_root_object='index.html'
                                                )
         return distribution
 
@@ -108,7 +103,8 @@ class AwsStack(Stack):
         )
 
         integration_responses = [api_gw.IntegrationResponse(status_code="200",
-                                                            response_parameters={'method.response.header.Access-Control-Allow-Origin': "'*'"})]
+                                                            response_parameters={
+                                                                'method.response.header.Access-Control-Allow-Origin': "'*'"})]
         integration = api_gw.LambdaIntegration(
             self.lambda_,
             proxy=False,
@@ -116,7 +112,8 @@ class AwsStack(Stack):
         )
 
         method_response = api_gw.MethodResponse(status_code="200",
-                                                response_parameters={'method.response.header.Access-Control-Allow-Origin': True})
+                                                response_parameters={
+                                                    'method.response.header.Access-Control-Allow-Origin': True})
         entity.add_method(
             http_method='POST',
             integration=integration,

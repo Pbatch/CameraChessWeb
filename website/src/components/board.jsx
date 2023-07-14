@@ -1,9 +1,9 @@
 import { Chessboard } from 'kokopu-react';
+import { useEffect, useState } from "react";
 
-const Board = ({fen}) => {
-
+const Board = ({ fen }) => {
   return (
-    <Chessboard squareSize={20} position={fen} />
+    <Chessboard position={fen} coordinateVisible={false} squareSize={50}/>
   );
 }
 
