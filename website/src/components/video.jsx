@@ -1,18 +1,10 @@
 import { detectVideo } from "../utils/detect";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import * as Constants from "../utils/constants.js";
 
-const Video = ({ modelRef, webcamRef, canvasRef, cornersRef, recordingRef, setFen, setLichessURL }) => {
-  const constraints = {
-    "audio": false,
-    "video": {
-      "facingMode": {
-        "ideal": "environment"
-      },
-     "width": Constants.MODEL_WIDTH,
-     "height": Constants.MODEL_HEIGHT
-    }
-  }
+const Video = ({ modelRef, cornersRef, recordingRef, setFen, setLichessURL, videoSize }) => {
+  const canvasRef = useRef(null);
+  const webcamRef = useRef(null);
 
   const canvasStyle = {
     position: "absolute",
@@ -23,8 +15,20 @@ const Video = ({ modelRef, webcamRef, canvasRef, cornersRef, recordingRef, setFe
     height: "100%"
   }
 
+  const constraints = {
+    "audio": false,
+    "video": {
+      "facingMode": {
+        "ideal": "environment"
+      }
+    },
+    "width": Constants.MODEL_WIDTH,
+    "height": Constants.MODEL_HEIGHT
+  }
+
   const setupWebcam = async () => {
-    const stream = await navigator.mediaDevices.getUserMedia(constraints)
+    console.log(constraints);
+    const stream = await navigator.mediaDevices.getUserMedia(constraints);
     webcamRef.current.srcObject = stream;
   };
 
@@ -34,12 +38,14 @@ const Video = ({ modelRef, webcamRef, canvasRef, cornersRef, recordingRef, setFe
     }
     setup();
     detectVideo(modelRef, webcamRef, canvasRef, cornersRef, recordingRef, setFen, setLichessURL);
+    canvasRef.current.height = videoSize;
+    canvasRef.current.width = videoSize;
   }, []);
 
   return (
     <>
       <video ref={webcamRef} autoPlay />
-      <canvas ref={canvasRef} style={canvasStyle} height={Constants.MODEL_HEIGHT} width={Constants.MODEL_WIDTH} />
+      <canvas ref={canvasRef} style={canvasStyle} />
     </>
   );
 };

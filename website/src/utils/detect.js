@@ -1,4 +1,4 @@
-import * as tf from "@tensorflow/tfjs";
+import * as tf from "@tensorflow/tfjs-core";
 import { renderBoxes } from "./renderBox";
 import * as Constants from "../utils/constants.js";
 
@@ -17,7 +17,7 @@ const detect = async (modelRef, webcamRef) => {
       const image = tf.browser.fromPixels(webcamRef.current).div(255.0).expandDims(0);
       return image
     });
-    const res = modelRef.current.net.execute(input);
+    const res = modelRef.current.net.predict(input);
 
     const [boxes, scores, classes] = tf.tidy(() => {
       const transRes = res.transpose([0, 2, 1]);

@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import * as tf from "@tensorflow/tfjs";
-import "@tensorflow/tfjs-backend-webgl";
 import RecordButton from "./components/recordButton";
 import LichessButton from "./components/lichessButton"
 import Corners from "./components/corners";
@@ -11,14 +10,12 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
+import { useWindowWidth } from '@react-hook/window-size';
 
 const App = () => {
   const [recording, setRecording] = useState(false);
   const [fen, setFen] = useState("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
   const [lichessURL, setLichessURL] = useState("https://lichess.org/analysis/pgn");
-
-  const webcamRef = useRef(null);
-  const canvasRef = useRef(null);
   const recordingRef = useRef(false);
   const cornersRef = useRef({
     a8: {x: 0, y: 100},
@@ -29,10 +26,23 @@ const App = () => {
   const modelRef = useRef({
     net: null
   });
+  const windowWidth = useWindowWidth();
+  const [videoSize, setVideoSize] = useState(240);
+  const displayRef = useRef(null);
+
+  useEffect(() => {
+    console.log('windowWidth', windowWidth);
+    setVideoSize(Math.min(60 * Math.floor((windowWidth - 100) / 60), 480));
+    console.log('videoSize', videoSize);
+
+    displayRef.current.style.height = `${videoSize}px`;
+    displayRef.current.style.width = `${videoSize}px`;
+  }, [windowWidth]);
 
   useEffect(() => {
     tf.ready().then(async () => {
       const yolov8 = await tf.loadGraphModel("480S_pruned_web_model/model.json");
+      console.log("Backend:", tf.getBackend());
 
       modelRef.current = {
         net: yolov8,
@@ -51,9 +61,9 @@ const App = () => {
     <Container id="container" className="m-3">
       <Row className="m-3">
         <Col className="d-flex align-items-center justify-content-center">
-          <div style={{"position": "relative", "height": Constants.MODEL_HEIGHT, "width": Constants.MODEL_WIDTH}}>
-            <Video modelRef={modelRef} webcamRef={webcamRef} canvasRef={canvasRef}
-            cornersRef={cornersRef} recordingRef={recordingRef} setFen={setFen} setLichessURL={setLichessURL} />
+          <div ref={displayRef} style={{"position": "relative"}}>
+            <Video modelRef={modelRef} cornersRef={cornersRef} recordingRef={recordingRef}
+            setFen={setFen} setLichessURL={setLichessURL} videoSize={videoSize} />
             <Corners cornersRef={cornersRef} />
           </div>
         </Col>

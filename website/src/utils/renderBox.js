@@ -1,4 +1,4 @@
-const LABELS = ["b", "k", "n", "p", "q", "r", "B", "K", "N", "P", "Q", "R"]
+import * as Constants from "../utils/constants.js";
 
 export const renderBoxes = (canvasRef, bbox_conf_cls, fps) => {
   const ctx = canvasRef.getContext("2d");
@@ -23,8 +23,7 @@ export const renderBoxes = (canvasRef, bbox_conf_cls, fps) => {
 
   for (let i = 0; i < bbox_conf_cls.length; ++i) {
     let [x1, y1, x2, y2, conf, cls, square] = bbox_conf_cls[i];
-    // filter based on class threshold
-    const klass = LABELS[cls];
+    const klass = Constants.LABELS[cls];
     const color = colors.get(cls);
     const width = x2 - x1;
     const height = y2 - y1;
@@ -70,14 +69,6 @@ class Colors {
       "#00D4BB",
       "#2C99A8",
       "#00C2FF",
-      "#344593",
-      "#6473FF",
-      "#0018EC",
-      "#8438FF",
-      "#520085",
-      "#CB38FF",
-      "#FF95C8",
-      "#FF37C7",
     ];
     this.n = this.palette.length;
   }
