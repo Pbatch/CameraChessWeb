@@ -71,7 +71,7 @@ const track = async (preds, tracker_output, cornersRef) => {
         "new_track_thresh": 0.3,
         "track_high_thresh": 0.3,
         "track_low_thresh": 0.1},
-      "state_kwargs": {"fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"}
+      "state_kwargs": {"fen": ""}
     })
   } else {
     body = JSON.stringify({
@@ -90,12 +90,12 @@ const track = async (preds, tracker_output, cornersRef) => {
   return tracker_output;
 }
 
-export const detectVideo = (modelRef, webcamRef, canvasRef, cornersRef, recordingRef, setFen, setLichessURL) => {
+export const detectVideo = (modelRef, webcamRef, canvasRef, cornersRef, recordingRef, videoSize, setFen, setPgn) => {
   let tracker_output = {"tracker": "",
                         "state": "",
                         "tracks": [],
                         "fen": "",
-                        "lichess_url": ""}
+                        "pgn": ""}
 
   console.log("modelRef", modelRef)
   console.log("webcamRef", webcamRef)
@@ -105,18 +105,19 @@ export const detectVideo = (modelRef, webcamRef, canvasRef, cornersRef, recordin
   const loop = async () => {
     if (recordingRef.current === false || webcamRef.current.srcObject == null) {
       tracker_output.tracker = "";
-      canvasRef.current.getContext("2d").clearRect(0, 0, Constants.MODEL_WIDTH, Constants.MODEL_HEIGHT);
+      canvasRef.current.getContext("2d").clearRect(0, 0, Constants.MODEL_SIZE, Constants.MODEL_SIZE);
     } else {
       const startTime = performance.now();
       const preds = await detect(modelRef, webcamRef);
       tracker_output = await track(preds, tracker_output, cornersRef);
       const endTime = performance.now();
       const fps = (Constants.BATCH_SIZE * 1000 / (endTime - startTime)).toFixed(2);
-      renderBoxes(canvasRef.current, tracker_output.tracks, fps);
+      renderBoxes(canvasRef.current, tracker_output.tracks, fps, videoSize.current);
       setFen(tracker_output.fen);
-      setLichessURL(tracker_output.lichess_url);
+      setPgn(tracker_output.pgn);
 
       console.log(tracker_output.fen);
+      console.log(tracker_output.pgn);
     }
     requestAnimationFrame(loop);
   }

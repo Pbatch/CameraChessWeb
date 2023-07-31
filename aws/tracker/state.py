@@ -1,23 +1,23 @@
 import chess
 import chess.pgn
-from constants import CLASSES, PIECE_TO_CLASS
+from constants import CLASSES, PIECE_TO_CLASS, CLASS_TO_PIECE
 
 
 class State:
     def __init__(self,
-                 fen="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+                 fen="",
                  move_thresh=0.0,
                  speed_thresh=1.0):
         self.fen = fen
         self.move_thresh = move_thresh
         self.speed_thresh = speed_thresh
 
-        self.board = chess.Board(self.fen)
-        self.game = chess.pgn.Game()
-        self.node = self.game
         self.change = False
         self.moves = []
-        self.lichess_url = "https://lichess.org/analysis/pgn"
+        self.game = chess.pgn.Game()
+        self.node = self.game
+        self.board = chess.Board(self.fen) if self.fen != "" else None
+        self.pgn = ""
 
     def _play_move(self, move):
         self.moves.append(self.board.san(move))
@@ -25,7 +25,17 @@ class State:
         self.node = self.node.add_variation(move)
         self.change = True
         self.fen = self.board.fen()
-        self.lichess_url = f'https://lichess.org/analysis/pgn/{"_".join(self.moves)}'
+        self.pgn = self.game.accept(chess.pgn.StringExporter())
+
+    def reset(self, tracks):
+        self.board = chess.Board("8/8/8/8/8/8/8/8 w - - 0 1")
+        for track in tracks:
+            self.board.set_piece_at(square=chess.SQUARES[chess.parse_square(track.square)],
+                                    piece=CLASS_TO_PIECE[track.piece])
+        self.fen = self.board.fen()
+        self.game.setup(self.board)
+        self.node = self.game
+        self.pgn = self.game.accept(chess.pgn.StringExporter())
 
     def update(self, tracks):
         self.change = False
@@ -42,7 +52,7 @@ class State:
         valid_moves = []
         for move in list(self.board.legal_moves):
             from_square = str(move)[:2]
-            to_square = str(move)[2:]
+            to_square = str(move)[2:4]
             piece_idx = CLASSES.index(PIECE_TO_CLASS[self.board.piece_at(move.from_square)])
 
             from_score = max(square_to_scores[from_square])

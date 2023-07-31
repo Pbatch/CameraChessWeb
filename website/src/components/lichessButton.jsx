@@ -1,9 +1,9 @@
 import Button from 'react-bootstrap/Button';
 
-const LichessButton = ({ lichessURL }) => {
+const LichessButton = ({ pgn }) => {
   return (
-    <Button as="a" href={lichessURL} target="_blank" rel="noreferrer">
-      Analyse position on Lichess
+    <Button as="a" href="https://lichess.org/paste" target="_blank" rel="noreferrer">
+      Lichess Analysis
     </Button>
   );
 };

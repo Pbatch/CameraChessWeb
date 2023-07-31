@@ -34,7 +34,11 @@ def lambda_handler(body, context):
     for pred in preds:
         pred = np.array(pred) if len(pred) else np.empty(shape=(0, 6))
         tracker.update(pred)
-        state.update(tracker.tracks)
+        if state.fen != "":
+            state.update(tracker.tracks)
+
+    if state.fen == "":
+        state.reset(tracker.tracks)
 
     tracks = [[*track.bbox, track.score, track.piece_idx, track.square] for track in tracker.tracks]
 
@@ -44,5 +48,5 @@ def lambda_handler(body, context):
         'state': serialize(state),
         'tracks': tracks,
         'fen': state.fen,
-        'lichess_url': state.lichess_url
+        'pgn': state.pgn
     }

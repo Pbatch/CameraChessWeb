@@ -1,6 +1,6 @@
 import * as Constants from "../utils/constants.js";
 
-export const renderBoxes = (canvasRef, bbox_conf_cls, fps) => {
+export const renderBoxes = (canvasRef, bbox_conf_cls, fps, videoSize) => {
   const ctx = canvasRef.getContext("2d");
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height); // clean canvas
 
@@ -23,6 +23,10 @@ export const renderBoxes = (canvasRef, bbox_conf_cls, fps) => {
 
   for (let i = 0; i < bbox_conf_cls.length; ++i) {
     let [x1, y1, x2, y2, conf, cls, square] = bbox_conf_cls[i];
+    x1 *= videoSize / Constants.MODEL_SIZE;
+    y1 *= videoSize / Constants.MODEL_SIZE;
+    x2 *= videoSize / Constants.MODEL_SIZE;
+    y2 *= videoSize / Constants.MODEL_SIZE;
     const klass = Constants.LABELS[cls];
     const color = colors.get(cls);
     const width = x2 - x1;
