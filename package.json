@@ -1,0 +1,44 @@
+{
+  "name": "camera-chess",
+  "description": "Camera Chess web app",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "deploy": "gh-pages -d dist"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@bity/oauth2-auth-code-pkce": "^2.13.0",
+    "@capacitor/core": "^5.4.0",
+    "@popperjs/core": "^2.11.8",
+    "@react-hook/window-size": "^3.1.1",
+    "@reduxjs/toolkit": "^1.9.7",
+    "@tensorflow/tfjs": "^4.12.0",
+    "bootstrap": "^5.3.0",
+    "chess.js": "^1.0.0-beta.6",
+    "delaunator": "^5.0.0",
+    "iframe-resizer-react": "^1.1.0",
+    "mathjs": "^11.11.1",
+    "normalize.css": "^8.0.1",
+    "numeric": "^1.2.6",
+    "react": "^18.2.0",
+    "react-bootstrap": "^2.8.0",
+    "react-dom": "^18.2.0",
+    "react-draggable": "^4.4.5",
+    "react-redux": "^8.1.3",
+    "react-router-dom": "^6.15.0",
+    "redux-persist": "^6.0.0",
+    "vectorious": "^6.1.12"
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.24",
+    "@types/react-dom": "^18.0.8",
+    "@vitejs/plugin-react": "^2.2.0",
+    "eslint": "^8.49.0",
+    "eslint-plugin-react": "^7.33.2",
+    "gh-pages": "^5.0.0",
+    "vite": "^3.2.3"
+  }
+}
