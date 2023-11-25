@@ -1,0 +1,35 @@
+{
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": false,
+  "contributors": [
+    {
+      "login": "ConorShepherd",
+      "name": "Conor Shepherd",
+      "avatar_url": "https://avatars.githubusercontent.com/u/75845466?v=4",
+      "profile": "https://github.com/ConorShepherd",
+      "contributions": [
+        "research"
+      ]
+    },
+    {
+      "login": "tdr24008",
+      "name": "tdr24008",
+      "avatar_url": "https://avatars.githubusercontent.com/u/109679977?v=4",
+      "profile": "https://github.com/tdr24008",
+      "contributions": [
+        "research"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7,
+  "projectName": "CameraChessWeb",
+  "projectOwner": "Pbatch",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "skipCi": true,
+  "commitConvention": "angular",
+  "commitType": "docs"
+}
