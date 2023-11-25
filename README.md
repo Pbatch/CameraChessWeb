@@ -1,6 +1,6 @@
 # Camera Chess Web
 
-## Demo
-<video src="https://www.youtube.com/watch?v=AAs4EX372bc"></video>
+Record your chess games and upload load to Lichess at https://www.camerachess.com.
 
-https://www.camerachess.com
+## Demo
+<video src="video.mp4"></video>
