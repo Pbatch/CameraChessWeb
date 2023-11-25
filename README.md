@@ -4,12 +4,22 @@
 [![All Contributors](https://img.shields.io/badge/all_contributors-2-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
-Record your chess games and upload them to Lichess.
+Record your chess games and upload them to Lichess on https://www.camerachess.com.
 
 ## Demo
-[<img src="https://private-user-images.githubusercontent.com/37177749/285556392-e8b5f199-1029-4333-9ff7-eca41ceacaf1.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTEiLCJleHAiOjE3MDA4NzIxNDgsIm5iZiI6MTcwMDg3MTg0OCwicGF0aCI6Ii8zNzE3Nzc0OS8yODU1NTYzOTItZThiNWYxOTktMTAyOS00MzMzLTlmZjctZWNhNDFjZWFjYWYxLnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFJV05KWUFYNENTVkVINTNBJTJGMjAyMzExMjUlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjMxMTI1VDAwMjQwOFomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPTMwMTcwNGY1NGFkNTIzYzEzZmE3YTU3MjY1ZDU1NTFjY2Q0ZTZjMmMyYjMxNTNiMWNiZmZlZGU5YjliM2I3MTMmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0JmFjdG9yX2lkPTAma2V5X2lkPTAmcmVwb19pZD0wIn0.k2xfWyNZ90XSvm8VpLKvBTgMoRqwUSLRivi4sihkCGA" width="50%">](https://youtu.be/AAs4EX372bc)
+[<img src="https://private-user-images.githubusercontent.com/37177749/285556392-e8b5f199-1029-4333-9ff7-eca41ceacaf1.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTEiLCJleHAiOjE3MDA4NzIxNDgsIm5iZiI6MTcwMDg3MTg0OCwicGF0aCI6Ii8zNzE3Nzc0OS8yODU1NTYzOTItZThiNWYxOTktMTAyOS00MzMzLTlmZjctZWNhNDFjZWFjYWYxLnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFJV05KWUFYNENTVkVINTNBJTJGMjAyMzExMjUlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjMxMTI1VDAwMjQwOFomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPTMwMTcwNGY1NGFkNTIzYzEzZmE3YTU3MjY1ZDU1NTFjY2Q0ZTZjMmMyYjMxNTNiMWNiZmZlZGU5YjliM2I3MTMmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0JmFjdG9yX2lkPTAma2V5X2lkPTAmcmVwb19pZD0wIn0.k2xfWyNZ90XSvm8VpLKvBTgMoRqwUSLRivi4sihkCGA" width="100%">](https://youtu.be/AAs4EX372bc)
 
-https://www.camerachess.com
+## Roadmap
+
+* Better visualization of the tracking output (rather than just algebraic notation) during recording
+* Raise an alert when an illegal move is played (currently they're just ignored)
+* Add a home screen (instead of having /record as the home screen)
+* Add a page where the user can upload a video
+* Add a page where a user can play an online game using the Lichess API
+* Use quantized tflite models instead of tfjs models
+* Cache the models so that they load faster
+* Develop a testing framework for different board + piece sets
+* ... Your next big idea?
 
 ## Contributors ✨
 
