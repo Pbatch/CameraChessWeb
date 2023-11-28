@@ -1,8 +1,10 @@
 import React from "react";
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import Home from "./components/home/home.jsx";
 import Record from "./components/record/record.jsx";
-import Upload from "./components/upload/upload.jsx";
+import Export from "./components/export/export.jsx";
+import App from "./App.jsx";
 
 import * as ReactDOM from "react-dom/client";
 import "./style/index.css";
@@ -15,11 +17,22 @@ import { PersistGate } from "redux-persist/integration/react";
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <Record />,
-  },
-  {
-    path: "/upload",
-    element: <Upload />
+    element: <App />,
+    children: [
+      {
+        path: "",
+        element: <Home />,
+      },
+      {
+        path: "/record",
+        element: <Record />
+      },
+      {
+        path: "/export",
+        element: <Export />
+      }
+
+    ]
   }
 ]);
 

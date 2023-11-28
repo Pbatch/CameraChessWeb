@@ -1,5 +1,5 @@
 import { findPieces } from "../../utils/findPieces.jsx";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useLayoutEffect } from "react";
 import * as Constants from "../../utils/constants.jsx";
 import Corners from "./corners";
 import { useWindowWidth } from '@react-hook/window-size';
@@ -94,7 +94,8 @@ const Video = ({ modelRef, canvasRef, webcamRef, sidebarRef, recordingRef, setTe
   }
 
   const parentStyle = {
-    position: "relative"
+    position: "relative",
+    backgroundColor: "#343a40"
   }
 
   const onLoadedMetadata = (e) => {  
@@ -122,7 +123,7 @@ const Video = ({ modelRef, canvasRef, webcamRef, sidebarRef, recordingRef, setTe
 
   return (
     <div className="d-flex align-items-center justify-content-center">
-      <div ref={displayRef} style={parentStyle} className="bg-dark" >
+      <div ref={displayRef} style={parentStyle} >
         <div style={videoContainerStyle} >
           <video ref={webcamRef} autoPlay={true} playsInline={true} muted={true}
           onLoadedMetadata={onLoadedMetadata} style={videoStyle} />

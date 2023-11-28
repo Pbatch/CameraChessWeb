@@ -20,7 +20,7 @@ const PgnButton = ({ setText, recording }) => {
   }
 
   return (
-    <button className="btn btn-dark btn-sm btn-outline-light" onClick={handleClick}>
+    <button className="btn btn-dark btn-sm btn-outline-light w-100" onClick={handleClick}>
       Copy PGN
     </button>
   );

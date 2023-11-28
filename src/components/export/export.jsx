@@ -1,4 +1,4 @@
-import UploadSidebar from "./uploadSidebar.jsx";
+import ExportSidebar from "./exportSidebar.jsx";
 import Board from "./board.jsx";
 import { useEffect } from "react";
 import { Auth } from "./auth.jsx";
@@ -11,8 +11,8 @@ const Upload = () => {
   }, []);
 
   return (
-    <div className="d-flex">
-      <UploadSidebar auth={auth} />
+    <div className="d-flex bg-dark h-100">
+      <ExportSidebar auth={auth} />
       <Board auth={auth} />
     </div>
   );

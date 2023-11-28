@@ -50,7 +50,7 @@ const StudyButton = ({ study, setStudy, auth }) => {
 
   return (
     <div className="dropdown">
-      <button className="btn btn-dark btn-sm btn-outline-light dropdown-toggle" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+      <button className="btn btn-dark btn-sm btn-outline-light dropdown-toggle w-100" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
         Study: {(study === null) ? "None": study.name}
       </button>
       <ul className="dropdown-menu" aria-labelledby="dropdownMenuButton1">

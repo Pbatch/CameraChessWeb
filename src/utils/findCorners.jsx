@@ -30,15 +30,16 @@ const runModels = async (webcamRef, xcornersModelRef, piecesModelRef) => {
   const maxPiecesScores = tf.max(piecesScores, 1);
   const piecesNms = await tf.image.nonMaxSuppressionAsync(piecesBoxes, maxPiecesScores, 100, 0.3, 0.1);
   
-  const pieces = tf.tidy(() => {
+  const piecesTensor = tf.tidy(() => {
     const keptPiecesBoxes = piecesBoxes.gather(piecesNms, 0);
     const piecesCenters = getCenters(keptPiecesBoxes);
     const argmaxPiecesScores = tf.expandDims(tf.argMax(piecesScores.gather(piecesNms, 0), 1), 1);
-    const pieces = tf.concat([piecesCenters, argmaxPiecesScores], 1).arraySync();
-    return pieces;
+    const piecesTensor = tf.concat([piecesCenters, argmaxPiecesScores], 1)
+    return piecesTensor;
   });
+  const pieces = piecesTensor.arraySync();
 
-  tf.dispose([piecesPreds, piecesBoxes, piecesScores, piecesNms, maxPiecesScores]);
+  tf.dispose([piecesPreds, piecesBoxes, piecesScores, piecesNms, piecesTensor, maxPiecesScores]);
 
   return [xCorners, pieces];
 }
@@ -137,6 +138,9 @@ const scoreQuad = (quad, xCorners) => {
 
 const findCornersFromXcorners = (xCorners) => {
   const quads = getQuads(xCorners);
+  if (quads.length == 0) {
+    return;
+  }
   let bestScore = 0
   let bestM = null;
   let bestQuad = null;
@@ -177,6 +181,9 @@ const euclidean = (a, b) => {
 const calculateKeypoints = (pieces, corners) => {
   const blackPieces = pieces.filter(x => x[2] <= 5).map(x => [x[0], x[1]]);
   const whitePieces = pieces.filter(x => x[2] > 5).map(x => [x[0], x[1]]);
+  if ((blackPieces.length == 0) || (whitePieces.length == 0)) {
+    return;
+  }
   const blackCenter = getCenter(blackPieces);
   const whiteCenter = getCenter(whitePieces);
   
@@ -200,16 +207,25 @@ const calculateKeypoints = (pieces, corners) => {
   return keypoints
 }
 
-export const findCorners = async (piecesModelRef, xcornersModelRef, webcamRef, canvasRef, dispatch, setText) => {
-  const startTensors = tf.memory().numTensors;
-
+export const _findCorners = async (piecesModelRef, xcornersModelRef, webcamRef, canvasRef, dispatch, setText) => {
   const [xCorners, pieces] = await runModels(webcamRef, xcornersModelRef, piecesModelRef);
-  if (xCorners.length < 4) {
-    setText(["Need ≥4 xCorners", `Detected ${xCorners.length}`]);
-    return () => { tf.disposeVariables() };
+  if (xCorners.length < 5) {
+    // With <= 5 xCorners, no quads are found
+    setText(["Need ≥5 xCorners", `Detected ${xCorners.length}`]);
+    return;
   }
+
   const corners = findCornersFromXcorners(xCorners);
+  if (corners === undefined) {
+    setText(["Failed to find corners"]);
+    return;
+  }
+
   const keypoints = calculateKeypoints(pieces, corners);
+  if (keypoints === undefined) {
+    setText(["No pieces to label corners"]);
+    return;
+  }
 
   ["h1", "a1", "a8", "h8"].forEach(key => {
     const payload = {"xy": getMarkerXY(keypoints[key], canvasRef.current.height, canvasRef.current.width),
@@ -218,7 +234,13 @@ export const findCorners = async (piecesModelRef, xcornersModelRef, webcamRef, c
   })
   renderCorners(canvasRef.current, keypoints, xCorners);
   setText(["Found corners", "Ready to record"])
-  
+}
+
+export const findCorners = async (piecesModelRef, xcornersModelRef, webcamRef, canvasRef, dispatch, setText) => {
+  const startTensors = tf.memory().numTensors;
+
+  await _findCorners(piecesModelRef, xcornersModelRef, webcamRef, canvasRef, dispatch, setText);
+
   const endTensors = tf.memory().numTensors;
   if (startTensors !== endTensors) {
     throw new Error(`Memory Leak! (${endTensors} > ${startTensors})`)

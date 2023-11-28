@@ -38,12 +38,12 @@ const ExportButton = ({ study, setText, auth }) => {
   }
 
   useEffect(() => {
-    const display = (pgn === "" || study === null) ? "none" : "inline-block";
+    const display = (study === null) ? "none" : "inline-block";
     setStyle({"display": display});
   }, [study, pgn])
 
   return (
-    <button className="btn btn-dark btn-sm btn-outline-light" onClick={handleClick}
+    <button className="btn btn-dark btn-sm btn-outline-light w-100" onClick={handleClick}
     style={style}>
       Export Game
     </button>

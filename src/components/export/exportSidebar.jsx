@@ -2,14 +2,14 @@ import { useState } from "react";
 import StudyButton from "./studyButton.jsx";
 import ExportButton from "./exportButton.jsx";
 import Display from "../common/display.jsx";
-import NavRecordButton from "./navRecordButton.jsx";
+import HomeButton from "../common/homeButton.jsx";
 
 const UploadSidebar = ({ auth }) => {
   const [study, setStudy] = useState(null);
   const [text, setText] = useState(["Select a study", "Export the game"]);
 
   return (
-    <div className="d-flex flex-column text-center bg-dark">
+    <div className="d-flex flex-column text-center px-1">
       <div className="navbar-brand text-light h1 my-2">
         ChessCam
       </div>
@@ -27,7 +27,7 @@ const UploadSidebar = ({ auth }) => {
         </li>
         <li className="border-top"></li>
         <li className="my-2">
-          <NavRecordButton />
+          <HomeButton />
         </li>
       </ul>
     </div>

@@ -3,11 +3,11 @@ import RecordButton from "./recordButton.jsx";
 import PgnButton from "./pgnButton.jsx";
 import HelpButton from "./helpButton.jsx";
 import CornersButton from "./cornersButton.jsx";
-import NavUploadButton from "./navUploadButton.jsx";
+import HomeButton from "../common/homeButton.jsx";
 
-const RecordSidebar = ({ piecesModelRef, xcornersModelRef, webcamRef, canvasRef, sidebarRef, recording, setRecording, text, setText, loading }) => {
+const RecordSidebar = ({ piecesModelRef, xcornersModelRef, webcamRef, canvasRef, sidebarRef, recording, setRecording, text, setText }) => {
   return (
-    <div ref={sidebarRef} className="d-flex flex-column text-center bg-dark">
+    <div ref={sidebarRef} className="d-flex flex-column text-center px-1">
       <div className="navbar-brand text-light h1 my-2">
         ChessCam
       </div>
@@ -15,10 +15,10 @@ const RecordSidebar = ({ piecesModelRef, xcornersModelRef, webcamRef, canvasRef,
         <li className="border-top"></li>
         <li className="my-2">
           <CornersButton piecesModelRef={piecesModelRef} xcornersModelRef={xcornersModelRef} webcamRef={webcamRef} canvasRef={canvasRef} 
-          setText={setText} loading={loading} />
+          setText={setText} />
         </li>
         <li className="my-2">
-          <RecordButton recording={recording} setRecording={setRecording} loading={loading} />
+          <RecordButton recording={recording} setRecording={setRecording} />
         </li>
         <li className="border-top"></li>
         <li className="my-2">
@@ -33,7 +33,7 @@ const RecordSidebar = ({ piecesModelRef, xcornersModelRef, webcamRef, canvasRef,
         </li>
         <li className="border-top"></li>
         <li className="my-2">
-          <NavUploadButton />
+          <HomeButton />
         </li>
         
       </ul>
