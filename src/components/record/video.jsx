@@ -2,7 +2,7 @@ import { findPieces } from "../../utils/findPieces.jsx";
 import { useEffect, useRef, useLayoutEffect } from "react";
 import * as Constants from "../../utils/constants.jsx";
 import Corners from "./corners";
-import { useWindowWidth } from '@react-hook/window-size';
+import { useWindowSize } from '@react-hook/window-size';
 import { useDispatch, useSelector } from 'react-redux';
 import { cornersSet } from "../../slices/cornersSlice.jsx";
 import { getMarkerXY, getXY } from "../../utils/detect.jsx";
@@ -23,7 +23,7 @@ const Video = ({ modelRef, canvasRef, webcamRef, sidebarRef, recordingRef, setTe
   }
   const displayRef = useRef(null);
   const cornersRef = useRef(null);
-  const windowWidth = useWindowWidth();
+  const [windowWidth, windowHeight] = useWindowSize();
   const dispatch = useDispatch();
   const corners = useSelector(state => state.corners.value);
 
@@ -35,9 +35,10 @@ const Video = ({ modelRef, canvasRef, webcamRef, sidebarRef, recordingRef, setTe
   const updateWidthHeight = () => {
     let height = ((windowWidth - sidebarRef.current.offsetWidth - Constants.MARKER_DIAMETER) 
     / aspectRatio) + Constants.MARKER_DIAMETER;
-    if (height > window.innerHeight) {
-      height = window.innerHeight;
+    if (height > windowHeight) {
+      height = windowHeight;
     }
+    console.log(height);
     const width = ((height - Constants.MARKER_DIAMETER) * aspectRatio) + Constants.MARKER_DIAMETER;
     const oldHeight = canvasRef.current.height;
     const oldWidth = canvasRef.current.width;
@@ -70,7 +71,7 @@ const Video = ({ modelRef, canvasRef, webcamRef, sidebarRef, recordingRef, setTe
 
   useEffect(() => {
     updateWidthHeight();
-  }, [windowWidth]);
+  }, [windowWidth, windowHeight]);
 
   useEffect(() => {
     cornersRef.current = corners
