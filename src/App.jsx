@@ -49,7 +49,6 @@ const App = () => {
     <>
        {loading.loading && <Loader progress={loading.progress} />}
        {!loading.loading && <Outlet context={[piecesModelRef, xcornersModelRef]}/>}
-      
     </>
   );
 };
