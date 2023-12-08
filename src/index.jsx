@@ -4,6 +4,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import Home from "./components/home/home.jsx";
 import Record from "./components/record/record.jsx";
 import Export from "./components/export/export.jsx";
+import Upload from "./components/upload/upload.jsx";
 import App from "./App.jsx";
 
 import * as ReactDOM from "react-dom/client";
@@ -30,8 +31,11 @@ const router = createBrowserRouter([
       {
         path: "/export",
         element: <Export />
-      }
-
+      },
+      // {
+      //   path: "/upload",
+      //   element: <Upload />
+      // }
     ]
   }
 ]);
