@@ -1,12 +1,9 @@
 const Display = ({ text }) => {
   return (
   <div className="text-white">
-    <div>
-      {text[0]}
-    </div>
-    <div>
-      {text[1]}
-    </div>
+    {text.map(function(t, i){
+        return <div key={i}>{t}</div>;
+    })}
   </div>
   );
 };
