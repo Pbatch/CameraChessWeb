@@ -1,0 +1,14 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.camerachess.www.twa",
+      "sha256_cert_fingerprints": [
+        "79:45:86:66:F4:EF:9C:68:44:99:BD:B6:AD:22:4B:09:C6:A9:5C:50:A8:51:B0:D2:6F:3B:B5:86:BA:C8:E3:12"
+      ]
+    }
+  }
+]
