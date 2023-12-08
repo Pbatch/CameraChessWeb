@@ -1,8 +1,8 @@
 description: Ultralytics 480N model trained on /content/datasets/data.yaml
 author: Ultralytics
 license: AGPL-3.0 https://ultralytics.com/license
-date: '2023-10-18T13:57:46.563890'
-version: 8.0.199
+date: '2023-11-29T21:23:55.686183'
+version: 8.0.220
 stride: 32
 task: detect
 batch: 1
