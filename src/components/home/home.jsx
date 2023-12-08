@@ -11,6 +11,10 @@ const Home = () => {
     navigate("/export");
   }
 
+  const handleUploadClick = () => {
+    navigate("/upload");
+  }
+
   return (
     <div className="container-fluid h-100 p-0 m-0 text-center text-white bg-dark">
       <div className="row py-2 m-0">
@@ -30,6 +34,12 @@ const Home = () => {
             Record
           </button>
         </div>
+        {/* <div className="col">
+          <button className="btn btn-dark btn-lg btn-outline-light w-100 p-3" 
+          onClick={handleUploadClick}>
+            Upload
+          </button>
+        </div> */}
         <div className="col">
           <button className="btn btn-dark btn-lg btn-outline-light w-100 p-3" 
           onClick={handleExportClick}>
