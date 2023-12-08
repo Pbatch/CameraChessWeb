@@ -71,7 +71,7 @@ const getSquares = (boxes, centers, boundary) => {
     const r = boxes.slice([0, 2], [-1, 1]);
     const b = boxes.slice([0, 3], [-1, 1]);
     const cx = l.add(r).div(2);
-    const cy = b.sub(r.sub(l).div(4));
+    const cy = b.sub(r.sub(l).div(3));
     let boxCenters = tf.concat([cx, cy], 1);
     const dist = tf.sum(tf.square(tf.sub(boxCenters.expandDims(1), tf.tensor2d(centers).expandDims(0))), 2);
     let squares = tf.argMin(dist, 1)
@@ -118,14 +118,14 @@ const updateState = (scores, squares, state, decay=0.5) => {
   return state
 }
 
-const detect = async (modelRef, webcamRef) => {
-  const [input, width, height] = getInput(webcamRef);
+const detect = async (modelRef, webcamRef, keypoints) => {
+  const [input, width, height, roi, originalWidth, originalHeight] = getInput(webcamRef, keypoints);
   const preds = modelRef.current.predict(input);
   const [boxes, scores] = getBoxesAndScores(width, height, preds);
 
   tf.dispose([input, preds]);
 
-  return [boxes, scores]
+  return [boxes, scores, roi, originalWidth, originalHeight]
 }
 
 export const findPieces = (modelRef, webcamRef, canvasRef,
@@ -140,9 +140,7 @@ recordingRef, setText, dispatch, cornersRef) => {
   let requestId = undefined;
 
   const loop = async () => {
-    if (!webcamRef.current) {
-      centers = [];
-    } else if (recordingRef.current === false || webcamRef.current.srcObject == null) {
+    if (recordingRef.current === false || (webcamRef.current?.srcObject === null && webcamRef.current?.src === null)) {
       centers = [];
     } else {
       if (centers.length == 0) {
@@ -157,7 +155,7 @@ recordingRef, setText, dispatch, cornersRef) => {
       const startTime = performance.now();
       const startTensors = tf.memory().numTensors;
 
-      const [boxes, scores] = await detect(modelRef, webcamRef);
+      const [boxes, scores, roi, originalHeight, originalWidth] = await detect(modelRef, webcamRef, keypoints);
       const squares = getSquares(boxes, centers, boundary);
       state = updateState(scores, squares, state);
       const [bestScore1, bestScore2, bestJointScore, bestMove, bestMoves] = processState(state, moveData, possibleMoves);
