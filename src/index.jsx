@@ -5,6 +5,7 @@ import Home from "./components/home/home.jsx";
 import Record from "./components/record/record.jsx";
 import Export from "./components/export/export.jsx";
 import Upload from "./components/upload/upload.jsx";
+import Privacy from "./components/privacy/privacy.jsx";
 import App from "./App.jsx";
 
 import * as ReactDOM from "react-dom/client";
@@ -36,6 +37,10 @@ const router = createBrowserRouter([
       //   path: "/upload",
       //   element: <Upload />
       // }
+      {
+        path: "/privacy",
+        element: <Privacy />
+      }
     ]
   }
 ]);
