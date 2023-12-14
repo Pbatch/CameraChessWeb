@@ -8,8 +8,8 @@ const HomeButton = () => {
   }
   
   return (
-    <button className="btn btn-dark btn-lg btn-outline-light w-100" onClick={handleClick} >
-      <i className="bi bi-house"></i>
+    <button className="btn btn-dark btn-outline-light w-100" onClick={handleClick} >
+      <i className="h4 bi bi-house"></i>
     </button>
   );
 };

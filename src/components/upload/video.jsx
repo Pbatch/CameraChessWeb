@@ -7,7 +7,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { cornersSet } from "../../slices/cornersSlice.jsx";
 import { getMarkerXY, getXY } from "../../utils/detect.jsx";
 
-const Video = ({ modelRef, videoRef, canvasRef, sidebarRef, playingRef, playing, setText }) => {
+const Video = ({ modelRef, videoRef, canvasRef, sidebarRef, playingRef, playing, setPlaying, setText }) => {
   const displayRef = useRef(null);
   const cornersRef = useRef(null);
   const [windowWidth, windowHeight] = useWindowSize();
@@ -69,9 +69,16 @@ const Video = ({ modelRef, videoRef, canvasRef, sidebarRef, playingRef, playing,
   }, [playing])
 
   const onCanPlay = (e) => {
-    videoRef.current.playbackRate = 2.0;
+    // TODO: Let the user set this
+    videoRef.current.playbackRate = 1.0;
     updateWidthHeight();
   };
+
+  const onEnded = (e) => {
+    videoRef.current.currentTime = videoRef.current.duration;
+    videoRef.current.pause;
+    setPlaying(false);
+  }
 
   const canvasStyle = {
     position: "absolute",
@@ -100,7 +107,7 @@ const Video = ({ modelRef, videoRef, canvasRef, sidebarRef, playingRef, playing,
       <div ref={displayRef} style={parentStyle} >
         <div style={videoContainerStyle} >
           <video ref={videoRef} playsInline={true} muted={true} style={videoStyle}
-           onCanPlay={onCanPlay} />
+           onCanPlay={onCanPlay} onEnded={onEnded} />
           <canvas ref={canvasRef} style={canvasStyle} />
         </div>
         <Corners />

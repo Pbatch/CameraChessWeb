@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
+import { clearCtx } from "../../utils/render/common";
 
-const VideoButton = ({ videoRef }) => {
+const VideoButton = ({ videoRef, canvasRef, setPlaying }) => {
   const inputVideoRef = useRef(null);
   const [streaming, setStreaming] = useState(false);
 
@@ -11,6 +12,8 @@ const VideoButton = ({ videoRef }) => {
       URL.revokeObjectURL(url);
     };
 
+    clearCtx(canvasRef.current.getContext('2d'));
+
     setStreaming(false);
     inputVideoRef.current.value = "";
     videoRef.current.style.display = "none";
@@ -19,7 +22,6 @@ const VideoButton = ({ videoRef }) => {
   const handleOnChange = (e) => {
     const url = URL.createObjectURL(e.target.files[0]); 
     videoRef.current.src = url;
-    videoRef.current.addEventListener("ended", () => closeVideo());
     videoRef.current.style.display = "block";
     setStreaming(true);
   }
@@ -30,7 +32,10 @@ const VideoButton = ({ videoRef }) => {
     } else {
       closeVideo();
     }
+    setPlaying(false);
   }
+
+  const textClass = streaming ? "bi-folder-x" : "bi-folder";
 
   return (
     <>
@@ -42,7 +47,7 @@ const VideoButton = ({ videoRef }) => {
         ref={inputVideoRef}
       />
       <button className="btn btn-dark btn-sm btn-outline-light w-100" onClick={handleOnClick}>
-        {streaming ? "Close" : "Open"} Video
+      <i class={`h4 bi ${textClass}`}></i>
       </button>
     </>
   );

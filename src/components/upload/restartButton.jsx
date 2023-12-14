@@ -7,7 +7,7 @@ const RestartButton = ({ videoRef }) => {
 
  return (
     <button className="btn btn-dark btn-sm btn-outline-light w-100" onClick={handleClick}>
-      Restart Video
+      <i class="h4 bi bi-skip-start"></i>
     </button>
   );
 };

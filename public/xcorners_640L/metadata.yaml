@@ -1,0 +1,13 @@
+description: Ultralytics 640L model trained on /content/datasets/data.yaml
+author: Ultralytics
+license: AGPL-3.0 https://ultralytics.com/license
+date: '2023-12-14T11:54:43.209307'
+version: 8.0.227
+stride: 32
+task: detect
+batch: 1
+imgsz:
+- 384
+- 640
+names:
+  0: xcorner

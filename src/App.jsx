@@ -13,10 +13,10 @@ const App = () => {
     tf.ready().then(async () => {
       console.info(`Backend: ${tf.getBackend()}`);
 
-      const dummyInput = tf.zeros([1, Constants.MODEL_SIZE, Constants.MODEL_SIZE, 3]);
+      const dummyInput = tf.zeros([1, Constants.MODEL_HEIGHT, Constants.MODEL_WIDTH, 3]);
 
       const piecesModel = await tf.loadGraphModel(
-        "480N_web_model/model.json",
+        "pieces_640S/model.json",
         {
           onProgress: (fractions) => {
             setLoading({ loading: true, progress: fractions / 4 });
@@ -27,7 +27,7 @@ const App = () => {
       setLoading({ loading: true, progress: 0.5 })
 
       const xcornersModel = await tf.loadGraphModel(
-        "480L_xcorner_web_model/model.json",
+        "xcorners_640L/model.json",
         {
           onProgress: (fractions) => {
             setLoading({ loading: true, progress: 0.5 + fractions / 4})

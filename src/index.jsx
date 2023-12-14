@@ -33,10 +33,10 @@ const router = createBrowserRouter([
         path: "/export",
         element: <Export />
       },
-      // {
-      //   path: "/upload",
-      //   element: <Upload />
-      // }
+      {
+        path: "/upload",
+        element: <Upload />
+      },
       {
         path: "/privacy",
         element: <Privacy />

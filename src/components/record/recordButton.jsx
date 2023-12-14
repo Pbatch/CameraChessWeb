@@ -1,5 +1,5 @@
 const RecordButton = ({ recording, setRecording }) => {
-  const text = recording ? "Stop Recording" : "Start Recording";
+  const textClass = recording ? "bi-pause" : "bi-play";
   const handleClick = (e) => {
     e.preventDefault();
 
@@ -8,7 +8,7 @@ const RecordButton = ({ recording, setRecording }) => {
 
  return (
     <button className="btn btn-dark btn-sm btn-outline-light w-100" onClick={handleClick}>
-      {text}
+      <i className={`h4 bi ${textClass}`} />
     </button>
   );
 };

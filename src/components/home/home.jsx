@@ -34,12 +34,12 @@ const Home = () => {
             Record
           </button>
         </div>
-        {/* <div className="col">
+        <div className="col">
           <button className="btn btn-dark btn-lg btn-outline-light w-100 p-3" 
           onClick={handleUploadClick}>
             Upload
           </button>
-        </div> */}
+        </div>
         <div className="col">
           <button className="btn btn-dark btn-lg btn-outline-light w-100 p-3" 
           onClick={handleExportClick}>
