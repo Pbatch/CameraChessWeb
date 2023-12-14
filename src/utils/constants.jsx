@@ -1,4 +1,5 @@
-export const MODEL_SIZE = 480;
+export const MODEL_WIDTH = 640;
+export const MODEL_HEIGHT = 384;
 export const MARKER_RADIUS = 25;
 export const MARKER_DIAMETER = 2 * MARKER_RADIUS;
 export const LABELS = ["b", "k", "n", "p", "q", "r", "B", "K", "N", "P", "Q", "R"];

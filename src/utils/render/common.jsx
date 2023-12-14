@@ -1,3 +1,32 @@
+import * as Constants from "../constants.jsx";
+
+export const clearCtx = (ctx) => {
+  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+}
+
+export const setupCtx = (canvasRef) => {
+  const ctx = canvasRef.getContext("2d");
+  ctx.globalAlpha = 0.8;
+  const width = ctx.canvas.width;
+  const height = ctx.canvas.height;
+
+  clearCtx(ctx);
+
+  const fontSize = Math.max(Math.round(Math.max(width, height) / 40), 14);
+  const font = `${fontSize}px Arial`;
+  const fontHeight = parseInt(font, 10);
+  const lineWidth = Math.max(Math.min(width, height) / 200, 2.5);
+  
+  ctx.textBaseline = "top";
+  ctx.lineWidth = lineWidth;
+  ctx.font = font;
+
+  const sx = width / Constants.MODEL_WIDTH;
+  const sy = height / Constants.MODEL_HEIGHT;
+
+  return [ctx, fontHeight, lineWidth, sx, sy];
+}
+
 export const drawPoints = (ctx, points, colour, sx, sy) => {
   ctx.strokeStyle = colour;
   points.forEach((p, _) => {

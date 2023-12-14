@@ -1,0 +1,24 @@
+description: Ultralytics 640S model trained on /content/datasets/data.yaml
+author: Ultralytics
+license: AGPL-3.0 https://ultralytics.com/license
+date: '2023-12-13T23:26:47.580912'
+version: 8.0.227
+stride: 32
+task: detect
+batch: 1
+imgsz:
+- 384
+- 640
+names:
+  0: black-bishop
+  1: black-king
+  2: black-knight
+  3: black-pawn
+  4: black-queen
+  5: black-rook
+  6: white-bishop
+  7: white-king
+  8: white-knight
+  9: white-pawn
+  10: white-queen
+  11: white-rook

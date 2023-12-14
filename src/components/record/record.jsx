@@ -1,11 +1,14 @@
 import { useState, useEffect, useRef } from "react";
 import Webcam from "./webcam.jsx";
 import RecordSidebar from "./recordSidebar.jsx";
+import { useDispatch } from 'react-redux';
+import { cornersReset } from '../../slices/cornersSlice.jsx';
 import { useOutletContext } from "react-router-dom";
 
 const Record = () => {
   const [recording, setRecording] = useState(false);
   const [text, setText] = useState([""]);
+  const dispatch = useDispatch();
 
   const recordingRef = useRef(recording);
   const sidebarRef = useRef(null);
@@ -16,6 +19,10 @@ const Record = () => {
   useEffect(() => {
     recordingRef.current = recording;
   }, [recording]);
+
+  useEffect(() => {
+    dispatch(cornersReset())
+  }, []);
   
   return (
     <div className="d-flex bg-dark h-100">

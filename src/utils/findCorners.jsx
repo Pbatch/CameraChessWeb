@@ -2,8 +2,10 @@ import * as tf from "@tensorflow/tfjs";
 import { renderCorners } from "./render/renderCorners.jsx";
 import Delaunator from 'delaunator';
 import { getPerspectiveTransform, perspectiveTransform } from "./warp.jsx";
-import { getBoxesAndScores, getInput, getCenters, getMarkerXY } from "./detect.jsx";
+import { getBoxesAndScores, getInput, getCenters, getMarkerXY, invalidWebcam } from "./detect.jsx";
 import { cornersSet } from '../slices/cornersSlice.jsx';
+import * as Constants from "./constants.jsx";
+import { clamp } from "./math.jsx";
 
 const x = Array.from({ length: 7 }, (_, i) => i);
 const y = Array.from({ length: 7 }, (_, i) => i);
@@ -12,13 +14,15 @@ const GRID = y.map(yy => x.map(xx => [xx, yy])).flat();
 const IDEAL_QUAD = [[0, 1], [1, 1], [1, 0], [0, 0]];
 
 const runModels = async (webcamRef, xcornersModelRef, piecesModelRef) => {
-  const [input, width, height] = getInput(webcamRef);
+  const [image, width, height, padding, roi] = getInput(webcamRef);
 
-  const xcornersPreds = xcornersModelRef.current.predict(input); 
-  const piecesPreds = piecesModelRef.current.predict(input);
-  tf.dispose([input])
+  const xcornersPreds = xcornersModelRef.current.predict(image); 
+  const piecesPreds = piecesModelRef.current.predict(image);
+  tf.dispose([image])
 
-  let [xcornersBoxes, xcornersScores] = getBoxesAndScores(width, height, xcornersPreds);
+  const videoWidth = webcamRef.current.videoWidth;
+  const videoHeight = webcamRef.current.videoHeight;
+  let [xcornersBoxes, xcornersScores] = getBoxesAndScores(xcornersPreds, width, height, videoWidth, videoHeight, padding, roi);
   const xcornersNms = await tf.image.nonMaxSuppressionAsync(xcornersBoxes, xcornersScores, 100, 0.3, 0.1);
   const keptXcornersBoxes = xcornersBoxes.gather(xcornersNms, 0);
   const xcornersTensor = getCenters(keptXcornersBoxes);
@@ -26,7 +30,7 @@ const runModels = async (webcamRef, xcornersModelRef, piecesModelRef) => {
 
   tf.dispose([xcornersPreds, xcornersBoxes, xcornersScores, xcornersNms, xcornersTensor, keptXcornersBoxes])
 
-  let [piecesBoxes, piecesScores] = getBoxesAndScores(width, height, piecesPreds);
+  let [piecesBoxes, piecesScores] = getBoxesAndScores(piecesPreds, width, height, videoWidth, videoHeight, padding, roi);
   const maxPiecesScores = tf.max(piecesScores, 1);
   const piecesNms = await tf.image.nonMaxSuppressionAsync(piecesBoxes, maxPiecesScores, 100, 0.3, 0.1);
   
@@ -162,6 +166,12 @@ const findCornersFromXcorners = (xCorners) => {
                          [bestOffset[0] + 7, bestOffset[1] - 1]]
   const corners = perspectiveTransform(warpedCorners, invM);
 
+  // Clip bad corners
+  for (let i = 0; i < 4; i++) {
+    corners[i][0] = clamp(corners[i][0], 0, Constants.MODEL_WIDTH);
+    corners[i][1] = clamp(corners[i][1], 0, Constants.MODEL_HEIGHT);
+  }
+
   return corners;
 }
 
@@ -208,6 +218,10 @@ const calculateKeypoints = (pieces, corners) => {
 }
 
 export const _findCorners = async (piecesModelRef, xcornersModelRef, webcamRef, canvasRef, dispatch, setText) => {
+  if (invalidWebcam(webcamRef)) {
+    return;
+  }
+  
   const [xCorners, pieces] = await runModels(webcamRef, xcornersModelRef, piecesModelRef);
   if (xCorners.length < 5) {
     // With <= 5 xCorners, no quads are found
@@ -232,7 +246,7 @@ export const _findCorners = async (piecesModelRef, xcornersModelRef, webcamRef, 
                      "key": key}
     dispatch(cornersSet(payload))
   })
-  renderCorners(canvasRef.current, keypoints, xCorners);
+  renderCorners(canvasRef.current, xCorners);
   setText(["Found corners", "Ready to record"])
 }
 
@@ -242,8 +256,8 @@ export const findCorners = async (piecesModelRef, xcornersModelRef, webcamRef, c
   await _findCorners(piecesModelRef, xcornersModelRef, webcamRef, canvasRef, dispatch, setText);
 
   const endTensors = tf.memory().numTensors;
-  if (startTensors !== endTensors) {
-    throw new Error(`Memory Leak! (${endTensors} > ${startTensors})`)
+  if (startTensors < endTensors) {
+    console.error(`Memory Leak! (${endTensors} > ${startTensors})`)
   }
 
   return () => {

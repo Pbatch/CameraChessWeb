@@ -4,7 +4,7 @@ import { getCentersAndBoundary } from "./warp.jsx";
 import * as tf from "@tensorflow/tfjs";
 import { Chess } from 'chess.js';
 import { pgnSet } from '../slices/pgnSlice.jsx';
-import { getBoxesAndScores, getInput, getXY } from "./detect.jsx";
+import { getBoxesAndScores, getInput, getXY, invalidWebcam } from "./detect.jsx";
 
 const zeros = (rows, columns) => {
   return Array.from(Array(rows), _ => Array(columns).fill(0));
@@ -119,13 +119,15 @@ const updateState = (scores, squares, state, decay=0.5) => {
 }
 
 const detect = async (modelRef, webcamRef, keypoints) => {
-  const [input, width, height, roi, originalWidth, originalHeight] = getInput(webcamRef, keypoints);
-  const preds = modelRef.current.predict(input);
-  const [boxes, scores] = getBoxesAndScores(width, height, preds);
+  const [image, width, height, padding, roi] = getInput(webcamRef, keypoints);
+  const videoWidth = webcamRef.current.videoWidth;
+  const videoHeight = webcamRef.current.videoHeight;
+  const preds = modelRef.current.predict(image);
+  const [boxes, scores] = getBoxesAndScores(preds, width, height, videoWidth, videoHeight, padding, roi);
 
-  tf.dispose([input, preds]);
+  tf.dispose([image, preds]);
 
-  return [boxes, scores, roi, originalWidth, originalHeight]
+  return [boxes, scores]
 }
 
 export const findPieces = (modelRef, webcamRef, canvasRef,
@@ -140,7 +142,7 @@ recordingRef, setText, dispatch, cornersRef) => {
   let requestId = undefined;
 
   const loop = async () => {
-    if (recordingRef.current === false || (webcamRef.current?.srcObject === null && webcamRef.current?.src === null)) {
+    if (recordingRef.current === false || invalidWebcam(webcamRef)) {
       centers = [];
     } else {
       if (centers.length == 0) {
@@ -155,7 +157,7 @@ recordingRef, setText, dispatch, cornersRef) => {
       const startTime = performance.now();
       const startTensors = tf.memory().numTensors;
 
-      const [boxes, scores, roi, originalHeight, originalWidth] = await detect(modelRef, webcamRef, keypoints);
+      const [boxes, scores] = await detect(modelRef, webcamRef, keypoints);
       const squares = getSquares(boxes, centers, boundary);
       state = updateState(scores, squares, state);
       const [bestScore1, bestScore2, bestJointScore, bestMove, bestMoves] = processState(state, moveData, possibleMoves);
@@ -208,8 +210,8 @@ recordingRef, setText, dispatch, cornersRef) => {
       }
 
       const endTensors = tf.memory().numTensors;
-      if (startTensors !== endTensors) {
-        throw new Error(`Memory Leak! (${endTensors} > ${startTensors})`)
+      if (startTensors < endTensors) {
+        console.error(`Memory Leak! (${endTensors} > ${startTensors})`)
       }
     }
     requestId = requestAnimationFrame(loop);

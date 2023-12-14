@@ -10,11 +10,14 @@ const cornersSlice = createSlice({
     cornersSet(state, action) {
       state.value[action.payload.key] = action.payload.xy;
     },
+    cornersReset(state) {
+     state.value = initialState.value; 
+    }
   }
 })
 
 
-export const { cornersSet } = cornersSlice.actions
+export const { cornersSet, cornersReset } = cornersSlice.actions
 
 // Export the slice reducer as the default export
 export default cornersSlice.reducer
