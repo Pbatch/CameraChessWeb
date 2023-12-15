@@ -1,7 +1,7 @@
 import { findPieces } from "../../utils/findPieces.jsx";
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef } from "react";
 import * as Constants from "../../utils/constants.jsx";
-import Corners from "../common/corners.jsx";
+import { Corners } from "../common";
 import { useWindowSize } from '@react-hook/window-size';
 import { useDispatch, useSelector } from 'react-redux';
 import { cornersSet } from "../../slices/cornersSlice.jsx";

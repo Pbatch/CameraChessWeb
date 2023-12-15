@@ -1,5 +1,6 @@
 import { findCorners } from "../../utils/findCorners";
 import { useDispatch } from 'react-redux';
+import SidebarButton from "./sidebarButton";
 
 const CornersButton = ({ piecesModelRef, xcornersModelRef, webcamRef, canvasRef, setText }) => {
   const dispatch = useDispatch();
@@ -11,9 +12,9 @@ const CornersButton = ({ piecesModelRef, xcornersModelRef, webcamRef, canvasRef,
   }
 
   return (
-    <button className="btn btn-dark btn-sm btn-outline-light w-100" onClick={handleClick}>
+    <SidebarButton onClick={handleClick}>
       Find Corners
-    </button>
+    </SidebarButton>
   );
 };
 

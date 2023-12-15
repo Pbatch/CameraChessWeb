@@ -3,16 +3,13 @@ import { useNavigate } from "react-router-dom";
 const Home = () => {
   let navigate = useNavigate();
 
-  const handleRecordClick = () => {
-    navigate("/record"); 
-  }
-
-  const handleExportClick = () => {
-    navigate("/export");
-  }
-
-  const handleUploadClick = () => {
-    navigate("/upload");
+  const NavButton = ({ text }) => {
+    return (
+      <button className="btn btn-dark btn-lg btn-outline-light w-100 p-3" 
+      onClick={() => navigate(`/${text.toLowerCase()}`)}>
+        {text}
+      </button>
+    )
   }
 
   return (
@@ -29,22 +26,13 @@ const Home = () => {
       </div>
       <div className="row py-2 m-0">
         <div className="col">
-          <button className="btn btn-dark btn-lg btn-outline-light w-100 p-3"
-          onClick={handleRecordClick}>
-            Record
-          </button>
+          <NavButton text="Record" />
         </div>
         <div className="col">
-          <button className="btn btn-dark btn-lg btn-outline-light w-100 p-3" 
-          onClick={handleUploadClick}>
-            Upload
-          </button>
+          <NavButton text="Upload" />
         </div>
         <div className="col">
-          <button className="btn btn-dark btn-lg btn-outline-light w-100 p-3" 
-          onClick={handleExportClick}>
-            Export
-          </button>
+          <NavButton text="Export" />
         </div>
       </div>
     </div>

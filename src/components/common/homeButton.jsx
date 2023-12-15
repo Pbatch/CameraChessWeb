@@ -1,4 +1,6 @@
 import { useNavigate } from "react-router-dom";
+import SidebarButton from "./sidebarButton";
+import Icon from "./icon";
 
 const HomeButton = () => {
   let navigate = useNavigate();
@@ -8,9 +10,9 @@ const HomeButton = () => {
   }
   
   return (
-    <button className="btn btn-dark btn-outline-light w-100" onClick={handleClick} >
-      <i className="h4 bi bi-house"></i>
-    </button>
+    <SidebarButton onClick={handleClick} >
+      <Icon iconName="bi-house"/>
+    </SidebarButton>
   );
 };
 
