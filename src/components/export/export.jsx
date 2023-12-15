@@ -2,6 +2,7 @@ import ExportSidebar from "./exportSidebar.jsx";
 import Board from "./board.jsx";
 import { useEffect } from "react";
 import { Auth } from "./auth.jsx";
+import { Container } from "../common";
 
 const Upload = () => {
   const auth = new Auth();
@@ -11,10 +12,10 @@ const Upload = () => {
   }, []);
 
   return (
-    <div className="d-flex bg-dark h-100">
+    <Container>
       <ExportSidebar auth={auth} />
       <Board auth={auth} />
-    </div>
+    </Container>
   );
 };
 

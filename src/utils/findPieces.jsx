@@ -1,7 +1,7 @@
 import { renderBoxes } from "./render/renderBox.jsx";
 import { getMoveData } from "./moves.jsx";
 import { getCentersAndBoundary } from "./warp.jsx";
-import * as tf from "@tensorflow/tfjs";
+import * as tf from "@tensorflow/tfjs-core";
 import { Chess } from 'chess.js';
 import { pgnSet } from '../slices/pgnSlice.jsx';
 import { getBoxesAndScores, getInput, getXY, invalidWebcam } from "./detect.jsx";
@@ -67,13 +67,14 @@ const processState = (state, moveData, possibleMoves) => {
 
 const getSquares = (boxes, centers, boundary) => {
   const squares = tf.tidy(() => {
-    const l = boxes.slice([0, 0], [-1, 1]);
-    const r = boxes.slice([0, 2], [-1, 1]);
-    const b = boxes.slice([0, 3], [-1, 1]);
-    const cx = l.add(r).div(2);
-    const cy = b.sub(r.sub(l).div(3));
+    const l = tf.slice(boxes, [0, 0], [-1, 1]);
+    const r = tf.slice(boxes, [0, 2], [-1, 1]);
+    const b = tf.slice(boxes, [0, 3], [-1, 1]);
+    const cx = tf.div(tf.add(l, r), 2);
+    const cy = tf.sub(b, tf.div(tf.sub(r, l), 3));
     let boxCenters = tf.concat([cx, cy], 1);
-    const dist = tf.sum(tf.square(tf.sub(boxCenters.expandDims(1), tf.tensor2d(centers).expandDims(0))), 2);
+    const dist = tf.sum(tf.square(tf.sub(tf.expandDims(boxCenters, 1), 
+    tf.expandDims(tf.tensor2d(centers), 0))), 2);
     let squares = tf.argMin(dist, 1)
     
     squares = squares.arraySync();

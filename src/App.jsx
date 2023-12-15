@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { Outlet } from "react-router-dom";
-import * as tf from "@tensorflow/tfjs";
+import * as tf from "@tensorflow/tfjs-core";
+import { loadGraphModel } from "@tensorflow/tfjs-converter";
+import "@tensorflow/tfjs-backend-webgl";
 import * as Constants from "./utils/constants.jsx";
 import Loader from "./components/loader.jsx";
 
@@ -11,12 +13,13 @@ const App = () => {
 
   useEffect(() => {
     tf.ready().then(async () => {
-      console.info(`Backend: ${tf.getBackend()}`);
+      tf.env().set('WEBGL_EXP_CONV', true);
+      tf.env().set('ENGINE_COMPILE_ONLY', true);
 
       const dummyInput = tf.zeros([1, Constants.MODEL_HEIGHT, Constants.MODEL_WIDTH, 3]);
 
-      const piecesModel = await tf.loadGraphModel(
-        "pieces_640S/model.json",
+      const piecesModel = await loadGraphModel(
+        "pieces_640S_float16/model.json",
         {
           onProgress: (fractions) => {
             setLoading({ loading: true, progress: fractions / 4 });
@@ -26,8 +29,8 @@ const App = () => {
       const piecesOutput = piecesModel.execute(dummyInput);
       setLoading({ loading: true, progress: 0.5 })
 
-      const xcornersModel = await tf.loadGraphModel(
-        "xcorners_640L/model.json",
+      const xcornersModel = await loadGraphModel(
+        "xcorners_640L_float16/model.json",
         {
           onProgress: (fractions) => {
             setLoading({ loading: true, progress: 0.5 + fractions / 4})
@@ -40,6 +43,10 @@ const App = () => {
       xcornersModelRef.current = xcornersModel;
 
       tf.dispose([dummyInput, piecesOutput, xcornersOutput]);
+
+      tf.backend().checkCompileCompletion();
+      tf.backend().getUniformLocations();
+      tf.env().set('ENGINE_COMPILE_ONLY', false);
 
       setLoading({ loading: false, progress: 1.0 });
     });

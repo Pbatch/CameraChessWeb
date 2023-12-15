@@ -1,5 +1,5 @@
 import * as Constants from "./constants.jsx";
-import * as tf from "@tensorflow/tfjs";
+import * as tf from "@tensorflow/tfjs-core";
 
 export const invalidWebcam = (webcamRef) => {
   if (webcamRef.current === null) {
@@ -63,7 +63,7 @@ export const getInput = (webcamRef, keypoints, paddingRatio=12) => {
     let image = tf.browser.fromPixels(webcamRef.current)
     
     // Cropping
-    image = image.slice(
+    image = tf.slice(image,
       [roi[1], roi[0], 0], 
       [roi[3] - roi[1], roi[2] - roi[0], 3]
     );
@@ -89,14 +89,14 @@ export const getInput = (webcamRef, keypoints, paddingRatio=12) => {
     const padBottom = Math.floor(dy / 2);
     const padTop = dy - padBottom;
     const padding = [padLeft, padRight, padTop, padBottom]
-    image = image.pad([
+    image = tf.pad(image, [
       [padTop, padBottom],
       [padLeft, padRight],
       [0, 0]
     ], 114);
     
     // Transpose + scale + expand
-    image = image.transpose([0, 1, 2]).div(255.0).expandDims(0);
+    image = tf.expandDims(tf.div(tf.transpose(image, [0, 1, 2]), 255.0), 0);
 
     return [image, width, height, padding];
   });
@@ -106,13 +106,13 @@ export const getInput = (webcamRef, keypoints, paddingRatio=12) => {
 export const getBoxesAndScores = (preds, width, height, videoWidth, videoHeight, padding, roi) => {
   const [boxes, scores] = tf.tidy(() => {
 
-    const transRes = preds.transpose([0, 2, 1]);
-    const w = transRes.slice([0, 0, 2], [-1, -1, 1]);
-    const h = transRes.slice([0, 0, 3], [-1, -1, 1]);
+    const transRes = tf.transpose(preds, [0, 2, 1]);
+    const w = tf.slice(transRes, [0, 0, 2], [-1, -1, 1]);
+    const h = tf.slice(transRes, [0, 0, 3], [-1, -1, 1]);
     
     // xc, yc, w, h -> l, t, r, b
-    let l = tf.sub(transRes.slice([0, 0, 0], [-1, -1, 1]), tf.div(w, 2));
-    let t = tf.sub(transRes.slice([0, 0, 1], [-1, -1, 1]), tf.div(h, 2));
+    let l = tf.sub(tf.slice(transRes, [0, 0, 0], [-1, -1, 1]), tf.div(w, 2));
+    let t = tf.sub(tf.slice(transRes, [0, 0, 1], [-1, -1, 1]), tf.div(h, 2));
     let r = tf.add(l, w);
     let b = tf.add(t, h);
     
@@ -140,8 +140,8 @@ export const getBoxesAndScores = (preds, width, height, videoWidth, videoHeight,
     t = tf.mul(t, Constants.MODEL_HEIGHT / videoHeight);
     b = tf.mul(b, Constants.MODEL_HEIGHT / videoHeight);
 
-    let boxes = tf.concat([l, t, r, b], 2).squeeze();
-    let scores = transRes.slice([0, 0, 4], [-1, -1, transRes.shape[2] - 4]).squeeze();
+    let boxes = tf.squeeze(tf.concat([l, t, r, b], 2));
+    let scores = tf.squeeze(tf.slice(transRes, [0, 0, 4], [-1, -1, transRes.shape[2] - 4]));
 
     return [boxes, scores];
   });
@@ -150,12 +150,12 @@ export const getBoxesAndScores = (preds, width, height, videoWidth, videoHeight,
 
 export const getCenters = (boxes) => {
   const centers = tf.tidy(() => {
-    const l = boxes.slice([0, 0], [-1, 1]);
-    const t = boxes.slice([0, 1], [-1, 1]);
-    const r = boxes.slice([0, 2], [-1, 1]);
-    const b = boxes.slice([0, 3], [-1, 1]);
-    const cx = l.add(r).div(2);
-    const cy = t.add(b).div(2);
+    const l = tf.slice(boxes, [0, 0], [-1, 1]);
+    const t = tf.slice(boxes, [0, 1], [-1, 1]);
+    const r = tf.slice(boxes, [0, 2], [-1, 1]);
+    const b = tf.slice(boxes, [0, 3], [-1, 1]);
+    const cx = tf.div(tf.add(l, r), 2);
+    const cy = tf.div(tf.add(t, b), 2);
     const centers = tf.concat([cx, cy], 1);
     return centers;
   })

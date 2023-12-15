@@ -1,4 +1,4 @@
-import * as tf from "@tensorflow/tfjs";
+import * as tf from "@tensorflow/tfjs-core";
 import { renderCorners } from "./render/renderCorners.jsx";
 import Delaunator from 'delaunator';
 import { getPerspectiveTransform, perspectiveTransform } from "./warp.jsx";
@@ -24,7 +24,7 @@ const runModels = async (webcamRef, xcornersModelRef, piecesModelRef) => {
   const videoHeight = webcamRef.current.videoHeight;
   let [xcornersBoxes, xcornersScores] = getBoxesAndScores(xcornersPreds, width, height, videoWidth, videoHeight, padding, roi);
   const xcornersNms = await tf.image.nonMaxSuppressionAsync(xcornersBoxes, xcornersScores, 100, 0.3, 0.1);
-  const keptXcornersBoxes = xcornersBoxes.gather(xcornersNms, 0);
+  const keptXcornersBoxes = tf.gather(xcornersBoxes, xcornersNms, 0);
   const xcornersTensor = getCenters(keptXcornersBoxes);
   const xCorners = xcornersTensor.arraySync();
 
@@ -35,9 +35,9 @@ const runModels = async (webcamRef, xcornersModelRef, piecesModelRef) => {
   const piecesNms = await tf.image.nonMaxSuppressionAsync(piecesBoxes, maxPiecesScores, 100, 0.3, 0.1);
   
   const piecesTensor = tf.tidy(() => {
-    const keptPiecesBoxes = piecesBoxes.gather(piecesNms, 0);
+    const keptPiecesBoxes = tf.gather(piecesBoxes, piecesNms, 0);
     const piecesCenters = getCenters(keptPiecesBoxes);
-    const argmaxPiecesScores = tf.expandDims(tf.argMax(piecesScores.gather(piecesNms, 0), 1), 1);
+    const argmaxPiecesScores = tf.expandDims(tf.argMax(tf.gather(piecesScores, piecesNms, 0), 1), 1);
     const piecesTensor = tf.concat([piecesCenters, argmaxPiecesScores], 1)
     return piecesTensor;
   });

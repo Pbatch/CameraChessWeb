@@ -4,6 +4,7 @@ import RecordSidebar from "./recordSidebar.jsx";
 import { useDispatch } from 'react-redux';
 import { cornersReset } from '../../slices/cornersSlice.jsx';
 import { useOutletContext } from "react-router-dom";
+import { Container } from "../common";
 
 const Record = () => {
   const [recording, setRecording] = useState(false);
@@ -25,11 +26,11 @@ const Record = () => {
   }, []);
   
   return (
-    <div className="d-flex bg-dark h-100">
+    <Container>
       <RecordSidebar piecesModelRef={piecesModelRef} xcornersModelRef={xcornersModelRef} 
       canvasRef={canvasRef} webcamRef={webcamRef} sidebarRef={sidebarRef} recording={recording} setRecording={setRecording} text={text} setText={setText} />
       <Webcam modelRef={piecesModelRef} canvasRef={canvasRef} recordingRef={recordingRef} setText={setText} sidebarRef={sidebarRef} webcamRef={webcamRef} />
-    </div>
+    </Container>
   );
 };
 

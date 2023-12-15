@@ -1,7 +1,7 @@
 import { findPieces } from "../../utils/findPieces.jsx";
 import { useEffect, useRef } from "react";
 import * as Constants from "../../utils/constants.jsx";
-import Corners from "../common/corners.jsx";
+import { Corners } from "../common";
 import { useWindowSize } from '@react-hook/window-size';
 import { useDispatch, useSelector } from 'react-redux';
 import { cornersSet } from "../../slices/cornersSlice.jsx";
@@ -29,7 +29,9 @@ const Video = ({ modelRef, canvasRef, webcamRef, sidebarRef, recordingRef, setTe
 
   const setupWebcam = async () => {
     const stream = await navigator.mediaDevices.getUserMedia(constraints);
-    webcamRef.current.srcObject = stream;
+    if (webcamRef.current !== null) {
+      webcamRef.current.srcObject = stream;
+    }
   };
 
   const updateWidthHeight = () => {

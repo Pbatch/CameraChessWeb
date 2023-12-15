@@ -1,4 +1,5 @@
 import { useSelector } from "react-redux";
+import SidebarButton from "./sidebarButton";
 
 const PgnButton = ({ setText, recording }) => {
   const pgn = useSelector(state => state.pgn.value);
@@ -20,9 +21,9 @@ const PgnButton = ({ setText, recording }) => {
   }
 
   return (
-    <button className="btn btn-dark btn-sm btn-outline-light w-100" onClick={handleClick}>
+    <SidebarButton onClick={handleClick}>
       Copy PGN
-    </button>
+    </SidebarButton>
   );
 };
 
