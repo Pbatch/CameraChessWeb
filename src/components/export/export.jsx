@@ -1,22 +1,17 @@
 import ExportSidebar from "./exportSidebar.jsx";
 import Board from "./board.jsx";
-import { useEffect } from "react";
-import { Auth } from "./auth.jsx";
 import { Container } from "../common";
+import { useOutletContext } from "react-router-dom";
 
-const Upload = () => {
-  const auth = new Auth();
-
-  useEffect(() => {
-    auth.init();
-  }, []);
+const Export = () => {
+  const context = useOutletContext();
 
   return (
     <Container>
-      <ExportSidebar auth={auth} />
-      <Board auth={auth} />
+      <ExportSidebar authRef={context.authRef} />
+      <Board authRef={context.authRef} />
     </Container>
   );
 };
 
-export default Upload;
+export default Export;

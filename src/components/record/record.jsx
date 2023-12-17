@@ -15,7 +15,7 @@ const Record = () => {
   const sidebarRef = useRef(null);
   const webcamRef = useRef(null);
   const canvasRef = useRef(null);
-  const [piecesModelRef, xcornersModelRef] = useOutletContext();
+  const context = useOutletContext();
 
   useEffect(() => {
     recordingRef.current = recording;
@@ -27,9 +27,9 @@ const Record = () => {
   
   return (
     <Container>
-      <RecordSidebar piecesModelRef={piecesModelRef} xcornersModelRef={xcornersModelRef} 
+      <RecordSidebar piecesModelRef={context.piecesModelRef} xcornersModelRef={context.xcornersModelRef} 
       canvasRef={canvasRef} webcamRef={webcamRef} sidebarRef={sidebarRef} recording={recording} setRecording={setRecording} text={text} setText={setText} />
-      <Webcam modelRef={piecesModelRef} canvasRef={canvasRef} recordingRef={recordingRef} setText={setText} sidebarRef={sidebarRef} webcamRef={webcamRef} />
+      <Webcam modelRef={context.piecesModelRef} canvasRef={canvasRef} recordingRef={recordingRef} setText={setText} sidebarRef={sidebarRef} webcamRef={webcamRef} />
     </Container>
   );
 };

@@ -1,19 +1,14 @@
-import { useNavigate } from "react-router-dom";
+import { NavButton, LoginButton, ExportButton } from "./buttons";
+import Socials from "./socials";
+import { useOutletContext } from "react-router-dom";
+
+
 
 const Home = () => {
-  let navigate = useNavigate();
-
-  const NavButton = ({ text }) => {
-    return (
-      <button className="btn btn-dark btn-lg btn-outline-light w-100 p-3" 
-      onClick={() => navigate(`/${text.toLowerCase()}`)}>
-        {text}
-      </button>
-    )
-  }
+  const authRef = useOutletContext().authRef;
 
   return (
-    <div className="container-fluid h-100 p-0 m-0 text-center text-white bg-dark">
+    <div className="container-flex d-flex h-100 flex-column p-0 m-0 text-center text-white bg-dark">
       <div className="row py-2 m-0">
         <div className="col">
           <h1>ChessCam</h1>
@@ -26,15 +21,25 @@ const Home = () => {
       </div>
       <div className="row py-2 m-0">
         <div className="col">
-          <NavButton text="Record" />
-        </div>
-        <div className="col">
           <NavButton text="Upload" />
         </div>
         <div className="col">
-          <NavButton text="Export" />
+          <NavButton text="Record" />
         </div>
       </div>
+      <div className="row py-2 m-0">
+        <div className="col">
+          <LoginButton authRef={authRef} />
+        </div>
+        <div className="col">
+          <ExportButton authRef={authRef} />
+        </div>
+      </div>
+      <footer className="mt-auto container">
+        <div className="row py-2">
+          <Socials />
+        </div>
+      </footer>
     </div>
   );
 };
