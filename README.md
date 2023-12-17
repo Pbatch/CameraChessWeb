@@ -14,8 +14,8 @@ Record your chess games and upload them to Lichess on https://www.camerachess.co
 * Better visualization of the tracking output (rather than just algebraic notation) during recording
 * Raise an alert when an illegal move is played (currently they're just ignored)
 * Add a page where a user can play an online game using the Lichess API
-* Use quantized tflite models instead of tfjs models
-* Cache the models so that they load faster
+* Add support for variants
+* Add support for starting a game from any valid position
 * Develop a testing framework for different board + piece sets
 * ... Your next big idea?
 
