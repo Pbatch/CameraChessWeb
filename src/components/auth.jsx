@@ -3,7 +3,7 @@ import { OAuth2AuthCodePKCE } from '@bity/oauth2-auth-code-pkce';
 export const lichessHost = 'https://lichess.org';
 export const scopes = ["study:write", "study:read"];
 export const clientId = 'lichess-api-demo';
-export const clientUrl = `${location.protocol}//${location.host}/export`;
+export const clientUrl = `${location.protocol}//${location.host}/`;
 
 export class Auth {
   oauth = new OAuth2AuthCodePKCE({
@@ -22,7 +22,6 @@ export class Auth {
       if (accessContext) await this.authenticate();
     } catch (err) {
       console.error(err);
-      this.login();
     }
     if (!this.me) {
       try {

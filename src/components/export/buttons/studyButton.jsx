@@ -26,16 +26,16 @@ const readStream = (processLine) => response => {
   return loop();
 }
 
-const StudyButton = ({ study, setStudy, auth }) => {
+const StudyButton = ({ study, setStudy, authRef }) => {
   const [studies, setStudies] = useState([]);
 
   useEffect(() => {
     const setStudiesAsync = (async () => {
       let newStudies = [];
-      let username = await auth.fetchBody("/api/account", {method: "Get"}).then(
+      let username = await authRef.current.fetchBody("/api/account", {method: "Get"}).then(
         (response) => response.username
       );
-      await auth.fetchResponse(`/api/study/by/${username}`, {method: "GET"}).then(
+      await authRef.current.fetchResponse(`/api/study/by/${username}`, {method: "GET"}).then(
         readStream((response) => newStudies.push({"id": response.id, "name": response.name}))
       ).then(() => setStudies(newStudies));
     });

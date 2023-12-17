@@ -7,7 +7,7 @@ import { cornersReset } from '../../slices/cornersSlice.jsx';
 import { Container } from "../common";
 
 const Upload = () => {
-  const [piecesModelRef, xcornersModelRef] = useOutletContext();
+  const context = useOutletContext();
   const dispatch = useDispatch();
 
   const [text, setText] = useState([]);
@@ -28,10 +28,10 @@ const Upload = () => {
 
   return (
     <Container>
-      <VideoSidebar videoRef={videoRef} piecesModelRef={piecesModelRef} xcornersModelRef={xcornersModelRef} 
+      <VideoSidebar videoRef={videoRef} piecesModelRef={context.piecesModelRef} xcornersModelRef={context.xcornersModelRef} 
       canvasRef={canvasRef} setText={setText} sidebarRef={sidebarRef} playing={playing} setPlaying={setPlaying}
       text={text} />
-      <Video modelRef={piecesModelRef} videoRef={videoRef} canvasRef={canvasRef} sidebarRef={sidebarRef} 
+      <Video modelRef={context.piecesModelRef} videoRef={videoRef} canvasRef={canvasRef} sidebarRef={sidebarRef} 
       playing={playing} setPlaying={setPlaying} playingRef={playingRef} setText={setText} />
     </Container>
   );

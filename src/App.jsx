@@ -5,14 +5,25 @@ import { loadGraphModel } from "@tensorflow/tfjs-converter";
 import "@tensorflow/tfjs-backend-webgl";
 import * as Constants from "./utils/constants.jsx";
 import Loader from "./components/loader.jsx";
+import Auth from "./components/auth.jsx"
 
 const App = () => {
   const [loading, setLoading] = useState({ loading: true, progress: 0 });
   const piecesModelRef = useRef(null);
   const xcornersModelRef = useRef(null);
+  const authRef = useRef(null);
+  const context = {
+    "piecesModelRef": piecesModelRef,
+    "xcornersModelRef": xcornersModelRef,
+    "authRef": authRef               
+  }
 
   useEffect(() => {
     tf.ready().then(async () => {
+      const auth = new Auth();
+      await auth.init();
+      authRef.current = auth;
+      
       tf.env().set('WEBGL_EXP_CONV', true);
       tf.env().set('ENGINE_COMPILE_ONLY', true);
 
@@ -54,8 +65,8 @@ const App = () => {
 
   return (
     <>
-       {loading.loading && <Loader progress={loading.progress} />}
-       {!loading.loading && <Outlet context={[piecesModelRef, xcornersModelRef]}/>}
+      {loading.loading && <Loader progress={loading.progress} />}
+      {!loading.loading && <Outlet context={context}/>}
     </>
   );
 };

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { SidebarButton } from "../../common";
 
-const ExportButton = ({ study, setText, auth }) => {
+const ExportButton = ({ study, setText, authRef }) => {
   const pgn = useSelector(state => state.pgn.value);
   const [style, setStyle] = useState({"display": "none"});
 
@@ -26,7 +26,7 @@ const ExportButton = ({ study, setText, auth }) => {
     const url = `/api/study/${study.id}/import-pgn`;
     const name = createName();
     const config = {body: new URLSearchParams({ pgn: pgn, name: name }), method: "POST"};
-    await auth.fetchBody(url, config);
+    await authRef.current.fetchBody(url, config);
     setText(["Exported game to", `"${study.name}/${name}"`]);
   }
 
