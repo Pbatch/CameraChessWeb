@@ -16,7 +16,7 @@ const Home = () => {
       </div>
       <div className="row py-2 m-0">
         <div className="col">
-          <img src="home-128x128.jpg" className="img-fluid rounded-circle" alt="ChessCam Logo" />
+          <img src="home-128x128.svg" className="img-fluid rounded-circle" alt="ChessCam Logo" />
         </div>
       </div>
       <div className="row py-2 m-0">
