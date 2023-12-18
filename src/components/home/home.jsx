@@ -35,11 +35,9 @@ const Home = () => {
           <ExportButton authRef={authRef} />
         </div>
       </div>
-      <footer className="mt-auto container">
-        <div className="row py-2">
-          <Socials />
-        </div>
-      </footer>
+      <div className="row py-2 m-0 mt-auto">
+        <Socials />
+      </div>
     </div>
   );
 };
