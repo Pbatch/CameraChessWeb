@@ -50,14 +50,14 @@ const App = () => {
       );
       const xcornersOutput = xcornersModel.execute(dummyInput);
 
-      piecesModelRef.current = piecesModel;
-      xcornersModelRef.current = xcornersModel;
-
       tf.dispose([dummyInput, piecesOutput, xcornersOutput]);
 
       tf.backend().checkCompileCompletion();
       tf.backend().getUniformLocations();
       tf.env().set('ENGINE_COMPILE_ONLY', false);
+
+      piecesModelRef.current = piecesModel;
+      xcornersModelRef.current = xcornersModel;
 
       setLoading({ loading: false, progress: 1.0 });
     });
