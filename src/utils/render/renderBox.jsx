@@ -1,15 +1,15 @@
-import * as Constants from "../constants.jsx";
-import * as tf from "@tensorflow/tfjs-core";
+import { LABELS, SQUARE_NAMES } from "../constants.jsx";
+import { max, tidy, concat, argMax, gather, expandDims, tensor1d } from "@tensorflow/tfjs-core";
 import { setupCtx, drawBox, drawPoints, drawPolygon } from "./common.jsx";
 
 export const renderBoxes = (canvasRef, boxes, scores, centers, boundary, squares) => {
   const [ctx, fontHeight, lineWidth, sx, sy] = setupCtx(canvasRef);
 
-  let bboxConfClsSquare = tf.tidy(() => {
+  let bboxConfClsSquare = tidy(() => {
     let maxConf = Array(64).fill(0.5);
     let idx = Array(64).fill(-1);
 
-    const confArray = tf.max(scores, 1).arraySync();
+    const confArray = max(scores, 1).arraySync();
     for (let i = 0; i < squares.length; i++) {
       const conf = confArray[i];
       const square = squares[i];
@@ -25,11 +25,11 @@ export const renderBoxes = (canvasRef, boxes, scores, centers, boundary, squares
     };
 
     idx = idx.filter(i => i != -1);
-    const squaresTensor = tf.tensor1d(squares);
-    const bboxConfClsSquare = tf.concat([tf.gather(boxes, idx),
-    tf.expandDims(tf.gather(tf.max(scores, 1), idx), 1),
-    tf.expandDims(tf.gather(tf.argMax(scores, 1), idx), 1),
-    tf.expandDims(tf.gather(squaresTensor, idx), 1)],
+    const squaresTensor = tensor1d(squares);
+    const bboxConfClsSquare = concat([gather(boxes, idx),
+    expandDims(gather(max(scores, 1), idx), 1),
+    expandDims(gather(argMax(scores, 1), idx), 1),
+    expandDims(gather(squaresTensor, idx), 1)],
     1);
     return bboxConfClsSquare.arraySync();
   });
@@ -49,7 +49,7 @@ export const renderBoxes = (canvasRef, boxes, scores, centers, boundary, squares
     drawPoints(ctx, [[sx * (x1 + x2) / 2, sy * (y2 - (sx * (x2 - x1) / 3))]], color, 1, 1)
 
     // Draw the label background.
-    const text = `${Constants.LABELS[clsIdx]}${Constants.SQUARE_NAMES[square]}`;
+    const text = `${LABELS[clsIdx]}${SQUARE_NAMES[square]}`;
     drawBox(ctx, color, x1, y1, text, fontHeight, lineWidth, sx, sy);
   });
 };
