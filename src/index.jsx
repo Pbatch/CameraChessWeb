@@ -15,6 +15,16 @@ import { Provider } from 'react-redux';
 import store from "./store.jsx";
 import { persistStore } from "redux-persist";
 import { PersistGate } from "redux-persist/integration/react";
+import { registerSW } from "virtual:pwa-register";
+
+// add this to prompt for a refresh
+const updateSW = registerSW({
+  onNeedRefresh() {
+    if (confirm("New content available. Reload?")) {
+      updateSW(true);
+    }
+  },
+});
 
 const router = createBrowserRouter([
   {
