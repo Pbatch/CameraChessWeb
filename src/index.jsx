@@ -8,7 +8,7 @@ import Upload from "./components/upload/upload.jsx";
 import Privacy from "./components/privacy/privacy.jsx";
 import App from "./App.jsx";
 
-import * as ReactDOM from "react-dom/client";
+import { createRoot } from 'react-dom/client';
 import "./style/index.css";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { Provider } from 'react-redux';
@@ -55,7 +55,7 @@ const router = createBrowserRouter([
   }
 ]);
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
+const root = createRoot(document.getElementById('root'));
 let persistor = persistStore(store);
 
 root.render(
