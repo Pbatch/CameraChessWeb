@@ -69,8 +69,6 @@ const Video = ({ modelRef, videoRef, canvasRef, sidebarRef, playingRef, playing,
   }, [playing])
 
   const onCanPlay = (e) => {
-    // TODO: Let the user set this
-    videoRef.current.playbackRate = 1.0;
     updateWidthHeight();
   };
 
