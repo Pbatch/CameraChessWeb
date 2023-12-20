@@ -6,6 +6,7 @@ import Record from "./components/record/record.jsx";
 import Export from "./components/export/export.jsx";
 import Upload from "./components/upload/upload.jsx";
 import Privacy from "./components/privacy/privacy.jsx";
+import FAQ from "./components/faq/faq.jsx";
 import App from "./App.jsx";
 
 import { createRoot } from 'react-dom/client';
@@ -50,6 +51,10 @@ const router = createBrowserRouter([
       {
         path: "/privacy",
         element: <Privacy />
+      },
+      {
+        path: "/faq",
+        element: <FAQ />
       }
     ]
   }
