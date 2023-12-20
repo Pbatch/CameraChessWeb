@@ -1,7 +1,7 @@
 import { renderBoxes } from "./render/renderBox.jsx";
+import * as tf from "@tensorflow/tfjs-core";
 import { getMoveData } from "./moves.jsx";
 import { getCentersAndBoundary } from "./warp.jsx";
-import { tidy, slice, div, add, sum, sub, square, concat, argMin, tensor2d, expandDims, dispose, memory, disposeVariables } from "@tensorflow/tfjs-core";
 import { Chess } from 'chess.js';
 import { pgnSet } from '../slices/pgnSlice.jsx';
 import { getBoxesAndScores, getInput, getXY, invalidWebcam } from "./detect.jsx";
@@ -66,16 +66,16 @@ const processState = (state, moveData, possibleMoves) => {
 }
 
 const getSquares = (boxes, centers, boundary) => {
-  const squares = tidy(() => {
-    const l = slice(boxes, [0, 0], [-1, 1]);
-    const r = slice(boxes, [0, 2], [-1, 1]);
-    const b = slice(boxes, [0, 3], [-1, 1]);
-    const cx = div(add(l, r), 2);
-    const cy = sub(b, div(sub(r, l), 3));
-    let boxCenters = concat([cx, cy], 1);
-    const dist = sum(square(sub(expandDims(boxCenters, 1), 
-    expandDims(tensor2d(centers), 0))), 2);
-    let squares = argMin(dist, 1)
+  const squares = tf.tidy(() => {
+    const l = tf.slice(boxes, [0, 0], [-1, 1]);
+    const r = tf.slice(boxes, [0, 2], [-1, 1]);
+    const b = tf.slice(boxes, [0, 3], [-1, 1]);
+    const cx = tf.div(tf.add(l, r), 2);
+    const cy = tf.sub(b, tf.div(tf.sub(r, l), 3));
+    let boxCenters = tf.concat([cx, cy], 1);
+    const dist = tf.sum(tf.square(tf.sub(tf.expandDims(boxCenters, 1), 
+    tf.expandDims(tf.tensor2d(centers), 0))), 2);
+    let squares = tf.argMin(dist, 1)
     
     squares = squares.arraySync();
     boxCenters = boxCenters.arraySync();
@@ -126,7 +126,7 @@ const detect = async (modelRef, webcamRef, keypoints) => {
   const preds = modelRef.current.predict(image);
   const [boxes, scores] = getBoxesAndScores(preds, width, height, videoWidth, videoHeight, padding, roi);
 
-  dispose([image, preds]);
+  tf.dispose([image, preds]);
 
   return [boxes, scores]
 }
@@ -156,7 +156,7 @@ recordingRef, setText, dispatch, cornersRef) => {
         moveData = getMoveData(board);
       }
       const startTime = performance.now();
-      const startTensors = memory().numTensors;
+      const startTensors = tf.memory().numTensors;
 
       const [boxes, scores] = await detect(modelRef, webcamRef, keypoints);
       const squares = getSquares(boxes, centers, boundary);
@@ -204,13 +204,13 @@ recordingRef, setText, dispatch, cornersRef) => {
       
       renderBoxes(canvasRef.current, boxes, scores, centers, boundary, squares);
       
-      dispose([boxes, scores]);
+      tf.dispose([boxes, scores]);
       
       if (greedyMove) {
         board.undo();
       }
 
-      const endTensors = memory().numTensors;
+      const endTensors = tf.memory().numTensors;
       if (startTensors < endTensors) {
         console.error(`Memory Leak! (${endTensors} > ${startTensors})`)
       }
@@ -220,7 +220,7 @@ recordingRef, setText, dispatch, cornersRef) => {
   requestId = requestAnimationFrame(loop);
 
   return () => {
-    disposeVariables();
+    tf.disposeVariables();
     if (requestId) {
       window.cancelAnimationFrame(requestId);
     }
