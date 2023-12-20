@@ -6,6 +6,7 @@ import Record from "./components/record/record.jsx";
 import Export from "./components/export/export.jsx";
 import Upload from "./components/upload/upload.jsx";
 import Privacy from "./components/privacy/privacy.jsx";
+import FAQ from "./components/faq/faq.jsx";
 import App from "./App.jsx";
 
 import { createRoot } from 'react-dom/client';
@@ -15,6 +16,16 @@ import { Provider } from 'react-redux';
 import store from "./store.jsx";
 import { persistStore } from "redux-persist";
 import { PersistGate } from "redux-persist/integration/react";
+import { registerSW } from "virtual:pwa-register";
+
+// add this to prompt for a refresh
+const updateSW = registerSW({
+  onNeedRefresh() {
+    if (confirm("New content available. Reload?")) {
+      updateSW(true);
+    }
+  },
+});
 
 const router = createBrowserRouter([
   {
@@ -40,6 +51,10 @@ const router = createBrowserRouter([
       {
         path: "/privacy",
         element: <Privacy />
+      },
+      {
+        path: "/faq",
+        element: <FAQ />
       }
     ]
   }

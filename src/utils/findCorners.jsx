@@ -1,10 +1,10 @@
-import * as tf from "@tensorflow/tfjs-core";
+import { dispose, gather, max, tidy, expandDims, argMax, concat, memory, disposeVariables } from "@tensorflow/tfjs-core";
 import { renderCorners } from "./render/renderCorners.jsx";
 import Delaunator from 'delaunator';
 import { getPerspectiveTransform, perspectiveTransform } from "./warp.jsx";
 import { getBoxesAndScores, getInput, getCenters, getMarkerXY, invalidWebcam } from "./detect.jsx";
 import { cornersSet } from '../slices/cornersSlice.jsx';
-import * as Constants from "./constants.jsx";
+import { MODEL_WIDTH, MODEL_HEIGHT } from "./constants.jsx";
 import { clamp } from "./math.jsx";
 
 const x = Array.from({ length: 7 }, (_, i) => i);
@@ -18,32 +18,32 @@ const runModels = async (webcamRef, xcornersModelRef, piecesModelRef) => {
 
   const xcornersPreds = xcornersModelRef.current.predict(image); 
   const piecesPreds = piecesModelRef.current.predict(image);
-  tf.dispose([image])
+  dispose([image])
 
   const videoWidth = webcamRef.current.videoWidth;
   const videoHeight = webcamRef.current.videoHeight;
   let [xcornersBoxes, xcornersScores] = getBoxesAndScores(xcornersPreds, width, height, videoWidth, videoHeight, padding, roi);
-  const xcornersNms = await tf.image.nonMaxSuppressionAsync(xcornersBoxes, xcornersScores, 100, 0.3, 0.1);
-  const keptXcornersBoxes = tf.gather(xcornersBoxes, xcornersNms, 0);
+  const xcornersNms = await image.nonMaxSuppressionAsync(xcornersBoxes, xcornersScores, 100, 0.3, 0.1);
+  const keptXcornersBoxes = gather(xcornersBoxes, xcornersNms, 0);
   const xcornersTensor = getCenters(keptXcornersBoxes);
   const xCorners = xcornersTensor.arraySync();
 
-  tf.dispose([xcornersPreds, xcornersBoxes, xcornersScores, xcornersNms, xcornersTensor, keptXcornersBoxes])
+  dispose([xcornersPreds, xcornersBoxes, xcornersScores, xcornersNms, xcornersTensor, keptXcornersBoxes])
 
   let [piecesBoxes, piecesScores] = getBoxesAndScores(piecesPreds, width, height, videoWidth, videoHeight, padding, roi);
-  const maxPiecesScores = tf.max(piecesScores, 1);
-  const piecesNms = await tf.image.nonMaxSuppressionAsync(piecesBoxes, maxPiecesScores, 100, 0.3, 0.1);
+  const maxPiecesScores = max(piecesScores, 1);
+  const piecesNms = await image.nonMaxSuppressionAsync(piecesBoxes, maxPiecesScores, 100, 0.3, 0.1);
   
-  const piecesTensor = tf.tidy(() => {
-    const keptPiecesBoxes = tf.gather(piecesBoxes, piecesNms, 0);
+  const piecesTensor = tidy(() => {
+    const keptPiecesBoxes = gather(piecesBoxes, piecesNms, 0);
     const piecesCenters = getCenters(keptPiecesBoxes);
-    const argmaxPiecesScores = tf.expandDims(tf.argMax(tf.gather(piecesScores, piecesNms, 0), 1), 1);
-    const piecesTensor = tf.concat([piecesCenters, argmaxPiecesScores], 1)
+    const argmaxPiecesScores = expandDims(argMax(gather(piecesScores, piecesNms, 0), 1), 1);
+    const piecesTensor = concat([piecesCenters, argmaxPiecesScores], 1)
     return piecesTensor;
   });
   const pieces = piecesTensor.arraySync();
 
-  tf.dispose([piecesPreds, piecesBoxes, piecesScores, piecesNms, piecesTensor, maxPiecesScores]);
+  dispose([piecesPreds, piecesBoxes, piecesScores, piecesNms, piecesTensor, maxPiecesScores]);
 
   return [xCorners, pieces];
 }
@@ -168,8 +168,8 @@ const findCornersFromXcorners = (xCorners) => {
 
   // Clip bad corners
   for (let i = 0; i < 4; i++) {
-    corners[i][0] = clamp(corners[i][0], 0, Constants.MODEL_WIDTH);
-    corners[i][1] = clamp(corners[i][1], 0, Constants.MODEL_HEIGHT);
+    corners[i][0] = clamp(corners[i][0], 0, MODEL_WIDTH);
+    corners[i][1] = clamp(corners[i][1], 0, MODEL_HEIGHT);
   }
 
   return corners;
@@ -251,16 +251,16 @@ export const _findCorners = async (piecesModelRef, xcornersModelRef, webcamRef, 
 }
 
 export const findCorners = async (piecesModelRef, xcornersModelRef, webcamRef, canvasRef, dispatch, setText) => {
-  const startTensors = tf.memory().numTensors;
+  const startTensors = memory().numTensors;
 
   await _findCorners(piecesModelRef, xcornersModelRef, webcamRef, canvasRef, dispatch, setText);
 
-  const endTensors = tf.memory().numTensors;
+  const endTensors = memory().numTensors;
   if (startTensors < endTensors) {
     console.error(`Memory Leak! (${endTensors} > ${startTensors})`)
   }
 
   return () => {
-    tf.disposeVariables();
+    disposeVariables();
   };
 }

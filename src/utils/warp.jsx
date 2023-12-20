@@ -1,5 +1,5 @@
 import { array, zeros } from 'vectorious';
-import * as Constants from "./constants.jsx";
+import { BOARD_SIZE, SQUARE_SIZE } from "./constants.jsx";
 
 export const perspectiveTransform = (src, transform) => {
     if (src[0].length == 2) {
@@ -51,10 +51,10 @@ export const getPerspectiveTransform = (target, keypoints) => {
 
 export const getCentersAndBoundary = (keypoints) => {
     const target = [
-        [Constants.BOARD_SIZE, Constants.BOARD_SIZE],
-        [0, Constants.BOARD_SIZE],
+        [BOARD_SIZE, BOARD_SIZE],
+        [0, BOARD_SIZE],
         [0, 0],
-        [Constants.BOARD_SIZE, 0]
+        [BOARD_SIZE, 0]
     ];
 
     const transform = getPerspectiveTransform(target, keypoints);
@@ -64,16 +64,16 @@ export const getCentersAndBoundary = (keypoints) => {
     const y = Array.from({ length: 8 }, (_, i) => 7.5 - i);
     const warpedCenters = y.map(yy => 
       x.map(xx => 
-        [xx * Constants.SQUARE_SIZE, yy * Constants.SQUARE_SIZE, 1]
+        [xx * SQUARE_SIZE, yy * SQUARE_SIZE, 1]
       )
     ).flat();
     const centers = perspectiveTransform(warpedCenters, invTransform);
 
     const warpedBoundary = [
-        [-0.5 * Constants.SQUARE_SIZE, -0.5 * Constants.SQUARE_SIZE, 1],
-        [-0.5 * Constants.SQUARE_SIZE, 8.5 * Constants.SQUARE_SIZE, 1],
-        [8.5 * Constants.SQUARE_SIZE, 8.5 * Constants.SQUARE_SIZE, 1],
-        [8.5 * Constants.SQUARE_SIZE, -0.5 * Constants.SQUARE_SIZE, 1]
+        [-0.5 * SQUARE_SIZE, -0.5 * SQUARE_SIZE, 1],
+        [-0.5 * SQUARE_SIZE, 8.5 * SQUARE_SIZE, 1],
+        [8.5 * SQUARE_SIZE, 8.5 * SQUARE_SIZE, 1],
+        [8.5 * SQUARE_SIZE, -0.5 * SQUARE_SIZE, 1]
     ]
     const boundary = perspectiveTransform(warpedBoundary, invTransform);
 

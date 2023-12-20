@@ -1,4 +1,4 @@
-import * as Constants from "../constants.jsx";
+import { MODEL_WIDTH, MODEL_HEIGHT } from "../constants.jsx";
 
 export const clearCtx = (ctx) => {
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
@@ -21,8 +21,8 @@ export const setupCtx = (canvasRef) => {
   ctx.lineWidth = lineWidth;
   ctx.font = font;
 
-  const sx = width / Constants.MODEL_WIDTH;
-  const sy = height / Constants.MODEL_HEIGHT;
+  const sx = width / MODEL_WIDTH;
+  const sy = height / MODEL_HEIGHT;
 
   return [ctx, fontHeight, lineWidth, sx, sy];
 }

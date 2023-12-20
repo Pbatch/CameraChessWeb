@@ -1,6 +1,6 @@
 import { findPieces } from "../../utils/findPieces.jsx";
 import { useEffect, useRef } from "react";
-import * as Constants from "../../utils/constants.jsx";
+import { MARKER_DIAMETER, MARKER_RADIUS } from "../../utils/constants.jsx";
 import { Corners } from "../common";
 import { useWindowSize } from '@react-hook/window-size';
 import { useDispatch, useSelector } from 'react-redux';
@@ -16,12 +16,12 @@ const Video = ({ modelRef, videoRef, canvasRef, sidebarRef, playingRef, playing,
 
   const updateWidthHeight = () => {
     const aspectRatio = (videoRef.current.videoWidth / videoRef.current.videoHeight);
-    let height = ((windowWidth - sidebarRef.current.offsetWidth - Constants.MARKER_DIAMETER) 
-    / aspectRatio) + Constants.MARKER_DIAMETER;
+    let height = ((windowWidth - sidebarRef.current.offsetWidth - MARKER_DIAMETER) 
+    / aspectRatio) + MARKER_DIAMETER;
     if (height > windowHeight) {
       height = windowHeight;
     }
-    const width = ((height - Constants.MARKER_DIAMETER) * aspectRatio) + Constants.MARKER_DIAMETER;
+    const width = ((height - MARKER_DIAMETER) * aspectRatio) + MARKER_DIAMETER;
     const oldHeight = canvasRef.current.height;
     const oldWidth = canvasRef.current.width;
 
@@ -80,14 +80,14 @@ const Video = ({ modelRef, videoRef, canvasRef, sidebarRef, playingRef, playing,
 
   const canvasStyle = {
     position: "absolute",
-    left: Constants.MARKER_RADIUS,
-    top: Constants.MARKER_RADIUS
+    left: MARKER_RADIUS,
+    top: MARKER_RADIUS
   }
 
   const videoContainerStyle = {
     width: "100%",
     height: "100%",
-    padding: Constants.MARKER_RADIUS
+    padding: MARKER_RADIUS
   }
 
   const videoStyle = {

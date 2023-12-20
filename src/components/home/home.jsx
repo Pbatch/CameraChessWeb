@@ -1,7 +1,6 @@
-import { NavButton, LoginButton, ExportButton } from "./buttons";
+import { NavButton, LoginButton, ExportButton, InfoButton } from "./buttons";
 import Socials from "./socials";
 import { useOutletContext } from "react-router-dom";
-
 
 
 const Home = () => {
@@ -9,7 +8,7 @@ const Home = () => {
 
   const Title = () => {
     return (
-      <div className="col text-end">
+      <div className="col-6 text-end">
         <h1>ChessCam</h1>
       </div>
     );
@@ -33,6 +32,7 @@ const Home = () => {
       <div className="row py-2 m-0 align-items-center">
         <Title />
         <Logo />
+        <InfoButton />
       </div>
       <div className="row py-2 m-0">
         <div className="col">
