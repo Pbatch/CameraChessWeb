@@ -18,7 +18,7 @@ const data = {
         <p>
           If you have an Android, you can download the free ChessCam app&nbsp;
           <a target="_blank" href="https://play.google.com/store/apps/details?id=com.camerachess.www.twa">here</a>.
-          In the future ChessCam plans to be on the App store too.
+          In the future ChessCam plans to be on the Apple App Store too.
         </p>
       },
       {
