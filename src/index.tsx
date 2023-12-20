@@ -1,4 +1,3 @@
-import React from "react";
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Home from "./components/home/home.jsx";
@@ -13,7 +12,7 @@ import { createRoot } from 'react-dom/client';
 import "./style/index.css";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { Provider } from 'react-redux';
-import store from "./store.jsx";
+import store from "./store.tsx";
 import { persistStore } from "redux-persist";
 import { PersistGate } from "redux-persist/integration/react";
 import { registerSW } from "virtual:pwa-register";
@@ -60,7 +59,7 @@ const router = createBrowserRouter([
   }
 ]);
 
-const root = createRoot(document.getElementById('root'));
+const root = createRoot(document.getElementById('root')!);
 let persistor = persistStore(store);
 
 root.render(
