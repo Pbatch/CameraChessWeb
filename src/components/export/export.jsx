@@ -1,5 +1,5 @@
-import ExportSidebar from "./exportSidebar.jsx";
-import Board from "./board.jsx";
+import ExportSidebar from "./exportSidebar";
+import Board from "./board";
 import { Container } from "../common";
 import { useOutletContext } from "react-router-dom";
 

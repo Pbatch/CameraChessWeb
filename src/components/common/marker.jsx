@@ -1,8 +1,8 @@
 import Draggable from 'react-draggable';
 import React from "react";
-import { MARKER_DIAMETER } from "../../utils/constants.jsx";
+import { MARKER_DIAMETER } from "../../utils/constants";
 import { useDispatch } from 'react-redux';
-import { cornersSet } from '../../slices/cornersSlice.jsx';
+import { cornersSet } from '../../slices/cornersSlice';
 
 const Marker = ({ name, xy }) => {
   const boxStyle = {

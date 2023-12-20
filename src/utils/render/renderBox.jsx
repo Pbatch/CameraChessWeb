@@ -1,6 +1,6 @@
-import { LABELS, SQUARE_NAMES } from "../constants.jsx";
+import { LABELS, SQUARE_NAMES } from "../constants";
 import * as tf from "@tensorflow/tfjs-core";
-import { setupCtx, drawBox, drawPoints, drawPolygon } from "./common.jsx";
+import { setupCtx, drawBox, drawPoints, drawPolygon } from "./common";
 
 export const renderBoxes = (canvasRef, boxes, scores, centers, boundary, squares) => {
   const [ctx, fontHeight, lineWidth, sx, sy] = setupCtx(canvasRef);

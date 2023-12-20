@@ -1,10 +1,11 @@
 import { useRef, useState, useEffect } from "react";
-import Video from "./video.jsx";
-import VideoSidebar from "./videoSidebar.jsx";
+import Video from "./video";
+import VideoSidebar from "./videoSidebar";
 import { useOutletContext } from "react-router-dom";
 import { useDispatch } from 'react-redux';
-import { cornersReset } from '../../slices/cornersSlice.jsx';
+import { cornersReset } from '../../slices/cornersSlice';
 import { Container } from "../common";
+import LoadModels from "../../utils/loadModels";
 
 const Upload = () => {
   const context = useOutletContext();
@@ -23,6 +24,7 @@ const Upload = () => {
   }, [playing]);
 
   useEffect(() => {
+    LoadModels(context.piecesModelRef, context.xcornersModelRef);
     dispatch(cornersReset())
   }, []);
 

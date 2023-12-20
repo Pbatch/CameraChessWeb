@@ -1,11 +1,11 @@
-import { findPieces } from "../../utils/findPieces.jsx";
+import { findPieces } from "../../utils/findPieces";
 import { useEffect, useRef } from "react";
-import { MARKER_DIAMETER, MARKER_RADIUS } from "../../utils/constants.jsx";
+import { MARKER_DIAMETER, MARKER_RADIUS } from "../../utils/constants";
 import { Corners } from "../common";
 import { useWindowSize } from '@react-hook/window-size';
 import { useDispatch, useSelector } from 'react-redux';
-import { cornersSet } from "../../slices/cornersSlice.jsx";
-import { getMarkerXY, getXY } from "../../utils/detect.jsx";
+import { cornersSet } from "../../slices/cornersSlice";
+import { getMarkerXY, getXY } from "../../utils/detect";
 
 const Video = ({ modelRef, videoRef, canvasRef, sidebarRef, playingRef, playing, setPlaying, setText }) => {
   const displayRef = useRef(null);

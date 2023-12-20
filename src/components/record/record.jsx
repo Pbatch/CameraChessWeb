@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from "react";
-import Webcam from "./webcam.jsx";
-import RecordSidebar from "./recordSidebar.jsx";
+import Webcam from "./webcam";
+import RecordSidebar from "./recordSidebar";
 import { useDispatch } from 'react-redux';
-import { cornersReset } from '../../slices/cornersSlice.jsx';
+import { cornersReset } from '../../slices/cornersSlice';
 import { useOutletContext } from "react-router-dom";
 import { Container } from "../common";
+import LoadModels from "../../utils/loadModels";
 
 const Record = () => {
   const [recording, setRecording] = useState(false);
@@ -22,6 +23,7 @@ const Record = () => {
   }, [recording]);
 
   useEffect(() => {
+    LoadModels(context.piecesModelRef, context.xcornersModelRef);
     dispatch(cornersReset())
   }, []);
   

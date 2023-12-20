@@ -1,10 +1,10 @@
-import { renderBoxes } from "./render/renderBox.jsx";
+import { renderBoxes } from "./render/renderBox";
 import * as tf from "@tensorflow/tfjs-core";
-import { getMoveData } from "./moves.jsx";
-import { getCentersAndBoundary } from "./warp.jsx";
+import { getMoveData } from "./moves";
+import { getCentersAndBoundary } from "./warp";
 import { Chess } from 'chess.js';
-import { pgnSet } from '../slices/pgnSlice.jsx';
-import { getBoxesAndScores, getInput, getXY, invalidWebcam } from "./detect.jsx";
+import { pgnSet } from '../slices/pgnSlice';
+import { getBoxesAndScores, getInput, getXY, invalidWebcam } from "./detect";
 
 const zeros = (rows, columns) => {
   return Array.from(Array(rows), _ => Array(columns).fill(0));

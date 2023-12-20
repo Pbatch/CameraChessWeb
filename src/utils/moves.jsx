@@ -1,4 +1,4 @@
-import { SQUARE_MAP, LABEL_MAP } from "./constants.jsx";
+import { SQUARE_MAP, LABEL_MAP } from "./constants";
 
 const castlingMap = {
   "g1": [SQUARE_MAP["h1"], SQUARE_MAP["f1"], LABEL_MAP["R"]],
