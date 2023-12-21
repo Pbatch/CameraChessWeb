@@ -1,12 +1,12 @@
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import Home from "./components/home/home.jsx";
-import Record from "./components/record/record.jsx";
-import Export from "./components/export/export.jsx";
-import Upload from "./components/upload/upload.jsx";
-import Privacy from "./components/privacy/privacy.jsx";
-import FAQ from "./components/faq/faq.jsx";
-import App from "./App.jsx";
+import Home from "./components/home/home";
+import Record from "./components/record/record";
+import Export from "./components/export/export";
+import Upload from "./components/upload/upload";
+import Privacy from "./components/privacy/privacy";
+import FAQ from "./components/faq/faq";
+import App from "./App";
 
 import { createRoot } from 'react-dom/client';
 import "./style/index.css";

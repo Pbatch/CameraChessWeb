@@ -1,4 +1,4 @@
-import Marker from "./marker.jsx";
+import Marker from "./marker";
 import { useSelector } from "react-redux";
 
 const Corners = () => {

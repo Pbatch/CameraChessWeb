@@ -1,5 +1,5 @@
 import { array, zeros } from 'vectorious';
-import { BOARD_SIZE, SQUARE_SIZE } from "./constants.jsx";
+import { BOARD_SIZE, SQUARE_SIZE } from "./constants";
 
 export const perspectiveTransform = (src, transform) => {
     if (src[0].length == 2) {

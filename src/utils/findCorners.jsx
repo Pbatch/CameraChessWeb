@@ -1,11 +1,11 @@
 import * as tf from "@tensorflow/tfjs-core";
-import { renderCorners } from "./render/renderCorners.jsx";
+import { renderCorners } from "./render/renderCorners";
 import Delaunator from 'delaunator';
-import { getPerspectiveTransform, perspectiveTransform } from "./warp.jsx";
-import { getBoxesAndScores, getInput, getCenters, getMarkerXY, invalidWebcam } from "./detect.jsx";
-import { cornersSet } from '../slices/cornersSlice.jsx';
-import { MODEL_WIDTH, MODEL_HEIGHT } from "./constants.jsx";
-import { clamp } from "./math.jsx";
+import { getPerspectiveTransform, perspectiveTransform } from "./warp";
+import { getBoxesAndScores, getInput, getCenters, getMarkerXY, invalidWebcam } from "./detect";
+import { cornersSet } from '../slices/cornersSlice';
+import { MODEL_WIDTH, MODEL_HEIGHT } from "./constants";
+import { clamp } from "./math";
 
 const x = Array.from({ length: 7 }, (_, i) => i);
 const y = Array.from({ length: 7 }, (_, i) => i);

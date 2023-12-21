@@ -1,4 +1,4 @@
-import { MODEL_WIDTH, MODEL_HEIGHT } from "../constants.jsx";
+import { MODEL_WIDTH, MODEL_HEIGHT } from "../constants";
 
 export const clearCtx = (ctx) => {
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);

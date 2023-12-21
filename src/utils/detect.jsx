@@ -1,4 +1,4 @@
-import { MODEL_WIDTH, MODEL_HEIGHT, MARKER_DIAMETER } from "./constants.jsx";
+import { MODEL_WIDTH, MODEL_HEIGHT, MARKER_DIAMETER } from "./constants";
 import * as tf from "@tensorflow/tfjs-core";
 
 export const invalidWebcam = (webcamRef) => {
