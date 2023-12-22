@@ -4,11 +4,20 @@ env:
 extends:
   - eslint:recommended
   - plugin:react/recommended
+  - plugin:@typescript-eslint/recommended
 parserOptions:
   ecmaVersion: latest
   sourceType: module
 plugins:
   - react
+settings:
+  react:
+    version: detect
 rules:
-  - react/react-in-jsx-scope: off
-
+  react/react-in-jsx-scope: off
+  react/no-unescaped-entities: 0 
+  no-unused-vars: 0
+  "@typescript-eslint/no-explicit-any": off
+  "@typescript-eslint/no-unused-vars":
+    - error
+    - { argsIgnorePattern: "^_", varsIgnorePattern: "^_", caughtErrorsIgnorePattern: "^_" }

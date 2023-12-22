@@ -9,6 +9,7 @@ const LoadModels = (piecesModelRef: any, xcornersModelRef: any) => {
 
   tf.ready().then(async () => {
     tf.env().set('WEBGL_EXP_CONV', true);
+    tf.env().set('WEBGL_PACK', false);
     tf.env().set('ENGINE_COMPILE_ONLY', true);
 
     const dummyInput: tf.Tensor<tf.Rank> = tf.zeros([1, MODEL_HEIGHT, MODEL_WIDTH, 3]);

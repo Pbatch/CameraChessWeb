@@ -16,11 +16,20 @@
   
       /* Linting */
       "strict": false,
+      "allowUnreachableCode": false,
+      "noFallthroughCasesInSwitch": true,
+      "noImplicitAny": true,
+      "noImplicitOverride": false,
+      "noImplicitThis": true,
+      "noImplicitReturns": true,
+      "noPropertyAccessFromIndexSignature": false,
       "noUnusedLocals": true,
       "noUnusedParameters": true,
-      "noFallthroughCasesInSwitch": true,
+      "strictBindCallApply": true,
+      "strictFunctionTypes": true,
       "strictNullChecks": true,
-
+      "strictPropertyInitialization": true,
+      
       "types": [
         "vite-plugin-pwa/client"
       ]
