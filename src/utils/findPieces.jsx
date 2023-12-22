@@ -4,6 +4,7 @@ import { getMoveData } from "./moves";
 import { getCentersAndBoundary } from "./warp";
 import { Chess } from 'chess.js';
 import { pgnSet } from '../slices/pgnSlice';
+import { fenSet } from '../slices/fenSlice';
 import { getBoxesAndScores, getInput, getXY, invalidWebcam } from "./detect";
 
 const zeros = (rows, columns) => {
@@ -177,6 +178,7 @@ recordingRef, setText, dispatch, cornersRef) => {
         board.move(bestMove.san);
       }
       dispatch(pgnSet(board.pgn()));
+      dispatch(fenSet(board.fen()));
 
       const endTime = performance.now();
       const fps = (1000 / (endTime - startTime)).toFixed(1);

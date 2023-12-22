@@ -1,8 +1,8 @@
 import { VideoButton, PlayButton, RestartButton, PlaybackButtons } from "./buttons";
-import { CornersButton, HomeButton, Display, PgnButton, Sidebar } from "../common";
+import { CornersButton, HomeButton, Display, PgnButton, Sidebar, DigitalButton } from "../common";
 
 const VideoSidebar = ({ videoRef, xcornersModelRef, piecesModelRef, canvasRef, sidebarRef, text, setText,
-playing, setPlaying }) => {
+playing, setPlaying, digital, setDigital }) => {
   return (
     <Sidebar sidebarRef={sidebarRef}>
       <li className="my-1">
@@ -20,6 +20,9 @@ playing, setPlaying }) => {
       </li>
       <li className="my-1">
         <PlaybackButtons videoRef={videoRef} />
+      </li>
+      <li className="my-1">
+        <DigitalButton digital={digital} setDigital={setDigital} />
       </li>
       <li className="border-top"></li>
       <li className="my-1">

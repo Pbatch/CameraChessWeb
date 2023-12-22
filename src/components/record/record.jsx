@@ -10,6 +10,7 @@ import LoadModels from "../../utils/loadModels";
 const Record = () => {
   const [recording, setRecording] = useState(false);
   const [text, setText] = useState([""]);
+  const [digital, setDigital] = useState(false);
   const dispatch = useDispatch();
 
   const recordingRef = useRef(recording);
@@ -30,8 +31,10 @@ const Record = () => {
   return (
     <Container>
       <RecordSidebar piecesModelRef={context.piecesModelRef} xcornersModelRef={context.xcornersModelRef} 
-      canvasRef={canvasRef} webcamRef={webcamRef} sidebarRef={sidebarRef} recording={recording} setRecording={setRecording} text={text} setText={setText} />
-      <Webcam modelRef={context.piecesModelRef} canvasRef={canvasRef} recordingRef={recordingRef} setText={setText} sidebarRef={sidebarRef} webcamRef={webcamRef} />
+      canvasRef={canvasRef} webcamRef={webcamRef} sidebarRef={sidebarRef} recording={recording} setRecording={setRecording} text={text} setText={setText}
+      digital={digital} setDigital={setDigital} />
+      <Webcam modelRef={context.piecesModelRef} canvasRef={canvasRef} recordingRef={recordingRef} setText={setText} sidebarRef={sidebarRef} webcamRef={webcamRef} 
+      digital={digital} />
     </Container>
   );
 };

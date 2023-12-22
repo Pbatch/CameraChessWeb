@@ -12,10 +12,12 @@ import {
 import storage from "redux-persist/lib/storage";
 import pgnReducer from "./slices/pgnSlice";
 import cornersReducer from "./slices/cornersSlice";
+import fenReducer from "./slices/fenSlice";
 
 const reducer = combineReducers({
   pgn: pgnReducer,
-  corners: cornersReducer
+  corners: cornersReducer,
+  fen: fenReducer
 })
 
 const persistConfig = {

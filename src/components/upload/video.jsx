@@ -1,20 +1,25 @@
 import { findPieces } from "../../utils/findPieces";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { MARKER_DIAMETER, MARKER_RADIUS } from "../../utils/constants";
 import { Corners } from "../common";
 import { useWindowSize } from '@react-hook/window-size';
 import { useDispatch, useSelector } from 'react-redux';
 import { cornersSet } from "../../slices/cornersSlice";
 import { getMarkerXY, getXY } from "../../utils/detect";
+import { Chessboard } from 'kokopu-react';
 
-const Video = ({ modelRef, videoRef, canvasRef, sidebarRef, playingRef, playing, setPlaying, setText }) => {
+const Video = ({ modelRef, videoRef, canvasRef, sidebarRef, playingRef, playing, setPlaying, setText, digital }) => {
   const displayRef = useRef(null);
   const cornersRef = useRef(null);
   const [windowWidth, windowHeight] = useWindowSize();
   const dispatch = useDispatch();
   const corners = useSelector(state => state.corners.value);
+  const fen = useSelector(state => state.fen.value);
 
   const updateWidthHeight = () => {
+    if ((videoRef.current.offsetHeight == 0) || (videoRef.current.offsetWidth) == 0) {
+      return;
+    }
     const aspectRatio = (videoRef.current.videoWidth / videoRef.current.videoHeight);
     let height = ((windowWidth - sidebarRef.current.offsetWidth - MARKER_DIAMETER) 
     / aspectRatio) + MARKER_DIAMETER;
@@ -95,20 +100,28 @@ const Video = ({ modelRef, videoRef, canvasRef, sidebarRef, playingRef, playing,
     height: "100%"
   }
 
-  const parentStyle = {
+  const liveStyle = {
     position: "relative",
-    backgroundColor: "#343a40"
+    backgroundColor: "#343a40",
+    display: digital ? "none": "inline-block"
+  }
+
+  const digitalStyle = {
+    display: digital ? "inline-block" : "none"
   }
 
   return (
     <div className="d-flex align-items-center justify-content-center">
-      <div ref={displayRef} style={parentStyle} >
+      <div ref={displayRef} style={liveStyle} >
         <div style={videoContainerStyle} >
           <video ref={videoRef} playsInline={true} muted={true} style={videoStyle}
            onCanPlay={onCanPlay} onEnded={onEnded} />
           <canvas ref={canvasRef} style={canvasStyle} />
         </div>
         <Corners />
+      </div>
+      <div style={digitalStyle} >
+        <Chessboard position={fen} squareSize={40} />
       </div>
     </div>
   );

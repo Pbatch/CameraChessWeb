@@ -6,8 +6,9 @@ import { useWindowSize } from '@react-hook/window-size';
 import { useDispatch, useSelector } from 'react-redux';
 import { cornersSet } from "../../slices/cornersSlice";
 import { getMarkerXY, getXY } from "../../utils/detect";
+import { Chessboard } from 'kokopu-react';
 
-const Video = ({ modelRef, canvasRef, webcamRef, sidebarRef, recordingRef, setText }) => {
+const Video = ({ modelRef, canvasRef, webcamRef, sidebarRef, recordingRef, setText, digital }) => {
   const aspectRatio = 16 / 9;
   const constraints = {
     "audio": false,
@@ -26,6 +27,7 @@ const Video = ({ modelRef, canvasRef, webcamRef, sidebarRef, recordingRef, setTe
   const [windowWidth, windowHeight] = useWindowSize();
   const dispatch = useDispatch();
   const corners = useSelector(state => state.corners.value);
+  const fen = useSelector(state => state.fen.value);
 
   const setupWebcam = async () => {
     const stream = await navigator.mediaDevices.getUserMedia(constraints);
@@ -35,6 +37,10 @@ const Video = ({ modelRef, canvasRef, webcamRef, sidebarRef, recordingRef, setTe
   };
 
   const updateWidthHeight = () => {
+    if ((canvasRef.current.offsetHeight == 0) || (canvasRef.current.offsetWidth) == 0) {
+      return;
+    }
+
     let height = ((windowWidth - sidebarRef.current.offsetWidth - MARKER_DIAMETER) 
     / aspectRatio) + MARKER_DIAMETER;
     if (height > windowHeight) {
@@ -95,9 +101,14 @@ const Video = ({ modelRef, canvasRef, webcamRef, sidebarRef, recordingRef, setTe
     height: "100%"
   }
 
-  const parentStyle = {
+  const liveStyle = {
     position: "relative",
-    backgroundColor: "#343a40"
+    backgroundColor: "#343a40",
+    display: digital ? "none": "inline-block"
+  }
+
+  const digitalStyle = {
+    display: digital ? "inline-block": "none"
   }
 
   const onLoadedMetadata = (e) => {  
@@ -125,13 +136,16 @@ const Video = ({ modelRef, canvasRef, webcamRef, sidebarRef, recordingRef, setTe
 
   return (
     <div className="d-flex align-items-center justify-content-center">
-      <div ref={displayRef} style={parentStyle} >
+      <div ref={displayRef} style={liveStyle} >
         <div style={videoContainerStyle} >
           <video ref={webcamRef} autoPlay={true} playsInline={true} muted={true}
           onLoadedMetadata={onLoadedMetadata} style={videoStyle} />
           <canvas ref={canvasRef} style={canvasStyle} />
         </div>
         <Corners />
+      </div>
+      <div style={digitalStyle} >
+        <Chessboard position={fen} squareSize={40} />
       </div>
     </div>
   );
