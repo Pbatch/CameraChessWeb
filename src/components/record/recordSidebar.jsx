@@ -1,7 +1,8 @@
-import { RecordButton, HelpButton } from "./buttons";
-import { Display, CornersButton, HomeButton, PgnButton, Sidebar } from "../common";
+import { RecordButton } from "./buttons";
+import { Display, CornersButton, HomeButton, PgnButton, Sidebar, DigitalButton } from "../common";
 
-const RecordSidebar = ({ piecesModelRef, xcornersModelRef, webcamRef, canvasRef, sidebarRef, recording, setRecording, text, setText }) => {
+const RecordSidebar = ({ piecesModelRef, xcornersModelRef, webcamRef, canvasRef, sidebarRef, recording, setRecording, text, setText,
+digital, setDigital }) => {
   return (
     <Sidebar sidebarRef={sidebarRef} >
       <li className="my-1">
@@ -11,6 +12,9 @@ const RecordSidebar = ({ piecesModelRef, xcornersModelRef, webcamRef, canvasRef,
       <li className="my-1">
         <RecordButton recording={recording} setRecording={setRecording} />
       </li>
+      <li className="my-1">
+        <DigitalButton digital={digital} setDigital={setDigital} />
+      </li>
       <li className="border-top"></li>
       <li className="my-1">
         <Display text={text} />
@@ -19,9 +23,6 @@ const RecordSidebar = ({ piecesModelRef, xcornersModelRef, webcamRef, canvasRef,
       <li className="my-1">
         <PgnButton setText={setText} recording={recording} />
       </li>
-      {/* <li className="my-1">
-        <HelpButton />
-      </li> */}
       <li className="my-1">
         <HomeButton />
       </li>

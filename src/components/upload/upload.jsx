@@ -13,6 +13,7 @@ const Upload = () => {
 
   const [text, setText] = useState([]);
   const [playing, setPlaying] = useState(false);
+  const [digital, setDigital] = useState(false);
   
   const videoRef = useRef(null);
   const playingRef = useRef(playing);
@@ -32,9 +33,9 @@ const Upload = () => {
     <Container>
       <VideoSidebar videoRef={videoRef} piecesModelRef={context.piecesModelRef} xcornersModelRef={context.xcornersModelRef} 
       canvasRef={canvasRef} setText={setText} sidebarRef={sidebarRef} playing={playing} setPlaying={setPlaying}
-      text={text} />
+      text={text} digital={digital} setDigital={setDigital} />
       <Video modelRef={context.piecesModelRef} videoRef={videoRef} canvasRef={canvasRef} sidebarRef={sidebarRef} 
-      playing={playing} setPlaying={setPlaying} playingRef={playingRef} setText={setText} />
+      playing={playing} setPlaying={setPlaying} playingRef={playingRef} setText={setText} digital={digital} />
     </Container>
   );
 };
