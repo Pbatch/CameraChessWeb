@@ -21,10 +21,10 @@ digital, setDigital }) => {
       </li>
       <li className="border-top"></li>
       <li className="my-1">
-        <PgnButton setText={setText} recording={recording} />
-      </li>
-      <li className="my-1">
-        <HomeButton />
+        <div className="btn-group w-100" role="group">
+          <PgnButton setText={setText} recording={recording} />
+          <HomeButton />
+        </div>
       </li>
     </Sidebar>
   );
