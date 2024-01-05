@@ -1,3 +1,5 @@
+import { CornersKey } from "../types";
+
 export const MODEL_WIDTH: number = 640;
 export const MODEL_HEIGHT: number = 384;
 export const MARKER_RADIUS: number = 25;
@@ -13,21 +15,37 @@ export const SQUARE_NAMES: string[] = ['a1', 'b1', 'c1', 'd1', 'e1', 'f1', 'g1',
 'a8', 'b8', 'c8', 'd8', 'e8', 'f8', 'g8', 'h8'];
 export const SQUARE_SIZE: number = 128;
 export const BOARD_SIZE: number = 8 * SQUARE_SIZE;
+export const CORNER_KEYS: CornersKey[] = ["h1", "a1", "a8", "h8"];
 
 const makeLabelMap = () => {
-  let d = {};
+  const d: { [id: string]: number } = {};
   LABELS.forEach((label, i) => {
     d[label] = i;
   })
   return d;
 }
-export const LABEL_MAP: { [label: string]: [idx: number] } = makeLabelMap();
+export const LABEL_MAP: { [id: string]: number } = makeLabelMap();
 
 const makeSquareMap = () => {
-  let d = {};
+  const d: { [id: string]: number } = {};
   SQUARE_NAMES.forEach((square, i) => {
     d[square] = i;
   })
   return d;
 }
-export const SQUARE_MAP: { [label: string]: [idx: number] } = makeSquareMap();
+export const SQUARE_MAP: { [id: string]: number } = makeSquareMap();
+
+export const PALETTE: string[] = [
+  "#FF3838",
+  "#FF9D97",
+  "#FF701F",
+  "#FFB21D",
+  "#CFD231",
+  "#48F90A",
+  "#92CC17",
+  "#3DDB86",
+  "#1A9334",
+  "#00D4BB",
+  "#2C99A8",
+  "#00C2FF",
+];
