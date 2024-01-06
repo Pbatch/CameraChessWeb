@@ -1,21 +1,21 @@
 import { RecordButton } from "./buttons";
 import { Display, CornersButton, HomeButton, PgnButton, Sidebar, DigitalButton } from "../common";
 
-const RecordSidebar = ({ piecesModelRef, xcornersModelRef, webcamRef, canvasRef, sidebarRef, recording, setRecording, text, setText,
+const RecordSidebar = ({ piecesModelRef, xcornersModelRef, videoRef, canvasRef, sidebarRef, playing, setPlaying, text, setText,
 digital, setDigital }: {
-  piecesModelRef: any, xcornersModelRef: any, webcamRef: any, canvasRef: any, sidebarRef: any,
-  recording: boolean, setRecording: React.Dispatch<React.SetStateAction<boolean>>, 
+  piecesModelRef: any, xcornersModelRef: any, videoRef: any, canvasRef: any, sidebarRef: any,
+  playing: boolean, setPlaying: React.Dispatch<React.SetStateAction<boolean>>, 
   text: string[], setText: React.Dispatch<React.SetStateAction<string[]>>,
   digital: boolean, setDigital: React.Dispatch<React.SetStateAction<boolean>>
 }) => {
   return (
     <Sidebar sidebarRef={sidebarRef} >
       <li className="my-1">
-        <CornersButton piecesModelRef={piecesModelRef} xcornersModelRef={xcornersModelRef} webcamRef={webcamRef} canvasRef={canvasRef} 
+        <CornersButton piecesModelRef={piecesModelRef} xcornersModelRef={xcornersModelRef} videoRef={videoRef} canvasRef={canvasRef} 
         setText={setText} />
       </li>
       <li className="my-1">
-        <RecordButton recording={recording} setRecording={setRecording} />
+        <RecordButton playing={playing} setPlaying={setPlaying} />
       </li>
       <li className="my-1">
         <DigitalButton digital={digital} setDigital={setDigital} />
@@ -27,7 +27,7 @@ digital, setDigital }: {
       <li className="border-top"></li>
       <li className="my-1">
         <div className="btn-group w-100" role="group">
-          <PgnButton setText={setText} recording={recording} />
+          <PgnButton setText={setText} playing={playing} />
           <HomeButton />
         </div>
       </li>

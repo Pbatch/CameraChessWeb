@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from "react";
-import Video from "./video";
-import VideoSidebar from "./videoSidebar";
+import Video from "../common/video";
+import UploadSidebar from "./uploadSidebar";
 import { useOutletContext } from "react-router-dom";
 import { useDispatch } from 'react-redux';
 import { cornersReset } from '../../slices/cornersSlice';
@@ -23,6 +23,7 @@ const Upload = () => {
 
   useEffect(() => {
     playingRef.current = playing;
+    console.log(playing, playingRef.current);
   }, [playing]);
 
   useEffect(() => {
@@ -32,11 +33,11 @@ const Upload = () => {
 
   return (
     <Container>
-      <VideoSidebar videoRef={videoRef} piecesModelRef={context.piecesModelRef} xcornersModelRef={context.xcornersModelRef} 
+      <UploadSidebar videoRef={videoRef} piecesModelRef={context.piecesModelRef} xcornersModelRef={context.xcornersModelRef} 
       canvasRef={canvasRef} setText={setText} sidebarRef={sidebarRef} playing={playing} setPlaying={setPlaying}
       text={text} digital={digital} setDigital={setDigital} />
       <Video modelRef={context.piecesModelRef} videoRef={videoRef} canvasRef={canvasRef} sidebarRef={sidebarRef} 
-      playing={playing} setPlaying={setPlaying} playingRef={playingRef} setText={setText} digital={digital} />
+      playing={playing} setPlaying={setPlaying} playingRef={playingRef} setText={setText} digital={digital} webcam={false} />
     </Container>
   );
 };

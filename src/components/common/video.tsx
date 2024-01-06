@@ -1,32 +1,57 @@
 import { findPieces } from "../../utils/findPieces";
 import { useEffect, useRef } from "react";
 import { CORNER_KEYS, MARKER_DIAMETER, MARKER_RADIUS } from "../../utils/constants";
-import { Corners } from "../common";
-import { useWindowSize } from '@react-hook/window-size';
+import { Corners } from ".";
+import { useWindowWidth, useWindowHeight } from '@react-hook/window-size';
 import { useDispatch, useSelector } from 'react-redux';
 import { cornersSet } from "../../slices/cornersSlice";
 import { getMarkerXY, getXY } from "../../utils/detect";
 import { Chessboard } from 'kokopu-react';
-import { CornersPayload, RootState } from '../../types';
+import { CornersPayload, RootState } from "../../types";
 
-const Video = ({ modelRef, videoRef, canvasRef, sidebarRef, playingRef, playing, setPlaying, setText, digital }: {
-  modelRef: any, videoRef: any, canvasRef: any, sidebarRef: any, playingRef: any,
-  playing: boolean, setPlaying: React.Dispatch<React.SetStateAction<boolean>>,
-  setText: React.Dispatch<React.SetStateAction<string[]>>, digital: boolean
+const Video = ({ modelRef, canvasRef, videoRef, sidebarRef, playing, setPlaying, playingRef, setText, digital, webcam }: {
+  modelRef: any, canvasRef: any, videoRef: any, sidebarRef: any, 
+  playing: boolean, setPlaying: React.Dispatch<React.SetStateAction<boolean>>, playingRef: any,
+  setText: React.Dispatch<React.SetStateAction<string[]>>, digital: boolean, webcam: boolean
 }) => {
+  const aspectRatio = 16 / 9;
   const displayRef: any = useRef(null);
   const cornersRef: any = useRef(null);
-  const [windowWidth, windowHeight] = useWindowSize();
+  const windowWidth = useWindowWidth();
+  const windowHeight = useWindowHeight();
   const dispatch = useDispatch();
   const corners = useSelector((state: RootState) => state.corners["value"]);
   const fen = useSelector((state: RootState) => state.fen["value"]);
 
+  const setupWebcam = async () => {
+    const constraints = {
+      "audio": false,
+      "video": {
+        "facingMode": {
+          "ideal": "environment"
+        },
+        "width": {
+          "ideal": 1000
+        },
+        "aspectRatio": aspectRatio
+      }
+    }
+    const stream = await navigator.mediaDevices.getUserMedia(constraints);
+    if (videoRef.current !== null) {
+      videoRef.current.srcObject = stream;
+    }
+  };
+
+  const awaitSetupWebcam = async () => {
+    await setupWebcam();
+  }
+
   const updateWidthHeight = () => {
-    if ((videoRef.current.offsetHeight == 0) || (videoRef.current.offsetWidth) == 0) {
+    if ((canvasRef.current.offsetHeight == 0) || (canvasRef.current.offsetWidth) == 0) {
       return;
     }
-    const aspectRatio: number = (videoRef.current.videoWidth / videoRef.current.videoHeight);
-    let height: number = ((windowWidth - sidebarRef.current.offsetWidth - MARKER_DIAMETER) 
+
+    let height = ((windowWidth - sidebarRef.current.offsetWidth - MARKER_DIAMETER) 
     / aspectRatio) + MARKER_DIAMETER;
     if (height > windowHeight) {
       height = windowHeight;
@@ -42,7 +67,7 @@ const Video = ({ modelRef, videoRef, canvasRef, sidebarRef, playingRef, playing,
 
     canvasRef.current.width = videoRef.current.offsetWidth;
     canvasRef.current.height = videoRef.current.offsetHeight;
-
+    
     CORNER_KEYS.forEach((key) => {
       const xy = getXY(corners[key], oldHeight, oldWidth);
       const payload: CornersPayload = {
@@ -54,13 +79,16 @@ const Video = ({ modelRef, videoRef, canvasRef, sidebarRef, playingRef, playing,
   }
 
   useEffect(() => {
+    updateWidthHeight();
+
+    if (webcam) {
+      awaitSetupWebcam()
+    }
+
     findPieces(modelRef, videoRef, canvasRef, playingRef, setText, dispatch, cornersRef);
-  }, [])
+  }, []);
 
   useEffect(() => {
-    if (videoRef.current.src === "") {
-      return;
-    }
     updateWidthHeight();
   }, [windowWidth, windowHeight]);
 
@@ -69,26 +97,16 @@ const Video = ({ modelRef, videoRef, canvasRef, sidebarRef, playingRef, playing,
   }, [corners])
 
   useEffect(() => {
-    if (videoRef.current.src === "") {
+    if ((webcam) || (videoRef.current.src === "")) {
       return;
     }
-
-    if (playingRef.current === false) {
-      videoRef.current.play();
-    } else {
+    
+    if (playingRef.current === true) {
       videoRef.current.pause();
+    } else {
+      videoRef.current.play();
     }
   }, [playing])
-
-  const onCanPlay = () => {
-    updateWidthHeight();
-  };
-
-  const onEnded = () => {
-    videoRef.current.currentTime = videoRef.current.duration;
-    videoRef.current.pause;
-    setPlaying(false);
-  }
 
   const canvasStyle: React.CSSProperties = {
     position: "absolute",
@@ -113,16 +131,55 @@ const Video = ({ modelRef, videoRef, canvasRef, sidebarRef, playingRef, playing,
     display: digital ? "none": "inline-block"
   }
 
-  const digitalStyle: React.CSSProperties = {
-    display: digital ? "inline-block" : "none"
+  const digitalStyle = {
+    display: digital ? "inline-block": "none"
+  }
+
+  const onLoadedMetadata = () => {  
+    if (!(webcam)) {
+      return;
+    }
+    window.setTimeout(() => {
+      if (!(videoRef.current)) {
+        return;
+      }
+      
+      const tracks = videoRef.current.srcObject.getVideoTracks();
+      if (tracks.length == 0) {
+        return;
+      }
+      
+      const capabilities = tracks[0].getCapabilities();
+      console.info(capabilities);
+
+      if (capabilities.zoom) {
+        tracks[0].applyConstraints({
+          zoom: capabilities.zoom.min,
+        })
+        .catch((e: any) => console.log(e));
+      }
+    }, 2000);
+  };
+
+  const onCanPlay = () => {
+    updateWidthHeight();
+  }
+
+  const onEnded = () => {
+    if (!(webcam)) {
+      videoRef.current.currentTime = videoRef.current.duration;
+      videoRef.current.pause;
+    }
+    setPlaying(false);
   }
 
   return (
     <div className="d-flex align-items-center justify-content-center">
       <div ref={displayRef} style={liveStyle} >
         <div style={videoContainerStyle} >
-          <video ref={videoRef} playsInline={true} muted={true} style={videoStyle}
-           onCanPlay={onCanPlay} onEnded={onEnded} />
+          <video ref={videoRef} autoPlay={webcam} playsInline={true} muted={true}
+          onLoadedMetadata={onLoadedMetadata} style={videoStyle} 
+          onCanPlay={onCanPlay} onEnded={onEnded} />
           <canvas ref={canvasRef} style={canvasStyle} />
         </div>
         <Corners />
@@ -135,3 +192,4 @@ const Video = ({ modelRef, videoRef, canvasRef, sidebarRef, playingRef, playing,
 };
 
 export default Video;
+

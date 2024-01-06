@@ -1,7 +1,7 @@
 import { VideoButton, PlayButton, RestartButton, PlaybackButtons } from "./buttons";
 import { CornersButton, HomeButton, Display, PgnButton, Sidebar, DigitalButton } from "../common";
 
-const VideoSidebar = ({ videoRef, xcornersModelRef, piecesModelRef, canvasRef, sidebarRef, text, setText,
+const UploadSidebar = ({ videoRef, xcornersModelRef, piecesModelRef, canvasRef, sidebarRef, text, setText,
 playing, setPlaying, digital, setDigital }: {
   videoRef: any, xcornersModelRef: any, piecesModelRef: any, canvasRef: any, sidebarRef: any,
   text: string[], setText: React.Dispatch<React.SetStateAction<string[]>>,
@@ -15,7 +15,7 @@ playing, setPlaying, digital, setDigital }: {
       </li>
       <li className="my-1">
         <CornersButton piecesModelRef={piecesModelRef} xcornersModelRef={xcornersModelRef} 
-        webcamRef={videoRef} canvasRef={canvasRef} setText={setText} />
+        videoRef={videoRef} canvasRef={canvasRef} setText={setText} />
       </li>
       <li className="my-1">
         <div className="btn-group w-100" role="group">
@@ -37,7 +37,7 @@ playing, setPlaying, digital, setDigital }: {
       
       <li className="my-1">
         <div className="btn-group w-100" role="group">
-          <PgnButton setText={setText} recording={playing} />
+          <PgnButton setText={setText} playing={playing} />
           <HomeButton />
         </div>
       </li>
@@ -45,4 +45,4 @@ playing, setPlaying, digital, setDigital }: {
   );
 };
 
-export default VideoSidebar;
+export default UploadSidebar;
