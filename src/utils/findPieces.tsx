@@ -5,7 +5,7 @@ import { getInvTransform, transformBoundary, transformCenters } from "./warp";
 import { Chess } from 'chess.js';
 import { pgnSet } from '../slices/pgnSlice';
 import { fenSet } from '../slices/fenSlice';
-import { getBoxesAndScores, getInput, getXY, invalidWebcam } from "./detect";
+import { getBoxesAndScores, getInput, getXY, invalidVideo } from "./detect";
 import { MovesData, MovesPair } from "../types";
 
 const zeros = (rows: number, columns: number) => {
@@ -124,11 +124,11 @@ const updateState = (scoresTensor: tf.Tensor2D, squares: number[], state: any, d
   return state
 }
 
-const detect = async (modelRef: any, webcamRef: any, keypoints: number[][]):
+const detect = async (modelRef: any, videoRef: any, keypoints: number[][]):
   Promise<{boxes: tf.Tensor2D, scores: tf.Tensor2D}> => {
-  const {image4D, width, height, padding, roi} = getInput(webcamRef, keypoints);
-  const videoWidth: number = webcamRef.current.videoWidth;
-  const videoHeight: number = webcamRef.current.videoHeight;
+  const {image4D, width, height, padding, roi} = getInput(videoRef, keypoints);
+  const videoWidth: number = videoRef.current.videoWidth;
+  const videoHeight: number = videoRef.current.videoHeight;
   const preds: tf.Tensor3D = modelRef.current.predict(image4D);
   const {boxes, scores} = getBoxesAndScores(preds, width, height, videoWidth, videoHeight, padding, roi);
 
@@ -137,7 +137,7 @@ const detect = async (modelRef: any, webcamRef: any, keypoints: number[][]):
   return {boxes, scores}
 }
 
-export const findPieces = (modelRef: any, webcamRef: any, canvasRef: any,
+export const findPieces = (modelRef: any, videoRef: any, canvasRef: any,
 playingRef: any, setText: any, dispatch: any, cornersRef: any) => {
   let centers: number[][] | null = null;
   let boundary: number[][];
@@ -149,7 +149,7 @@ playingRef: any, setText: any, dispatch: any, cornersRef: any) => {
   let requestId: number;
 
   const loop = async () => {
-    if (playingRef.current === false || invalidWebcam(webcamRef)) {
+    if (playingRef.current === false || invalidVideo(videoRef)) {
       centers = null
     } else {
       if (centers === null) {
@@ -166,7 +166,7 @@ playingRef: any, setText: any, dispatch: any, cornersRef: any) => {
       const startTime: number = performance.now();
       const startTensors: number = tf.memory().numTensors;
 
-      const {boxes, scores} = await detect(modelRef, webcamRef, keypoints);
+      const {boxes, scores} = await detect(modelRef, videoRef, keypoints);
       const squares: number[] = getSquares(boxes, centers, boundary);
       state = updateState(scores, squares, state);
       const {bestScore1, bestScore2, bestJointScore, bestMove, bestMoves} = processState(state, movesPairs, possibleMoves);

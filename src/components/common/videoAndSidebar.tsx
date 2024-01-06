@@ -1,14 +1,15 @@
 import { useRef, useState, useEffect } from "react";
 import Video from "../common/video";
-import UploadSidebar from "./uploadSidebar";
 import { useOutletContext } from "react-router-dom";
 import { useDispatch } from 'react-redux';
 import { cornersReset } from '../../slices/cornersSlice';
 import { Container } from "../common";
 import LoadModels from "../../utils/loadModels";
 import { Context } from "../../types";
+import RecordSidebar from "../record/recordSidebar";
+import UploadSidebar from "../upload/uploadSidebar";
 
-const Upload = () => {
+const VideoAndSidebar = ({ webcam }: {webcam: boolean}) => {
   const context = useOutletContext<Context>();
   const dispatch = useDispatch();
 
@@ -23,7 +24,6 @@ const Upload = () => {
 
   useEffect(() => {
     playingRef.current = playing;
-    console.log(playing, playingRef.current);
   }, [playing]);
 
   useEffect(() => {
@@ -31,15 +31,33 @@ const Upload = () => {
     dispatch(cornersReset())
   }, []);
 
+  const sidebarProps = {
+    "videoRef": videoRef,
+    "piecesModelRef": context.piecesModelRef,
+    "xcornersModelRef": context.xcornersModelRef,
+    "canvasRef": canvasRef,
+    "sidebarRef": sidebarRef,
+    "setPlaying": setPlaying,
+    "setText": setText,
+    "setDigital": setDigital,
+    "playing": playing,
+    "text": text,
+    "digital": digital,
+  }
+  const sidebar = () => {
+    if (webcam) {
+      return <RecordSidebar {...sidebarProps} /> 
+    } else {
+      return <UploadSidebar {...sidebarProps} />
+    }
+  }
   return (
     <Container>
-      <UploadSidebar videoRef={videoRef} piecesModelRef={context.piecesModelRef} xcornersModelRef={context.xcornersModelRef} 
-      canvasRef={canvasRef} setText={setText} sidebarRef={sidebarRef} playing={playing} setPlaying={setPlaying}
-      text={text} digital={digital} setDigital={setDigital} />
+      {sidebar()}
       <Video modelRef={context.piecesModelRef} videoRef={videoRef} canvasRef={canvasRef} sidebarRef={sidebarRef} 
-      playing={playing} setPlaying={setPlaying} playingRef={playingRef} setText={setText} digital={digital} webcam={false} />
+      playing={playing} setPlaying={setPlaying} playingRef={playingRef} setText={setText} digital={digital} webcam={webcam} />
     </Container>
   );
 };
 
-export default Upload;
+export default VideoAndSidebar;
