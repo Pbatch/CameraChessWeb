@@ -2,7 +2,7 @@ import * as tf from "@tensorflow/tfjs-core";
 import { renderCorners } from "./render/renderCorners";
 import Delaunator from 'delaunator';
 import { getPerspectiveTransform, perspectiveTransform } from "./warp";
-import { getBoxesAndScores, getInput, getCenters, getMarkerXY, invalidWebcam } from "./detect";
+import { getBoxesAndScores, getInput, getCenters, getMarkerXY, invalidVideo } from "./detect";
 import { cornersSet } from '../slices/cornersSlice';
 import { MODEL_WIDTH, MODEL_HEIGHT, CORNER_KEYS } from "./constants";
 import { clamp } from "./math";
@@ -34,16 +34,16 @@ const processBoxesAndScores = async (boxes: tf.Tensor2D, scores: tf.Tensor2D, si
   return res
 }
 
-const runModels = async (webcamRef: any, xcornersModelRef: any, piecesModelRef: any):
+const runModels = async (videoRef: any, xcornersModelRef: any, piecesModelRef: any):
   Promise<{ xCorners: number[][], pieces: number[][] }> => {
-  const {image4D, width, height, padding, roi} = getInput(webcamRef);
+  const {image4D, width, height, padding, roi} = getInput(videoRef);
 
   const xcornersPreds: tf.Tensor3D = xcornersModelRef.current.predict(image4D); 
   const piecesPreds: tf.Tensor3D = piecesModelRef.current.predict(image4D);
   tf.dispose([image4D])
 
-  const videoWidth: number = webcamRef.current.videoWidth;
-  const videoHeight: number = webcamRef.current.videoHeight;
+  const videoWidth: number = videoRef.current.videoWidth;
+  const videoHeight: number = videoRef.current.videoHeight;
   let boxesAndScores = getBoxesAndScores(xcornersPreds, width, height, videoWidth, videoHeight, padding, roi);
   const xCorners: number[][] = await processBoxesAndScores(boxesAndScores.boxes, boxesAndScores.scores, true);
 
@@ -229,13 +229,13 @@ const calculateKeypoints = (pieces: number[][], corners: number[][]) => {
   return keypoints
 }
 
-export const _findCorners = async (piecesModelRef: any, xcornersModelRef: any, webcamRef: any, 
+export const _findCorners = async (piecesModelRef: any, xcornersModelRef: any, videoRef: any, 
   canvasRef: any, dispatch: any, setText: any) => {
-  if (invalidWebcam(webcamRef)) {
+  if (invalidVideo(videoRef)) {
     return;
   }
   
-  const {xCorners, pieces} = await runModels(webcamRef, xcornersModelRef, piecesModelRef);
+  const {xCorners, pieces} = await runModels(videoRef, xcornersModelRef, piecesModelRef);
   if (xCorners.length < 5) {
     // With <= 5 xCorners, no quads are found
     setText(["Need ≥5 xCorners", `Detected ${xCorners.length}`]);
@@ -266,11 +266,11 @@ export const _findCorners = async (piecesModelRef: any, xcornersModelRef: any, w
   setText(["Found corners", "Ready to record"])
 }
 
-export const findCorners = async (piecesModelRef: any, xcornersModelRef: any, webcamRef: any, canvasRef: any,
+export const findCorners = async (piecesModelRef: any, xcornersModelRef: any, videoRef: any, canvasRef: any,
    dispatch: any, setText: any) => {
   const startTensors = tf.memory().numTensors;
 
-  await _findCorners(piecesModelRef, xcornersModelRef, webcamRef, canvasRef, dispatch, setText);
+  await _findCorners(piecesModelRef, xcornersModelRef, videoRef, canvasRef, dispatch, setText);
 
   const endTensors = tf.memory().numTensors;
   if (startTensors < endTensors) {

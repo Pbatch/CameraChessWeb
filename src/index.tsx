@@ -1,9 +1,7 @@
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Home from "./components/home/home";
-import Record from "./components/record/record";
 import Export from "./components/export/export";
-import Upload from "./components/upload/upload";
 import Privacy from "./components/privacy/privacy";
 import FAQ from "./components/faq/faq";
 import App from "./App";
@@ -16,6 +14,7 @@ import store from "./store.tsx";
 import { persistStore } from "redux-persist";
 import { PersistGate } from "redux-persist/integration/react";
 import { registerSW } from "virtual:pwa-register";
+import VideoAndSidebar from './components/common/videoAndSidebar.tsx';
 
 // add this to prompt for a refresh
 const updateSW = registerSW({
@@ -37,7 +36,7 @@ const router = createBrowserRouter([
       },
       {
         path: "/record",
-        element: <Record />
+        element: <VideoAndSidebar webcam={true} />
       },
       {
         path: "/export",
@@ -45,7 +44,7 @@ const router = createBrowserRouter([
       },
       {
         path: "/upload",
-        element: <Upload />
+        element: <VideoAndSidebar webcam={false} />
       },
       {
         path: "/privacy",

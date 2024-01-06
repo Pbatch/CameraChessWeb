@@ -1,30 +1,30 @@
 import { MODEL_WIDTH, MODEL_HEIGHT, MARKER_DIAMETER } from "./constants";
 import * as tf from "@tensorflow/tfjs-core";
 
-export const invalidWebcam = (webcamRef: any) => {
-  if (webcamRef.current === null) {
+export const invalidVideo = (videoRef: any) => {
+  if (videoRef.current === null) {
     return true;
   }
 
   // If it's uploaded video, the src must start with "blob"
-  if (webcamRef.current.autoplay === false && !(webcamRef.current.src.startsWith("blob"))) {
+  if (videoRef.current.autoplay === false && !(videoRef.current.src.startsWith("blob"))) {
     return true
   }
 
   // srcObject is used for recording, src is used for uploading
-  if (webcamRef.current?.srcObject === null && webcamRef.current?.src === null) {
+  if (videoRef.current?.srcObject === null && videoRef.current?.src === null) {
     return true;
   }
 
   return false;
 }
 
-export const getInput = (webcamRef: any, keypoints: number[][] | null=null, paddingRatio: number=12): {
+export const getInput = (videoRef: any, keypoints: number[][] | null=null, paddingRatio: number=12): {
   image4D: tf.Tensor4D, width: number, height: number, padding: number[], roi: number[]
 } => {
   let roi: number[];
-  const videoWidth: number = webcamRef.current.videoWidth;
-  const videoHeight: number = webcamRef.current.videoHeight;
+  const videoWidth: number = videoRef.current.videoWidth;
+  const videoHeight: number = videoRef.current.videoHeight;
   if (keypoints !== null) {
     const xs: number[] = keypoints.map(p => p[0]);
     const ys: number[] = keypoints.map(p => p[1]);
@@ -62,7 +62,7 @@ export const getInput = (webcamRef: any, keypoints: number[][] | null=null, padd
     roi = [0, 0, videoWidth, videoHeight];
   }
   const [image4D, width, height, padding]: [tf.Tensor4D, number, number, number[]] = tf.tidy(() => {
-    let image: tf.Tensor3D = tf.browser.fromPixels(webcamRef.current);
+    let image: tf.Tensor3D = tf.browser.fromPixels(videoRef.current);
     
     // Cropping
     image = tf.slice(image,
