@@ -2,8 +2,8 @@ import { useSelector } from "react-redux";
 import SidebarButton from "./sidebarButton";
 import { RootState } from "../../types";
 
-const PgnButton = ({ setText, recording }:
-  {setText: React.Dispatch<React.SetStateAction<string[]>>, recording: boolean}) => {
+const PgnButton = ({ setText, playing }:
+  {setText: React.Dispatch<React.SetStateAction<string[]>>, playing: boolean}) => {
   const pgn = useSelector((state: RootState) => state.pgn["value"]);
 
   const handleClick = (e: any) => {
@@ -17,7 +17,7 @@ const PgnButton = ({ setText, recording }:
       text = ["Copied PGN"]
     }
 
-    if (!recording) {
+    if (!playing) {
       setText(text);
     }
   }

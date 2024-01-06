@@ -138,7 +138,7 @@ const detect = async (modelRef: any, webcamRef: any, keypoints: number[][]):
 }
 
 export const findPieces = (modelRef: any, webcamRef: any, canvasRef: any,
-recordingRef: any, setText: any, dispatch: any, cornersRef: any) => {
+playingRef: any, setText: any, dispatch: any, cornersRef: any) => {
   let centers: number[][] | null = null;
   let boundary: number[][];
   let state: number[][];
@@ -149,7 +149,7 @@ recordingRef: any, setText: any, dispatch: any, cornersRef: any) => {
   let requestId: number;
 
   const loop = async () => {
-    if (recordingRef.current === false || invalidWebcam(webcamRef)) {
+    if (playingRef.current === false || invalidWebcam(webcamRef)) {
       centers = null
     } else {
       if (centers === null) {

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import Webcam from "./webcam";
+import Video from "../common/video";
 import RecordSidebar from "./recordSidebar";
 import { useDispatch } from 'react-redux';
 import { cornersReset } from '../../slices/cornersSlice';
@@ -9,20 +9,20 @@ import LoadModels from "../../utils/loadModels";
 import { Context } from "../../types";
 
 const Record = () => {
-  const [recording, setRecording] = useState(false);
+  const [playing, setPlaying] = useState(false);
   const [text, setText] = useState([""]);
   const [digital, setDigital] = useState(false);
   const dispatch = useDispatch();
 
-  const recordingRef = useRef(recording);
+  const playingRef = useRef(playing);
   const sidebarRef = useRef(null);
-  const webcamRef = useRef(null);
+  const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const context = useOutletContext<Context>();
 
   useEffect(() => {
-    recordingRef.current = recording;
-  }, [recording]);
+    playingRef.current = playing;
+  }, [playing]);
 
   useEffect(() => {
     LoadModels(context.piecesModelRef, context.xcornersModelRef);
@@ -32,10 +32,13 @@ const Record = () => {
   return (
     <Container>
       <RecordSidebar piecesModelRef={context.piecesModelRef} xcornersModelRef={context.xcornersModelRef} 
-      canvasRef={canvasRef} webcamRef={webcamRef} sidebarRef={sidebarRef} recording={recording} setRecording={setRecording} text={text} setText={setText}
+      canvasRef={canvasRef} videoRef={videoRef} sidebarRef={sidebarRef} 
+      playing={playing} setPlaying={setPlaying} text={text} setText={setText}
       digital={digital} setDigital={setDigital} />
-      <Webcam modelRef={context.piecesModelRef} canvasRef={canvasRef} recordingRef={recordingRef} setText={setText} sidebarRef={sidebarRef} webcamRef={webcamRef} 
-      digital={digital} />
+      <Video modelRef={context.piecesModelRef} canvasRef={canvasRef} 
+      playing={playing} setPlaying={setPlaying} playingRef={playingRef}
+       setText={setText} sidebarRef={sidebarRef} videoRef={videoRef} 
+      digital={digital} webcam={true} />
     </Container>
   );
 };
