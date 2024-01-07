@@ -1,12 +1,10 @@
-import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { SidebarButton } from "../../common";
-import { RootState } from "../../../types";
+import { RootState, Study } from "../../../types";
 
 const ExportButton = ({ study, setText, authRef }: 
-  {study: any, setText: React.Dispatch<React.SetStateAction<string[]>>, authRef: any}) => {
-  const pgn = useSelector((state: RootState) => state.pgn["value"]);
-  const [style, setStyle] = useState({"display": "none"});
+  {study: Study | null, setText: React.Dispatch<React.SetStateAction<string[]>>, authRef: any}) => {
+  const pgn: string = useSelector((state: RootState) => state.game["pgn"]);
 
   const createName = () => {
     const now = new Date();
@@ -21,7 +19,10 @@ const ExportButton = ({ study, setText, authRef }:
   }
 
   const importPgnToStudy = async () => {
-    if (pgn === "") {
+    if (study === null) {
+      setText(["Please select a study"])
+      return;
+    } else if (pgn === "") {
       setText(["Cannot export empty PGN"])
       return;
     }
@@ -32,21 +33,8 @@ const ExportButton = ({ study, setText, authRef }:
     setText(["Exported game to", `"${study.name}/${name}"`]);
   }
 
-  const handleClick = (e: any) => {
-    e.preventDefault();
-    
-    if (study.id != "n/a") {
-      importPgnToStudy();
-    }
-  }
-
-  useEffect(() => {
-    const display = (study === null) ? "none" : "inline-block";
-    setStyle({"display": display});
-  }, [study, pgn])
-
   return (
-    <SidebarButton onClick={handleClick} style={style}>
+    <SidebarButton onClick={importPgnToStudy}>
       Export Game 
     </SidebarButton>
   );

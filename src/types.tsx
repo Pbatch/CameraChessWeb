@@ -1,7 +1,6 @@
-interface RootState {
-  pgn: { value: string },
-  corners: { value: CornersDict },
-  fen: {value : string }
+interface Study {
+  id: string,
+  name: string
 }
 
 interface Context {
@@ -29,4 +28,17 @@ interface CornersPayload {
 }
 type CornersDict = {[key in CornersKey]: number[]};
 
-export type { RootState, Context, MovesData, MovesPair, CornersDict, CornersKey, CornersPayload }
+interface Game {
+  fen: string,
+  pgn: string
+}
+
+interface RootState {
+  game: Game
+  corners: CornersDict,
+}
+
+export type { 
+  RootState, Study, Context, MovesData, MovesPair, 
+  CornersDict, CornersKey, CornersPayload, Game
+}

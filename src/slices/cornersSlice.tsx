@@ -1,8 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { CornersDict, CornersPayload } from "../types";
 
-const initialDict: CornersDict = {"h1": [50, -100], "a1": [0, -100], "a8": [0, -150], "h8": [50, -150]}
-const initialState = {"value": initialDict};
+const initialState: CornersDict = {"h1": [50, -100], "a1": [0, -100], "a8": [0, -150], "h8": [50, -150]}
 
 interface Action {
   payload: CornersPayload,
@@ -14,10 +13,10 @@ const cornersSlice = createSlice({
   initialState,
   reducers: {
     cornersSet(state, action: Action) {
-      state.value[action.payload.key] = action.payload.xy;
+      state[action.payload.key] = action.payload.xy;
     },
-    cornersReset(state) {
-     state.value = initialState.value; 
+    cornersReset() {
+      return initialState
     }
   }
 })

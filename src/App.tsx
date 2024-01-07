@@ -10,7 +10,7 @@ const App = () => {
 
   const piecesModelRef = useRef<GraphModel>();
   const xcornersModelRef = useRef<GraphModel>();
-  const authRef = useRef(new Auth());
+  const authRef = useRef<Auth>(new Auth());
   const context: Context = {
     "piecesModelRef": piecesModelRef,
     "xcornersModelRef": xcornersModelRef,
@@ -18,9 +18,7 @@ const App = () => {
   }
 
   const loadAuth = async () => {
-    const auth = new Auth();
-    await auth.init();
-    authRef.current = auth;
+    await authRef.current.init();
 
     setLoading(false);
   }
