@@ -6,10 +6,9 @@ import Icon from "./icon";
 import Corners from "./corners";
 import Display from "./display";
 import HomeButton from "./homeButton";
-import Marker from "./marker";
 import Sidebar from "./sidebar";
 import Container from "./container";
-
+import VideoAndSidebar from "./videoAndSidebar";
 
 export { SidebarButton, CornersButton, DigitalButton, PgnButton, Icon, Corners,
-  Display, HomeButton, Marker, Sidebar, Container };
+  Display, HomeButton, Sidebar, Container, VideoAndSidebar };
