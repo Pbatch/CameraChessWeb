@@ -10,14 +10,11 @@ import {
   REGISTER,
 } from 'redux-persist'
 import storage from "redux-persist/lib/storage";
-import pgnReducer from "./slices/pgnSlice";
-import cornersReducer from "./slices/cornersSlice";
-import fenReducer from "./slices/fenSlice";
+import { cornersReducer, gameReducer } from "./slices";
 
 const reducer = combineReducers({
-  pgn: pgnReducer,
-  corners: cornersReducer,
-  fen: fenReducer
+  game: gameReducer,
+  corners: cornersReducer
 })
 
 const persistConfig = {

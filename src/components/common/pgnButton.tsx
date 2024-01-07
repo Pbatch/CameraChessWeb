@@ -4,13 +4,13 @@ import { RootState } from "../../types";
 
 const PgnButton = ({ setText, playing }:
   {setText: React.Dispatch<React.SetStateAction<string[]>>, playing: boolean}) => {
-  const pgn = useSelector((state: RootState) => state.pgn["value"]);
+  const pgn: string = useSelector((state: RootState) => state.game["pgn"]);
 
   const handleClick = (e: any) => {
     e.preventDefault();
 
     let text: string[];
-    if (pgn == "") {
+    if (pgn === "") {
       text = ["Cannot copy empty PGN"]
     } else {
       navigator.clipboard.writeText(pgn);

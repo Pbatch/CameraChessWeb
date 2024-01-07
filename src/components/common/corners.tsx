@@ -3,7 +3,7 @@ import Marker from "./marker";
 import { useSelector } from "react-redux";
 
 const Corners = () => {
-  const corners: CornersDict = useSelector((state: RootState) => state.corners["value"]);
+  const corners: CornersDict = useSelector((state: RootState) => state.corners);
 
   return (
     <>

@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { HomeButton, Display, Sidebar } from "../common";
 import { StudyButton, ExportButton } from "./buttons";
+import { Study } from "../../types";
 
 const UploadSidebar = ({ authRef }: { authRef: any}) => {
-  const [study, setStudy] = useState(null);
-  const [text, setText] = useState(["Select a study", "Export the game"]);
+  const [study, setStudy] = useState<Study | null>(null);
+  const [text, setText] = useState<string[]>(["Select a study", "Export the game"]);
 
   return (
     <Sidebar>

@@ -7,7 +7,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { cornersSet } from "../../slices/cornersSlice";
 import { getMarkerXY, getXY } from "../../utils/detect";
 import { Chessboard } from 'kokopu-react';
-import { CornersPayload, RootState } from "../../types";
+import { CornersDict, CornersPayload, Game, RootState } from "../../types";
 
 const Video = ({ modelRef, canvasRef, videoRef, sidebarRef, playing, setPlaying, playingRef, setText, digital, webcam }: {
   modelRef: any, canvasRef: any, videoRef: any, sidebarRef: any, 
@@ -20,8 +20,8 @@ const Video = ({ modelRef, canvasRef, videoRef, sidebarRef, playing, setPlaying,
   const windowWidth = useWindowWidth();
   const windowHeight = useWindowHeight();
   const dispatch = useDispatch();
-  const corners = useSelector((state: RootState) => state.corners["value"]);
-  const fen = useSelector((state: RootState) => state.fen["value"]);
+  const corners: CornersDict = useSelector((state: RootState) => state.corners);
+  const game: Game = useSelector((state: RootState) => state.game);
 
   const setupWebcam = async () => {
     const constraints = {
@@ -185,7 +185,7 @@ const Video = ({ modelRef, canvasRef, videoRef, sidebarRef, playing, setPlaying,
         <Corners />
       </div>
       <div style={digitalStyle} >
-        <Chessboard position={fen} squareSize={40} />
+        <Chessboard position={game.fen} squareSize={40} />
       </div>
     </div>
   );

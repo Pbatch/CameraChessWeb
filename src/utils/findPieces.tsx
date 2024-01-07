@@ -3,10 +3,9 @@ import * as tf from "@tensorflow/tfjs-core";
 import { getMovesPairs } from "./moves";
 import { getInvTransform, transformBoundary, transformCenters } from "./warp";
 import { Chess } from 'chess.js';
-import { pgnSet } from '../slices/pgnSlice';
-import { fenSet } from '../slices/fenSlice';
+import { gameSet } from "../slices/gameSlice";
 import { getBoxesAndScores, getInput, getXY, invalidVideo } from "./detect";
-import { MovesData, MovesPair } from "../types";
+import { Game, MovesData, MovesPair } from "../types";
 
 const zeros = (rows: number, columns: number) => {
   return Array.from(Array(rows), _ => Array(columns).fill(0));
@@ -190,8 +189,11 @@ playingRef: any, setText: any, dispatch: any, cornersRef: any) => {
         }
       }
 
-      dispatch(pgnSet(board.pgn()));
-      dispatch(fenSet(board.fen()));
+      const game: Game = {
+        "pgn": board.pgn(),
+        "fen": board.fen()
+      }
+      dispatch(gameSet(game));
 
       const endTime: number = performance.now();
       const fps: string = (1000 / (endTime - startTime)).toFixed(1);

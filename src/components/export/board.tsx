@@ -3,8 +3,8 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../types";
 
 const Board = ({ authRef }: { authRef: any }) => {
-  const pgn = useSelector((state: RootState) => state.pgn["value"]);
-  const [emb, setEmb] = useState("");
+  const pgn: string = useSelector((state: RootState) => state.game["pgn"]);
+  const [emb, setEmb] = useState<string>("");
 
   const getEmb = async () => {
     const url = "/api/import";
