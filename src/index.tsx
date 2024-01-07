@@ -14,7 +14,7 @@ import store from "./store.tsx";
 import { persistStore } from "redux-persist";
 import { PersistGate } from "redux-persist/integration/react";
 import { registerSW } from "virtual:pwa-register";
-import VideoAndSidebar from './components/common/videoAndSidebar.tsx';
+import { VideoAndSidebar } from './components/common';
 
 // add this to prompt for a refresh
 const updateSW = registerSW({
