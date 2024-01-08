@@ -22,9 +22,6 @@ const ExportButton = ({ study, setText, authRef }:
     if (study === null) {
       setText(["Please select a study"])
       return;
-    } else if (pgn === "") {
-      setText(["Cannot export empty PGN"])
-      return;
     }
     const url = `/api/study/${study.id}/import-pgn`;
     const name = createName();

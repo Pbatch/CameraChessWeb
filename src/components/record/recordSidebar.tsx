@@ -1,4 +1,4 @@
-import { RecordButton } from "./buttons";
+import { RecordButton, StopButton } from "./buttons";
 import { Display, CornersButton, HomeButton, PgnButton, Sidebar, DigitalButton } from "../common";
 
 const RecordSidebar = ({ piecesModelRef, xcornersModelRef, videoRef, canvasRef, sidebarRef, playing, setPlaying, text, setText,
@@ -15,7 +15,10 @@ digital, setDigital }: {
         setText={setText} />
       </li>
       <li className="my-1">
-        <RecordButton playing={playing} setPlaying={setPlaying} />
+        <div className="btn-group w-100" role="group">
+          <RecordButton playing={playing} setPlaying={setPlaying} />
+          <StopButton setPlaying={setPlaying} setText={setText} />
+        </div>
       </li>
       <li className="my-1">
         <DigitalButton digital={digital} setDigital={setDigital} />

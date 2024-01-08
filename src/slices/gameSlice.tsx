@@ -1,20 +1,30 @@
 import { createSlice } from '@reduxjs/toolkit'
 
+const startingPosition = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 const initialState = {
-  "pgn": "",
-  "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+  "pgn": `[FEN "${startingPosition}"]`,
+  "fen": startingPosition,
+  "start": startingPosition
 };
 
 const gameSlice = createSlice({
   name: 'game',
   initialState,
   reducers: {
-    gameSet(_, action) {
-      return action.payload
+    gameSetPgnAndFen(state, action) {
+      state.pgn = action.payload.pgn;
+      state.fen = action.payload.fen;
+    },
+    gameSetStart(state, action) {
+      state.start = action.payload;
+    },
+    gameResetPgnAndFen(state) {
+      state.pgn = `[FEN "${state.start}"]`;
+      state.fen = state.start;
     }
   }
 })
 
 
-export const { gameSet } = gameSlice.actions
+export const { gameSetPgnAndFen, gameSetStart, gameResetPgnAndFen } = gameSlice.actions
 export default gameSlice.reducer

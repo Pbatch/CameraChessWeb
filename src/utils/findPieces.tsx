@@ -3,9 +3,9 @@ import * as tf from "@tensorflow/tfjs-core";
 import { getMovesPairs } from "./moves";
 import { getInvTransform, transformBoundary, transformCenters } from "./warp";
 import { Chess } from 'chess.js';
-import { gameSet } from "../slices/gameSlice";
+import { gameSetPgnAndFen } from "../slices/gameSlice";
 import { getBoxesAndScores, getInput, getXY, invalidVideo } from "./detect";
-import { Game, MovesData, MovesPair } from "../types";
+import { MovesData, MovesPair } from "../types";
 
 const zeros = (rows: number, columns: number) => {
   return Array.from(Array(rows), _ => Array(columns).fill(0));
@@ -137,7 +137,7 @@ const detect = async (modelRef: any, videoRef: any, keypoints: number[][]):
 }
 
 export const findPieces = (modelRef: any, videoRef: any, canvasRef: any,
-playingRef: any, setText: any, dispatch: any, cornersRef: any) => {
+playingRef: any, setText: any, dispatch: any, cornersRef: any, gameRef: any) => {
   let centers: number[][] | null = null;
   let boundary: number[][];
   let state: number[][];
@@ -159,7 +159,8 @@ playingRef: any, setText: any, dispatch: any, cornersRef: any) => {
         boundary = transformBoundary(invTransform);
         state = zeros(64, 12);
         board = new Chess();
-        possibleMoves = new Set();
+        possibleMoves = new Set<string>;
+        board.loadPgn(gameRef.current.pgn);
         movesPairs = getMovesPairs(board);
       }
       const startTime: number = performance.now();
@@ -188,12 +189,12 @@ playingRef: any, setText: any, dispatch: any, cornersRef: any) => {
           board.move(bestMove.sans[0]);
         }
       }
-
-      const game: Game = {
+      
+      const payload = {
         "pgn": board.pgn(),
         "fen": board.fen()
       }
-      dispatch(gameSet(game));
+      dispatch(gameSetPgnAndFen(payload));
 
       const endTime: number = performance.now();
       const fps: string = (1000 / (endTime - startTime)).toFixed(1);

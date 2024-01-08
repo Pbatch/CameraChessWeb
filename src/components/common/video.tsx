@@ -14,14 +14,21 @@ const Video = ({ modelRef, canvasRef, videoRef, sidebarRef, playing, setPlaying,
   playing: boolean, setPlaying: React.Dispatch<React.SetStateAction<boolean>>, playingRef: any,
   setText: React.Dispatch<React.SetStateAction<string[]>>, digital: boolean, webcam: boolean
 }) => {
-  const aspectRatio = 16 / 9;
+  const corners: CornersDict = useSelector((state: RootState) => state.corners);
+  const game: Game = useSelector((state: RootState) => state.game);
+
   const displayRef: any = useRef(null);
   const cornersRef: any = useRef(null);
+  const gameRef = useRef<Game>(game);
+
+  const aspectRatio = 16 / 9;
   const windowWidth = useWindowWidth();
   const windowHeight = useWindowHeight();
   const dispatch = useDispatch();
-  const corners: CornersDict = useSelector((state: RootState) => state.corners);
-  const game: Game = useSelector((state: RootState) => state.game);
+
+  useEffect(() => {
+    gameRef.current = game;
+  }, [game])
 
   const setupWebcam = async () => {
     const constraints = {
@@ -85,7 +92,7 @@ const Video = ({ modelRef, canvasRef, videoRef, sidebarRef, playing, setPlaying,
       awaitSetupWebcam()
     }
 
-    findPieces(modelRef, videoRef, canvasRef, playingRef, setText, dispatch, cornersRef);
+    findPieces(modelRef, videoRef, canvasRef, playingRef, setText, dispatch, cornersRef, gameRef);
   }, []);
 
   useEffect(() => {
