@@ -1,12 +1,13 @@
 import { RecordButton, StopButton } from "./buttons";
 import { Display, CornersButton, HomeButton, PgnButton, Sidebar, DigitalButton } from "../common";
+import { setBoolean, setStringArray } from "../../types";
 
 const RecordSidebar = ({ piecesModelRef, xcornersModelRef, videoRef, canvasRef, sidebarRef, playing, setPlaying, text, setText,
 digital, setDigital }: {
   piecesModelRef: any, xcornersModelRef: any, videoRef: any, canvasRef: any, sidebarRef: any,
-  playing: boolean, setPlaying: React.Dispatch<React.SetStateAction<boolean>>, 
-  text: string[], setText: React.Dispatch<React.SetStateAction<string[]>>,
-  digital: boolean, setDigital: React.Dispatch<React.SetStateAction<boolean>>
+  playing: boolean, setPlaying: setBoolean, 
+  text: string[], setText: setStringArray,
+  digital: boolean, setDigital: setBoolean
 }) => {
   return (
     <Sidebar sidebarRef={sidebarRef} >

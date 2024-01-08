@@ -1,7 +1,8 @@
 import { SidebarButton } from ".";
+import { setBoolean } from "../../types";
 
 const DigitalButton = ({ digital, setDigital }: 
-  { digital: boolean, setDigital: React.Dispatch<React.SetStateAction<boolean>>}) => {
+  { digital: boolean, setDigital: setBoolean }) => {
   const handleClick = (e: any) => {
     e.preventDefault();
 

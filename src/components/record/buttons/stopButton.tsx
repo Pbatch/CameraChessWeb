@@ -1,11 +1,9 @@
 import { useDispatch } from "react-redux";
 import { gameResetPgnAndFen } from "../../../slices/gameSlice";
 import { SidebarButton, Icon } from "../../common";
+import { setBoolean, setStringArray } from "../../../types";
 
-const StopButton = ({ setPlaying, setText }: 
-  { setPlaying: React.Dispatch<React.SetStateAction<boolean>>, 
-    setText: React.Dispatch<React.SetStateAction<string[]>>}
-  ) => {
+const StopButton = ({ setPlaying, setText }: { setPlaying: setBoolean, setText: setStringArray }) => {
   const dispatch = useDispatch();
 
   const handleClick = (e: any) => {

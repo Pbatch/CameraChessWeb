@@ -38,7 +38,12 @@ interface RootState {
   corners: CornersDict,
 }
 
+type setBoolean = React.Dispatch<React.SetStateAction<boolean>>
+type setString = React.Dispatch<React.SetStateAction<string>>
+type setStringArray = React.Dispatch<React.SetStateAction<string[]>>
+
 export type { 
   RootState, Study, Context, MovesData, MovesPair, 
-  CornersDict, CornersKey, CornersPayload, Game
+  CornersDict, CornersKey, CornersPayload, Game,
+  setBoolean, setString, setStringArray
 }

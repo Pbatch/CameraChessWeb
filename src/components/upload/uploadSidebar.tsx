@@ -1,12 +1,13 @@
 import { VideoButton, PlayButton, RestartButton, PlaybackButtons, StopButton } from "./buttons";
 import { CornersButton, HomeButton, Display, PgnButton, Sidebar, DigitalButton } from "../common";
+import { setBoolean, setStringArray } from "../../types";
 
 const UploadSidebar = ({ videoRef, xcornersModelRef, piecesModelRef, canvasRef, sidebarRef, text, setText,
 playing, setPlaying, digital, setDigital }: {
   videoRef: any, xcornersModelRef: any, piecesModelRef: any, canvasRef: any, sidebarRef: any,
-  text: string[], setText: React.Dispatch<React.SetStateAction<string[]>>,
-  playing: boolean, setPlaying: React.Dispatch<React.SetStateAction<boolean>>,
-  digital: boolean, setDigital: React.Dispatch<React.SetStateAction<boolean>> 
+  text: string[], setText: setStringArray,
+  playing: boolean, setPlaying: setBoolean,
+  digital: boolean, setDigital: setBoolean 
 }) => {
   return (
     <Sidebar sidebarRef={sidebarRef}>

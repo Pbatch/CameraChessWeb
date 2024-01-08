@@ -7,12 +7,12 @@ import { useDispatch, useSelector } from 'react-redux';
 import { cornersSet } from "../../slices/cornersSlice";
 import { getMarkerXY, getXY } from "../../utils/detect";
 import { Chessboard } from 'kokopu-react';
-import { CornersDict, CornersPayload, Game, RootState } from "../../types";
+import { CornersDict, CornersPayload, Game, RootState, setBoolean, setStringArray } from "../../types";
 
 const Video = ({ modelRef, canvasRef, videoRef, sidebarRef, playing, setPlaying, playingRef, setText, digital, webcam }: {
   modelRef: any, canvasRef: any, videoRef: any, sidebarRef: any, 
-  playing: boolean, setPlaying: React.Dispatch<React.SetStateAction<boolean>>, playingRef: any,
-  setText: React.Dispatch<React.SetStateAction<string[]>>, digital: boolean, webcam: boolean
+  playing: boolean, setPlaying: setBoolean, playingRef: any,
+  setText: setStringArray, digital: boolean, webcam: boolean
 }) => {
   const corners: CornersDict = useSelector((state: RootState) => state.corners);
   const game: Game = useSelector((state: RootState) => state.game);

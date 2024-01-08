@@ -1,9 +1,9 @@
 import { useDispatch } from "react-redux";
 import { gameResetPgnAndFen } from "../../../slices/gameSlice";
 import { SidebarButton, Icon } from "../../common";
+import { setStringArray } from "../../../types";
 
-const RestartButton = ({ videoRef, setText }: 
-  { videoRef: any, setText: React.Dispatch<React.SetStateAction<string[]>>}) => {
+const RestartButton = ({ videoRef, setText }: { videoRef: any, setText: setStringArray}) => {
   const dispatch = useDispatch();
   
   const handleClick = (e: any) => {

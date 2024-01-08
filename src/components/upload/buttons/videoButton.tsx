@@ -1,9 +1,10 @@
 import { useRef, useState } from "react";
 import { clearCtx } from "../../../utils/render/common";
 import { Icon, SidebarButton } from "../../common";
+import { setBoolean } from "../../../types";
 
 const VideoButton = ({ videoRef, canvasRef, setPlaying }: {
-  videoRef: any, canvasRef: any, setPlaying: React.Dispatch<React.SetStateAction<boolean>>
+  videoRef: any, canvasRef: any, setPlaying: setBoolean
 }) => {
   const inputVideoRef: any = useRef(null);
   const [streaming, setStreaming] = useState(false);
