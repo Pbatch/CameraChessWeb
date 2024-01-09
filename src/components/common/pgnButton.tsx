@@ -1,9 +1,9 @@
 import { useSelector } from "react-redux";
 import SidebarButton from "./sidebarButton";
-import { RootState } from "../../types";
+import { RootState, setStringArray } from "../../types";
 
 const PgnButton = ({ setText, playing }:
-  {setText: React.Dispatch<React.SetStateAction<string[]>>, playing: boolean}) => {
+  {setText: setStringArray, playing: boolean}) => {
   const pgn: string = useSelector((state: RootState) => state.game["pgn"]);
 
   const handleClick = (e: any) => {

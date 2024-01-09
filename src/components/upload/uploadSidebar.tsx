@@ -1,12 +1,13 @@
-import { VideoButton, PlayButton, RestartButton, PlaybackButtons } from "./buttons";
+import { VideoButton, PlayButton, RestartButton, PlaybackButtons, StopButton } from "./buttons";
 import { CornersButton, HomeButton, Display, PgnButton, Sidebar, DigitalButton } from "../common";
+import { setBoolean, setStringArray } from "../../types";
 
 const UploadSidebar = ({ videoRef, xcornersModelRef, piecesModelRef, canvasRef, sidebarRef, text, setText,
 playing, setPlaying, digital, setDigital }: {
   videoRef: any, xcornersModelRef: any, piecesModelRef: any, canvasRef: any, sidebarRef: any,
-  text: string[], setText: React.Dispatch<React.SetStateAction<string[]>>,
-  playing: boolean, setPlaying: React.Dispatch<React.SetStateAction<boolean>>,
-  digital: boolean, setDigital: React.Dispatch<React.SetStateAction<boolean>> 
+  text: string[], setText: setStringArray,
+  playing: boolean, setPlaying: setBoolean,
+  digital: boolean, setDigital: setBoolean 
 }) => {
   return (
     <Sidebar sidebarRef={sidebarRef}>
@@ -20,7 +21,8 @@ playing, setPlaying, digital, setDigital }: {
       <li className="my-1">
         <div className="btn-group w-100" role="group">
           <PlayButton videoRef={videoRef} playing={playing} setPlaying={setPlaying} />
-          <RestartButton videoRef={videoRef} />
+          <StopButton videoRef={videoRef} setPlaying={setPlaying} setText={setText} />
+          <RestartButton videoRef={videoRef} setText={setText} />
         </div>
       </li>
       <li className="my-1">
@@ -34,7 +36,6 @@ playing, setPlaying, digital, setDigital }: {
         <Display text={text} />
       </li>
       <li className="border-top"></li>
-      
       <li className="my-1">
         <div className="btn-group w-100" role="group">
           <PgnButton setText={setText} playing={playing} />

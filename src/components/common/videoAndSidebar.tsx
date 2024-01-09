@@ -8,6 +8,7 @@ import LoadModels from "../../utils/loadModels";
 import { Context } from "../../types";
 import RecordSidebar from "../record/recordSidebar";
 import UploadSidebar from "../upload/uploadSidebar";
+import { gameResetPgnAndFen } from "../../slices/gameSlice";
 
 const VideoAndSidebar = ({ webcam }: {webcam: boolean}) => {
   const context = useOutletContext<Context>();
@@ -29,6 +30,7 @@ const VideoAndSidebar = ({ webcam }: {webcam: boolean}) => {
   useEffect(() => {
     LoadModels(context.piecesModelRef, context.xcornersModelRef);
     dispatch(cornersReset())
+    dispatch(gameResetPgnAndFen());
   }, []);
 
   const sidebarProps = {

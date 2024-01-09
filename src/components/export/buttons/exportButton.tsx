@@ -1,9 +1,9 @@
 import { useSelector } from "react-redux";
 import { SidebarButton } from "../../common";
-import { RootState, Study } from "../../../types";
+import { RootState, Study, setStringArray } from "../../../types";
 
 const ExportButton = ({ study, setText, authRef }: 
-  {study: Study | null, setText: React.Dispatch<React.SetStateAction<string[]>>, authRef: any}) => {
+  {study: Study | null, setText: setStringArray, authRef: any}) => {
   const pgn: string = useSelector((state: RootState) => state.game["pgn"]);
 
   const createName = () => {
@@ -21,9 +21,6 @@ const ExportButton = ({ study, setText, authRef }:
   const importPgnToStudy = async () => {
     if (study === null) {
       setText(["Please select a study"])
-      return;
-    } else if (pgn === "") {
-      setText(["Cannot export empty PGN"])
       return;
     }
     const url = `/api/study/${study.id}/import-pgn`;
