@@ -14,10 +14,10 @@ const LoadModels = (piecesModelRef: any, xcornersModelRef: any) => {
 
     const dummyInput: tf.Tensor<tf.Rank> = tf.zeros([1, MODEL_HEIGHT, MODEL_WIDTH, 3]);
 
-    const piecesModel: GraphModel = await loadGraphModel("pieces_640S/model.json");
+    const piecesModel: GraphModel = await loadGraphModel("480S_pieces_float16/model.json");
     const piecesOutput: tf.Tensor<tf.Rank> | tf.Tensor<tf.Rank>[] = piecesModel.execute(dummyInput);
 
-    const xcornersModel: GraphModel = await loadGraphModel("xcorners_640L_float16/model.json");
+    const xcornersModel: GraphModel = await loadGraphModel("480L_xcorners_float16/model.json");
     const xcornersOutput: tf.Tensor<tf.Rank> | tf.Tensor<tf.Rank>[]  = xcornersModel.execute(dummyInput);
 
     tf.dispose([dummyInput, piecesOutput, xcornersOutput]);
