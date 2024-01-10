@@ -7,9 +7,6 @@ const Board = ({ authRef }: { authRef: any }) => {
 
   const getEmb = async () => {
     const url = "/api/import";
-    if (pgn === "") {
-      return;
-    }
     const config = {body: new URLSearchParams({ pgn }), method: "POST"};
     const data = await authRef.current.fetchBody(url, config);
     const emb: string = `https://lichess.org/embed/game/${data.id}?theme=brown&bg=dark`;
