@@ -104,7 +104,9 @@ const Video = ({ modelRef, canvasRef, videoRef, sidebarRef, playing, setPlaying,
       }
     }
 
-    return stopWebcam
+    return () => {
+      stopWebcam();
+    }
   }, []);
 
   useEffect(() => {
