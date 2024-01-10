@@ -142,6 +142,7 @@ playingRef: any, setText: any, dispatch: any, cornersRef: any, gameRef: any) => 
   let boundary: number[][];
   let state: number[][];
   let board: Chess;
+  let startFen: string;
   let movesPairs: MovesPair[];
   let keypoints: number[][];
   let possibleMoves: Set<string>;
@@ -161,6 +162,7 @@ playingRef: any, setText: any, dispatch: any, cornersRef: any, gameRef: any) => 
         board = new Chess();
         possibleMoves = new Set<string>;
         board.loadPgn(gameRef.current.pgn);
+        startFen = gameRef.current.start;
         movesPairs = getMovesPairs(board);
       }
       const startTime: number = performance.now();
@@ -190,11 +192,9 @@ playingRef: any, setText: any, dispatch: any, cornersRef: any, gameRef: any) => 
         }
       }
       
-      const payload = {
-        "pgn": board.pgn(),
-        "fen": board.fen()
-      }
-      dispatch(gameSetPgnAndFen(payload));
+      const pgn = `[FEN "${startFen}"]` + "\n" + board.pgn();
+      const fen = board.fen();
+      dispatch(gameSetPgnAndFen({ "pgn": pgn, "fen": fen }));
 
       const endTime: number = performance.now();
       const fps: string = (1000 / (endTime - startTime)).toFixed(1);
