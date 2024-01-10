@@ -1,7 +1,7 @@
 import { CornersKey } from "../types";
 
-export const MODEL_WIDTH: number = 640;
-export const MODEL_HEIGHT: number = 384;
+export const MODEL_WIDTH: number = 480;
+export const MODEL_HEIGHT: number = 288;
 export const MARKER_RADIUS: number = 25;
 export const MARKER_DIAMETER: number = 2 * MARKER_RADIUS;
 export const LABELS: string[] = ["b", "k", "n", "p", "q", "r", "B", "K", "N", "P", "Q", "R"];
