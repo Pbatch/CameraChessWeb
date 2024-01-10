@@ -48,10 +48,11 @@ const Video = ({ modelRef, canvasRef, videoRef, sidebarRef, playing, setPlaying,
     if (videoRef.current !== null) {
       videoRef.current.srcObject = stream;
     }
+    return stream;
   };
 
   const awaitSetupWebcam = async () => {
-    await setupWebcam();
+    return setupWebcam();
   }
 
   const updateWidthHeight = () => {
@@ -89,11 +90,21 @@ const Video = ({ modelRef, canvasRef, videoRef, sidebarRef, playing, setPlaying,
   useEffect(() => {
     updateWidthHeight();
 
+    let streamPromise: any = null;
     if (webcam) {
-      awaitSetupWebcam()
+      streamPromise = awaitSetupWebcam()
     }
 
     findPieces(modelRef, videoRef, canvasRef, playingRef, setText, dispatch, cornersRef, gameRef);
+
+    const stopWebcam = async () => {
+      const stream = await streamPromise;
+      if (stream !== null) {
+        stream.getTracks().forEach((track: any) => track.stop());
+      }
+    }
+
+    return stopWebcam
   }, []);
 
   useEffect(() => {
