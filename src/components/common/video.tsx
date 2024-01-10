@@ -3,19 +3,20 @@ import { useEffect, useRef } from "react";
 import { CORNER_KEYS, MARKER_DIAMETER, MARKER_RADIUS } from "../../utils/constants";
 import { Corners } from ".";
 import { useWindowWidth, useWindowHeight } from '@react-hook/window-size';
-import { useDispatch, useSelector } from 'react-redux';
-import { cornersSet } from "../../slices/cornersSlice";
+import { useDispatch } from 'react-redux';
+import { cornersSelect, cornersSet } from "../../slices/cornersSlice";
 import { getMarkerXY, getXY } from "../../utils/detect";
 import { Chessboard } from 'kokopu-react';
-import { CornersDict, CornersPayload, Game, RootState, setBoolean, setStringArray } from "../../types";
+import { CornersDict, CornersPayload, Game, setBoolean, setStringArray } from "../../types";
+import { gameSelect } from "../../slices/gameSlice";
 
 const Video = ({ modelRef, canvasRef, videoRef, sidebarRef, playing, setPlaying, playingRef, setText, digital, webcam }: {
   modelRef: any, canvasRef: any, videoRef: any, sidebarRef: any, 
   playing: boolean, setPlaying: setBoolean, playingRef: any,
   setText: setStringArray, digital: boolean, webcam: boolean
 }) => {
-  const corners: CornersDict = useSelector((state: RootState) => state.corners);
-  const game: Game = useSelector((state: RootState) => state.game);
+  const corners: CornersDict = cornersSelect();
+  const game: Game = gameSelect();
 
   const displayRef: any = useRef(null);
   const cornersRef: any = useRef(null);

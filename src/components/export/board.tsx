@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
-import { RootState } from "../../types";
+import { gameSelect } from "../../slices/gameSlice";
 
 const Board = ({ authRef }: { authRef: any }) => {
-  const pgn: string = useSelector((state: RootState) => state.game["pgn"]);
+  const pgn: string = gameSelect().pgn;
   const [emb, setEmb] = useState<string>("");
 
   const getEmb = async () => {

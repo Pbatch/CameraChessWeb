@@ -1,9 +1,9 @@
-import { CornersDict, RootState } from "../../types";
+import { cornersSelect } from "../../slices/cornersSlice";
+import { CornersDict } from "../../types";
 import Marker from "./marker";
-import { useSelector } from "react-redux";
 
 const Corners = () => {
-  const corners: CornersDict = useSelector((state: RootState) => state.corners);
+  const corners: CornersDict = cornersSelect();
 
   return (
     <>

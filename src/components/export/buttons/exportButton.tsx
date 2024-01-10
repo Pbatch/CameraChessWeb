@@ -1,10 +1,10 @@
-import { useSelector } from "react-redux";
 import { SidebarButton } from "../../common";
-import { RootState, Study, setStringArray } from "../../../types";
+import { Study, setStringArray } from "../../../types";
+import { gameSelect } from "../../../slices/gameSlice";
 
 const ExportButton = ({ study, setText, authRef }: 
   {study: Study | null, setText: setStringArray, authRef: any}) => {
-  const pgn: string = useSelector((state: RootState) => state.game["pgn"]);
+  const pgn: string = gameSelect().pgn;
 
   const createName = () => {
     const now = new Date();
