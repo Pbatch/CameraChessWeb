@@ -1,3 +1,4 @@
+import { PieceSymbol, Square } from "chess.js";
 import { CornersKey } from "../types";
 
 export const MODEL_WIDTH: number = 480;
@@ -5,7 +6,8 @@ export const MODEL_HEIGHT: number = 288;
 export const MARKER_RADIUS: number = 25;
 export const MARKER_DIAMETER: number = 2 * MARKER_RADIUS;
 export const LABELS: string[] = ["b", "k", "n", "p", "q", "r", "B", "K", "N", "P", "Q", "R"];
-export const SQUARE_NAMES: string[] = ['a1', 'b1', 'c1', 'd1', 'e1', 'f1', 'g1', 'h1',
+export const PIECE_SYMBOLS: PieceSymbol[] = ["b", "k", "n", "p", "q", "r"];
+export const SQUARE_NAMES: Square[] = ['a1', 'b1', 'c1', 'd1', 'e1', 'f1', 'g1', 'h1',
 'a2', 'b2', 'c2', 'd2', 'e2', 'f2', 'g2', 'h2',
 'a3', 'b3', 'c3', 'd3', 'e3', 'f3', 'g3', 'h3',
 'a4', 'b4', 'c4', 'd4', 'e4', 'f4', 'g4', 'h4',

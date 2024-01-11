@@ -23,6 +23,9 @@ const gameSlice = createSlice({
     gameResetPgnAndFen(state) {
       state.pgn = `[FEN "${state.start}"]`;
       state.fen = state.start;
+    },
+    gameResetStart(state) {
+      state.start = startingPosition;
     }
   }
 })
@@ -32,5 +35,5 @@ export const gameSelect = () => {
 }
 
 
-export const { gameSetPgnAndFen, gameSetStart, gameResetPgnAndFen } = gameSlice.actions
+export const { gameSetPgnAndFen, gameSetStart, gameResetPgnAndFen, gameResetStart } = gameSlice.actions
 export default gameSlice.reducer

@@ -4,22 +4,22 @@ import { CORNER_KEYS, MARKER_DIAMETER, MARKER_RADIUS } from "../../utils/constan
 import { Corners } from ".";
 import { useWindowWidth, useWindowHeight } from '@react-hook/window-size';
 import { useDispatch } from 'react-redux';
-import { cornersSelect, cornersSet } from "../../slices/cornersSlice";
+import { cornersSet } from "../../slices/cornersSlice";
 import { getMarkerXY, getXY } from "../../utils/detect";
 import { Chessboard } from 'kokopu-react';
-import { CornersDict, CornersPayload, Game, setBoolean, setStringArray } from "../../types";
+import { CornersPayload, Game, setBoolean, setStringArray } from "../../types";
 import { gameSelect } from "../../slices/gameSlice";
 
-const Video = ({ modelRef, canvasRef, videoRef, sidebarRef, playing, setPlaying, playingRef, setText, digital, webcam }: {
+const Video = ({ modelRef, canvasRef, videoRef, sidebarRef, playing, 
+  setPlaying, playingRef, setText, digital, webcam, cornersRef }: {
   modelRef: any, canvasRef: any, videoRef: any, sidebarRef: any, 
   playing: boolean, setPlaying: setBoolean, playingRef: any,
-  setText: setStringArray, digital: boolean, webcam: boolean
+  setText: setStringArray, digital: boolean, webcam: boolean,
+  cornersRef: any
 }) => {
-  const corners: CornersDict = cornersSelect();
   const game: Game = gameSelect();
 
   const displayRef: any = useRef(null);
-  const cornersRef: any = useRef(null);
   const gameRef = useRef<Game>(game);
 
   const aspectRatio = 16 / 9;
@@ -78,7 +78,7 @@ const Video = ({ modelRef, canvasRef, videoRef, sidebarRef, playing, setPlaying,
     canvasRef.current.height = videoRef.current.offsetHeight;
     
     CORNER_KEYS.forEach((key) => {
-      const xy = getXY(corners[key], oldHeight, oldWidth);
+      const xy = getXY(cornersRef.current[key], oldHeight, oldWidth);
       const payload: CornersPayload = {
         "xy": getMarkerXY(xy, canvasRef.current.height, canvasRef.current.width),
         "key": key
@@ -112,10 +112,6 @@ const Video = ({ modelRef, canvasRef, videoRef, sidebarRef, playing, setPlaying,
   useEffect(() => {
     updateWidthHeight();
   }, [windowWidth, windowHeight]);
-
-  useEffect(() => {
-    cornersRef.current = corners
-  }, [corners])
 
   useEffect(() => {
     if ((webcam) || (videoRef.current.src === "")) {

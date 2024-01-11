@@ -6,14 +6,21 @@ export const invalidVideo = (videoRef: any) => {
     return true;
   }
 
-  // If it's uploaded video, the src must start with "blob"
-  if (videoRef.current.autoplay === false && !(videoRef.current.src.startsWith("blob"))) {
-    return true
-  }
+  if (videoRef.current.autoplay) {
+    // Record check
+    if (videoRef.current?.srcObject === null) {
+      return true;
+    }
+  } else {
+    // Upload check
+    const src = videoRef.current?.src;
+    if (src === null) {
+      return true;
+    }
 
-  // srcObject is used for recording, src is used for uploading
-  if (videoRef.current?.srcObject === null && videoRef.current?.src === null) {
-    return true;
+    if (!(src.startsWith("blob"))) {
+      return true;
+    }
   }
 
   return false;
