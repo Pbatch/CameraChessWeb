@@ -6,10 +6,7 @@ import { Chess } from 'chess.js';
 import { gameSetPgnAndFen } from "../slices/gameSlice";
 import { getBoxesAndScores, getInput, getXY, invalidVideo } from "./detect";
 import { MovesData, MovesPair } from "../types";
-
-const zeros = (rows: number, columns: number) => {
-  return Array.from(Array(rows), _ => Array(columns).fill(0));
-}
+import { zeros } from "./math";
 
 const calculateScore = (state: any, move: MovesData, from_thr=0.6, to_thr=0.6) => {
   let score = 0;
@@ -69,7 +66,7 @@ const processState = (state: any, movesPairs: MovesPair[], possibleMoves: Set<st
   return {bestScore1, bestScore2, bestJointScore, bestMove, bestMoves};
 }
 
-const getSquares = (boxes: tf.Tensor2D, centers: number[][], boundary: number[][]): number[] => {
+export const getSquares = (boxes: tf.Tensor2D, centers: number[][], boundary: number[][]): number[] => {
   const squares: number[] = tf.tidy(() => {
     const l: tf.Tensor2D = tf.slice(boxes, [0, 0], [-1, 1]);
     const r: tf.Tensor2D = tf.slice(boxes, [0, 2], [-1, 1]);
@@ -102,7 +99,7 @@ const getSquares = (boxes: tf.Tensor2D, centers: number[][], boundary: number[][
   return squares;
 }
 
-const updateState = (scoresTensor: tf.Tensor2D, squares: number[], state: any, decay: number=0.5) => {
+export const getUpdate = (scoresTensor: tf.Tensor2D, squares: number[]) => {
   const update: number[][] = zeros(64, 12);
   const scores: number[][] = scoresTensor.arraySync();
   squares.forEach((square, i) => {
@@ -113,17 +110,19 @@ const updateState = (scoresTensor: tf.Tensor2D, squares: number[], state: any, d
       update[square][j] = Math.max(update[square][j], scores[i][j]);
     }
   })
+  return update;
+}
 
+const updateState = (state: number[][], update: number[][], decay: number=0.5) => {
   for (let i = 0; i < 64; i++) {
     for (let j = 0; j < 12; j++) {
       state[i][j] = decay * state[i][j] + (1 - decay) * update[i][j]
     }
   }
-
   return state
 }
 
-const detect = async (modelRef: any, videoRef: any, keypoints: number[][]):
+export const detect = async (modelRef: any, videoRef: any, keypoints: number[][]):
   Promise<{boxes: tf.Tensor2D, scores: tf.Tensor2D}> => {
   const {image4D, width, height, padding, roi} = getInput(videoRef, keypoints);
   const videoWidth: number = videoRef.current.videoWidth;
@@ -134,6 +133,13 @@ const detect = async (modelRef: any, videoRef: any, keypoints: number[][]):
   tf.dispose([image4D, preds]);
 
   return {boxes, scores}
+}
+
+export const getKeypoints = (cornersRef: any, canvasRef: any): number[][] => {
+  const keypoints = ['h1', 'a1', 'a8', 'h8'].map(x => 
+    getXY(cornersRef.current[x], canvasRef.current.height, canvasRef.current.width)
+  );
+  return keypoints
 }
 
 export const findPieces = (modelRef: any, videoRef: any, canvasRef: any,
@@ -153,8 +159,7 @@ playingRef: any, setText: any, dispatch: any, cornersRef: any, gameRef: any) => 
       centers = null
     } else {
       if (centers === null) {
-        keypoints = ['h1', 'a1', 'a8', 'h8'].map(x => getXY(cornersRef.current[x], canvasRef.current.height,
-          canvasRef.current.width));
+        keypoints = getKeypoints(cornersRef, canvasRef);
         const invTransform = getInvTransform(keypoints);
         centers = transformCenters(invTransform);
         boundary = transformBoundary(invTransform);
@@ -170,7 +175,8 @@ playingRef: any, setText: any, dispatch: any, cornersRef: any, gameRef: any) => 
 
       const {boxes, scores} = await detect(modelRef, videoRef, keypoints);
       const squares: number[] = getSquares(boxes, centers, boundary);
-      state = updateState(scores, squares, state);
+      const update: number[][] = getUpdate(scores, squares);
+      state = updateState(state, update);
       const {bestScore1, bestScore2, bestJointScore, bestMove, bestMoves} = processState(state, movesPairs, possibleMoves);
       
       let pushMove: boolean = false;
