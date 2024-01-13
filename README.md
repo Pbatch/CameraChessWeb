@@ -15,7 +15,6 @@ Record your chess games and upload them to Lichess on https://www.camerachess.co
 * Raise an alert when an illegal move is played (currently they're just ignored)
 * Add a page where a user can play an online game using the Lichess API
 * Add support for variants
-* Add support for starting a game from any valid position
 * Develop a testing framework for different board + piece sets
 * ... Your next big idea?
 
