@@ -19,7 +19,8 @@ const data = {
         <p>
           If you have an Android, you can download the free ChessCam app&nbsp;
           <a target="_blank" href="https://play.google.com/store/apps/details?id=com.camerachess.www.twa" rel="noreferrer">here</a>.
-          In the future ChessCam plans to be on the Apple App Store too.
+          If you have an IPhone, you can add ChessCam to your home screen from the browser.
+          See <a target="blank" href="https://support.google.com/chrome/answer/9658361?hl=en-GB&co=GENIE.Platform%3DiOS" rel="noreferrer">here</a> for more detail.
         </p>
       },
       {
@@ -172,13 +173,6 @@ const data = {
         content:
         <p>
           Not at the moment.
-        </p>
-      },
-      {
-        title: "Can I start recording or uploading from a game mid-way through?",
-        content:
-        <p>
-          The app needs the game to begin from the starting position.
         </p>
       },
       {
