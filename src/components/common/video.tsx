@@ -1,12 +1,12 @@
 import { findPieces } from "../../utils/findPieces";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CORNER_KEYS, MARKER_DIAMETER, MARKER_RADIUS } from "../../utils/constants";
 import { Corners } from ".";
 import { useWindowWidth, useWindowHeight } from '@react-hook/window-size';
 import { useDispatch } from 'react-redux';
 import { cornersSet } from "../../slices/cornersSlice";
 import { getMarkerXY, getXY } from "../../utils/detect";
-import { Chessboard } from 'kokopu-react';
+import { Chessboard } from "react-chessboard";
 import { CornersPayload, Game, setBoolean, setStringArray } from "../../types";
 import { gameSelect } from "../../slices/gameSlice";
 
@@ -18,6 +18,8 @@ const Video = ({ modelRef, canvasRef, videoRef, sidebarRef, playing,
   cornersRef: any
 }) => {
   const game: Game = gameSelect();
+
+  const [boardWidth, setBoardWidth]: any = useState(100);
 
   const displayRef: any = useRef(null);
   const gameRef = useRef<Game>(game);
@@ -56,14 +58,19 @@ const Video = ({ modelRef, canvasRef, videoRef, sidebarRef, playing,
   }
 
   const updateWidthHeight = () => {
-    if ((canvasRef.current.offsetHeight == 0) || (canvasRef.current.offsetWidth) == 0) {
-      return;
-    }
-
     let height = ((windowWidth - sidebarRef.current.offsetWidth - MARKER_DIAMETER) 
     / aspectRatio) + MARKER_DIAMETER;
     if (height > windowHeight) {
       height = windowHeight;
+    }
+
+    if (digital) {
+      setBoardWidth(height);
+      return;
+    }
+
+    if ((canvasRef.current.offsetHeight == 0) || (canvasRef.current.offsetWidth) == 0) {
+      return;
     }
     const width: number = ((height - MARKER_DIAMETER) * aspectRatio) + MARKER_DIAMETER;
     const oldHeight: number = canvasRef.current.height;
@@ -111,7 +118,7 @@ const Video = ({ modelRef, canvasRef, videoRef, sidebarRef, playing,
 
   useEffect(() => {
     updateWidthHeight();
-  }, [windowWidth, windowHeight]);
+  }, [windowWidth, windowHeight, digital]);
 
   useEffect(() => {
     if ((webcam) || (videoRef.current.src === "")) {
@@ -201,8 +208,8 @@ const Video = ({ modelRef, canvasRef, videoRef, sidebarRef, playing,
         </div>
         <Corners />
       </div>
-      <div style={digitalStyle} >
-        <Chessboard position={game.fen} squareSize={40} />
+      <div style={digitalStyle}>
+        <Chessboard position={game.fen} boardWidth={boardWidth} />
       </div>
     </div>
   );
