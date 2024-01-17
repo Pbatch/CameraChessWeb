@@ -198,9 +198,11 @@ playingRef: any, setText: any, dispatch: any, cornersRef: any, gameRef: any) => 
         }
       }
       
-      const pgn = `[FEN "${startFen}"]` + "\n" + board.pgn();
-      const fen = board.fen();
-      dispatch(gameSetPgnAndFen({ "pgn": pgn, "fen": fen }));
+      if (pushMove || greedyMove) {
+        const pgn = `[FEN "${startFen}"]` + "\n \n" + board.pgn();
+        const fen = board.fen();
+        dispatch(gameSetPgnAndFen({ "pgn": pgn, "fen": fen }));
+      }
 
       const endTime: number = performance.now();
       const fps: string = (1000 / (endTime - startTime)).toFixed(1);

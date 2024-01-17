@@ -41,9 +41,10 @@ interface RootState {
 type setBoolean = React.Dispatch<React.SetStateAction<boolean>>
 type setString = React.Dispatch<React.SetStateAction<string>>
 type setStringArray = React.Dispatch<React.SetStateAction<string[]>>
+type setNumber = React.Dispatch<React.SetStateAction<number>>
 
 export type { 
   RootState, Study, Context, MovesData, MovesPair, 
   CornersDict, CornersKey, CornersPayload, Game,
-  setBoolean, setString, setStringArray
+  setBoolean, setString, setStringArray, setNumber
 }
