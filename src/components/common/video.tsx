@@ -10,9 +10,9 @@ import { Chessboard } from "react-chessboard";
 import { CornersPayload, Game, setBoolean, setStringArray } from "../../types";
 import { gameSelect } from "../../slices/gameSlice";
 
-const Video = ({ modelRef, canvasRef, videoRef, sidebarRef, playing, 
+const Video = ({ piecesModelRef, canvasRef, videoRef, sidebarRef, playing, 
   setPlaying, playingRef, setText, digital, webcam, cornersRef }: {
-  modelRef: any, canvasRef: any, videoRef: any, sidebarRef: any, 
+  piecesModelRef: any, canvasRef: any, videoRef: any, sidebarRef: any, 
   playing: boolean, setPlaying: setBoolean, playingRef: any,
   setText: setStringArray, digital: boolean, webcam: boolean,
   cornersRef: any
@@ -102,7 +102,7 @@ const Video = ({ modelRef, canvasRef, videoRef, sidebarRef, playing,
       streamPromise = awaitSetupWebcam()
     }
 
-    findPieces(modelRef, videoRef, canvasRef, playingRef, setText, dispatch, cornersRef, gameRef);
+    findPieces(piecesModelRef, videoRef, canvasRef, playingRef, setText, dispatch, cornersRef, gameRef);
 
     const stopWebcam = async () => {
       const stream = await streamPromise;

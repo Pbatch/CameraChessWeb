@@ -70,33 +70,34 @@ const VideoAndSidebar = ({ webcam }: {webcam: boolean}) => {
     dispatch(gameResetPgnAndFen());
   }, []);
 
-  const sidebarProps = {
-    "videoRef": videoRef,
-    "piecesModelRef": context.piecesModelRef,
-    "xcornersModelRef": context.xcornersModelRef,
-    "canvasRef": canvasRef,
-    "sidebarRef": sidebarRef,
-    "setPlaying": setPlaying,
-    "setText": setText,
-    "setDigital": setDigital,
+  const props = {
     "playing": playing,
     "text": text,
     "digital": digital,
+    "setPlaying": setPlaying,
+    "setText": setText,
+    "setDigital": setDigital,
+    "setBoardNumber": setBoardNumber,
+    "setRound": setRound,
+    "piecesModelRef": context.piecesModelRef,
+    "xcornersModelRef": context.xcornersModelRef,
+    "videoRef": videoRef,
+    "canvasRef": canvasRef,
+    "sidebarRef": sidebarRef,
     "cornersRef": cornersRef,
+    "playingRef": playingRef
   }
   const sidebar = () => {
     if (webcam) {
-      return <RecordSidebar {...sidebarProps} setBoardNumber={setBoardNumber} setRound={setRound} /> 
+      return <RecordSidebar {...props} /> 
     } else {
-      return <UploadSidebar {...sidebarProps} />
+      return <UploadSidebar {...props} />
     }
   }
   return (
     <Container>
       {sidebar()}
-      <Video modelRef={context.piecesModelRef} videoRef={videoRef} canvasRef={canvasRef} 
-      sidebarRef={sidebarRef} playing={playing} setPlaying={setPlaying} playingRef={playingRef} 
-      setText={setText} digital={digital} webcam={webcam} cornersRef={cornersRef} />
+      <Video {...props} webcam={webcam} />
     </Container>
   );
 };
