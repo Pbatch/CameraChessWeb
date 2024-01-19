@@ -1,8 +1,9 @@
-import { setBoolean } from "../../../types";
-import { SidebarButton, Icon } from "../../common";
+import { SetBoolean } from "../../types";
+import Icon from "./icon";
+import SidebarButton from "./sidebarButton";
 
 const RecordButton = ({ playing, setPlaying }: 
-  { playing: boolean, setPlaying: setBoolean }) => {
+  { playing: boolean, setPlaying: SetBoolean }) => {
   const handleClick = (e: any) => {
     e.preventDefault();
 

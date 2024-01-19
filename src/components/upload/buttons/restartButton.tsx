@@ -1,16 +1,17 @@
 import { useDispatch } from "react-redux";
-import { gameResetPgnAndFen } from "../../../slices/gameSlice";
+import { gameResetFen, gameResetMoves } from "../../../slices/gameSlice";
 import { SidebarButton, Icon } from "../../common";
-import { setStringArray } from "../../../types";
+import { SetStringArray } from "../../../types";
 
-const RestartButton = ({ videoRef, setText }: { videoRef: any, setText: setStringArray}) => {
+const RestartButton = ({ videoRef, setText }: { videoRef: any, setText: SetStringArray}) => {
   const dispatch = useDispatch();
   
   const handleClick = (e: any) => {
     e.preventDefault();
 
     videoRef.current.currentTime = 0;
-    dispatch(gameResetPgnAndFen());
+    dispatch(gameResetMoves());
+    dispatch(gameResetFen());
     setText(["Rewound video", "Reset PGN to start position"])
   }
 

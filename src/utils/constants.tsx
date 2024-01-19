@@ -1,6 +1,7 @@
 import { PieceSymbol, Square } from "chess.js";
 import { CornersKey } from "../types";
 
+export const START_FEN: string = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 export const MODEL_WIDTH: number = 480;
 export const MODEL_HEIGHT: number = 288;
 export const MARKER_RADIUS: number = 25;

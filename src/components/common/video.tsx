@@ -7,14 +7,14 @@ import { useDispatch } from 'react-redux';
 import { cornersSet } from "../../slices/cornersSlice";
 import { getMarkerXY, getXY } from "../../utils/detect";
 import { Chessboard } from "react-chessboard";
-import { CornersPayload, Game, setBoolean, setStringArray } from "../../types";
+import { CornersPayload, Game, SetBoolean, SetStringArray } from "../../types";
 import { gameSelect } from "../../slices/gameSlice";
 
 const Video = ({ piecesModelRef, canvasRef, videoRef, sidebarRef, playing, 
   setPlaying, playingRef, setText, digital, webcam, cornersRef }: {
   piecesModelRef: any, canvasRef: any, videoRef: any, sidebarRef: any, 
-  playing: boolean, setPlaying: setBoolean, playingRef: any,
-  setText: setStringArray, digital: boolean, webcam: boolean,
+  playing: boolean, setPlaying: SetBoolean, playingRef: any,
+  setText: SetStringArray, digital: boolean, webcam: boolean,
   cornersRef: any
 }) => {
   const game: Game = gameSelect();

@@ -3,10 +3,11 @@ import * as tf from "@tensorflow/tfjs-core";
 import { getMovesPairs } from "./moves";
 import { getInvTransform, transformBoundary, transformCenters } from "./warp";
 import { Chess } from 'chess.js';
-import { gameSetPgnAndFen } from "../slices/gameSlice";
+import { gameSetFen, gameSetMoves, makePgn } from "../slices/gameSlice";
 import { getBoxesAndScores, getInput, getXY, invalidVideo } from "./detect";
-import { MovesData, MovesPair } from "../types";
+import {  MovesData, MovesPair } from "../types";
 import { zeros } from "./math";
+import { CORNER_KEYS } from "./constants";
 
 const calculateScore = (state: any, move: MovesData, from_thr=0.6, to_thr=0.6) => {
   let score = 0;
@@ -136,7 +137,7 @@ export const detect = async (modelRef: any, videoRef: any, keypoints: number[][]
 }
 
 export const getKeypoints = (cornersRef: any, canvasRef: any): number[][] => {
-  const keypoints = ['h1', 'a1', 'a8', 'h8'].map(x => 
+  const keypoints = CORNER_KEYS.map(x =>
     getXY(cornersRef.current[x], canvasRef.current.height, canvasRef.current.width)
   );
   return keypoints
@@ -148,7 +149,6 @@ playingRef: any, setText: any, dispatch: any, cornersRef: any, gameRef: any) => 
   let boundary: number[][];
   let state: number[][];
   let board: Chess;
-  let startFen: string;
   let movesPairs: MovesPair[];
   let keypoints: number[][];
   let possibleMoves: Set<string>;
@@ -166,8 +166,7 @@ playingRef: any, setText: any, dispatch: any, cornersRef: any, gameRef: any) => 
         state = zeros(64, 12);
         board = new Chess();
         possibleMoves = new Set<string>;
-        board.loadPgn(gameRef.current.pgn);
-        startFen = gameRef.current.start;
+        board.loadPgn(makePgn(gameRef.current));
         movesPairs = getMovesPairs(board);
       }
       const startTime: number = performance.now();
@@ -199,9 +198,10 @@ playingRef: any, setText: any, dispatch: any, cornersRef: any, gameRef: any) => 
       }
       
       if (pushMove || greedyMove) {
-        const pgn = `[FEN "${startFen}"]` + "\n \n" + board.pgn();
-        const fen = board.fen();
-        dispatch(gameSetPgnAndFen({ "pgn": pgn, "fen": fen }));
+        const splitPgn = board.pgn().split("\n\n");
+        const moves = splitPgn[splitPgn.length - 1];
+        dispatch(gameSetMoves(moves));
+        dispatch(gameSetFen(board.fen()));
       }
 
       const endTime: number = performance.now();

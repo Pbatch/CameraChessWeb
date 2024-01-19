@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { HomeButton, Display, Sidebar } from "../common";
-import { StudyButton, ExportButton } from "./buttons";
+import { HomeButton, Display, Sidebar, StudyButton } from "../common";
+import ExportButton from "./exportButton";
 import { Study } from "../../types";
 
-const UploadSidebar = ({ authRef }: { authRef: any}) => {
+const UploadSidebar = ({ pgn }: { pgn: string }) => {
   const [study, setStudy] = useState<Study | null>(null);
   const [text, setText] = useState<string[]>(["Select a study", "Export the game"]);
 
@@ -11,10 +11,10 @@ const UploadSidebar = ({ authRef }: { authRef: any}) => {
     <Sidebar>
       <li className="border-top"></li>
       <li className="my-2">
-        <StudyButton study={study} setStudy={setStudy} authRef={authRef} />
+        <StudyButton study={study} setStudy={setStudy} onlyBroadcasts={false} />
       </li>
       <li className="my-2">
-        <ExportButton study={study} setText={setText} authRef={authRef} />
+        <ExportButton study={study} setText={setText} pgn={pgn} />
       </li>
       <li className="border-top"></li>
       <li className="my-2">

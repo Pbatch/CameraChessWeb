@@ -3,10 +3,9 @@ interface Study {
   name: string
 }
 
-interface Context {
+interface ModelRefs {
   piecesModelRef: any,
-  xcornersModelRef: any,
-  authRef: any
+  xcornersModelRef: any
 }
 
 interface MovesData {
@@ -30,21 +29,32 @@ type CornersDict = {[key in CornersKey]: number[]};
 
 interface Game {
   fen: string,
-  pgn: string
+  moves: string,
+  start: string
+}
+
+interface User {
+  token: string
+  username: string
 }
 
 interface RootState {
   game: Game
   corners: CornersDict,
+  user: User
 }
 
-type setBoolean = React.Dispatch<React.SetStateAction<boolean>>
-type setString = React.Dispatch<React.SetStateAction<string>>
-type setStringArray = React.Dispatch<React.SetStateAction<string[]>>
-type setNumber = React.Dispatch<React.SetStateAction<number>>
+type Mode = "record" | "upload" | "broadcast";
+
+type SetBoolean = React.Dispatch<React.SetStateAction<boolean>>
+type SetString = React.Dispatch<React.SetStateAction<string>>
+type SetStringArray = React.Dispatch<React.SetStateAction<string[]>>
+type SetNumber = React.Dispatch<React.SetStateAction<number>>
+type SetStudy = React.Dispatch<React.SetStateAction<Study | null>>
 
 export type { 
-  RootState, Study, Context, MovesData, MovesPair, 
+  RootState, Study, ModelRefs, MovesData, MovesPair, 
   CornersDict, CornersKey, CornersPayload, Game,
-  setBoolean, setString, setStringArray, setNumber
+  SetBoolean, SetString, SetStringArray, SetNumber, Mode,
+  SetStudy
 }
