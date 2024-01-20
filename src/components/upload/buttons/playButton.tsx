@@ -1,8 +1,8 @@
-import { setBoolean } from "../../../types";
+import { SetBoolean } from "../../../types";
 import { SidebarButton, Icon } from "../../common";
 
 const PlayButton = ({ videoRef, playing, setPlaying }: {
-  videoRef: any, playing: boolean, setPlaying: setBoolean
+  videoRef: any, playing: boolean, setPlaying: SetBoolean
 }) => {
   const handleClick = (e: any) => {
     e.preventDefault();

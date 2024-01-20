@@ -1,16 +1,15 @@
 import ExportSidebar from "./exportSidebar";
 import Board from "./board";
 import { Container } from "../common";
-import { useOutletContext } from "react-router-dom";
-import { Context } from "../../types";
+import { gameSelect, makePgn } from "../../slices/gameSlice";
 
 const Export = () => {
-  const context = useOutletContext<Context>();
+  const pgn: string = makePgn(gameSelect());
 
   return (
     <Container>
-      <ExportSidebar authRef={context.authRef} />
-      <Board authRef={context.authRef} />
+      <ExportSidebar pgn={pgn} />
+      <Board pgn={pgn} />
     </Container>
   );
 };

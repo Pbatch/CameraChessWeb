@@ -1,10 +1,10 @@
 import { useDispatch } from "react-redux";
-import { gameResetPgnAndFen } from "../../../slices/gameSlice";
+import { gameResetFen, gameResetMoves } from "../../../slices/gameSlice";
 import { SidebarButton, Icon } from "../../common";
-import { setBoolean, setStringArray } from "../../../types";
+import { SetBoolean, SetStringArray } from "../../../types";
 
 const StopButton = ({ videoRef, setPlaying, setText }: {
-  videoRef: any, setPlaying: setBoolean, setText: setStringArray
+  videoRef: any, setPlaying: SetBoolean, setText: SetStringArray
 }) => {
   const dispatch = useDispatch();
 
@@ -13,8 +13,9 @@ const StopButton = ({ videoRef, setPlaying, setText }: {
     
     if (videoRef.current.src.startsWith("blob")) {
       setPlaying(false);
-      dispatch(gameResetPgnAndFen());
-      setText(["Reset PGN to start position"])
+      dispatch(gameResetMoves());
+      dispatch(gameResetFen());
+      setText(["Reset to start position"])
     }
   }
 

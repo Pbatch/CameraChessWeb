@@ -4,9 +4,9 @@ import { invalidVideo } from "./detect";
 import { detect, getKeypoints, getSquares, getUpdate} from "./findPieces";
 import { Chess, Color, Piece, PieceSymbol, Square } from "chess.js";
 import { PIECE_SYMBOLS, SQUARE_NAMES } from "./constants";
-import { gameResetPgnAndFen, gameSetStart } from "../slices/gameSlice";
+import { gameResetMoves, gameSetFen, gameSetStart } from "../slices/gameSlice";
 import { renderBoxes } from "./render/renderBox";
-import { setStringArray } from "../types";
+import { SetStringArray } from "../types";
 
 const getFenAndError = (board: Chess, color: Color) => {
   let fen = board.fen();
@@ -33,7 +33,7 @@ const getFenAndError = (board: Chess, color: Color) => {
   return {fen, error}
 }
 
-const setFenFromState = (state: number[][], color: Color, dispatch: any, setText: setStringArray) => {
+const setFenFromState = (state: number[][], color: Color, dispatch: any, setText: SetStringArray) => {
   const assignment = Array(64).fill(-1);
 
   // In the first pass, assign the black king
@@ -108,7 +108,8 @@ const setFenFromState = (state: number[][], color: Color, dispatch: any, setText
   const {fen, error} = getFenAndError(board, color);
   if (error === null) {
     dispatch(gameSetStart(fen));
-    dispatch(gameResetPgnAndFen());
+    dispatch(gameSetFen(fen));
+    dispatch(gameResetMoves());
     setText(["Set starting FEN"]);
   } else {
     setText(["Invalid FEN:", error]);

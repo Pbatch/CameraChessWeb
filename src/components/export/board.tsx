@@ -1,14 +1,13 @@
 import { useEffect, useState } from "react";
-import { gameSelect } from "../../slices/gameSlice";
+import { userSelect } from "../../slices/userSlice";
+import { lichessImportPgn } from "../../utils/lichess";
 
-const Board = ({ authRef }: { authRef: any }) => {
-  const pgn: string = gameSelect().pgn;
+const Board = ({ pgn }: { pgn: string }) => {
   const [emb, setEmb] = useState<string>("");
+  const token = userSelect().token;
 
   const getEmb = async () => {
-    const url = "/api/import";
-    const config = {body: new URLSearchParams({ pgn }), method: "POST"};
-    const data = await authRef.current.fetchBody(url, config);
+    const data = await lichessImportPgn(token, pgn);
     const emb: string = `https://lichess.org/embed/game/${data.id}?theme=brown&bg=dark`;
     setEmb(emb);
   }

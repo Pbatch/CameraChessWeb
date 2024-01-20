@@ -1,14 +1,14 @@
 import { VideoButton, PlayButton, RestartButton, PlaybackButtons, StopButton } from "./buttons";
 import { CornersButton, HomeButton, Display, PgnButton, Sidebar, DigitalButton } from "../common";
-import { setBoolean, setStringArray } from "../../types";
+import { SetBoolean, SetStringArray } from "../../types";
 import FenButton from "../common/fenButton";
 
 const UploadSidebar = ({ videoRef, xcornersModelRef, piecesModelRef, canvasRef, 
   sidebarRef, text, setText, playing, setPlaying, digital, setDigital, cornersRef }: {
   videoRef: any, xcornersModelRef: any, piecesModelRef: any, canvasRef: any, sidebarRef: any,
-  text: string[], setText: setStringArray,
-  playing: boolean, setPlaying: setBoolean,
-  digital: boolean, setDigital: setBoolean,
+  text: string[], setText: SetStringArray,
+  playing: boolean, setPlaying: SetBoolean,
+  digital: boolean, setDigital: SetBoolean,
   cornersRef: any
 }) => {
   return (

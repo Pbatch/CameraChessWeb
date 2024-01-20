@@ -5,22 +5,27 @@ import { useDispatch } from 'react-redux';
 import { cornersReset, cornersSelect } from '../../slices/cornersSlice';
 import { Container } from "../common";
 import LoadModels from "../../utils/loadModels";
-import { Context, CornersDict } from "../../types";
+import { CornersDict, Mode, ModelRefs, Study } from "../../types";
 import RecordSidebar from "../record/recordSidebar";
 import UploadSidebar from "../upload/uploadSidebar";
-import { gameResetPgnAndFen, gameResetStart, gameSelect } from "../../slices/gameSlice";
+import BroadcastSidebar from "../broadcast/broadcastSidebar";
+import { gameResetFen, gameResetMoves, gameResetStart, gameSelect } from "../../slices/gameSlice";
+import { lichessPushRound } from "../../utils/lichess";
+import { userSelect } from "../../slices/userSlice";
+import { START_FEN } from "../../utils/constants";
 
-const VideoAndSidebar = ({ webcam }: {webcam: boolean}) => {
-  const context = useOutletContext<Context>();
+const VideoAndSidebar = ({ mode }: { mode: Mode }) => {
+  const context = useOutletContext<ModelRefs>();
   const dispatch = useDispatch();
   const corners: CornersDict = cornersSelect();
-  const pgn: string = gameSelect().pgn;
+  const token: string = userSelect().token;
+  const moves: string = gameSelect().moves;
 
   const [text, setText] = useState<string[]>([]);
   const [playing, setPlaying] = useState<boolean>(false);
+  const [study, setStudy] = useState<Study | null>(null);
+  const [boardNumber, setBoardNumber] = useState<number>(-1)
   const [digital, setDigital] = useState<boolean>(false);
-  const [boardNumber, setBoardNumber] = useState<number>(-1);
-  const [round, setRound] = useState<string>("");
   
   const videoRef = useRef<any>(null);
   const playingRef = useRef<boolean>(playing);
@@ -28,32 +33,47 @@ const VideoAndSidebar = ({ webcam }: {webcam: boolean}) => {
   const sidebarRef = useRef<any>(null);
   const cornersRef = useRef<CornersDict>(corners);
 
-  useEffect(() => {
-    if (!(webcam) || (round.length !== 8) || (boardNumber === -1)) {
-      return;
-    }
-
+  const makeEmptyGame = (boardNumber: number) => {
     const emptyGame = [
       `[Result "*"]`,
+      `[FEN "${START_FEN}"]`,
+      `[Board "${boardNumber}"]`,
       "",
       "",
-      "",
-      ""
-    ]
-    const url = `/api/broadcast/round/${round}/push`;
-    const prelines = new Array(boardNumber - 1).fill(emptyGame).flat();
-    const postlines = new Array(64 - boardNumber).fill(emptyGame).flat();
-    const game = [
-      `[Result "*"]`,
-      pgn,
       "",
       ""
     ];
-    const lines = prelines.concat(game, postlines);
-    const body = lines.join("\r\n");
-    const config = {body: body, method: "POST"};
-    context.authRef.current.fetchBody(url, config);
-  }, [pgn])
+    return emptyGame;
+  }
+
+  useEffect(() => {
+    if (!(mode === "broadcast") || (study === null) || (boardNumber === -1)) {
+      return;
+    }
+
+    let broadcastPgnLines: string[] = [];
+    for (let i = 1; i < boardNumber; i++) {
+      const emptyGame = makeEmptyGame(i);
+      broadcastPgnLines = broadcastPgnLines.concat(emptyGame);
+    }
+    const pgnWithHeaders = [
+      `[Result "*"]`,
+      `[FEN "${START_FEN}"]`,
+      `[Board "${boardNumber}"]`,
+      "",
+      moves,
+      "",
+      ""
+    ];
+    broadcastPgnLines = broadcastPgnLines.concat(pgnWithHeaders);
+    for (let i = boardNumber + 1; i < 65; i++) {
+      const emptyGame = makeEmptyGame(i);
+      broadcastPgnLines = broadcastPgnLines.concat(emptyGame);
+    }
+
+    const broadcastPgn = broadcastPgnLines.join("\r\n");
+    lichessPushRound(token, broadcastPgn, study.id);
+  }, [moves])
 
   useEffect(() => {
     playingRef.current = playing;
@@ -67,18 +87,20 @@ const VideoAndSidebar = ({ webcam }: {webcam: boolean}) => {
     LoadModels(context.piecesModelRef, context.xcornersModelRef);
     dispatch(cornersReset());
     dispatch(gameResetStart());
-    dispatch(gameResetPgnAndFen());
+    dispatch(gameResetMoves());
+    dispatch(gameResetFen());
   }, []);
 
   const props = {
     "playing": playing,
     "text": text,
     "digital": digital,
+    "study": study,
     "setPlaying": setPlaying,
     "setText": setText,
     "setDigital": setDigital,
     "setBoardNumber": setBoardNumber,
-    "setRound": setRound,
+    "setStudy": setStudy,
     "piecesModelRef": context.piecesModelRef,
     "xcornersModelRef": context.xcornersModelRef,
     "videoRef": videoRef,
@@ -88,16 +110,19 @@ const VideoAndSidebar = ({ webcam }: {webcam: boolean}) => {
     "playingRef": playingRef
   }
   const sidebar = () => {
-    if (webcam) {
+    if (mode === "record") {
       return <RecordSidebar {...props} /> 
-    } else {
+    } else if (mode == "upload") {
       return <UploadSidebar {...props} />
+    } else {
+      // mode == "broadcast"
+      return <BroadcastSidebar {...props} />
     }
   }
   return (
     <Container>
       {sidebar()}
-      <Video {...props} webcam={webcam} />
+      <Video {...props} webcam={!(mode === "upload")} />
     </Container>
   );
 };

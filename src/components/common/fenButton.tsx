@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { findFen } from "../../utils/findFen";
 import { useDispatch } from 'react-redux';
-import { gameResetPgnAndFen, gameResetStart } from "../../slices/gameSlice";
+import { gameResetFen, gameResetMoves, gameResetStart } from "../../slices/gameSlice";
 import { Color } from "chess.js";
 
 const FenButton = ({ piecesModelRef, videoRef, canvasRef, setText, cornersRef }: 
@@ -15,7 +15,8 @@ const FenButton = ({ piecesModelRef, videoRef, canvasRef, setText, cornersRef }:
     e.preventDefault();
     if (option === "Normal") {
       dispatch(gameResetStart());
-      dispatch(gameResetPgnAndFen());
+      dispatch(gameResetMoves());
+      dispatch(gameResetFen());
     } else {
       const color: Color = option.includes("White to move") ? "w" : "b";
       findFen(piecesModelRef, videoRef, cornersRef, canvasRef, dispatch, setText, color);

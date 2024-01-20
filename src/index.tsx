@@ -36,15 +36,19 @@ const router = createBrowserRouter([
       },
       {
         path: "/record",
-        element: <VideoAndSidebar webcam={true} />
+        element: <VideoAndSidebar mode="record" />
+      },
+      {
+        path: "/upload",
+        element: <VideoAndSidebar mode="upload" />
+      },
+      {
+        path: "/broadcast",
+        element: <VideoAndSidebar mode="broadcast" />
       },
       {
         path: "/export",
         element: <Export />
-      },
-      {
-        path: "/upload",
-        element: <VideoAndSidebar webcam={false} />
       },
       {
         path: "/privacy",

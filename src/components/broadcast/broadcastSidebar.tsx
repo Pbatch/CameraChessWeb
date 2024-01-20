@@ -1,16 +1,17 @@
-import { Display, CornersButton, HomeButton, PgnButton, Sidebar, DigitalButton, 
-RecordButton, StopButton } from "../common";
-import { SetBoolean, SetStringArray } from "../../types";
-import FenButton from "../common/fenButton";
+import { Display, CornersButton, HomeButton, PgnButton, Sidebar, DigitalButton, RecordButton, StopButton, StudyButton } from "../common";
+import { SetBoolean, SetNumber, SetStringArray, SetStudy, Study } from "../../types";
+import BoardNumberInput from "./boardNumberInput";
 
-const RecordSidebar = ({ piecesModelRef, xcornersModelRef, videoRef, canvasRef, sidebarRef, 
-  playing, setPlaying, text, setText, digital, setDigital, cornersRef }: {
+const BroadcastSidebar = ({ piecesModelRef, xcornersModelRef, videoRef, canvasRef, sidebarRef, 
+  playing, setPlaying, text, setText, digital, setDigital, study, setStudy, setBoardNumber }: {
   piecesModelRef: any, xcornersModelRef: any, videoRef: any, canvasRef: any, sidebarRef: any,
   playing: boolean, setPlaying: SetBoolean, 
   text: string[], setText: SetStringArray,
-  digital: boolean, setDigital: SetBoolean,
-  cornersRef: any
+  digital: boolean, setDigital: SetBoolean, 
+  study: Study | null, setStudy: SetStudy,
+  setBoardNumber: SetNumber
 }) => {
+
   return (
     <Sidebar sidebarRef={sidebarRef} >
       <li className="my-1">
@@ -18,14 +19,16 @@ const RecordSidebar = ({ piecesModelRef, xcornersModelRef, videoRef, canvasRef, 
         setText={setText} />
       </li>
       <li className="my-1">
-        <FenButton piecesModelRef={piecesModelRef} videoRef={videoRef} 
-        canvasRef={canvasRef} setText={setText} cornersRef={cornersRef} />
-      </li>
-      <li className="my-1">
         <div className="btn-group w-100" role="group">
           <RecordButton playing={playing} setPlaying={setPlaying} />
           <StopButton setPlaying={setPlaying} setText={setText} />
         </div>
+      </li>
+      <li className="my-1">
+        <StudyButton study={study} setStudy={setStudy} onlyBroadcasts={true} />
+      </li>
+      <li className="my-1">
+        <BoardNumberInput setBoardNumber={setBoardNumber} />
       </li>
       <li className="border-top"></li>
       <li className="my-1">
@@ -43,4 +46,4 @@ const RecordSidebar = ({ piecesModelRef, xcornersModelRef, videoRef, canvasRef, 
   );
 };
 
-export default RecordSidebar;
+export default BroadcastSidebar;

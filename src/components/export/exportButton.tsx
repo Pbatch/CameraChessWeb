@@ -1,10 +1,11 @@
-import { SidebarButton } from "../../common";
-import { Study, setStringArray } from "../../../types";
-import { gameSelect } from "../../../slices/gameSlice";
+import { SidebarButton } from "../common";
+import { Study, SetStringArray } from "../../types";
+import { userSelect } from "../../slices/userSlice";
+import { lichessImportPgnToStudy } from "../../utils/lichess";
 
-const ExportButton = ({ study, setText, authRef }: 
-  {study: Study | null, setText: setStringArray, authRef: any}) => {
-  const pgn: string = gameSelect().pgn;
+const ExportButton = ({ study, setText, pgn }: 
+  {study: Study | null, setText: SetStringArray, pgn: string}) => {
+  const token: string = userSelect().token;
 
   const createName = () => {
     const now = new Date();
@@ -23,10 +24,8 @@ const ExportButton = ({ study, setText, authRef }:
       setText(["Please select a study"])
       return;
     }
-    const url = `/api/study/${study.id}/import-pgn`;
     const name = createName();
-    const config = {body: new URLSearchParams({ pgn: pgn, name: name }), method: "POST"};
-    await authRef.current.fetchBody(url, config);
+    lichessImportPgnToStudy(token, pgn, name, study.id);
     setText(["Exported game to", `"${study.name}/${name}"`]);
   }
 
