@@ -87,31 +87,42 @@ export const lichessGetAccount = (token: string) => {
   return account;
 }
 
-export const lichessSetStudies = async (token: string, username: string, setStudies: any) => {
+const setBroadcastlessStudies = async (token: string, username: string, setStudies: any, broadcasts: any) => {
   const path = `/api/study/by/${username}`;
+
+  const broadcastIds = broadcasts.map((x: any) => x.id);
 
   const studies: Study[] = [];
   fetchResponse(token, path)
   .then(readStream(async (response: any) => {
-    studies.push({
-      "id": response.id, 
-      "name": response.name
-    });
+    const id_ = response.id;
+    if (!(broadcastIds.includes(id_))) {
+      studies.push({
+        "id": id_, 
+        "name": response.name
+      });
+    }
   }))
   .then(() => setStudies(studies));
 }
 
-export const lichessSetBroadcasts = (token: string, setStudies: any) => {
+export const lichessSetStudies = (token: string, setStudies: any, username: string, onlyBroadcasts: boolean) => {
   const path = `/api/broadcast/my-rounds`;
-  const studies: Study[] = [];
+  const broadcasts: Study[] = [];
   fetchResponse(token, path)
   .then(readStream(async (response: any) => {
-    studies.push({
+    broadcasts.push({
       "id": response.round.id, 
       "name": response.round.name
     });
   }))
-  .then(() => setStudies(studies));
+  .then(() => {
+    if (onlyBroadcasts) {
+      setStudies(broadcasts);
+    } else {
+      setBroadcastlessStudies(token, username, setStudies, broadcasts);
+    }
+  });
 }
 
 export const lichessImportPgn = (token: string, pgn: string) => {

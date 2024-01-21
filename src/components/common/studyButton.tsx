@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { SetStudy, Study } from "../../types";
 import { userSelect } from "../../slices/userSlice";
-import { lichessSetBroadcasts, lichessSetStudies } from "../../utils/lichess";
+import { lichessSetStudies } from "../../utils/lichess";
 
 const StudyButton = ({ study, setStudy, onlyBroadcasts }: 
   {study: Study | null, setStudy: SetStudy, onlyBroadcasts: boolean }
@@ -10,12 +10,8 @@ const StudyButton = ({ study, setStudy, onlyBroadcasts }:
   const user = userSelect();
 
   useEffect(() => {
-    if (onlyBroadcasts) {
-      lichessSetBroadcasts(user.token, setStudies);
-    } else {
-      lichessSetStudies(user.token, user.username, setStudies);
-    }
-    }, []);
+    lichessSetStudies(user.token, setStudies, user.username, onlyBroadcasts);
+  }, []);
 
   const handleClick = (e: any, study: Study) => {
     e.preventDefault();
