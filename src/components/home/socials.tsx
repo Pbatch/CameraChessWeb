@@ -1,17 +1,13 @@
 import { SocialIcon } from 'react-social-icons/component'
-import 'react-social-icons/twitter'
 import 'react-social-icons/youtube'
 import 'react-social-icons/github'
-import 'react-social-icons/instagram'
 import 'react-social-icons/google_play'
 
 const Socials = () => {
   const socials = [
     {"network": "github", "url": "https://github.com/Pbatch/CameraChessWeb", "bgColor": "#111111"},
     {"network": "youtube", "url": "https://www.youtube.com/channel/UCtgc3RevHj6UHq1D8Ymarmw"},
-    {"network": "google_play", "url": "https://play.google.com/store/apps/details?id=com.camerachess.www.twa"},
-    {"network": "instagram", "url": "https://www.instagram.com/chess.cam/"},
-    {"network": "twitter", "url": "https://twitter.com/chesscam1"}
+    {"network": "google_play", "url": "https://play.google.com/store/apps/details?id=com.camerachess.www.twa"}
   ]
 
   const icons: any[] = [];
