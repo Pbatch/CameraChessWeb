@@ -153,6 +153,7 @@ playingRef: any, setText: any, dispatch: any, cornersRef: any, gameRef: any) => 
   let keypoints: number[][];
   let possibleMoves: Set<string>;
   let requestId: number;
+  let greedyMoveToTime: { [move: string] : number};
 
   const loop = async () => {
     if (playingRef.current === false || invalidVideo(videoRef)) {
@@ -168,6 +169,7 @@ playingRef: any, setText: any, dispatch: any, cornersRef: any, gameRef: any) => 
         possibleMoves = new Set<string>;
         board.loadPgn(makePgn(gameRef.current));
         movesPairs = getMovesPairs(board);
+        greedyMoveToTime = {};
       }
       const startTime: number = performance.now();
       const startTensors: number = tf.memory().numTensors;
@@ -177,35 +179,43 @@ playingRef: any, setText: any, dispatch: any, cornersRef: any, gameRef: any) => 
       const update: number[][] = getUpdate(scores, squares);
       state = updateState(state, update);
       const {bestScore1, bestScore2, bestJointScore, bestMove, bestMoves} = processState(state, movesPairs, possibleMoves);
+
+      const endTime: number = performance.now();
+      const fps: string = (1000 / (endTime - startTime)).toFixed(1);
       
-      let pushMove: boolean = false;
+      let hasMove: boolean = false;
       if (bestMoves !== null) {
-        pushMove = (bestScore2 > 0) && (bestJointScore > 0) && (possibleMoves.has(bestMoves.sans[0]));
-        if (pushMove) {
-          board.move(bestMoves.sans[0]);
+        const move: string = bestMoves.sans[0];
+        hasMove = (bestScore2 > 0) && (bestJointScore > 0) && (possibleMoves.has(move));
+        if (hasMove) {
+          board.move(move);
           movesPairs = getMovesPairs(board);
           possibleMoves.clear();
+          greedyMoveToTime = {};
           console.info(bestJointScore, bestMoves);
         }
       }
-      
-      let greedyMove: boolean = true;
+
+      let hasGreedyMove: boolean = false;
       if (bestMove !== null) {
-        greedyMove = (bestScore1 > 0) && (!(pushMove));
-        if (greedyMove) {
-          board.move(bestMove.sans[0]);
+        const greedyMove: string = bestMove.sans[0];
+        if (!(greedyMove in greedyMoveToTime)) { 
+          greedyMoveToTime[greedyMove] = endTime;
+        }
+        const deltaTime = endTime - greedyMoveToTime[greedyMove]
+        const oneSecondElapsed = deltaTime > 1000;
+        hasGreedyMove = (bestScore1 > 0) && (!(hasMove)) && oneSecondElapsed;
+        if (hasGreedyMove) {
+          board.move(greedyMove);
         }
       }
       
-      if (pushMove || greedyMove) {
+      if (hasMove || hasGreedyMove) {
         const splitPgn = board.pgn().split("\n\n");
         const moves = splitPgn[splitPgn.length - 1];
         dispatch(gameSetMoves(moves));
         dispatch(gameSetFen(board.fen()));
       }
-
-      const endTime: number = performance.now();
-      const fps: string = (1000 / (endTime - startTime)).toFixed(1);
       
       // FPS + last 2 moves
       const text: string[] = [`FPS: ${fps}`];
@@ -232,7 +242,7 @@ playingRef: any, setText: any, dispatch: any, cornersRef: any, gameRef: any) => 
       
       tf.dispose([boxes, scores]);
       
-      if (greedyMove) {
+      if (hasGreedyMove) {
         board.undo();
       }
 
