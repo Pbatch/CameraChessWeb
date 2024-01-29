@@ -198,7 +198,7 @@ const Video = ({ piecesModelRef, canvasRef, videoRef, sidebarRef, playing,
   }
 
   return (
-    <div className="d-flex align-items-center justify-content-center">
+    <div className="d-flex align-top justify-content-center">
       <div ref={displayRef} style={liveStyle} >
         <div style={videoContainerStyle} >
           <video ref={videoRef} autoPlay={webcam} playsInline={true} muted={true}
