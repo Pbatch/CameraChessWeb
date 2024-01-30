@@ -1,4 +1,4 @@
-import { Display, CornersButton, HomeButton, PgnButton, Sidebar, DigitalButton, RecordButton, StopButton, StudyButton } from "../common";
+import { Display, CornersButton, HomeButton, PgnButton, Sidebar, DigitalButton, RecordButton, StopButton, StudyButton, DeviceButton } from "../common";
 import { SetBoolean, SetNumber, SetStringArray, SetStudy, Study } from "../../types";
 import BoardNumberInput from "./boardNumberInput";
 
@@ -14,6 +14,9 @@ const BroadcastSidebar = ({ piecesModelRef, xcornersModelRef, videoRef, canvasRe
 
   return (
     <Sidebar sidebarRef={sidebarRef} >
+      <li className="my-1">
+        <DeviceButton videoRef={videoRef} />
+      </li>
       <li className="my-1">
         <CornersButton piecesModelRef={piecesModelRef} xcornersModelRef={xcornersModelRef} videoRef={videoRef} canvasRef={canvasRef} 
         setText={setText} />

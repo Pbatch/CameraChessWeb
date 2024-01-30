@@ -52,3 +52,17 @@ export const PALETTE: string[] = [
   "#2C99A8",
   "#00C2FF",
 ];
+
+export const MEDIA_ASPECT_RATIO: number = 16 / 9;
+export const MEDIA_CONSTRAINTS: MediaStreamConstraints = {
+  "audio": false,
+  "video": {
+    "facingMode": {
+      "ideal": "environment"
+    },
+    "width": {
+      "ideal": 1000
+    },
+    "aspectRatio": MEDIA_ASPECT_RATIO
+  }
+}
