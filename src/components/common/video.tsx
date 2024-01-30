@@ -132,7 +132,7 @@ const Video = ({ piecesModelRef, canvasRef, videoRef, sidebarRef, playing,
   }
 
   const videoStyle: React.CSSProperties = {
-    width: "100%",
+    width: "auto",
     height: "100%"
   }
 
