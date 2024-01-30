@@ -34,7 +34,7 @@ interface Game {
 }
 
 interface User {
-  token: string
+  token: string,
   username: string
 }
 

@@ -12,8 +12,11 @@ import Sidebar from "./sidebar";
 import Container from "./container";
 import VideoAndSidebar from "./videoAndSidebar";
 import StudyButton from "./studyButton";
+import FenButton from "./fenButton";
+import DeviceButton from "./deviceButton";
 
 export { 
   SidebarButton, CornersButton, DigitalButton, PgnButton, Icon, Corners, Display, 
-  HomeButton, Sidebar, Container, VideoAndSidebar, RecordButton, StopButton, StudyButton
+  HomeButton, Sidebar, Container, VideoAndSidebar, RecordButton, StopButton, StudyButton,
+  FenButton, DeviceButton
 };

@@ -1,6 +1,6 @@
 import { findPieces } from "../../utils/findPieces";
 import { useEffect, useRef, useState } from "react";
-import { CORNER_KEYS, MARKER_DIAMETER, MARKER_RADIUS } from "../../utils/constants";
+import { CORNER_KEYS, MARKER_DIAMETER, MARKER_RADIUS, MEDIA_ASPECT_RATIO, MEDIA_CONSTRAINTS } from "../../utils/constants";
 import { Corners } from ".";
 import { useWindowWidth, useWindowHeight } from '@react-hook/window-size';
 import { useDispatch } from 'react-redux';
@@ -24,7 +24,6 @@ const Video = ({ piecesModelRef, canvasRef, videoRef, sidebarRef, playing,
   const displayRef: any = useRef(null);
   const gameRef = useRef<Game>(game);
 
-  const aspectRatio = 16 / 9;
   const windowWidth = useWindowWidth();
   const windowHeight = useWindowHeight();
   const dispatch = useDispatch();
@@ -34,19 +33,7 @@ const Video = ({ piecesModelRef, canvasRef, videoRef, sidebarRef, playing,
   }, [game])
 
   const setupWebcam = async () => {
-    const constraints = {
-      "audio": false,
-      "video": {
-        "facingMode": {
-          "ideal": "environment"
-        },
-        "width": {
-          "ideal": 1000
-        },
-        "aspectRatio": aspectRatio
-      }
-    }
-    const stream = await navigator.mediaDevices.getUserMedia(constraints);
+    const stream = await navigator.mediaDevices.getUserMedia(MEDIA_CONSTRAINTS);
     if (videoRef.current !== null) {
       videoRef.current.srcObject = stream;
     }
@@ -59,7 +46,7 @@ const Video = ({ piecesModelRef, canvasRef, videoRef, sidebarRef, playing,
 
   const updateWidthHeight = () => {
     let height = ((windowWidth - sidebarRef.current.offsetWidth - MARKER_DIAMETER) 
-    / aspectRatio) + MARKER_DIAMETER;
+    / MEDIA_ASPECT_RATIO) + MARKER_DIAMETER;
     if (height > windowHeight) {
       height = windowHeight;
     }
@@ -72,7 +59,7 @@ const Video = ({ piecesModelRef, canvasRef, videoRef, sidebarRef, playing,
     if ((canvasRef.current.offsetHeight == 0) || (canvasRef.current.offsetWidth) == 0) {
       return;
     }
-    const width: number = ((height - MARKER_DIAMETER) * aspectRatio) + MARKER_DIAMETER;
+    const width: number = ((height - MARKER_DIAMETER) * MEDIA_ASPECT_RATIO) + MARKER_DIAMETER;
     const oldHeight: number = canvasRef.current.height;
     const oldWidth: number = canvasRef.current.width;
 

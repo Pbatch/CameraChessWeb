@@ -1,7 +1,6 @@
 import { Display, CornersButton, HomeButton, PgnButton, Sidebar, DigitalButton, 
-RecordButton, StopButton } from "../common";
+RecordButton, StopButton, FenButton, DeviceButton } from "../common";
 import { SetBoolean, SetStringArray } from "../../types";
-import FenButton from "../common/fenButton";
 
 const RecordSidebar = ({ piecesModelRef, xcornersModelRef, videoRef, canvasRef, sidebarRef, 
   playing, setPlaying, text, setText, digital, setDigital, cornersRef }: {
@@ -13,6 +12,9 @@ const RecordSidebar = ({ piecesModelRef, xcornersModelRef, videoRef, canvasRef, 
 }) => {
   return (
     <Sidebar sidebarRef={sidebarRef} >
+      <li className="my-1">
+        <DeviceButton videoRef={videoRef} />
+      </li>
       <li className="my-1">
         <CornersButton piecesModelRef={piecesModelRef} xcornersModelRef={xcornersModelRef} videoRef={videoRef} canvasRef={canvasRef} 
         setText={setText} />
