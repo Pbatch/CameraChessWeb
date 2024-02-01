@@ -54,15 +54,16 @@ export const PALETTE: string[] = [
 ];
 
 export const MEDIA_ASPECT_RATIO: number = 16 / 9;
-export const MEDIA_CONSTRAINTS: MediaStreamConstraints = {
+export const MEDIA_CONSTRAINTS: any = {
   "audio": false,
   "video": {
     "facingMode": {
       "ideal": "environment"
     },
     "width": {
-      "ideal": 1000
+      "ideal": 640
     },
-    "aspectRatio": MEDIA_ASPECT_RATIO
+    "aspectRatio": MEDIA_ASPECT_RATIO,
+    "resizeMode": "none"
   }
 }
