@@ -159,9 +159,9 @@ const Video = ({ piecesModelRef, canvasRef, videoRef, sidebarRef, playing,
       if (tracks.length == 0) {
         return;
       }
-      
+
       const capabilities = tracks[0].getCapabilities();
-      console.info(capabilities);
+      console.log("Capabilties", capabilities);
 
       if (capabilities.zoom) {
         tracks[0].applyConstraints({
@@ -169,6 +169,10 @@ const Video = ({ piecesModelRef, canvasRef, videoRef, sidebarRef, playing,
         })
         .catch((e: any) => console.log(e));
       }
+
+      const settings = tracks[0].getSettings();
+      console.log("Settings", settings);
+
     }, 2000);
   };
 
