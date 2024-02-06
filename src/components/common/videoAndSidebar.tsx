@@ -33,45 +33,18 @@ const VideoAndSidebar = ({ mode }: { mode: Mode }) => {
   const sidebarRef = useRef<any>(null);
   const cornersRef = useRef<CornersDict>(corners);
 
-  const makeEmptyGame = (boardNumber: number) => {
-    const emptyGame = [
-      `[Result "*"]`,
-      `[FEN "${START_FEN}"]`,
-      `[Board "${boardNumber}"]`,
-      "",
-      "",
-      "",
-      ""
-    ];
-    return emptyGame;
-  }
-
   useEffect(() => {
     if (!(mode === "broadcast") || (study === null) || (boardNumber === -1)) {
       return;
     }
-
-    let broadcastPgnLines: string[] = [];
-    for (let i = 1; i < boardNumber; i++) {
-      const emptyGame = makeEmptyGame(i);
-      broadcastPgnLines = broadcastPgnLines.concat(emptyGame);
-    }
-    const pgnWithHeaders = [
+    const broadcastPgn = [
       `[Result "*"]`,
       `[FEN "${START_FEN}"]`,
       `[Board "${boardNumber}"]`,
+      `[Site "${boardNumber}"]`,
       "",
-      moves,
-      "",
-      ""
-    ];
-    broadcastPgnLines = broadcastPgnLines.concat(pgnWithHeaders);
-    for (let i = boardNumber + 1; i < 65; i++) {
-      const emptyGame = makeEmptyGame(i);
-      broadcastPgnLines = broadcastPgnLines.concat(emptyGame);
-    }
-
-    const broadcastPgn = broadcastPgnLines.join("\r\n");
+      moves
+    ].join("\r");
     lichessPushRound(token, broadcastPgn, study.id);
   }, [moves])
 
