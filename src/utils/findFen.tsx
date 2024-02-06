@@ -7,6 +7,7 @@ import { PIECE_SYMBOLS, SQUARE_NAMES } from "./constants";
 import { gameResetMoves, gameSetFen, gameSetStart } from "../slices/gameSlice";
 import { renderBoxes } from "./render/renderBox";
 import { SetStringArray } from "../types";
+import { ones } from "./math";
 
 const getFenAndError = (board: Chess, color: Color) => {
   let fen = board.fen();
@@ -128,7 +129,8 @@ export const _findFen = async (modelRef: any, videoRef: any,
   const boundary = transformBoundary(invTransform);
   const {boxes, scores} = await detect(modelRef, videoRef, keypoints);
   const squares: number[] = getSquares(boxes, centers, boundary);
-  const state = getUpdate(scores, squares);
+  const possiblePieces = ones(64, 12);
+  const state = getUpdate(scores, squares, possiblePieces);
   setFenFromState(state, color, dispatch, setText);
 
   renderBoxes(canvasRef.current, boxes, scores, centers, boundary, squares);

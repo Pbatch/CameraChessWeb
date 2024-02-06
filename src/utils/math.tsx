@@ -6,3 +6,7 @@ export const clamp = (x: number, min: number, max: number) => {
 export const zeros = (rows: number, columns: number) => {
   return Array.from(Array(rows), _ => Array(columns).fill(0));
 }
+
+export const ones = (rows: number, columns: number) => {
+  return Array.from(Array(rows), _ => Array(columns).fill(1));
+}

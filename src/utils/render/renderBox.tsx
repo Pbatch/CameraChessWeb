@@ -2,7 +2,8 @@ import { LABELS, PALETTE, SQUARE_NAMES } from "../constants";
 import * as tf from "@tensorflow/tfjs-core";
 import { setupCtx, drawBox, drawPoints, drawPolygon } from "./common";
 
-export const renderBoxes = (canvasRef: any, boxes: tf.Tensor2D, scores: tf.Tensor2D, centers: number[][], boundary: number[][], squares: number[]) => {
+export const renderBoxes = (canvasRef: any, boxes: tf.Tensor2D, scores: tf.Tensor2D, 
+  centers: number[][], boundary: number[][], squares: number[]) => {
   const [ctx, fontHeight, lineWidth, sx, sy] = setupCtx(canvasRef);
 
   const bboxConfClsSquare: number[][] = tf.tidy(() => {

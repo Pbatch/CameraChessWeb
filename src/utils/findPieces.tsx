@@ -7,7 +7,7 @@ import { gameSetFen, gameSetMoves, makePgn } from "../slices/gameSlice";
 import { getBoxesAndScores, getInput, getXY, invalidVideo } from "./detect";
 import {  MovesData, MovesPair } from "../types";
 import { zeros } from "./math";
-import { CORNER_KEYS } from "./constants";
+import { CORNER_KEYS, LABELS } from "./constants";
 
 const calculateScore = (state: any, move: MovesData, from_thr=0.6, to_thr=0.6) => {
   let score = 0;
@@ -100,15 +100,54 @@ export const getSquares = (boxes: tf.Tensor2D, centers: number[][], boundary: nu
   return squares;
 }
 
-export const getUpdate = (scoresTensor: tf.Tensor2D, squares: number[]) => {
+export const getPossiblePieces = (movesPairs: MovesPair[]) => {
+  const possiblePieces: number[][] = zeros(64, 12);
+  movesPairs.forEach((movePair: MovesPair) => {
+    
+    const move1 = movePair.move1;
+    possiblePieces[move1.to[0]][move1.targets[0]] = 1;
+    
+    const move2 = movePair.move2;
+    if (move2 !== null) {
+      possiblePieces[move2.to[0]][move2.targets[0]] = 1;
+    } 
+  })
+
+  return possiblePieces;
+}
+
+export const getUpdate = (scoresTensor: tf.Tensor2D, squares: number[], possiblePieces: number[][]) => {
   const update: number[][] = zeros(64, 12);
   const scores: number[][] = scoresTensor.arraySync();
+
+  // If a piece can't be on a square, because of move constraints, map it's probability to its neighbour
+  // Bishops give their probability to Pawns, Kings give their probability to Queens
+  const neighbourMap: {[cls: string]: string} = {
+    "b": "p", 
+    "p": "b",
+    "q": "k", 
+    "k": "q",
+    "n": "n",
+    "r": "r",
+    "B": "P", 
+    "P": "B",
+    "K": "Q", 
+    "Q": "K",
+    "N": "N",
+    "R": "R"
+  }
   squares.forEach((square, i) => {
     if (square == -1) {
       return;
     }
     for (let j = 0; j < 12; j++) {
-      update[square][j] = Math.max(update[square][j], scores[i][j]);
+      const cls: number = (possiblePieces[square][j] === 0) ? LABELS.indexOf(neighbourMap[LABELS[j]]) : j;
+
+      if (possiblePieces[square][cls] === 0) {
+        continue;
+      }
+      
+      update[square][cls] = Math.max(update[square][cls], scores[i][j]);
     }
   })
   return update;
@@ -152,6 +191,7 @@ playingRef: any, setText: any, dispatch: any, cornersRef: any, gameRef: any) => 
   let movesPairs: MovesPair[];
   let keypoints: number[][];
   let possibleMoves: Set<string>;
+  let possiblePieces: number[][];
   let requestId: number;
   let greedyMoveToTime: { [move: string] : number};
 
@@ -169,6 +209,7 @@ playingRef: any, setText: any, dispatch: any, cornersRef: any, gameRef: any) => 
         possibleMoves = new Set<string>;
         board.loadPgn(makePgn(gameRef.current));
         movesPairs = getMovesPairs(board);
+        possiblePieces = getPossiblePieces(movesPairs);
         greedyMoveToTime = {};
       }
       const startTime: number = performance.now();
@@ -176,7 +217,8 @@ playingRef: any, setText: any, dispatch: any, cornersRef: any, gameRef: any) => 
 
       const {boxes, scores} = await detect(modelRef, videoRef, keypoints);
       const squares: number[] = getSquares(boxes, centers, boundary);
-      const update: number[][] = getUpdate(scores, squares);
+      
+      const update: number[][] = getUpdate(scores, squares, possiblePieces);
       state = updateState(state, update);
       const {bestScore1, bestScore2, bestJointScore, bestMove, bestMoves} = processState(state, movesPairs, possibleMoves);
 
@@ -190,6 +232,7 @@ playingRef: any, setText: any, dispatch: any, cornersRef: any, gameRef: any) => 
         if (hasMove) {
           board.move(move);
           movesPairs = getMovesPairs(board);
+          possiblePieces = getPossiblePieces(movesPairs);
           possibleMoves.clear();
           greedyMoveToTime = {};
           console.info(bestJointScore, bestMoves);
