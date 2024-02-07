@@ -63,18 +63,19 @@ export const drawPolygon = (ctx: any, polygon: number[][], colour: string, sx: n
   ctx.stroke();
 }
 
-export const drawBox = (ctx: any, colour:string, x: number, y: number, text: string, fontHeight: number, lineWidth: number, sx: number, sy: number) => {
+export const drawBox = (ctx: any, colour: string, cx: number, cy: number, text: string, fontHeight: number, lineWidth: number) => {
   ctx.fillStyle = colour;
   const textWidth = ctx.measureText(text).width;
-  const yText = (sy * y) - fontHeight - lineWidth;
+  const y = cy - lineWidth - fontHeight / 2;
+  const x = cx - textWidth / 2;
   ctx.fillRect(
-    (sx * x) - 1,
-    yText < 0 ? 0 : yText, // handle overflow label box
+    x,
+    y,
     textWidth + lineWidth,
     fontHeight + lineWidth
   );
 
   // Draw labels
   ctx.fillStyle = "#ffffff";
-  ctx.fillText(text, (sx * x) - 1, yText < 0 ? 0 : yText);
+  ctx.fillText(text, x, y);
 }

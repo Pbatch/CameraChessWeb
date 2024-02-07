@@ -90,7 +90,7 @@ export const getInput = (videoRef: any, keypoints: number[][] | null=null, paddi
       resizeHeight = Math.round(MODEL_WIDTH * ratio);
     }
     image = tf.image.resizeBilinear(image, [resizeHeight, resizeWidth]);
-    
+
     // Padding
     const dx: number = MODEL_WIDTH - image.shape[1];
     const dy: number = MODEL_HEIGHT - image.shape[0];

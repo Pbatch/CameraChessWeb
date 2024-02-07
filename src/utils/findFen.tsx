@@ -5,7 +5,7 @@ import { detect, getKeypoints, getSquares, getUpdate} from "./findPieces";
 import { Chess, Color, Piece, PieceSymbol, Square } from "chess.js";
 import { PIECE_SYMBOLS, SQUARE_NAMES } from "./constants";
 import { gameResetMoves, gameSetFen, gameSetStart } from "../slices/gameSlice";
-import { renderBoxes } from "./render/renderBox";
+import { renderBoxes, renderState } from "./render/renderState";
 import { SetStringArray } from "../types";
 
 const getFenAndError = (board: Chess, color: Color) => {
@@ -131,7 +131,7 @@ export const _findFen = async (modelRef: any, videoRef: any,
   const state = getUpdate(scores, squares);
   setFenFromState(state, color, dispatch, setText);
 
-  renderBoxes(canvasRef.current, boxes, scores, centers, boundary, squares);
+  renderState(canvasRef.current, centers, boundary, state);
 
   tf.dispose([boxes, scores]);
 }

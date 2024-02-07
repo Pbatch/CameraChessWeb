@@ -1,4 +1,4 @@
-import { renderBoxes } from "./render/renderBox";
+import { renderState} from "./render/renderState";
 import * as tf from "@tensorflow/tfjs-core";
 import { getMovesPairs } from "./moves";
 import { getInvTransform, transformBoundary, transformCenters } from "./warp";
@@ -67,14 +67,22 @@ const processState = (state: any, movesPairs: MovesPair[], possibleMoves: Set<st
   return {bestScore1, bestScore2, bestJointScore, bestMove, bestMoves};
 }
 
-export const getSquares = (boxes: tf.Tensor2D, centers: number[][], boundary: number[][]): number[] => {
-  const squares: number[] = tf.tidy(() => {
+const getBoxCenters = (boxes: tf.Tensor2D) => {
+  const boxCenters: tf.Tensor2D = tf.tidy(() => {
     const l: tf.Tensor2D = tf.slice(boxes, [0, 0], [-1, 1]);
     const r: tf.Tensor2D = tf.slice(boxes, [0, 2], [-1, 1]);
     const b: tf.Tensor2D = tf.slice(boxes, [0, 3], [-1, 1]);
     const cx: tf.Tensor2D = tf.div(tf.add(l, r), 2);
     const cy: tf.Tensor2D = tf.sub(b, tf.div(tf.sub(r, l), 3));
-    const boxCentersTensor: tf.Tensor2D = tf.concat([cx, cy], 1);
+    const boxCenters: tf.Tensor2D = tf.concat([cx, cy], 1);
+    return boxCenters;
+  })
+  return boxCenters;
+}
+
+export const getSquares = (boxes: tf.Tensor2D, centers: number[][], boundary: number[][]): number[] => {
+  const squares: number[] = tf.tidy(() => {
+    const boxCentersTensor: tf.Tensor2D = getBoxCenters(boxes);
     const dist: tf.Tensor2D = tf.sum(tf.square(tf.sub(tf.expandDims(boxCentersTensor, 1), 
     tf.expandDims(tf.tensor2d(centers), 0))), 2);
     const squaresTensor: tf.Tensor1D = tf.argMin(dist, 1)
@@ -238,8 +246,8 @@ playingRef: any, setText: any, dispatch: any, cornersRef: any, gameRef: any) => 
       text.push(moveText);
       setText(text);
       
-      renderBoxes(canvasRef.current, boxes, scores, centers, boundary, squares);
-      
+      renderState(canvasRef.current, centers, boundary, state);
+
       tf.dispose([boxes, scores]);
       
       if (hasGreedyMove) {
