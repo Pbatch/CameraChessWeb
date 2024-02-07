@@ -5,7 +5,7 @@ import { detect, getKeypoints, getSquares, getUpdate} from "./findPieces";
 import { Chess, Color, Piece, PieceSymbol, Square } from "chess.js";
 import { PIECE_SYMBOLS, SQUARE_NAMES } from "./constants";
 import { gameResetMoves, gameSetFen, gameSetStart } from "../slices/gameSlice";
-import { renderBoxes, renderState } from "./render/renderState";
+import { renderState } from "./render/renderState";
 import { SetStringArray } from "../types";
 
 const getFenAndError = (board: Chess, color: Color) => {
