@@ -6,7 +6,7 @@ import { NavigateFunction } from 'react-router-dom';
 import { Study } from '../types';
 
 const lichessHost = 'https://lichess.org';
-const scopes = ["study:write", "study:read"];
+const scopes = ["study:write", "study:read", "challenge:read", "bot:play", "board:play"];
 const clientId = 'lichess-api-demo';
 const clientUrl = `${location.protocol}//${location.host}/`;
 
@@ -71,22 +71,6 @@ const fetchResponse = async (token: string, path: string, options: any = {}) => 
   return res;
 };
 
-export const lichessLogin = () => {
-  const oauth = getOauth();
-  oauth.fetchAuthorizationCode();
-}
-
-export const lichessLogout = (dispatch: Dispatch<AnyAction>) => {
-  localStorage.removeItem("oauth2authcodepkce-state");
-  dispatch(userReset());
-}
-
-export const lichessGetAccount = (token: string) => {
-  const path = "/api/account";
-  const account = fetchBody(token, path);
-  return account;
-}
-
 const setBroadcastlessStudies = async (token: string, username: string, setStudies: any, broadcasts: any) => {
   const path = `/api/study/by/${username}`;
 
@@ -104,6 +88,22 @@ const setBroadcastlessStudies = async (token: string, username: string, setStudi
     }
   }))
   .then(() => setStudies(studies));
+}
+
+export const lichessLogin = () => {
+  const oauth = getOauth();
+  oauth.fetchAuthorizationCode();
+}
+
+export const lichessLogout = (dispatch: Dispatch<AnyAction>) => {
+  localStorage.removeItem("oauth2authcodepkce-state");
+  dispatch(userReset());
+}
+
+export const lichessGetAccount = (token: string) => {
+  const path = "/api/account";
+  const account = fetchBody(token, path);
+  return account;
 }
 
 export const lichessSetStudies = (token: string, setStudies: any, username: string, onlyBroadcasts: boolean) => {
@@ -153,6 +153,25 @@ export const lichessPushRound = (token: string, pgn: string, roundId: string) =>
   fetchResponse(token, path, options);
 }
 
+export const lichessStreamEvents = (token: string, callback: any) => {
+  const path = `/api/stream/event`;
+  fetchResponse(token, path)
+  .then(readStream(callback))
+};
+
+export const lichessStreamGame = (token: string, callback: any, gameId: string) => {
+  const path = `/api/board/game/stream/${gameId}`;
+  fetchResponse(token, path)
+  .then(readStream(callback));
+}
+
+export const lichessPlayMove = (token: string, gameId: string, move: string) => {
+  const path = `/api/board/game/${gameId}/move/${move}`;
+  const options = {
+    method: "POST"
+  }
+  fetchResponse(token, path, options);
+}
 
 export const lichessTrySetUser = async (navigate: NavigateFunction, dispatch: Dispatch<AnyAction>) => {
   const oauth: OAuth2AuthCodePKCE = getOauth();

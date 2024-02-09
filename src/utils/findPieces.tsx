@@ -1,9 +1,7 @@
 import { renderState} from "./render/renderState";
 import * as tf from "@tensorflow/tfjs-core";
-import { getMovesPairs } from "./moves";
 import { getInvTransform, transformBoundary, transformCenters } from "./warp";
-import { Chess } from 'chess.js';
-import { gameSetFen, gameSetMoves, makePgn } from "../slices/gameSlice";
+import { gameUpdate, makeUpdatePayload } from "../slices/gameSlice";
 import { getBoxesAndScores, getInput, getXY, invalidVideo } from "./detect";
 import {  MovesData, MovesPair } from "../types";
 import { zeros } from "./math";
@@ -152,12 +150,10 @@ export const getKeypoints = (cornersRef: any, canvasRef: any): number[][] => {
 }
 
 export const findPieces = (modelRef: any, videoRef: any, canvasRef: any,
-playingRef: any, setText: any, dispatch: any, cornersRef: any, gameRef: any) => {
+playingRef: any, setText: any, dispatch: any, cornersRef: any, boardRef: any, movesPairsRef: any) => {
   let centers: number[][] | null = null;
   let boundary: number[][];
   let state: number[][];
-  let board: Chess;
-  let movesPairs: MovesPair[];
   let keypoints: number[][];
   let possibleMoves: Set<string>;
   let requestId: number;
@@ -173,10 +169,7 @@ playingRef: any, setText: any, dispatch: any, cornersRef: any, gameRef: any) => 
         centers = transformCenters(invTransform);
         boundary = transformBoundary(invTransform);
         state = zeros(64, 12);
-        board = new Chess();
         possibleMoves = new Set<string>;
-        board.loadPgn(makePgn(gameRef.current));
-        movesPairs = getMovesPairs(board);
         greedyMoveToTime = {};
       }
       const startTime: number = performance.now();
@@ -186,7 +179,7 @@ playingRef: any, setText: any, dispatch: any, cornersRef: any, gameRef: any) => 
       const squares: number[] = getSquares(boxes, centers, boundary);
       const update: number[][] = getUpdate(scores, squares);
       state = updateState(state, update);
-      const {bestScore1, bestScore2, bestJointScore, bestMove, bestMoves} = processState(state, movesPairs, possibleMoves);
+      const {bestScore1, bestScore2, bestJointScore, bestMove, bestMoves} = processState(state, movesPairsRef.current, possibleMoves);
 
       const endTime: number = performance.now();
       const fps: string = (1000 / (endTime - startTime)).toFixed(1);
@@ -196,8 +189,7 @@ playingRef: any, setText: any, dispatch: any, cornersRef: any, gameRef: any) => 
         const move: string = bestMoves.sans[0];
         hasMove = (bestScore2 > 0) && (bestJointScore > 0) && (possibleMoves.has(move));
         if (hasMove) {
-          board.move(move);
-          movesPairs = getMovesPairs(board);
+          boardRef.current.move(move);
           possibleMoves.clear();
           greedyMoveToTime = {};
           console.info(bestJointScore, bestMoves);
@@ -214,20 +206,18 @@ playingRef: any, setText: any, dispatch: any, cornersRef: any, gameRef: any) => 
         const oneSecondElapsed = deltaTime > 1000;
         hasGreedyMove = (bestScore1 > 0) && (!(hasMove)) && oneSecondElapsed;
         if (hasGreedyMove) {
-          board.move(greedyMove);
+          boardRef.current.move(greedyMove);
         }
       }
       
       if (hasMove || hasGreedyMove) {
-        const splitPgn = board.pgn().split("\n\n");
-        const moves = splitPgn[splitPgn.length - 1];
-        dispatch(gameSetMoves(moves));
-        dispatch(gameSetFen(board.fen()));
+        const payload = makeUpdatePayload(boardRef.current);
+        dispatch(gameUpdate(payload))
       }
       
       // FPS + last 2 moves
       const text: string[] = [`FPS: ${fps}`];
-      const history: string[] = board.history();
+      const history: string[] = boardRef.current.history();
       let moveText: string = "";
       if (history.length == 0) {
         moveText = "";
@@ -251,7 +241,7 @@ playingRef: any, setText: any, dispatch: any, cornersRef: any, gameRef: any) => 
       tf.dispose([boxes, scores]);
       
       if (hasGreedyMove) {
-        board.undo();
+        boardRef.current.undo();
       }
 
       const endTensors: number = tf.memory().numTensors;

@@ -19,7 +19,7 @@ const FenButton = ({ piecesModelRef, videoRef, canvasRef, setText, cornersRef }:
       dispatch(gameResetFen());
     } else {
       const color: Color = option.includes("White to move") ? "w" : "b";
-      findFen(piecesModelRef, videoRef, cornersRef, canvasRef, dispatch, setText, color);
+      findFen({piecesModelRef, videoRef, cornersRef, canvasRef, dispatch, setText, color});
     }
     setOption(option);
   }

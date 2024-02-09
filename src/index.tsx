@@ -47,6 +47,10 @@ const router = createBrowserRouter([
         element: <VideoAndSidebar mode="broadcast" />
       },
       {
+        path: "/play",
+        element: <VideoAndSidebar mode="play" />
+      },
+      {
         path: "/export",
         element: <Export />
       },

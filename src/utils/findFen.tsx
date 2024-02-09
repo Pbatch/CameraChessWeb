@@ -8,6 +8,16 @@ import { gameResetMoves, gameSetFen, gameSetStart } from "../slices/gameSlice";
 import { renderState } from "./render/renderState";
 import { SetStringArray } from "../types";
 
+interface findFenInput {
+  piecesModelRef: any,
+  videoRef: any,
+  cornersRef: any,
+  canvasRef: any,
+  dispatch: any,
+  setText: SetStringArray,
+  color: Color
+}
+
 const getFenAndError = (board: Chess, color: Color) => {
   let fen = board.fen();
   const otherColor: Color = (color === "w") ? "b" : "w";
@@ -116,8 +126,8 @@ const setFenFromState = (state: number[][], color: Color, dispatch: any, setText
   }
 }
 
-export const _findFen = async (modelRef: any, videoRef: any, 
-  cornersRef: any, canvasRef: any, dispatch: any, setText: any, color: Color) => {
+export const _findFen = async ({piecesModelRef, videoRef, 
+  cornersRef, canvasRef, dispatch, setText, color}: findFenInput) => {
   if (invalidVideo(videoRef)) {
     return;
   }
@@ -126,7 +136,7 @@ export const _findFen = async (modelRef: any, videoRef: any,
   const invTransform = getInvTransform(keypoints);
   const centers = transformCenters(invTransform);
   const boundary = transformBoundary(invTransform);
-  const {boxes, scores} = await detect(modelRef, videoRef, keypoints);
+  const {boxes, scores} = await detect(piecesModelRef, videoRef, keypoints);
   const squares: number[] = getSquares(boxes, centers, boundary);
   const state = getUpdate(scores, squares);
   setFenFromState(state, color, dispatch, setText);
@@ -136,11 +146,11 @@ export const _findFen = async (modelRef: any, videoRef: any,
   tf.dispose([boxes, scores]);
 }
 
-export const findFen = async (piecesModelRef: any, videoRef: any, cornersRef: any, canvasRef: any,
-   dispatch: any, setText: any, color: Color) => {
+export const findFen = async ({piecesModelRef, videoRef, cornersRef, canvasRef, dispatch, setText, color}: 
+  findFenInput) => {
   const startTensors = tf.memory().numTensors;
 
-  await _findFen(piecesModelRef, videoRef, cornersRef, canvasRef, dispatch, setText, color);
+  await _findFen({piecesModelRef, videoRef, cornersRef, canvasRef, dispatch, setText, color});
 
   const endTensors = tf.memory().numTensors;
   if (startTensors < endTensors) {

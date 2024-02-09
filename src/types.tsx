@@ -30,7 +30,8 @@ type CornersDict = {[key in CornersKey]: number[]};
 interface Game {
   fen: string,
   moves: string,
-  start: string
+  start: string,
+  lastMove: string
 }
 
 interface User {
@@ -44,7 +45,7 @@ interface RootState {
   user: User
 }
 
-type Mode = "record" | "upload" | "broadcast";
+type Mode = "record" | "upload" | "broadcast" | "play";
 
 type SetBoolean = React.Dispatch<React.SetStateAction<boolean>>
 type SetString = React.Dispatch<React.SetStateAction<string>>
