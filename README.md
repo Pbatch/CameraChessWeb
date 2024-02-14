@@ -4,16 +4,22 @@
 [![All Contributors](https://img.shields.io/badge/all_contributors-4-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
-Record your chess games and upload them to Lichess on https://www.camerachess.com.
+Replace Chess eBoards with your phone camera using ChessCam (https://www.chesscam.net).
+
+Features include:
+* Broadcasting your game to Lichess.
+* Playing a game on Lichess.
+* Digitizing a chess game from a video / live stream.
+
+Download the free app on [Google Play](https://play.google.com/store/apps/details?id=com.camerachess.www.twa).
 
 ## Demo
 [<img src="https://raw.githubusercontent.com/wiki/Pbatch/CameraChessWeb/images/thumbnail.png" width="100%">](https://youtu.be/AAs4EX372bc)
 
 ## Roadmap
 
-* Better visualization of the tracking output (rather than just algebraic notation) during recording
 * Raise an alert when an illegal move is played (currently they're just ignored)
-* Add a page where a user can play an online game using the Lichess API
+* Add sounds for the opponents moves in "/play"
 * Add support for variants
 * Develop a testing framework for different board + piece sets
 * ... Your next big idea?
