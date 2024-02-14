@@ -7,8 +7,10 @@ import { useDispatch } from 'react-redux';
 import { cornersSet } from "../../slices/cornersSlice";
 import { getMarkerXY, getXY } from "../../utils/detect";
 import { Chessboard } from "react-chessboard";
-import { CornersPayload, Game, SetBoolean, SetStringArray } from "../../types";
-import { gameSelect } from "../../slices/gameSlice";
+import { CornersPayload, Game, MovesPair, SetBoolean, SetStringArray } from "../../types";
+import { gameSelect, makeBoard } from "../../slices/gameSlice";
+import { getMovesPairs } from "../../utils/moves";
+import { Chess } from "chess.js";
 
 const Video = ({ piecesModelRef, canvasRef, videoRef, sidebarRef, playing, 
   setPlaying, playingRef, setText, digital, webcam, cornersRef }: {
@@ -21,15 +23,18 @@ const Video = ({ piecesModelRef, canvasRef, videoRef, sidebarRef, playing,
 
   const [boardWidth, setBoardWidth]: any = useState(100);
 
-  const displayRef: any = useRef(null);
-  const gameRef = useRef<Game>(game);
+  const displayRef = useRef<any>(null);
+  const boardRef = useRef<Chess>(makeBoard(game));
+  const movesPairsRef = useRef<MovesPair[]>(getMovesPairs(boardRef.current));
 
   const windowWidth = useWindowWidth();
   const windowHeight = useWindowHeight();
   const dispatch = useDispatch();
 
   useEffect(() => {
-    gameRef.current = game;
+    const board = makeBoard(game);
+    boardRef.current = board;
+    movesPairsRef.current = getMovesPairs(board);
   }, [game])
 
   const setupWebcam = async () => {
@@ -89,7 +94,8 @@ const Video = ({ piecesModelRef, canvasRef, videoRef, sidebarRef, playing,
       streamPromise = awaitSetupWebcam()
     }
 
-    findPieces(piecesModelRef, videoRef, canvasRef, playingRef, setText, dispatch, cornersRef, gameRef);
+    findPieces(piecesModelRef, videoRef, canvasRef, playingRef, setText, dispatch, 
+      cornersRef, boardRef, movesPairsRef);
 
     const stopWebcam = async () => {
       const stream = await streamPromise;

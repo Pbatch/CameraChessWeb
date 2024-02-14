@@ -13,6 +13,7 @@ import { gameResetFen, gameResetMoves, gameResetStart, gameSelect } from "../../
 import { lichessPushRound } from "../../utils/lichess";
 import { userSelect } from "../../slices/userSlice";
 import { START_FEN } from "../../utils/constants";
+import PlaySidebar from "../play/playSidebar";
 
 const VideoAndSidebar = ({ mode }: { mode: Mode }) => {
   const context = useOutletContext<ModelRefs>();
@@ -87,6 +88,8 @@ const VideoAndSidebar = ({ mode }: { mode: Mode }) => {
       return <RecordSidebar {...props} /> 
     } else if (mode == "upload") {
       return <UploadSidebar {...props} />
+    } else if (mode == "play") {
+      return <PlaySidebar {...props} />
     } else {
       // mode == "broadcast"
       return <BroadcastSidebar {...props} />
