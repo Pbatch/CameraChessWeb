@@ -3,9 +3,10 @@ import * as tf from "@tensorflow/tfjs-core";
 import { getInvTransform, transformBoundary, transformCenters } from "./warp";
 import { gameUpdate, makeUpdatePayload } from "../slices/gameSlice";
 import { getBoxesAndScores, getInput, getXY, invalidVideo } from "./detect";
-import {  MovesData, MovesPair } from "../types";
+import {  Mode, MovesData, MovesPair } from "../types";
 import { zeros } from "./math";
 import { CORNER_KEYS } from "./constants";
+import { Chess } from "chess.js";
 
 const calculateScore = (state: any, move: MovesData, from_thr=0.6, to_thr=0.6) => {
   let score = 0;
@@ -129,6 +130,14 @@ const updateState = (state: number[][], update: number[][], decay: number=0.5) =
   return state
 }
 
+const sanToLan = (board: Chess, san: string): string => {
+  board.move(san);
+  const history: any = board.history({ verbose: true });
+  const lan: string = history[history.length - 1].lan;
+  board.undo();
+  return lan;
+}
+
 export const detect = async (modelRef: any, videoRef: any, keypoints: number[][]):
   Promise<{boxes: tf.Tensor2D, scores: tf.Tensor2D}> => {
   const {image4D, width, height, padding, roi} = getInput(videoRef, keypoints);
@@ -150,7 +159,8 @@ export const getKeypoints = (cornersRef: any, canvasRef: any): number[][] => {
 }
 
 export const findPieces = (modelRef: any, videoRef: any, canvasRef: any,
-playingRef: any, setText: any, dispatch: any, cornersRef: any, boardRef: any, movesPairsRef: any) => {
+playingRef: any, setText: any, dispatch: any, cornersRef: any, boardRef: any, 
+movesPairsRef: any, lastMoveRef: any, moveTextRef: any, mode: Mode) => {
   let centers: number[][] | null = null;
   let boundary: number[][];
   let state: number[][];
@@ -185,64 +195,44 @@ playingRef: any, setText: any, dispatch: any, cornersRef: any, boardRef: any, mo
       const fps: string = (1000 / (endTime - startTime)).toFixed(1);
       
       let hasMove: boolean = false;
-      if (bestMoves !== null) {
+      if ((bestMoves !== null) && (mode !== "play")) {
         const move: string = bestMoves.sans[0];
         hasMove = (bestScore2 > 0) && (bestJointScore > 0) && (possibleMoves.has(move));
         if (hasMove) {
           boardRef.current.move(move);
           possibleMoves.clear();
           greedyMoveToTime = {};
-          console.info(bestJointScore, bestMoves);
         }
       }
 
       let hasGreedyMove: boolean = false;
-      if (bestMove !== null) {
-        const greedyMove: string = bestMove.sans[0];
-        if (!(greedyMove in greedyMoveToTime)) { 
-          greedyMoveToTime[greedyMove] = endTime;
+      if (bestMove !== null && !(hasMove) && (bestScore1 > 0)) {
+        const move: string = bestMove.sans[0];
+        if (!(move in greedyMoveToTime)) { 
+          greedyMoveToTime[move] = endTime;
         }
-        const deltaTime = endTime - greedyMoveToTime[greedyMove]
-        const oneSecondElapsed = deltaTime > 1000;
-        hasGreedyMove = (bestScore1 > 0) && (!(hasMove)) && oneSecondElapsed;
+
+        const secondElapsed = (endTime - greedyMoveToTime[move]) > 1000;
+        const newMove = sanToLan(boardRef.current, move) !== lastMoveRef.current;
+        hasGreedyMove = secondElapsed && newMove;
         if (hasGreedyMove) {
-          boardRef.current.move(greedyMove);
+          boardRef.current.move(move);
+          greedyMoveToTime = {greedyMove: greedyMoveToTime[move]};
         }
       }
       
       if (hasMove || hasGreedyMove) {
-        const payload = makeUpdatePayload(boardRef.current);
-        dispatch(gameUpdate(payload))
+        // No takebacks in "play" mode
+        const greedy = (mode === "play") ? false : hasGreedyMove;
+        const payload = makeUpdatePayload(boardRef.current, greedy);
+        console.log("payload", payload);
+        dispatch(gameUpdate(payload));
       }
-      
-      // FPS + last 2 moves
-      const text: string[] = [`FPS: ${fps}`];
-      const history: string[] = boardRef.current.history();
-      let moveText: string = "";
-      if (history.length == 0) {
-        moveText = "";
-      } else if (history.length == 1) {
-        moveText = `1. ${history[history.length - 1]}`
-      } else {
-        const firstMove: string = history[history.length - 2];
-        const secondMove: string = history[history.length - 1];
-        const nHalfMoves: number = Math.floor(history.length / 2);
-        if (history.length % 2 == 0) {
-          moveText = `${nHalfMoves}.${firstMove} ${secondMove}`
-        } else {
-          moveText = `${nHalfMoves}...${firstMove} ${nHalfMoves + 1}.${secondMove}`
-        }
-      }
-      text.push(moveText);
-      setText(text);
+      setText([`FPS: ${fps}`, moveTextRef.current]);
       
       renderState(canvasRef.current, centers, boundary, state);
 
       tf.dispose([boxes, scores]);
-      
-      if (hasGreedyMove) {
-        boardRef.current.undo();
-      }
 
       const endTensors: number = tf.memory().numTensors;
       if (startTensors < endTensors) {

@@ -67,7 +67,8 @@ import { gameSelect, gameSetStart, gameUpdate, makeBoard, makeUpdatePayload } fr
       const board = makeBoard(gameRef.current);
       board.move(lastMove);
       const payload = makeUpdatePayload(board);
-      dispatch(gameUpdate(payload))
+      console.log("payload", payload);
+      dispatch(gameUpdate(payload));
     }
     
     useEffect(() => {

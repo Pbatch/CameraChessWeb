@@ -31,7 +31,8 @@ interface Game {
   fen: string,
   moves: string,
   start: string,
-  lastMove: string
+  lastMove: string,
+  greedy: boolean
 }
 
 interface User {

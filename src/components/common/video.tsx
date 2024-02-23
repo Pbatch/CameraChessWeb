@@ -7,16 +7,16 @@ import { useDispatch } from 'react-redux';
 import { cornersSet } from "../../slices/cornersSlice";
 import { getMarkerXY, getXY } from "../../utils/detect";
 import { Chessboard } from "react-chessboard";
-import { CornersPayload, Game, MovesPair, SetBoolean, SetStringArray } from "../../types";
+import { CornersPayload, Game, Mode, MovesPair, SetBoolean, SetStringArray } from "../../types";
 import { gameSelect, makeBoard } from "../../slices/gameSlice";
 import { getMovesPairs } from "../../utils/moves";
 import { Chess } from "chess.js";
 
 const Video = ({ piecesModelRef, canvasRef, videoRef, sidebarRef, playing, 
-  setPlaying, playingRef, setText, digital, webcam, cornersRef }: {
+  setPlaying, playingRef, setText, digital, mode, cornersRef }: {
   piecesModelRef: any, canvasRef: any, videoRef: any, sidebarRef: any, 
   playing: boolean, setPlaying: SetBoolean, playingRef: any,
-  setText: SetStringArray, digital: boolean, webcam: boolean,
+  setText: SetStringArray, digital: boolean, mode: Mode,
   cornersRef: any
 }) => {
   const game: Game = gameSelect();
@@ -26,6 +26,8 @@ const Video = ({ piecesModelRef, canvasRef, videoRef, sidebarRef, playing,
   const displayRef = useRef<any>(null);
   const boardRef = useRef<Chess>(makeBoard(game));
   const movesPairsRef = useRef<MovesPair[]>(getMovesPairs(boardRef.current));
+  const lastMoveRef = useRef<string>(game.lastMove);
+  const moveTextRef = useRef<string>("");
 
   const windowWidth = useWindowWidth();
   const windowHeight = useWindowHeight();
@@ -33,9 +35,35 @@ const Video = ({ piecesModelRef, canvasRef, videoRef, sidebarRef, playing,
 
   useEffect(() => {
     const board = makeBoard(game);
+    moveTextRef.current = getMoveText(board);
+    if (game.greedy === true) {
+      board.undo();
+    }
     boardRef.current = board;
     movesPairsRef.current = getMovesPairs(board);
+    lastMoveRef.current = game.lastMove;
   }, [game])
+
+  const getMoveText = (board: Chess): string => {
+    const history: string[] = board.history();
+    
+    if (history.length == 0) {
+      return "";
+    }
+  
+    if (history.length == 1) {
+      return `1. ${history[history.length - 1]}`
+    }
+  
+    const firstMove: string = history[history.length - 2];
+    const secondMove: string = history[history.length - 1];
+    const nHalfMoves: number = Math.floor(history.length / 2);
+    if (history.length % 2 == 0) {
+      return `${nHalfMoves}.${firstMove} ${secondMove}`
+    } 
+    
+    return `${nHalfMoves}...${firstMove} ${nHalfMoves + 1}.${secondMove}`
+  }
 
   const setupWebcam = async () => {
     const stream = await navigator.mediaDevices.getUserMedia(MEDIA_CONSTRAINTS);
@@ -90,12 +118,12 @@ const Video = ({ piecesModelRef, canvasRef, videoRef, sidebarRef, playing,
     updateWidthHeight();
 
     let streamPromise: any = null;
-    if (webcam) {
+    if (mode !== "upload") {
       streamPromise = awaitSetupWebcam()
     }
 
     findPieces(piecesModelRef, videoRef, canvasRef, playingRef, setText, dispatch, 
-      cornersRef, boardRef, movesPairsRef);
+      cornersRef, boardRef, movesPairsRef, lastMoveRef, moveTextRef, mode);
 
     const stopWebcam = async () => {
       const stream = await streamPromise;
@@ -114,7 +142,7 @@ const Video = ({ piecesModelRef, canvasRef, videoRef, sidebarRef, playing,
   }, [windowWidth, windowHeight, digital]);
 
   useEffect(() => {
-    if ((webcam) || (videoRef.current.src === "")) {
+    if ((mode !== "upload") || (videoRef.current.src === "")) {
       return;
     }
     
@@ -153,7 +181,7 @@ const Video = ({ piecesModelRef, canvasRef, videoRef, sidebarRef, playing,
   }
 
   const onLoadedMetadata = () => {  
-    if (!(webcam)) {
+    if (mode === "upload") {
       return;
     }
     window.setTimeout(() => {
@@ -187,7 +215,7 @@ const Video = ({ piecesModelRef, canvasRef, videoRef, sidebarRef, playing,
   }
 
   const onEnded = () => {
-    if (!(webcam)) {
+    if (mode === "upload") {
       videoRef.current.currentTime = videoRef.current.duration;
       videoRef.current.pause;
     }
@@ -198,7 +226,7 @@ const Video = ({ piecesModelRef, canvasRef, videoRef, sidebarRef, playing,
     <div className="d-flex align-top justify-content-center">
       <div ref={displayRef} style={liveStyle} >
         <div style={videoContainerStyle} >
-          <video ref={videoRef} autoPlay={webcam} playsInline={true} muted={true}
+          <video ref={videoRef} autoPlay={mode !== "upload"} playsInline={true} muted={true}
           onLoadedMetadata={onLoadedMetadata} style={videoStyle} 
           onCanPlay={onCanPlay} onEnded={onEnded} />
           <canvas ref={canvasRef} style={canvasStyle} />

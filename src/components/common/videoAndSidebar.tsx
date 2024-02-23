@@ -81,7 +81,8 @@ const VideoAndSidebar = ({ mode }: { mode: Mode }) => {
     "canvasRef": canvasRef,
     "sidebarRef": sidebarRef,
     "cornersRef": cornersRef,
-    "playingRef": playingRef
+    "playingRef": playingRef,
+    "mode": mode
   }
   const sidebar = () => {
     if (mode === "record") {
@@ -98,7 +99,7 @@ const VideoAndSidebar = ({ mode }: { mode: Mode }) => {
   return (
     <Container>
       {sidebar()}
-      <Video {...props} webcam={!(mode === "upload")} />
+      <Video {...props} />
     </Container>
   );
 };

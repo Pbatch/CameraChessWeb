@@ -9,6 +9,7 @@ const initialState: Game = {
   "fen": START_FEN,
   "start": START_FEN,
   "lastMove": "",
+  "greedy": false
 };
 
 const gameSlice = createSlice({
@@ -44,7 +45,8 @@ const gameSlice = createSlice({
         "start": state.start,
         "moves": action.payload.moves,
         "fen": action.payload.fen,
-        "lastMove": action.payload.lastMove
+        "lastMove": action.payload.lastMove,
+        "greedy": action.payload.greedy
       }
       return newState
     }
@@ -68,7 +70,7 @@ export const makePgn = (game: Game) => {
   return `[FEN "${game.start}"]` + "\n \n" + game.moves;
 }
 
-export const makeUpdatePayload = (board: Chess) => {
+export const makeUpdatePayload = (board: Chess, greedy: boolean=false) => {
   const history = board.history({ "verbose": true });
 
   const moves = getMovesFromPgn(board);
@@ -78,7 +80,8 @@ export const makeUpdatePayload = (board: Chess) => {
   const payload = {
     "moves": moves,
     "fen": fen,
-    "lastMove": lastMove
+    "lastMove": lastMove,
+    "greedy": greedy
   }
 
   return payload
