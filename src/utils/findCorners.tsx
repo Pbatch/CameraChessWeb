@@ -34,27 +34,33 @@ const processBoxesAndScores = async (boxes: tf.Tensor2D, scores: tf.Tensor2D, si
   return res
 }
 
-const runModels = async (videoRef: any, xcornersModelRef: any, piecesModelRef: any):
-  Promise<{ xCorners: number[][], pieces: number[][] }> => {
-  const {image4D, width, height, padding, roi} = getInput(videoRef);
-
-  const xcornersPreds: tf.Tensor3D = xcornersModelRef.current.predict(image4D); 
-  const piecesPreds: tf.Tensor3D = piecesModelRef.current.predict(image4D);
-  tf.dispose([image4D])
-
+const runPiecesModel = async (videoRef: any, piecesModelRef: any): Promise<number[][]> => {
   const videoWidth: number = videoRef.current.videoWidth;
   const videoHeight: number = videoRef.current.videoHeight;
-  let boxesAndScores = getBoxesAndScores(xcornersPreds, width, height, videoWidth, videoHeight, padding, roi);
-  const xCorners: number[][] = await processBoxesAndScores(boxesAndScores.boxes, boxesAndScores.scores, true);
 
-  tf.dispose([xcornersPreds])
+  const {image4D, width, height, padding, roi} = getInput(videoRef);
+  const piecesPreds: tf.Tensor3D = piecesModelRef.current.predict(image4D);
+  const boxesAndScores = getBoxesAndScores(piecesPreds, width, height, videoWidth, videoHeight, padding, roi);
+  tf.dispose([piecesPreds, image4D]);
 
-  boxesAndScores = getBoxesAndScores(piecesPreds, width, height, videoWidth, videoHeight, padding, roi);
   const pieces: number[][] = await processBoxesAndScores(boxesAndScores.boxes, boxesAndScores.scores, false); 
-
-  tf.dispose([piecesPreds]);
   
-  return {xCorners, pieces};
+  return pieces;
+}
+
+const runXcornersModel = async (videoRef: any, xcornersModelRef: any, keypoints: number[][]): 
+Promise<number[][]> => {
+  const videoWidth: number = videoRef.current.videoWidth;
+  const videoHeight: number = videoRef.current.videoHeight;
+
+  const {image4D, width, height, padding, roi} = getInput(videoRef, keypoints);
+  const xcornersPreds: tf.Tensor3D = xcornersModelRef.current.predict(image4D); 
+  const boxesAndScores = getBoxesAndScores(xcornersPreds, width, height, videoWidth, videoHeight, padding, roi);
+  tf.dispose([xcornersPreds, image4D]);
+
+  const xCorners: number[][] = await processBoxesAndScores(boxesAndScores.boxes, boxesAndScores.scores, true);
+  
+  return xCorners;
 }
 
 const getQuads = (xCorners: number[][]) => {
@@ -197,12 +203,7 @@ const euclidean = (a: number[], b: number[]) => {
   return dist;
 }
 
-const calculateKeypoints = (pieces: number[][], corners: number[][]) => {
-  const blackPieces = pieces.filter(x => x[2] <= 5).map(x => [x[0], x[1]]);
-  const whitePieces = pieces.filter(x => x[2] > 5).map(x => [x[0], x[1]]);
-  if ((blackPieces.length == 0) || (whitePieces.length == 0)) {
-    return;
-  }
+const calculateKeypoints = (blackPieces: number[][], whitePieces: number[][], corners: number[][]) => {
   const blackCenter = getCenter(blackPieces);
   const whiteCenter = getCenter(whitePieces);
   
@@ -234,8 +235,16 @@ export const _findCorners = async (piecesModelRef: any, xcornersModelRef: any, v
   if (invalidVideo(videoRef)) {
     return;
   }
-  
-  const {xCorners, pieces} = await runModels(videoRef, xcornersModelRef, piecesModelRef);
+
+  const pieces = await runPiecesModel(videoRef, piecesModelRef);
+  const blackPieces = pieces.filter(x => x[2] <= 5).map(x => [x[0], x[1]]);
+  const whitePieces = pieces.filter(x => x[2] > 5).map(x => [x[0], x[1]]);
+  if ((blackPieces.length == 0) || (whitePieces.length == 0)) {
+    setText(["No pieces to label corners"]);
+    return;
+  }
+
+  const xCorners = await runXcornersModel(videoRef, xcornersModelRef, pieces);
   if (xCorners.length < 5) {
     // With <= 5 xCorners, no quads are found
     setText(["Need ≥5 xCorners", `Detected ${xCorners.length}`]);
@@ -248,11 +257,7 @@ export const _findCorners = async (piecesModelRef: any, xcornersModelRef: any, v
     return;
   }
 
-  const keypoints: CornersDict | undefined = calculateKeypoints(pieces, corners);
-  if (keypoints === undefined) {
-    setText(["No pieces to label corners"]);
-    return;
-  }
+  const keypoints: CornersDict = calculateKeypoints(blackPieces, whitePieces, corners);
 
   CORNER_KEYS.forEach((key) => {
     const xy: number[] = keypoints[key];

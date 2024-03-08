@@ -26,6 +26,29 @@ export const invalidVideo = (videoRef: any) => {
   return false;
 }
 
+export const getBbox = (points: number[][]) => {
+  const xs: number[] = points.map(p => p[0]);
+  const ys: number[] = points.map(p => p[1]);
+  const xmin: number = Math.min(...xs);
+  const xmax: number = Math.max(...xs);
+  const ymin: number = Math.min(...ys);
+  const ymax: number = Math.max(...ys);
+
+  const width: number = xmax - xmin;
+  const height: number = ymax - ymin;
+
+  const bbox: any = {
+    "xmin": xmin,
+    "xmax": xmax,
+    "ymin": ymin,
+    "ymax": ymax,
+    "width": width,
+    "height": height
+  }
+
+  return bbox
+}
+
 export const getInput = (videoRef: any, keypoints: number[][] | null=null, paddingRatio: number=12): {
   image4D: tf.Tensor4D, width: number, height: number, padding: number[], roi: number[]
 } => {
@@ -33,22 +56,14 @@ export const getInput = (videoRef: any, keypoints: number[][] | null=null, paddi
   const videoWidth: number = videoRef.current.videoWidth;
   const videoHeight: number = videoRef.current.videoHeight;
   if (keypoints !== null) {
-    const xs: number[] = keypoints.map(p => p[0]);
-    const ys: number[] = keypoints.map(p => p[1]);
-    const xmin: number = Math.min(...xs);
-    const xmax: number = Math.max(...xs);
-    const ymin: number = Math.min(...ys);
-    const ymax: number = Math.max(...ys)
+    const bbox = getBbox(keypoints);
+    let paddingLeft: number = Math.floor(bbox.width / paddingRatio);
+    let paddingRight: number = Math.floor(bbox.width / paddingRatio);
+    let paddingTop: number = Math.floor(bbox.height / paddingRatio);
+    const paddingBottom: number = Math.floor(bbox.height / paddingRatio)
 
-    const roiWidth: number = xmax - xmin;
-    const roiHeight: number = ymax - ymin;
-    let paddingLeft: number = Math.floor(roiWidth / paddingRatio);
-    let paddingRight: number = Math.floor(roiWidth / paddingRatio);
-    let paddingTop: number = Math.floor(roiHeight / paddingRatio);
-    const paddingBottom: number = Math.floor(roiHeight / paddingRatio)
-
-    const paddedRoiWidth: number = roiWidth + paddingLeft + paddingRight;
-    const paddedRoiHeight: number = roiHeight + paddingTop + paddingBottom;
+    const paddedRoiWidth: number = bbox.width + paddingLeft + paddingRight;
+    const paddedRoiHeight: number = bbox.height + paddingTop + paddingBottom;
     const ratio: number = paddedRoiHeight / paddedRoiWidth;
     const desiredRatio: number = MODEL_HEIGHT / MODEL_WIDTH;
 
@@ -61,10 +76,10 @@ export const getInput = (videoRef: any, keypoints: number[][] | null=null, paddi
         const targetHeight: number = paddedRoiWidth * desiredRatio;
         paddingTop += targetHeight - paddedRoiHeight;
     }
-    roi = [Math.round(Math.max(videoWidth * (xmin - paddingLeft) / MODEL_WIDTH, 0)),
-      Math.round(Math.max(videoHeight * (ymin - paddingTop) / MODEL_HEIGHT, 0)),
-      Math.round(Math.min(videoWidth * (xmax + paddingRight) / MODEL_WIDTH, videoWidth)),
-      Math.round(Math.min(videoHeight * (ymax + paddingBottom) / MODEL_HEIGHT, videoHeight))]
+    roi = [Math.round(Math.max(videoWidth * (bbox.xmin - paddingLeft) / MODEL_WIDTH, 0)),
+      Math.round(Math.max(videoHeight * (bbox.ymin - paddingTop) / MODEL_HEIGHT, 0)),
+      Math.round(Math.min(videoWidth * (bbox.xmax + paddingRight) / MODEL_WIDTH, videoWidth)),
+      Math.round(Math.min(videoHeight * (bbox.ymax + paddingBottom) / MODEL_HEIGHT, videoHeight))]
   } else {
     roi = [0, 0, videoWidth, videoHeight];
   }
