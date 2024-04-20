@@ -165,6 +165,12 @@ export const lichessStreamGame = (token: string, callback: any, gameId: string) 
   .then(readStream(callback));
 }
 
+export const lichessGetPlaying = (token: string) => {
+  const path = "/api/account/playing";
+  const playing = fetchBody(token, path);
+  return playing;
+}
+
 export const lichessPlayMove = (token: string, gameId: string, move: string) => {
   const path = `/api/board/game/${gameId}/move/${move}`;
   const options = {

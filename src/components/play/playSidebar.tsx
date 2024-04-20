@@ -3,10 +3,11 @@ import { Display, CornersButton, HomeButton, PgnButton, Sidebar, DigitalButton,
 import { Game, SetBoolean, SetStringArray } from "../../types";
 import { userSelect } from "../../slices/userSlice";
 import { useEffect, useRef, useState } from "react";
-import { lichessPlayMove, lichessStreamEvents, lichessStreamGame } from "../../utils/lichess";
-import { Chess, Color } from "chess.js";
+import { lichessPlayMove, lichessStreamGame } from "../../utils/lichess";
+import { Color } from "chess.js";
 import { useDispatch } from "react-redux";
-import { gameSelect, gameSetStart, gameUpdate, makeBoard, makeUpdatePayload } from "../../slices/gameSlice";
+import { gameSelect, gameUpdate, makeBoard, makeUpdatePayload } from "../../slices/gameSlice";
+import GamesButton from "./gamesButton";
   
   const PlaySidebar = ({ piecesModelRef, xcornersModelRef, videoRef, canvasRef, sidebarRef, 
     playing, setPlaying, text, setText, digital, setDigital }: {
@@ -36,22 +37,6 @@ import { gameSelect, gameSetStart, gameUpdate, makeBoard, makeUpdatePayload } fr
       lichessPlayMove(token, gameId, lastMove);
     }, [gameRef.current])
 
-    const streamEventsCallback = async (response: any) => {
-      if (response.type === 'gameStart') {
-        setGameId(response.game.gameId);
-        setColor((response.game.color === "white") ? "w" : "b");
-        
-        const colorText = (response.game.color === "white") ? "White" : "Black";
-        const opponent = response.game.opponent.username;
-        setText(["Starting game", `${colorText} vs ${opponent}`]);
-        
-        const board = new Chess(response.game.fen);
-        const payload = makeUpdatePayload(board);
-        dispatch(gameUpdate(payload))
-        dispatch(gameSetStart(response.game.fen));
-      }    
-    };
-
     const streamGameCallback = async (response: any) => {
       const moves = response.moves;
       if (moves === undefined) {
@@ -70,10 +55,6 @@ import { gameSelect, gameSetStart, gameUpdate, makeBoard, makeUpdatePayload } fr
       console.log("payload", payload);
       dispatch(gameUpdate(payload));
     }
-    
-    useEffect(() => {
-      lichessStreamEvents(token, streamEventsCallback);
-    }, []);
 
     useEffect(() => {
       if (gameId === undefined) {
@@ -87,6 +68,9 @@ import { gameSelect, gameSetStart, gameUpdate, makeBoard, makeUpdatePayload } fr
       <Sidebar sidebarRef={sidebarRef} >
         <li className="my-1">
           <DeviceButton videoRef={videoRef} />
+        </li>
+        <li className="my-1">
+          <GamesButton setGameId={setGameId} setColor={setColor} setText={setText} />
         </li>
         <li className="my-1">
           <CornersButton piecesModelRef={piecesModelRef} xcornersModelRef={xcornersModelRef} videoRef={videoRef} canvasRef={canvasRef} 
