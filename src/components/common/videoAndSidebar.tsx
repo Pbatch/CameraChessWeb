@@ -14,6 +14,15 @@ import { lichessPushRound } from "../../utils/lichess";
 import { userSelect } from "../../slices/userSlice";
 import { START_FEN } from "../../utils/constants";
 import PlaySidebar from "../play/playSidebar";
+import { useMediaQuery } from 'react-responsive';
+
+const PortraitWarning = () => {
+  return (
+    <h1 className="text-white text-center w-100 p-3 h-2">
+      Please use your device in landscape mode
+    </h1>
+  )
+}
 
 const VideoAndSidebar = ({ mode }: { mode: Mode }) => {
   const context = useOutletContext<ModelRefs>();
@@ -21,6 +30,7 @@ const VideoAndSidebar = ({ mode }: { mode: Mode }) => {
   const corners: CornersDict = cornersSelect();
   const token: string = userSelect().token;
   const moves: string = gameSelect().moves;
+  const isPortrait = useMediaQuery({ orientation: 'portrait' });
 
   const [text, setText] = useState<string[]>([]);
   const [playing, setPlaying] = useState<boolean>(false);
@@ -84,22 +94,25 @@ const VideoAndSidebar = ({ mode }: { mode: Mode }) => {
     "playingRef": playingRef,
     "mode": mode
   }
-  const sidebar = () => {
-    if (mode === "record") {
-      return <RecordSidebar {...props} /> 
-    } else if (mode == "upload") {
-      return <UploadSidebar {...props} />
-    } else if (mode == "play") {
-      return <PlaySidebar {...props} />
-    } else {
-      // mode == "broadcast"
-      return <BroadcastSidebar {...props} />
+  const Sidebar = () => {
+    switch(mode) {
+      case "record": return <RecordSidebar {...props} />
+      case "upload": return <UploadSidebar {...props} />
+      case "play": return <PlaySidebar {...props} />
+      case "broadcast": return <BroadcastSidebar {...props} />
     }
   }
+
   return (
     <Container>
-      {sidebar()}
-      <Video {...props} />
+      {isPortrait ? (
+        <PortraitWarning />
+      ) : (
+        <>
+          {Sidebar()}
+          <Video {...props} />
+        </>
+      )}
     </Container>
   );
 };
