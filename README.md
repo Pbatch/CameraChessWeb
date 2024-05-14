@@ -24,6 +24,14 @@ Download the free app on [Google Play](https://play.google.com/store/apps/detail
 * Develop a testing framework for different board + piece sets
 * ... Your next big idea?
 
+## Models 
+
+Here are the models in ONNX format, post in the Issues if you want them in PyTorch format as well.
+Once you've downloaded the models, you can view them in Netron (https://netron.app/). 
+
+* 480S_pieces_480x288.onnx - https://drive.google.com/file/d/1-0ud7pAT2-oR9DxAimWCTJuQeCFnchPQ/view?usp=sharing
+* 480L_xcorners_480x288.onnx - https://drive.google.com/file/d/1-58WXTiXTupb7BJsO_ilwAN9j1XNTUTn/view?usp=sharing
+
 ## Contributors ✨
 
 Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
