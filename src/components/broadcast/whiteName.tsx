@@ -6,7 +6,7 @@ const WhiteName = ({ setWhiteName }: {setWhiteName: SetString }) => {
   }
   
   return (
-    <div className="text-white">
+    <div className="text-white d-flex justify-content-between">
       <label className="form-check-label" htmlFor="whiteName">
         White:&nbsp;
       </label>

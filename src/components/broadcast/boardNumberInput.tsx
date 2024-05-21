@@ -6,7 +6,7 @@ const BoardNumberInput = ({ setBoardNumber }: {setBoardNumber: SetNumber }) => {
   }
   
   return (
-    <div className="text-white">
+    <div className="text-white d-flex justify-content-between">
       <label className="form-check-label" htmlFor="board">
         Board:&nbsp;
       </label>
