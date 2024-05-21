@@ -38,6 +38,9 @@ const VideoAndSidebar = ({ mode }: { mode: Mode }) => {
   const [boardNumber, setBoardNumber] = useState<number>(-1)
   const [digital, setDigital] = useState<boolean>(false);
   
+  const [whiteName, setWhiteName] = useState<string>("")
+  const [blackName, setBlackName] = useState<string>("")
+  
   const videoRef = useRef<any>(null);
   const playingRef = useRef<boolean>(playing);
   const canvasRef = useRef<any>(null);
@@ -49,6 +52,8 @@ const VideoAndSidebar = ({ mode }: { mode: Mode }) => {
       return;
     }
     const broadcastPgn = [
+      `[White "${whiteName}"]`,
+      `[Black "${blackName}"]`,
       `[Result "*"]`,
       `[FEN "${START_FEN}"]`,
       `[Board "${boardNumber}"]`,
@@ -85,6 +90,8 @@ const VideoAndSidebar = ({ mode }: { mode: Mode }) => {
     "setDigital": setDigital,
     "setBoardNumber": setBoardNumber,
     "setStudy": setStudy,
+    "setWhiteName": setWhiteName,
+    "setBlackName": setBlackName,
     "piecesModelRef": context.piecesModelRef,
     "xcornersModelRef": context.xcornersModelRef,
     "videoRef": videoRef,

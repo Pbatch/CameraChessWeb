@@ -1,16 +1,19 @@
 import { Display, CornersButton, HomeButton, PgnButton, Sidebar, DigitalButton, RecordButton, StopButton, StudyButton, DeviceButton } from "../common";
-import { SetBoolean, SetNumber, SetStringArray, SetStudy, Study } from "../../types";
+import { SetBoolean, SetNumber, SetString, SetStringArray, SetStudy, Study } from "../../types";
 import BoardNumberInput from "./boardNumberInput";
+import WhiteName from "./whiteName";
+import BlackName from "./blackName";
 
 const BroadcastSidebar = ({ piecesModelRef, xcornersModelRef, videoRef, canvasRef, sidebarRef, 
-  playing, setPlaying, text, setText, digital, setDigital, study, setStudy, setBoardNumber }: {
+  playing, setPlaying, text, setText, digital, setDigital, study, setStudy, setBoardNumber, setWhiteName, setBlackName }: {
   piecesModelRef: any, xcornersModelRef: any, videoRef: any, canvasRef: any, sidebarRef: any,
   playing: boolean, setPlaying: SetBoolean, 
   text: string[], setText: SetStringArray,
   digital: boolean, setDigital: SetBoolean, 
   study: Study | null, setStudy: SetStudy,
-  setBoardNumber: SetNumber
-}) => {
+  setBoardNumber: SetNumber,
+  setWhiteName: SetString, setBlackName: SetString}) => {
+
 
   return (
     <Sidebar sidebarRef={sidebarRef} >
@@ -33,6 +36,13 @@ const BroadcastSidebar = ({ piecesModelRef, xcornersModelRef, videoRef, canvasRe
       <li className="my-1">
         <BoardNumberInput setBoardNumber={setBoardNumber} />
       </li>
+      <li className="my-1">
+        <WhiteName setWhiteName={setWhiteName} />
+      </li>
+      <li className="my-1">
+        <BlackName setBlackName={setBlackName} />
+      </li>
+      
       <li className="border-top"></li>
       <li className="my-1">
         <Display text={text} />
