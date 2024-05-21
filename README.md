@@ -29,9 +29,11 @@ Download the free app on [Google Play](https://play.google.com/store/apps/detail
 Here are the models in ONNX format, post in the Issues if you want them in PyTorch format as well.
 Once you've downloaded the models, you can view them in Netron (https://netron.app/). 
 
-* 480L_xcorners_480x288.onnx - prod - https://drive.google.com/file/d/1-58WXTiXTupb7BJsO_ilwAN9j1XNTUTn/view?usp=sharing
-* 480S_pieces_step_3_480x288.onnx - prod - https://drive.google.com/file/d/1K1Yqm3vYGcbIlI2gTIaY5EKPLpQ1dcU6/view?usp=sharing
-* 480S_pieces_480x288.onnx - dev - https://drive.google.com/file/d/1-0ud7pAT2-oR9DxAimWCTJuQeCFnchPQ/view?usp=sharing
+| Name | Description | Link |
+| :---: | :---: | :---: |
+| 480L_xcorners_480x288.onnx | YOLOv8 xcorner detector | https://drive.google.com/file/d/1-58WXTiXTupb7BJsO_ilwAN9j1XNTUTn/view?usp=sharing |
+| 480S_pieces_step_3_480x288.onnx | Pruned YOLOv8 piece detector | https://drive.google.com/file/d/1K1Yqm3vYGcbIlI2gTIaY5EKPLpQ1dcU6/view?usp=sharing |
+| 480S_pieces_480x288.onnx | YOLOv8 piece detector | https://drive.google.com/file/d/1-0ud7pAT2-oR9DxAimWCTJuQeCFnchPQ/view?usp=sharing |
 
 ## Contributors ✨
 
