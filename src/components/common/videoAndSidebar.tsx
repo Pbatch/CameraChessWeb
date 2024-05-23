@@ -10,7 +10,7 @@ import RecordSidebar from "../record/recordSidebar";
 import UploadSidebar from "../upload/uploadSidebar";
 import BroadcastSidebar from "../broadcast/broadcastSidebar";
 import { gameResetFen, gameResetMoves, gameResetStart, gameSelect } from "../../slices/gameSlice";
-import { lichessPushRound } from "../../utils/lichess";
+import { lichessGetRound, lichessPushRound } from "../../utils/lichess";
 import { userSelect } from "../../slices/userSlice";
 import { START_FEN } from "../../utils/constants";
 import PlaySidebar from "../play/playSidebar";
@@ -45,18 +45,57 @@ const VideoAndSidebar = ({ mode }: { mode: Mode }) => {
   const cornersRef = useRef<CornersDict>(corners);
 
   useEffect(() => {
-    if (!(mode === "broadcast") || (study === null) || (boardNumber === -1)) {
+    if (mode !== "broadcast" || (study === null) || (boardNumber === -1)) {
       return;
     }
-    const broadcastPgn = [
-      `[Result "*"]`,
-      `[FEN "${START_FEN}"]`,
-      `[Board "${boardNumber}"]`,
-      `[Site "${boardNumber}"]`,
-      "",
-      moves
-    ].join("\r");
-    lichessPushRound(token, broadcastPgn, study.id);
+    
+    lichessGetRound(token, study.id).then((lichessPgn) => {
+      const lichessGames: string[] = lichessPgn.split(/\n\n\n/);
+      let matchedGame: string = "";
+      lichessGames.forEach((lichessGame: string) => {
+        if (lichessGame.includes(`[Board "${boardNumber}"]`)) {
+          matchedGame = lichessGame;
+        }
+      });
+      let tags: string[];
+      if (matchedGame === "") {
+        tags = [
+          `[Result "*"]`,
+          `[FEN "${START_FEN}"]`,
+          `[Board "${boardNumber}"]`,
+          `[Site "${boardNumber}"]`,
+          `[Annotator "ChessCam"]`
+        ]
+      } else {
+        const matches = matchedGame.match(/\[(.*?)\]/g);
+        if (matches === null) {
+          throw Error(`Could not find any tags in ${matchedGame}`);
+        }
+        tags = matches.filter((tag) => {
+          const badStarts: string[] = [
+            "[Event", 
+            "[Annotator", 
+            "[Variant",
+            "[ECO",
+            "[Opening",
+            "[UTCDate",
+            "[UTCTime",
+          ];
+          for (let i=0; i < badStarts.length; i++) {
+            if (tag.startsWith(badStarts[i])) {
+              return false;
+            }
+          }
+          return true;
+        })
+      }
+      const broadcastPgn = [
+        ...tags,
+        "",
+        moves
+      ].join("\r");
+      lichessPushRound(token, broadcastPgn, study.id);
+    });
   }, [moves])
 
   useEffect(() => {
@@ -64,7 +103,7 @@ const VideoAndSidebar = ({ mode }: { mode: Mode }) => {
   }, [playing]);
 
   useEffect(() => {
-    cornersRef.current = corners
+    cornersRef.current = corners;
   }, [corners])
 
   useEffect(() => {

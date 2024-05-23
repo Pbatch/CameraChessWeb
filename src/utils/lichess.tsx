@@ -106,6 +106,20 @@ export const lichessGetAccount = (token: string) => {
   return account;
 }
 
+export const lichessGetRound = (token: string, roundId: string) => {
+  const path = `/api/broadcast/round/${roundId}.pgn`;
+  const pgn = fetchResponse(token, path).then(async (response: any) => {
+    const stream = response.body.getReader();
+    const decoder = new TextDecoder();
+    const res = stream.read().then(async ({ done, value }: {done: boolean, value: any}) => {
+      if (done) return ""
+      return decoder.decode(value, {stream: true});
+    });
+    return res; 
+  });
+  return pgn;
+}
+
 export const lichessSetStudies = (token: string, setStudies: any, username: string, onlyBroadcasts: boolean) => {
   const path = `/api/broadcast/my-rounds`;
   const broadcasts: Study[] = [];
