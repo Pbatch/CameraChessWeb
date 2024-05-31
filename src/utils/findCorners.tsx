@@ -2,7 +2,7 @@ import * as tf from "@tensorflow/tfjs-core";
 import { renderCorners } from "./render/renderCorners";
 import Delaunator from 'delaunator';
 import { getPerspectiveTransform, perspectiveTransform } from "./warp";
-import { getBoxesAndScores, getInput, getCenters, getMarkerXY, invalidVideo } from "./detect";
+import { getBoxesAndScores, getInput, getCenters, getMarkerXY, invalidVideo, getBoxesScoresAndCls } from "./detect";
 import { cornersSet } from '../slices/cornersSlice';
 import { MODEL_WIDTH, MODEL_HEIGHT, CORNER_KEYS } from "./constants";
 import { clamp } from "./math";
@@ -13,20 +13,13 @@ const y: number[] = Array.from({ length: 7 }, (_, i) => i);
 const GRID: number[][] = y.map(yy => x.map(xx => [xx, yy])).flat();
 const IDEAL_QUAD: number[][] = [[0, 1], [1, 1], [1, 0], [0, 0]];
 
-const processBoxesAndScores = async (boxes: tf.Tensor2D, scores: tf.Tensor2D, singleClass: boolean=false) => {
+const processBoxesAndScores = async (boxes: tf.Tensor2D, scores: tf.Tensor2D) => {
   const maxScores: tf.Tensor1D = tf.max(scores, 1);
   const nms: tf.Tensor1D = await tf.image.nonMaxSuppressionAsync(boxes, maxScores, 100, 0.3, 0.1);
   const resTensor: tf.Tensor2D = tf.tidy(() => {
     const keptBoxes: tf.Tensor2D = tf.gather(boxes, nms, 0);
     const centers: tf.Tensor2D = getCenters(keptBoxes);
-    let resTensor: tf.Tensor2D;
-    if (singleClass) {
-      resTensor = centers;
-    } else {
-      const argmaxScores: tf.Tensor2D = tf.expandDims(tf.argMax(tf.gather(scores, nms, 0), 1), 1);
-      resTensor = tf.concat([centers, argmaxScores], 1)
-    }
-    return resTensor;
+    return centers;
   });
   const res: number[][] = resTensor.arraySync();
 
@@ -40,12 +33,14 @@ const runPiecesModel = async (videoRef: any, piecesModelRef: any): Promise<numbe
 
   const {image4D, width, height, padding, roi} = getInput(videoRef);
   const piecesPreds: tf.Tensor3D = piecesModelRef.current.predict(image4D);
-  const boxesAndScores = getBoxesAndScores(piecesPreds, width, height, videoWidth, videoHeight, padding, roi);
-  tf.dispose([piecesPreds, image4D]);
-
-  const pieces: number[][] = await processBoxesAndScores(boxesAndScores.boxes, boxesAndScores.scores, false); 
+  const boxesScoresAndCls = getBoxesScoresAndCls(piecesPreds, width, height, videoWidth, videoHeight, padding, roi);
+  const scores2D: tf.Tensor2D = tf.expandDims(boxesScoresAndCls.scores, 1);
+  const cls2D: tf.Tensor2D = tf.expandDims(boxesScoresAndCls.cls, 1);
+  const resTensor: tf.Tensor2D = tf.concat2d([boxesScoresAndCls.boxes, scores2D, cls2D], 1);
+  const res: number[][] = resTensor.arraySync();
+  tf.dispose([piecesPreds, resTensor, image4D, scores2D, cls2D, boxesScoresAndCls]);
   
-  return pieces;
+  return res;
 }
 
 const runXcornersModel = async (videoRef: any, xcornersModelRef: any, keypoints: number[][]): 
@@ -58,7 +53,7 @@ Promise<number[][]> => {
   const boxesAndScores = getBoxesAndScores(xcornersPreds, width, height, videoWidth, videoHeight, padding, roi);
   tf.dispose([xcornersPreds, image4D]);
 
-  const xCorners: number[][] = await processBoxesAndScores(boxesAndScores.boxes, boxesAndScores.scores, true);
+  const xCorners: number[][] = await processBoxesAndScores(boxesAndScores.boxes, boxesAndScores.scores);
   
   return xCorners;
 }
@@ -237,8 +232,8 @@ export const _findCorners = async (piecesModelRef: any, xcornersModelRef: any, v
   }
 
   const pieces = await runPiecesModel(videoRef, piecesModelRef);
-  const blackPieces = pieces.filter(x => x[2] <= 5).map(x => [x[0], x[1]]);
-  const whitePieces = pieces.filter(x => x[2] > 5).map(x => [x[0], x[1]]);
+  const blackPieces = pieces.filter(x => (x[5] <= 5) && (x[4] > 0.1)).map(x => [(x[0] + x[2]) / 2, (x[1] + x[3]) / 2]);
+  const whitePieces = pieces.filter(x => (x[5] > 5) && (x[4] > 0.1)).map(x => [(x[0] + x[2]) / 2, (x[1] + x[3]) / 2]);
   if ((blackPieces.length == 0) || (whitePieces.length == 0)) {
     setText(["No pieces to label corners"]);
     return;

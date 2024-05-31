@@ -2,7 +2,7 @@ import { renderState} from "./render/renderState";
 import * as tf from "@tensorflow/tfjs-core";
 import { getInvTransform, transformBoundary, transformCenters } from "./warp";
 import { gameUpdate, makeUpdatePayload } from "../slices/gameSlice";
-import { getBoxesAndScores, getInput, getXY, invalidVideo } from "./detect";
+import { getBoxesScoresAndCls, getInput, getXY, invalidVideo } from "./detect";
 import {  Mode, MovesData, MovesPair } from "../types";
 import { zeros } from "./math";
 import { CORNER_KEYS } from "./constants";
@@ -107,17 +107,19 @@ export const getSquares = (boxes: tf.Tensor2D, centers: number[][], boundary: nu
   return squares;
 }
 
-export const getUpdate = (scoresTensor: tf.Tensor2D, squares: number[]) => {
+export const getUpdate = (scoresTensor: tf.Tensor1D, clsTensor: tf.Tensor1D, squares: number[]) => {
   const update: number[][] = zeros(64, 12);
-  const scores: number[][] = scoresTensor.arraySync();
-  squares.forEach((square, i) => {
+  const scores: number[] = scoresTensor.arraySync();
+  const classes: number[] = clsTensor.arraySync();
+  for (let i = 0; i < squares.length; i++) {
+    const square = squares[i];
     if (square == -1) {
-      return;
+      continue;
     }
-    for (let j = 0; j < 12; j++) {
-      update[square][j] = Math.max(update[square][j], scores[i][j]);
-    }
-  })
+    const cls = classes[i];
+    const score = scores[i];
+    update[square][cls] = Math.max(update[square][cls], score);
+  }
   return update;
 }
 
@@ -139,16 +141,16 @@ const sanToLan = (board: Chess, san: string): string => {
 }
 
 export const detect = async (modelRef: any, videoRef: any, keypoints: number[][]):
-  Promise<{boxes: tf.Tensor2D, scores: tf.Tensor2D}> => {
+  Promise<{boxes: tf.Tensor2D, scores: tf.Tensor1D, cls: tf.Tensor1D}> => {
   const {image4D, width, height, padding, roi} = getInput(videoRef, keypoints);
   const videoWidth: number = videoRef.current.videoWidth;
   const videoHeight: number = videoRef.current.videoHeight;
   const preds: tf.Tensor3D = modelRef.current.predict(image4D);
-  const {boxes, scores} = getBoxesAndScores(preds, width, height, videoWidth, videoHeight, padding, roi);
-
+  const {boxes, scores, cls} = getBoxesScoresAndCls(preds, width, height, videoWidth, videoHeight, padding, roi);
+  
   tf.dispose([image4D, preds]);
 
-  return {boxes, scores}
+  return {boxes, scores, cls}
 }
 
 export const getKeypoints = (cornersRef: any, canvasRef: any): number[][] => {
@@ -185,9 +187,9 @@ movesPairsRef: any, lastMoveRef: any, moveTextRef: any, mode: Mode) => {
       const startTime: number = performance.now();
       const startTensors: number = tf.memory().numTensors;
 
-      const {boxes, scores} = await detect(modelRef, videoRef, keypoints);
+      const {boxes, scores, cls} = await detect(modelRef, videoRef, keypoints);
       const squares: number[] = getSquares(boxes, centers, boundary);
-      const update: number[][] = getUpdate(scores, squares);
+      const update: number[][] = getUpdate(scores, cls, squares);
       state = updateState(state, update);
       const {bestScore1, bestScore2, bestJointScore, bestMove, bestMoves} = processState(state, movesPairsRef.current, possibleMoves);
 
@@ -232,7 +234,7 @@ movesPairsRef: any, lastMoveRef: any, moveTextRef: any, mode: Mode) => {
       
       renderState(canvasRef.current, centers, boundary, state);
 
-      tf.dispose([boxes, scores]);
+      tf.dispose([boxes, scores, cls]);
 
       const endTensors: number = tf.memory().numTensors;
       if (startTensors < endTensors) {
