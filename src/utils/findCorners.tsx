@@ -34,11 +34,12 @@ const runPiecesModel = async (videoRef: any, piecesModelRef: any): Promise<numbe
   const {image4D, width, height, padding, roi} = getInput(videoRef);
   const piecesPreds: tf.Tensor3D = piecesModelRef.current.predict(image4D);
   const boxesScoresAndCls = getBoxesScoresAndCls(piecesPreds, width, height, videoWidth, videoHeight, padding, roi);
+  const boxes2D = boxesScoresAndCls.boxes;
   const scores2D: tf.Tensor2D = tf.expandDims(boxesScoresAndCls.scores, 1);
   const cls2D: tf.Tensor2D = tf.expandDims(boxesScoresAndCls.cls, 1);
-  const resTensor: tf.Tensor2D = tf.concat2d([boxesScoresAndCls.boxes, scores2D, cls2D], 1);
+  const resTensor: tf.Tensor2D = tf.concat2d([boxes2D, scores2D, cls2D], 1);
   const res: number[][] = resTensor.arraySync();
-  tf.dispose([piecesPreds, resTensor, image4D, scores2D, cls2D, boxesScoresAndCls]);
+  tf.dispose([piecesPreds, resTensor, image4D, boxes2D, scores2D, cls2D, boxesScoresAndCls]);
   
   return res;
 }
