@@ -2,7 +2,7 @@ import * as tf from "@tensorflow/tfjs-core";
 import { renderCorners } from "./render/renderCorners";
 import Delaunator from 'delaunator';
 import { getPerspectiveTransform, perspectiveTransform } from "./warp";
-import { getBoxesAndScores, getInput, getCenters, getMarkerXY, invalidVideo, getBoxesScoresAndCls } from "./detect";
+import { getBoxesAndScores, getInput, getCenters, getMarkerXY, invalidVideo } from "./detect";
 import { cornersSet } from '../slices/cornersSlice';
 import { MODEL_WIDTH, MODEL_HEIGHT, CORNER_KEYS } from "./constants";
 import { clamp } from "./math";
@@ -15,15 +15,17 @@ const IDEAL_QUAD: number[][] = [[0, 1], [1, 1], [1, 0], [0, 0]];
 
 const processBoxesAndScores = async (boxes: tf.Tensor2D, scores: tf.Tensor2D) => {
   const maxScores: tf.Tensor1D = tf.max(scores, 1);
+  const argmaxScores: tf.Tensor1D = tf.argMax(scores, 1);
   const nms: tf.Tensor1D = await tf.image.nonMaxSuppressionAsync(boxes, maxScores, 100, 0.3, 0.1);
   const resTensor: tf.Tensor2D = tf.tidy(() => {
-    const keptBoxes: tf.Tensor2D = tf.gather(boxes, nms, 0);
-    const centers: tf.Tensor2D = getCenters(keptBoxes);
-    return centers;
+    const centers: tf.Tensor2D = getCenters(tf.gather(boxes, nms, 0));
+    const cls: tf.Tensor2D = tf.expandDims(tf.gather(argmaxScores, nms, 0), 1);
+    const res: tf.Tensor2D = tf.concat([centers, cls], 1);
+    return res;
   });
   const res: number[][] = resTensor.arraySync();
 
-  tf.dispose([nms, resTensor, boxes, scores, maxScores])
+  tf.dispose([nms, resTensor, boxes, scores, argmaxScores, maxScores])
   return res
 }
 
@@ -33,19 +35,17 @@ const runPiecesModel = async (videoRef: any, piecesModelRef: any): Promise<numbe
 
   const {image4D, width, height, padding, roi} = getInput(videoRef);
   const piecesPreds: tf.Tensor3D = piecesModelRef.current.predict(image4D);
-  const boxesScoresAndCls = getBoxesScoresAndCls(piecesPreds, width, height, videoWidth, videoHeight, padding, roi);
-  const boxes2D = boxesScoresAndCls.boxes;
-  const scores2D: tf.Tensor2D = tf.expandDims(boxesScoresAndCls.scores, 1);
-  const cls2D: tf.Tensor2D = tf.expandDims(boxesScoresAndCls.cls, 1);
-  const resTensor: tf.Tensor2D = tf.concat2d([boxes2D, scores2D, cls2D], 1);
-  const res: number[][] = resTensor.arraySync();
-  tf.dispose([piecesPreds, resTensor, image4D, boxes2D, scores2D, cls2D, boxesScoresAndCls]);
+  const piecesPredsT: tf.Tensor3D = tf.transpose(piecesPreds, [0, 2, 1]);
+  const boxesAndScores = getBoxesAndScores(piecesPredsT, width, height, videoWidth, videoHeight, padding, roi);
+  const pieces: number[][] = await processBoxesAndScores(boxesAndScores.boxes, boxesAndScores.scores);
   
-  return res;
+  tf.dispose([piecesPreds, piecesPredsT, image4D, boxesAndScores]);
+  return pieces;
 }
 
-const runXcornersModel = async (videoRef: any, xcornersModelRef: any, keypoints: number[][]): 
+const runXcornersModel = async (videoRef: any, xcornersModelRef: any, pieces: number[][]): 
 Promise<number[][]> => {
+  const keypoints: number[][] = pieces.map(x => [x[0], x[1]]);
   const videoWidth: number = videoRef.current.videoWidth;
   const videoHeight: number = videoRef.current.videoHeight;
 
@@ -54,8 +54,8 @@ Promise<number[][]> => {
   const boxesAndScores = getBoxesAndScores(xcornersPreds, width, height, videoWidth, videoHeight, padding, roi);
   tf.dispose([xcornersPreds, image4D]);
 
-  const xCorners: number[][] = await processBoxesAndScores(boxesAndScores.boxes, boxesAndScores.scores);
-  
+  let xCorners: number[][] = await processBoxesAndScores(boxesAndScores.boxes, boxesAndScores.scores);
+  xCorners = xCorners.map(x => [x[0], x[1]]);
   return xCorners;
 }
 
@@ -233,8 +233,8 @@ export const _findCorners = async (piecesModelRef: any, xcornersModelRef: any, v
   }
 
   const pieces = await runPiecesModel(videoRef, piecesModelRef);
-  const blackPieces = pieces.filter(x => (x[5] <= 5) && (x[4] > 0.1)).map(x => [(x[0] + x[2]) / 2, (x[1] + x[3]) / 2]);
-  const whitePieces = pieces.filter(x => (x[5] > 5) && (x[4] > 0.1)).map(x => [(x[0] + x[2]) / 2, (x[1] + x[3]) / 2]);
+  const blackPieces = pieces.filter(x => (x[2] <= 5));
+  const whitePieces = pieces.filter(x => (x[2] > 5));
   if ((blackPieces.length == 0) || (whitePieces.length == 0)) {
     setText(["No pieces to label corners"]);
     return;
