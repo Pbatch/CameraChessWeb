@@ -174,49 +174,6 @@ export const getBoxesAndScores = (preds: tf.Tensor3D, width: number, height: num
   return {boxes, scores};
 } 
 
-export const getBoxesScoresAndCls = (preds: tf.Tensor3D, width: number, height: number, 
-  videoWidth: number, videoHeight: number, padding: number[], roi: number[]): {
-    boxes: tf.Tensor2D, scores: tf.Tensor1D, cls: tf.Tensor1D
-  } => {
-  const {boxes, scores, cls} = tf.tidy(() => {
-    let l: tf.Tensor3D = tf.slice(preds, [0, 0, 0], [-1, -1, 1]);
-    let t: tf.Tensor3D = tf.slice(preds, [0, 0, 1], [-1, -1, 1]);
-    let r: tf.Tensor3D = tf.slice(preds, [0, 0, 2], [-1, -1, 1]);
-    let b: tf.Tensor3D = tf.slice(preds, [0, 0, 3], [-1, -1, 1]);
-    
-    // Remove padding
-    l = tf.sub(l, padding[0]);
-    r = tf.sub(r, padding[0]);
-    t = tf.sub(t, padding[2]);
-    b = tf.sub(b, padding[2]);
-
-    // Scale
-    l = tf.mul(l, width / (MODEL_WIDTH - padding[0] - padding[1]));
-    r = tf.mul(r, width / (MODEL_WIDTH - padding[0] - padding[1]));
-    t = tf.mul(t, height / (MODEL_HEIGHT - padding[2] - padding[3]));
-    b = tf.mul(b, height / (MODEL_HEIGHT - padding[2] - padding[3]));
-
-    // Add ROI
-    l = tf.add(l, roi[0]);
-    r = tf.add(r, roi[0]);
-    t = tf.add(t, roi[1]);
-    b = tf.add(b, roi[1]);
-
-    // Scale
-    l = tf.mul(l, MODEL_WIDTH / videoWidth);
-    r = tf.mul(r, MODEL_WIDTH / videoWidth);
-    t = tf.mul(t, MODEL_HEIGHT / videoHeight);
-    b = tf.mul(b, MODEL_HEIGHT / videoHeight);
-
-    const boxes: tf.Tensor2D = tf.squeeze(tf.concat([l, t, r, b], 2));
-    const scores: tf.Tensor1D = tf.squeeze(tf.slice(preds, [0, 0, 4], [-1, -1, 1]));
-    const cls: tf.Tensor1D = tf.squeeze(tf.slice(preds, [0, 0, 5], [-1, -1, 1]));
-
-    return {boxes, scores, cls};
-  });
-  return {boxes, scores, cls};
-} 
-
 export const getCenters = (boxes: tf.Tensor2D) => {
   const centers: tf.Tensor2D = tf.tidy(() => {
     const l: tf.Tensor2D = tf.slice(boxes, [0, 0], [-1, 1]);
