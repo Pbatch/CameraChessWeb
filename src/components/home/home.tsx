@@ -15,12 +15,14 @@ const Home = () => {
         </div>
       </div>
       <div className="row py-2 m-0">
-        {/* <div className="col">
+        <div className="col">
           <NavButton text="Broadcast" tokenRequired={true} />
-        </div> */}
+        </div>
         <div className="col">
           <NavButton text="Play" tokenRequired={true} />
         </div>
+      </div>
+      <div className="row py-2 m-0">
         <div className="col">
           <NavButton text="Export" tokenRequired={true} />
         </div>
