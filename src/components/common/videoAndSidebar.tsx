@@ -10,7 +10,7 @@ import RecordSidebar from "../record/recordSidebar";
 import UploadSidebar from "../upload/uploadSidebar";
 import BroadcastSidebar from "../broadcast/broadcastSidebar";
 import { gameResetFen, gameResetMoves, gameResetStart, gameSelect } from "../../slices/gameSlice";
-import { lichessGetRound, lichessPushRound } from "../../utils/lichess";
+import { lichessPushRound } from "../../utils/lichess";
 import { userSelect } from "../../slices/userSlice";
 import { START_FEN } from "../../utils/constants";
 import PlaySidebar from "../play/playSidebar";
@@ -49,53 +49,18 @@ const VideoAndSidebar = ({ mode }: { mode: Mode }) => {
       return;
     }
     
-    lichessGetRound(token, study.id).then((lichessPgn) => {
-      const lichessGames: string[] = lichessPgn.split(/\n\n\n/);
-      let matchedGame: string = "";
-      lichessGames.forEach((lichessGame: string) => {
-        if (lichessGame.includes(`[Board "${boardNumber}"]`)) {
-          matchedGame = lichessGame;
-        }
-      });
-      let tags: string[];
-      if (matchedGame === "") {
-        tags = [
-          `[Result "*"]`,
-          `[FEN "${START_FEN}"]`,
-          `[Board "${boardNumber}"]`,
-          `[Site "${boardNumber}"]`,
-          `[Annotator "ChessCam"]`
-        ]
-      } else {
-        const matches = matchedGame.match(/\[(.*?)\]/g);
-        if (matches === null) {
-          throw Error(`Could not find any tags in ${matchedGame}`);
-        }
-        tags = matches.filter((tag) => {
-          const badStarts: string[] = [
-            "[Event", 
-            "[Annotator", 
-            "[Variant",
-            "[ECO",
-            "[Opening",
-            "[UTCDate",
-            "[UTCTime",
-          ];
-          for (let i=0; i < badStarts.length; i++) {
-            if (tag.startsWith(badStarts[i])) {
-              return false;
-            }
-          }
-          return true;
-        })
-      }
-      const broadcastPgn = [
-        ...tags,
-        "",
-        moves
-      ].join("\r");
-      lichessPushRound(token, broadcastPgn, study.id);
-    });
+    const broadcastPgn = [
+      `[Result "*"]`,
+      `[FEN "${START_FEN}"]`,
+      `[Board "${boardNumber}"]`,
+      `[Site "${boardNumber}"]`,
+      `[White "White ${boardNumber}"]`,
+      `[Black "Black ${boardNumber}"]`,
+      `[Annotator "ChessCam"]`,
+      "",
+      moves
+    ].join("\r");
+    lichessPushRound(token, broadcastPgn, study.id);
   }, [moves])
 
   useEffect(() => {

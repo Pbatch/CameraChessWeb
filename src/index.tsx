@@ -43,10 +43,10 @@ const router = createBrowserRouter([
         path: "/upload",
         element: <VideoAndSidebar mode="upload" />
       },
-      // {
-      //   path: "/broadcast",
-      //   element: <VideoAndSidebar mode="broadcast" />
-      // },
+      {
+        path: "/broadcast",
+        element: <VideoAndSidebar mode="broadcast" />
+      },
       {
         path: "/play",
         element: <VideoAndSidebar mode="play" />
