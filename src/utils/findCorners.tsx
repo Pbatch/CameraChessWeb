@@ -35,11 +35,10 @@ const runPiecesModel = async (videoRef: any, piecesModelRef: any): Promise<numbe
 
   const {image4D, width, height, padding, roi} = getInput(videoRef);
   const piecesPreds: tf.Tensor3D = piecesModelRef.current.predict(image4D);
-  const piecesPredsT: tf.Tensor3D = tf.transpose(piecesPreds, [0, 2, 1]);
-  const boxesAndScores = getBoxesAndScores(piecesPredsT, width, height, videoWidth, videoHeight, padding, roi);
+  const boxesAndScores = getBoxesAndScores(piecesPreds, width, height, videoWidth, videoHeight, padding, roi);
   const pieces: number[][] = await processBoxesAndScores(boxesAndScores.boxes, boxesAndScores.scores);
   
-  tf.dispose([piecesPreds, piecesPredsT, image4D, boxesAndScores]);
+  tf.dispose([piecesPreds, image4D, boxesAndScores]);
   return pieces;
 }
 

@@ -133,12 +133,14 @@ export const getBoxesAndScores = (preds: tf.Tensor3D, width: number, height: num
     boxes: tf.Tensor2D, scores: tf.Tensor2D
   } => {
   const {boxes, scores} = tf.tidy(() => {
-    const w: tf.Tensor3D = tf.slice(preds, [0, 0, 2], [-1, -1, 1]);
-    const h: tf.Tensor3D = tf.slice(preds, [0, 0, 3], [-1, -1, 1]);
+    const predsT: tf.Tensor3D = tf.transpose(preds, [0, 2, 1]);
+
+    const w: tf.Tensor3D = tf.slice(predsT, [0, 0, 2], [-1, -1, 1]);
+    const h: tf.Tensor3D = tf.slice(predsT, [0, 0, 3], [-1, -1, 1]);
     
     // xc, yc, w, h -> l, t, r, b
-    let l: tf.Tensor2D = tf.sub(tf.slice(preds, [0, 0, 0], [-1, -1, 1]), tf.div(w, 2));
-    let t: tf.Tensor2D = tf.sub(tf.slice(preds, [0, 0, 1], [-1, -1, 1]), tf.div(h, 2));
+    let l: tf.Tensor2D = tf.sub(tf.slice(predsT, [0, 0, 0], [-1, -1, 1]), tf.div(w, 2));
+    let t: tf.Tensor2D = tf.sub(tf.slice(predsT, [0, 0, 1], [-1, -1, 1]), tf.div(h, 2));
     let r: tf.Tensor2D = tf.add(l, w);
     let b: tf.Tensor2D = tf.add(t, h);
     
@@ -167,7 +169,7 @@ export const getBoxesAndScores = (preds: tf.Tensor3D, width: number, height: num
     b = tf.mul(b, MODEL_HEIGHT / videoHeight);
 
     const boxes: tf.Tensor2D = tf.squeeze(tf.concat([l, t, r, b], 2));
-    const scores: tf.Tensor2D = tf.squeeze(tf.slice(preds, [0, 0, 4], [-1, -1, preds.shape[2] - 4]), [0]);
+    const scores: tf.Tensor2D = tf.squeeze(tf.slice(predsT, [0, 0, 4], [-1, -1, predsT.shape[2] - 4]), [0]);
 
     return {boxes, scores};
   });

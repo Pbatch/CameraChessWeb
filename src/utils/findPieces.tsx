@@ -146,10 +146,9 @@ export const detect = async (modelRef: any, videoRef: any, keypoints: number[][]
   const videoWidth: number = videoRef.current.videoWidth;
   const videoHeight: number = videoRef.current.videoHeight;
   const preds: tf.Tensor3D = modelRef.current.predict(image4D);
-  const predsT: tf.Tensor3D = tf.transpose(preds, [0, 2, 1]);
-  const {boxes, scores} = getBoxesAndScores(predsT, width, height, videoWidth, videoHeight, padding, roi);
+  const {boxes, scores} = getBoxesAndScores(preds, width, height, videoWidth, videoHeight, padding, roi);
   
-  tf.dispose([image4D, preds, predsT]);
+  tf.dispose([image4D, preds]);
 
   return {boxes, scores}
 }
