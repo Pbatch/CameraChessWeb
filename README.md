@@ -1,17 +1,26 @@
-# Camera Chess Web
+<div align="center">
 
-<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
+📌 This app is under active development and may experience minor issues.  
+Please report any bugs on Discord, and we will fix them promptly.
+
+<table>
+  <tr>
+    <td align=center>
+      <img src="https://github.com/user-attachments/assets/f7e73c25-36f6-42b7-aae9-e970e7bcebeb" alt="ClashRoyaleBuildABot" width="512">
+    </td>
+  </tr>
+</table>
+
+[![Discord](https://img.shields.io/badge/Discord-00c8d6?logo=discord&logoColor=white&style=flat)](https://discord.gg/3yQth8YBp8)
 [![All Contributors](https://img.shields.io/badge/all_contributors-6-orange.svg?style=flat-square)](#contributors-)
-<!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 Replace Chess eBoards with your phone camera using ChessCam (https://www.chesscam.net).
 
-Features include:
-* Broadcasting your game to Lichess.
-* Playing a game on Lichess.
-* Digitizing a chess game from a video / live stream.
-
 Download the free app on [Google Play](https://play.google.com/store/apps/details?id=com.camerachess.www.twa).
+
+Do you have ideas, bugs to report or training footage? Join our [Discord Server](https://discord.gg/3yQth8YBp8).
+
+</div>
 
 ## Demo
 [<img src="https://raw.githubusercontent.com/wiki/Pbatch/CameraChessWeb/images/thumbnail.png" width="100%">](https://youtu.be/AAs4EX372bc)
