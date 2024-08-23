@@ -217,7 +217,7 @@ const Video = ({ piecesModelRef, canvasRef, videoRef, sidebarRef, playing,
   const onEnded = () => {
     if (mode === "upload") {
       videoRef.current.currentTime = videoRef.current.duration;
-      videoRef.current.pause;
+      videoRef.current.pause();
     }
     setPlaying(false);
   }

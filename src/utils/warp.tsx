@@ -1,8 +1,7 @@
-// @ts-expect-error (vectorious has no type declaration)
-import { array, zeros } from 'vectorious';
+import { array, NDArray, zeros } from 'vectorious';
 import { BOARD_SIZE, SQUARE_SIZE } from "./constants";
 
-export const perspectiveTransform = (src: number[][], transform: any) => {
+export const perspectiveTransform = (src: number[][], transform: any): number[][] => {
     if (src[0].length == 2) {
       src = src.map(x => [x[0], x[1], 1]);
     }
@@ -22,9 +21,9 @@ export const perspectiveTransform = (src: number[][], transform: any) => {
     return warpedSrcArray
 }
 
-export const getPerspectiveTransform = (target: number[][], keypoints: number[][]) => {
-    const A = zeros(8, 8);
-    const B = zeros(8, 1);
+export const getPerspectiveTransform = (target: number[][], keypoints: number[][]): NDArray => {
+    const A: NDArray = zeros(8, 8);
+    const B: NDArray = zeros(8, 1);
 
     for (let i = 0; i < 4; i++) {
         const [x, y] = keypoints[i];
@@ -44,14 +43,14 @@ export const getPerspectiveTransform = (target: number[][], keypoints: number[][
     }
 
     const solution = A.solve(B).toArray();
-    const transform = array([...solution, 1], {
+    const transform: NDArray = array([...solution, 1], {
       shape: [3, 3],
     });
 
     return transform
 }
 
-export const getInvTransform = (keypoints: number[][]) => {
+export const getInvTransform = (keypoints: number[][]): NDArray => {
   const target: number[][] = [
     [BOARD_SIZE, BOARD_SIZE],
     [0, BOARD_SIZE],
@@ -59,14 +58,14 @@ export const getInvTransform = (keypoints: number[][]) => {
     [BOARD_SIZE, 0]
   ];
 
-  const transform = getPerspectiveTransform(target, keypoints);
-  const invTransform = transform.inv();
+  const transform: NDArray = getPerspectiveTransform(target, keypoints);
+  const invTransform: NDArray = transform.inv();
   return invTransform
 }
 
-export const transformCenters = (invTransform: any) => {
-  const x = Array.from({ length: 8 }, (_, i) => 0.5 + i);
-  const y = Array.from({ length: 8 }, (_, i) => 7.5 - i);
+export const transformCenters = (invTransform: any): number[][] => {
+  const x: number[] = Array.from({ length: 8 }, (_, i) => 0.5 + i);
+  const y: number[] = Array.from({ length: 8 }, (_, i) => 7.5 - i);
   const warpedCenters: number[][] = y.map(yy => 
     x.map(xx => 
       [xx * SQUARE_SIZE, yy * SQUARE_SIZE, 1]
@@ -77,7 +76,7 @@ export const transformCenters = (invTransform: any) => {
   return centers
 }
 
-export const transformBoundary = (invTransform: any) => {
+export const transformBoundary = (invTransform: any): number[][] => {
   const warpedBoundary: number[][] = [
     [-0.5 * SQUARE_SIZE, -0.5 * SQUARE_SIZE, 1],
     [-0.5 * SQUARE_SIZE, 8.5 * SQUARE_SIZE, 1],

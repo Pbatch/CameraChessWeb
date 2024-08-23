@@ -7,6 +7,7 @@ import { cornersSet } from '../slices/cornersSlice';
 import { MODEL_WIDTH, MODEL_HEIGHT, CORNER_KEYS } from "./constants";
 import { clamp } from "./math";
 import { CornersDict, CornersPayload } from "../types";
+import { NDArray } from "vectorious";
 
 const x: number[] = Array.from({ length: 7 }, (_, i) => i);
 const y: number[] = Array.from({ length: 7 }, (_, i) => i);
@@ -141,12 +142,12 @@ const findOffset = (warpedXcorners: number[][]) => {
   return bestOffset;
 }
 
-const scoreQuad = (quad: number[][], xCorners: number[][]) => {
-  const M = getPerspectiveTransform(IDEAL_QUAD, quad);
-  const warpedXcorners = perspectiveTransform(xCorners, M);
-  const offset = findOffset(warpedXcorners);
+const scoreQuad = (quad: number[][], xCorners: number[][]): [number, NDArray, number[]] => {
+  const M: NDArray = getPerspectiveTransform(IDEAL_QUAD, quad);
+  const warpedXcorners: number[][] = perspectiveTransform(xCorners, M);
+  const offset: number[] = findOffset(warpedXcorners);
 
-  const score = calculateOffsetScore(warpedXcorners, offset);
+  const score: number = calculateOffsetScore(warpedXcorners, offset);
   return [score, M, offset]
 }
 
@@ -157,7 +158,7 @@ const findCornersFromXcorners = (xCorners: number[][]) => {
   }
 
   let bestScore: number;
-  let bestM: any;
+  let bestM: NDArray;
   let bestOffset: number[];
   [bestScore, bestM, bestOffset] = scoreQuad(quads[0], xCorners);
   for (let i = 1; i < quads.length; i++) {
