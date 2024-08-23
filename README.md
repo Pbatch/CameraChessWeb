@@ -6,7 +6,7 @@ Please report any bugs on Discord, and we will fix them promptly.
 <table>
   <tr>
     <td align=center>
-      <img src="https://github.com/user-attachments/assets/f7e73c25-36f6-42b7-aae9-e970e7bcebeb" alt="ClashRoyaleBuildABot" width="512">
+      <img src="https://github.com/user-attachments/assets/f7e73c25-36f6-42b7-aae9-e970e7bcebeb" alt="ChessCam" width="512">
     </td>
   </tr>
 </table>
