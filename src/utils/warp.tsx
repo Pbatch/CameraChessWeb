@@ -1,5 +1,6 @@
 import { array, NDArray, zeros } from 'vectorious';
 import { BOARD_SIZE, SQUARE_SIZE } from "./constants";
+import * as tf from "@tensorflow/tfjs-core";
 
 export const perspectiveTransform = (src: number[][], transform: any): number[][] => {
     if (src[0].length == 2) {
@@ -63,7 +64,7 @@ export const getInvTransform = (keypoints: number[][]): NDArray => {
   return invTransform
 }
 
-export const transformCenters = (invTransform: any): number[][] => {
+export const transformCenters = (invTransform: any): [number[][], tf.Tensor3D] => {
   const x: number[] = Array.from({ length: 8 }, (_, i) => 0.5 + i);
   const y: number[] = Array.from({ length: 8 }, (_, i) => 7.5 - i);
   const warpedCenters: number[][] = y.map(yy => 
@@ -72,11 +73,13 @@ export const transformCenters = (invTransform: any): number[][] => {
     )
   ).flat();
   const centers: number[][] = perspectiveTransform(warpedCenters, invTransform);
-
-  return centers
+  const centers3D: tf.Tensor3D = tf.tidy(() => {
+    return tf.expandDims(tf.tensor2d(centers), 0);
+  });
+  return [centers, centers3D]
 }
 
-export const transformBoundary = (invTransform: any): number[][] => {
+export const transformBoundary = (invTransform: any): [number[][], tf.Tensor3D] => {
   const warpedBoundary: number[][] = [
     [-0.5 * SQUARE_SIZE, -0.5 * SQUARE_SIZE, 1],
     [-0.5 * SQUARE_SIZE, 8.5 * SQUARE_SIZE, 1],
@@ -84,6 +87,8 @@ export const transformBoundary = (invTransform: any): number[][] => {
     [8.5 * SQUARE_SIZE, -0.5 * SQUARE_SIZE, 1]
   ]
   const boundary: number[][] = perspectiveTransform(warpedBoundary, invTransform);
-  
-  return boundary
+  const boundary3D: tf.Tensor3D = tf.tidy(() => {
+    return tf.expandDims(tf.tensor2d(boundary), 0);
+  });
+  return [boundary, boundary3D];
 }
