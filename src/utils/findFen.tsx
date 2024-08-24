@@ -134,16 +134,16 @@ export const _findFen = async ({piecesModelRef, videoRef,
   const keypoints: number[][] = getKeypoints(cornersRef, canvasRef);
   
   const invTransform = getInvTransform(keypoints);
-  const centers = transformCenters(invTransform);
-  const boundary = transformBoundary(invTransform);
+  const [centers, centers3D] = transformCenters(invTransform);
+  const [boundary, boundary3D] = transformBoundary(invTransform);
   const {boxes, scores} = await detect(piecesModelRef, videoRef, keypoints);
-  const squares: number[] = getSquares(boxes, centers, boundary);
+  const squares: number[] = getSquares(boxes, centers3D, boundary3D);
   const state = getUpdate(scores, squares);
   setFenFromState(state, color, dispatch, setText);
 
   renderState(canvasRef.current, centers, boundary, state);
 
-  tf.dispose([boxes, scores]);
+  tf.dispose([boxes, scores, centers3D, boundary3D]);
 }
 
 export const findFen = async ({piecesModelRef, videoRef, cornersRef, canvasRef, dispatch, setText, color}: 

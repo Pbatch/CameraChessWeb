@@ -79,29 +79,44 @@ const getBoxCenters = (boxes: tf.Tensor2D) => {
   return boxCenters;
 }
 
-export const getSquares = (boxes: tf.Tensor2D, centers: number[][], boundary: number[][]): number[] => {
+export const getSquares = (boxes: tf.Tensor2D, centers3D: tf.Tensor3D, boundary3D: tf.Tensor3D): number[] => {
   const squares: number[] = tf.tidy(() => {
-    const boxCentersTensor: tf.Tensor2D = getBoxCenters(boxes);
-    const dist: tf.Tensor2D = tf.sum(tf.square(tf.sub(tf.expandDims(boxCentersTensor, 1), 
-    tf.expandDims(tf.tensor2d(centers), 0))), 2);
-    const squaresTensor: tf.Tensor1D = tf.argMin(dist, 1)
+    const boxCenters3D: tf.Tensor3D = tf.expandDims(getBoxCenters(boxes), 1);
+    const dist: tf.Tensor2D = tf.sum(tf.square(tf.sub(boxCenters3D, centers3D)), 2);
+    const squares: any = tf.argMin(dist, 1);
+
+    const shiftedBoundary3D: tf.Tensor3D = tf.concat([
+      tf.slice(boundary3D, [0, 1, 0], [1, 3, 2]),
+      tf.slice(boundary3D, [0, 0, 0], [1, 1, 2]),
+    ], 1);
+
+    const nBoxes: number = boxCenters3D.shape[0];
     
-    const squares: number[] = squaresTensor.arraySync();
-    const boxCenters: number[][] = boxCentersTensor.arraySync();
-    for (let i: number = 0; i < squares.length; i++) {
-      for (let j: number = 0; j < 4; j++) {
-        const jplus: number = (j + 1) % 4;
-        const a: number = boundary[j][0] - boundary[jplus][0];
-        const b: number = boundary[j][1] - boundary[jplus][1];
-        const c: number = boxCenters[i][0] - boundary[jplus][0];
-        const d: number = boxCenters[i][1] - boundary[jplus][1];
-        const det: number = (a * d) - (b * c);
-        if (det < 0) {
-          squares[i] = -1;
-        }
-      }
-    }
-    return squares;
+    const a: tf.Tensor2D = tf.squeeze(tf.sub(
+      tf.slice(boundary3D, [0, 0, 0], [1, 4, 1]),
+      tf.slice(shiftedBoundary3D, [0, 0, 0], [1, 4, 1])
+    ), [2]);
+    const b: tf.Tensor2D = tf.squeeze(tf.sub(
+      tf.slice(boundary3D, [0, 0, 1], [1, 4, 1]),
+      tf.slice(shiftedBoundary3D, [0, 0, 1], [1, 4, 1])
+    ), [2]);
+    const c: tf.Tensor2D = tf.squeeze(tf.sub(
+      tf.slice(boxCenters3D, [0, 0, 0], [nBoxes, 1, 1]),
+      tf.slice(shiftedBoundary3D, [0, 0, 0], [1, 4, 1])
+    ), [2]);
+    const d: tf.Tensor2D = tf.squeeze(tf.sub(
+      tf.slice(boxCenters3D, [0, 0, 1], [nBoxes, 1, 1]),
+      tf.slice(shiftedBoundary3D, [0, 0, 1], [1, 4, 1])
+    ), [2]);
+    
+    const det: tf.Tensor2D = tf.sub(tf.mul(a, d), tf.mul(b, c));
+    const newSquares: tf.Tensor1D = tf.where(
+      tf.any(tf.less(det, 0), 1), 
+      tf.scalar(-1), 
+      squares
+    );
+    
+    return newSquares.arraySync();
   });
 
   return squares;
@@ -165,6 +180,8 @@ playingRef: any, setText: any, dispatch: any, cornersRef: any, boardRef: any,
 movesPairsRef: any, lastMoveRef: any, moveTextRef: any, mode: Mode) => {
   let centers: number[][] | null = null;
   let boundary: number[][];
+  let centers3D: tf.Tensor3D;
+  let boundary3D: tf.Tensor3D;
   let state: number[][];
   let keypoints: number[][];
   let possibleMoves: Set<string>;
@@ -178,8 +195,8 @@ movesPairsRef: any, lastMoveRef: any, moveTextRef: any, mode: Mode) => {
       if (centers === null) {
         keypoints = getKeypoints(cornersRef, canvasRef);
         const invTransform = getInvTransform(keypoints);
-        centers = transformCenters(invTransform);
-        boundary = transformBoundary(invTransform);
+        [centers, centers3D] = transformCenters(invTransform);
+        [boundary, boundary3D] = transformBoundary(invTransform);
         state = zeros(64, 12);
         possibleMoves = new Set<string>;
         greedyMoveToTime = {};
@@ -188,7 +205,7 @@ movesPairsRef: any, lastMoveRef: any, moveTextRef: any, mode: Mode) => {
       const startTensors: number = tf.memory().numTensors;
 
       const {boxes, scores} = await detect(modelRef, videoRef, keypoints);
-      const squares: number[] = getSquares(boxes, centers, boundary);
+      const squares: number[] = getSquares(boxes, centers3D, boundary3D);
       const update: number[][] = getUpdate(scores, squares);
       state = updateState(state, update);
       const {bestScore1, bestScore2, bestJointScore, bestMove, bestMoves} = processState(state, movesPairsRef.current, possibleMoves);
