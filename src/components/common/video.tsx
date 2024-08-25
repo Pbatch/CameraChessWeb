@@ -1,27 +1,24 @@
 import { findPieces } from "../../utils/findPieces";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { CORNER_KEYS, MARKER_DIAMETER, MARKER_RADIUS, MEDIA_ASPECT_RATIO, MEDIA_CONSTRAINTS } from "../../utils/constants";
 import { Corners } from ".";
 import { useWindowWidth, useWindowHeight } from '@react-hook/window-size';
 import { useDispatch } from 'react-redux';
 import { cornersSet } from "../../slices/cornersSlice";
 import { getMarkerXY, getXY } from "../../utils/detect";
-import { Chessboard } from "react-chessboard";
 import { CornersPayload, Game, Mode, MovesPair, SetBoolean, SetStringArray } from "../../types";
 import { gameSelect, makeBoard } from "../../slices/gameSlice";
 import { getMovesPairs } from "../../utils/moves";
 import { Chess } from "chess.js";
 
 const Video = ({ piecesModelRef, canvasRef, videoRef, sidebarRef, playing, 
-  setPlaying, playingRef, setText, digital, mode, cornersRef }: {
+  setPlaying, playingRef, setText, mode, cornersRef }: {
   piecesModelRef: any, canvasRef: any, videoRef: any, sidebarRef: any, 
   playing: boolean, setPlaying: SetBoolean, playingRef: any,
-  setText: SetStringArray, digital: boolean, mode: Mode,
+  setText: SetStringArray, mode: Mode,
   cornersRef: any
 }) => {
   const game: Game = gameSelect();
-
-  const [boardWidth, setBoardWidth]: any = useState(100);
 
   const displayRef = useRef<any>(null);
   const boardRef = useRef<Chess>(makeBoard(game));
@@ -85,11 +82,6 @@ const Video = ({ piecesModelRef, canvasRef, videoRef, sidebarRef, playing,
       height = windowHeight;
     }
 
-    if (digital) {
-      setBoardWidth(height);
-      return;
-    }
-
     if ((canvasRef.current.offsetHeight == 0) || (canvasRef.current.offsetWidth) == 0) {
       return;
     }
@@ -140,7 +132,7 @@ const Video = ({ piecesModelRef, canvasRef, videoRef, sidebarRef, playing,
 
   useEffect(() => {
     updateWidthHeight();
-  }, [windowWidth, windowHeight, digital]);
+  }, [windowWidth, windowHeight]);
 
   useEffect(() => {
     if ((mode !== "upload") || (videoRef.current.src === "")) {
@@ -174,11 +166,6 @@ const Video = ({ piecesModelRef, canvasRef, videoRef, sidebarRef, playing,
   const liveStyle: React.CSSProperties = {
     position: "relative",
     backgroundColor: "#343a40",
-    display: digital ? "none": "inline-block"
-  }
-
-  const digitalStyle = {
-    display: digital ? "inline-block": "none"
   }
 
   const onLoadedMetadata = () => {  
@@ -195,19 +182,25 @@ const Video = ({ piecesModelRef, canvasRef, videoRef, sidebarRef, playing,
         return;
       }
 
-      const capabilities = tracks[0].getCapabilities();
-      console.log("Capabilties", capabilities);
-
-      if (capabilities.zoom) {
-        tracks[0].applyConstraints({
-          zoom: capabilities.zoom.min,
-        })
-        .catch((e: any) => console.log(e));
+      try {
+        const capabilities = tracks[0].getCapabilities();
+        console.log("Capabilties", capabilities);
+        
+        if (capabilities.zoom) {
+          tracks[0].applyConstraints({
+            zoom: capabilities.zoom.min,
+          })
+        }
+      } catch (_) {
+        console.log("Cannot update track capabilities")
       }
 
-      const settings = tracks[0].getSettings();
-      console.log("Settings", settings);
-
+      try {
+        const settings = tracks[0].getSettings();
+        console.log("Settings", settings);
+      } catch (_) {
+        console.log("Cannot log track settings")
+      }
     }, 2000);
   };
 
@@ -233,9 +226,6 @@ const Video = ({ piecesModelRef, canvasRef, videoRef, sidebarRef, playing,
           <canvas ref={canvasRef} style={canvasStyle} />
         </div>
         <Corners />
-      </div>
-      <div style={digitalStyle}>
-        <Chessboard position={game.fen} boardWidth={boardWidth} />
       </div>
     </div>
   );

@@ -1,6 +1,5 @@
 import SidebarButton from "./sidebarButton";
 import CornersButton from "./cornersButton";
-import DigitalButton from "./digitalButton";
 import RecordButton from "./recordButton";
 import StopButton from "./stopButton";
 import PgnButton from "./pgnButton";
@@ -14,9 +13,10 @@ import VideoAndSidebar from "./videoAndSidebar";
 import StudyButton from "./studyButton";
 import FenButton from "./fenButton";
 import DeviceButton from "./deviceButton";
+import BoardDisplay from "./boardDisplay";
 
 export { 
-  SidebarButton, CornersButton, DigitalButton, PgnButton, Icon, Corners, Display, 
+  SidebarButton, CornersButton, PgnButton, Icon, Corners, Display, 
   HomeButton, Sidebar, Container, VideoAndSidebar, RecordButton, StopButton, StudyButton,
-  FenButton, DeviceButton
+  FenButton, DeviceButton, BoardDisplay,
 };

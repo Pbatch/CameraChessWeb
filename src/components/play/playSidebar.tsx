@@ -1,4 +1,4 @@
-import { Display, CornersButton, HomeButton, PgnButton, Sidebar, DigitalButton, 
+import { Display, CornersButton, HomeButton, PgnButton, Sidebar,
   RecordButton, DeviceButton } from "../common";
 import { Game, SetBoolean, SetStringArray } from "../../types";
 import { userSelect } from "../../slices/userSlice";
@@ -10,11 +10,10 @@ import { gameSelect, gameUpdate, makeBoard, makeUpdatePayload } from "../../slic
 import GamesButton from "./gamesButton";
   
   const PlaySidebar = ({ piecesModelRef, xcornersModelRef, videoRef, canvasRef, sidebarRef, 
-    playing, setPlaying, text, setText, digital, setDigital }: {
+    playing, setPlaying, text, setText }: {
     piecesModelRef: any, xcornersModelRef: any, videoRef: any, canvasRef: any, sidebarRef: any,
     playing: boolean, setPlaying: SetBoolean, 
-    text: string[], setText: SetStringArray,
-    digital: boolean, setDigital: SetBoolean
+    text: string[], setText: SetStringArray
   }) => {
     const token: string = userSelect().token;
     const game: Game = gameSelect();
@@ -22,6 +21,9 @@ import GamesButton from "./gamesButton";
     const [gameId, setGameId] = useState<string>();
     const [color, setColor] = useState<Color>();
     const dispatch = useDispatch();
+    const inputStyle = {
+      display: playing ? "none": "inline-block"
+    }
 
     useEffect(() => {
       gameRef.current = game;
@@ -65,14 +67,14 @@ import GamesButton from "./gamesButton";
     }, [gameId]);
     
     return (
-      <Sidebar sidebarRef={sidebarRef} >
-        <li className="my-1">
+      <Sidebar sidebarRef={sidebarRef} playing={playing} >
+        <li className="my-1" style={inputStyle}>
           <DeviceButton videoRef={videoRef} />
         </li>
-        <li className="my-1">
+        <li className="my-1" style={inputStyle}>
           <GamesButton setGameId={setGameId} setColor={setColor} setText={setText} />
         </li>
-        <li className="my-1">
+        <li className="my-1" style={inputStyle}>
           <CornersButton piecesModelRef={piecesModelRef} xcornersModelRef={xcornersModelRef} videoRef={videoRef} canvasRef={canvasRef} 
           setText={setText} />
         </li>
@@ -88,7 +90,6 @@ import GamesButton from "./gamesButton";
         <li className="border-top"></li>
         <li className="my-1">
           <div className="btn-group w-100" role="group">
-            <DigitalButton digital={digital} setDigital={setDigital} />
             <PgnButton setText={setText} playing={playing} />
             <HomeButton />
           </div>
