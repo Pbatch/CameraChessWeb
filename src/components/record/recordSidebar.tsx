@@ -1,5 +1,4 @@
-import { Display, CornersButton, HomeButton, PgnButton, Sidebar,
-RecordButton, StopButton, FenButton, DeviceButton } from "../common";
+import { CornersButton, Sidebar, RecordButton, StopButton, FenButton, DeviceButton } from "../common";
 import { SetBoolean, SetStringArray } from "../../types";
 
 const RecordSidebar = ({ piecesModelRef, xcornersModelRef, videoRef, canvasRef, sidebarRef, 
@@ -13,7 +12,7 @@ const RecordSidebar = ({ piecesModelRef, xcornersModelRef, videoRef, canvasRef, 
     display: playing ? "none": "inline-block"
   }
   return (
-    <Sidebar sidebarRef={sidebarRef} playing={playing} >
+    <Sidebar sidebarRef={sidebarRef} playing={playing} text={text} setText={setText} >
       <li className="my-1" style={inputStyle}>
         <DeviceButton videoRef={videoRef} />
       </li>
@@ -29,17 +28,6 @@ const RecordSidebar = ({ piecesModelRef, xcornersModelRef, videoRef, canvasRef, 
         <div className="btn-group w-100" role="group">
           <RecordButton playing={playing} setPlaying={setPlaying} />
           <StopButton setPlaying={setPlaying} setText={setText} />
-        </div>
-      </li>
-      <li className="border-top"></li>
-      <li className="my-1">
-        <Display text={text} />
-      </li>
-      <li className="border-top"></li>
-      <li className="my-1">
-        <div className="btn-group w-100" role="group">
-          <PgnButton setText={setText} playing={playing} />
-          <HomeButton />
         </div>
       </li>
     </Sidebar>

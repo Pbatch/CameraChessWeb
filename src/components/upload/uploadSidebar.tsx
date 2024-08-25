@@ -1,5 +1,5 @@
 import { VideoButton, PlayButton, RestartButton, PlaybackButtons, StopButton } from "./buttons";
-import { CornersButton, HomeButton, Display, PgnButton, Sidebar, FenButton } from "../common";
+import { CornersButton, Sidebar, FenButton } from "../common";
 import { SetBoolean, SetStringArray } from "../../types";
 
 const UploadSidebar = ({ videoRef, xcornersModelRef, piecesModelRef, canvasRef, 
@@ -15,7 +15,7 @@ const UploadSidebar = ({ videoRef, xcornersModelRef, piecesModelRef, canvasRef,
   }
 
   return (
-    <Sidebar sidebarRef={sidebarRef} playing={playing}>
+    <Sidebar sidebarRef={sidebarRef} playing={playing} text={text} setText={setText} >
       <li className="my-1" style={inputStyle}>
         <VideoButton videoRef={videoRef} canvasRef={canvasRef} setPlaying={setPlaying} />
       </li>
@@ -35,17 +35,6 @@ const UploadSidebar = ({ videoRef, xcornersModelRef, piecesModelRef, canvasRef,
           <PlayButton videoRef={videoRef} playing={playing} setPlaying={setPlaying} />
           <StopButton videoRef={videoRef} setPlaying={setPlaying} setText={setText} />
           <RestartButton videoRef={videoRef} setText={setText} />
-        </div>
-      </li>
-      <li className="border-top"></li>
-      <li className="my-1">
-        <Display text={text} />
-      </li>
-      <li className="border-top"></li>
-      <li className="my-1">
-        <div className="btn-group w-100" role="group">
-          <PgnButton setText={setText} playing={playing} />
-          <HomeButton />
         </div>
       </li>
     </Sidebar>

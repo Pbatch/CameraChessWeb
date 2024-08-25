@@ -1,5 +1,4 @@
-import { Display, CornersButton, HomeButton, PgnButton, Sidebar,
-  RecordButton, DeviceButton } from "../common";
+import { CornersButton, Sidebar, RecordButton, DeviceButton } from "../common";
 import { Game, SetBoolean, SetStringArray } from "../../types";
 import { userSelect } from "../../slices/userSlice";
 import { useEffect, useRef, useState } from "react";
@@ -67,7 +66,7 @@ import GamesButton from "./gamesButton";
     }, [gameId]);
     
     return (
-      <Sidebar sidebarRef={sidebarRef} playing={playing} >
+      <Sidebar sidebarRef={sidebarRef} playing={playing} text={text} setText={setText} >
         <li className="my-1" style={inputStyle}>
           <DeviceButton videoRef={videoRef} />
         </li>
@@ -81,17 +80,6 @@ import GamesButton from "./gamesButton";
         <li className="my-1">
           <div className="btn-group w-100" role="group">
             <RecordButton playing={playing} setPlaying={setPlaying} />
-          </div>
-        </li>
-        <li className="border-top"></li>
-        <li className="my-1">
-          <Display text={text} />
-        </li>
-        <li className="border-top"></li>
-        <li className="my-1">
-          <div className="btn-group w-100" role="group">
-            <PgnButton setText={setText} playing={playing} />
-            <HomeButton />
           </div>
         </li>
       </Sidebar>
