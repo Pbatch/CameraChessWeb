@@ -35,8 +35,7 @@ const VideoAndSidebar = ({ mode }: { mode: Mode }) => {
   const [text, setText] = useState<string[]>([]);
   const [playing, setPlaying] = useState<boolean>(false);
   const [study, setStudy] = useState<Study | null>(null);
-  const [boardNumber, setBoardNumber] = useState<number>(-1)
-  const [digital, setDigital] = useState<boolean>(false);
+  const [boardNumber, setBoardNumber] = useState<number>(-1);
   
   const videoRef = useRef<any>(null);
   const playingRef = useRef<boolean>(playing);
@@ -82,11 +81,9 @@ const VideoAndSidebar = ({ mode }: { mode: Mode }) => {
   const props = {
     "playing": playing,
     "text": text,
-    "digital": digital,
     "study": study,
     "setPlaying": setPlaying,
     "setText": setText,
-    "setDigital": setDigital,
     "setBoardNumber": setBoardNumber,
     "setStudy": setStudy,
     "piecesModelRef": context.piecesModelRef,
