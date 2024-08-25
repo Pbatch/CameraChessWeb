@@ -18,28 +18,19 @@ const Header = () => {
   }
   
   return (
-    <div className="row py-2 m-0 align-items-center">
-      <div className="col-3 px-1">
-        <h3>
-          ChessCam
-        </h3>
+    <div className="row m-2">
+      <div className="h1 col-6 h-100 d-flex justify-content-center align-items-end m-0">
+        <img src="favicon.ico"></img>
+        <>&nbsp;</>
+        <div>ChessCam</div>
       </div>
-      <div className="col-2 px-1">
-        <i className="h1 bi bi-info-circle" onClick={() => navigate("/faq")}></i>
+      <div className="col-6 h-100">
+        <div className="h-100 d-flex justify-content-center align-items-end m-0">
+          <button className="btn btn-dark btn-outline-light m-0" onClick={handleClick}>
+            {username === "" ? "Login" : `Logout from "${username}"`}
+          </button> 
+        </div>
       </div>
-      <div className="col-3 px-1">
-        <h6>
-          <button className="btn btn-dark btn-outline-light" onClick={handleClick}>
-            {username === "" ? "Login" : "Logout"}
-          </button>
-        </h6>   
-      </div>
-      <div className="col-4 px-1">
-        <h6>
-          {username}
-        </h6>
-      </div>
-
     </div>
   );
 }
