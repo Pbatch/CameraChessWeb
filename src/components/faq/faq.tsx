@@ -3,7 +3,7 @@ import Faq from "react-faq-component";
 import { HomeButton } from "../common";
 
 const data = {
-  title: "FAQ (How it works)",
+  title: "Frequently Asked Questions",
   rows: [
       {
         title: "Where can I buy a stand?",
