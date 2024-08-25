@@ -38,9 +38,10 @@ const Video = ({ piecesModelRef, canvasRef, videoRef, sidebarRef, playing,
     moveTextRef.current = getMoveText(board);
     if (game.greedy === true) {
       board.undo();
+    } else {
+      movesPairsRef.current = getMovesPairs(board);
     }
     boardRef.current = board;
-    movesPairsRef.current = getMovesPairs(board);
     lastMoveRef.current = game.lastMove;
   }, [game])
 
