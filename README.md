@@ -40,7 +40,7 @@ If you need any help running inference, please post something in the Issues tab.
 | Name | Description | Link |
 | :---: | :---: | :---: |
 | 480L_leyolo_xcorners.onnx | LeYOLO xcorners detector | https://drive.google.com/file/d/1-2wodbiXag9UQ44e2AYAmoRN6jVpxy83/view?usp=sharing |
-| 480L_leyolo_xcorners.onnx | LeYOLO xcorners detector | https://drive.google.com/file/d/173orSe8eaytN8nin_HOvd2sEfP_wtOUW/view?usp=sharing |
+| 480L_leyolo_xcorners.pt | LeYOLO xcorners detector | https://drive.google.com/file/d/173orSe8eaytN8nin_HOvd2sEfP_wtOUW/view?usp=sharing |
 | 480M_leyolo_pieces.onnx | LeYOLO pieces detector | https://drive.google.com/file/d/1-80xp_nly9i6s3o0mF0mU9OZGEzUAlGj/view?usp=sharing |
 | 480M_leyolo_pieces.pt | LeYOLO pieces detector | https://drive.google.com/file/d/1L6PZbSdT-peCmiJGNwmgHJN5MTpfAM-0/view?usp=sharing |
 
