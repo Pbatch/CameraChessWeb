@@ -58,6 +58,15 @@
       "contributions": [
         "research"
       ]
+    },
+    {
+      "login": "tejasraman",
+      "name": "Tejas Raman",
+      "avatar_url": "https://avatars.githubusercontent.com/u/96961804?v=4",
+      "profile": "http://tejasraman.me",
+      "contributions": [
+        "security"
+      ]
     }
   ],
   "contributorsPerLine": 7,
