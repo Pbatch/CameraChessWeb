@@ -32,6 +32,11 @@ const Home = () => {
       </div>
       <div className="row my-2 mx-0 mt-auto">
         <Socials />
+        <div key="privacy" className="col">
+          <a href="/privacy" className="btn btn-dark btn-lg btn-outline-light w-20">
+            Privacy
+          </a>
+        </div>
       </div>
     </div>
   );
