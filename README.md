@@ -82,6 +82,9 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/AbdullahKhetran"><img src="https://avatars.githubusercontent.com/u/101284310?v=4?s=100" width="100px;" alt="Abdullah Khetran"/><br /><sub><b>Abdullah Khetran</b></sub></a><br /><a href="#research-AbdullahKhetran" title="Research">🔬</a></td>
       <td align="center" valign="top" width="14.28%"><a href="http://tejasraman.me"><img src="https://avatars.githubusercontent.com/u/96961804?v=4?s=100" width="100px;" alt="Tejas Raman"/><br /><sub><b>Tejas Raman</b></sub></a><br /><a href="#security-tejasraman" title="Security">🛡️</a></td>
     </tr>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/danispringer"><img src="https://avatars.githubusercontent.com/u/19246409?v=4?s=100" width="100px;" alt="Dani Springer Chess Lessons 🇮🇱"/><br /><sub><b>Dani Springer Chess Lessons 🇮🇱</b></sub></a><br /><a href="https://github.com/Pbatch/CameraChessWeb/commits?author=danispringer" title="Documentation">📖</a></td>
+    </tr>
   </tbody>
 </table>
 
