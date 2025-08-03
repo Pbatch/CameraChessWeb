@@ -25,14 +25,12 @@ const getData = (move: Move) => {
   const fromSquares: number[] = [SQUARE_MAP[move.from]];
   const toSquares = [SQUARE_MAP[move.to]];
   const targets = [getPieceIdx(move)];
-  if ((move.flags.includes("k")) || (move.flags.includes("q"))) {
-    // Castling
+  if (move.isKingsideCastle() || move.isQueensideCastle()) {
     const [from, to, target] = castlingMap[move.to];
     fromSquares.push(from);
     toSquares.push(to);
     targets.push(target);
-  } else if (move.flags.includes("e")) {
-    // En-passant
+  } else if (move.isEnPassant()) {
     const capturedPawnSquare = SQUARE_MAP[move.to[0] + move.from[1]];
     fromSquares.push(capturedPawnSquare);
   }
