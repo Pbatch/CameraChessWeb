@@ -2,7 +2,6 @@ import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Home from "./components/home/home";
 import Export from "./components/export/export";
-import Privacy from "./components/privacy/privacy";
 import FAQ from "./components/faq/faq";
 import App from "./App";
 
@@ -54,10 +53,6 @@ const router = createBrowserRouter([
       {
         path: "/export",
         element: <Export />
-      },
-      {
-        path: "/privacy",
-        element: <Privacy />
       },
       {
         path: "/faq",
