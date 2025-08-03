@@ -67,6 +67,15 @@
       "contributions": [
         "security"
       ]
+    },
+    {
+      "login": "danispringer",
+      "name": "Dani Springer Chess Lessons 🇮🇱",
+      "avatar_url": "https://avatars.githubusercontent.com/u/19246409?v=4",
+      "profile": "https://github.com/danispringer",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,
