@@ -28,7 +28,10 @@ const getFenAndError = (board: Chess, color: Color) => {
   // Side to move has opponent in check
   for (let i = 0; i < 64; i++) {
     const square: Square = SQUARE_NAMES[i];
-    const piece: Piece = board.get(square);
+    const piece: Piece | undefined = board.get(square);
+    if (piece === undefined) {
+      continue;
+    }
 
     const isKing: boolean = (piece.type === "k");
     const isOtherColor: boolean = (piece.color === otherColor);
