@@ -62,7 +62,7 @@
     "source-map-loader": "^5.0.0",
     "ts-loader": "^9.5.1",
     "typescript": "^5.5.4",
-    "vite": "^7.0.6",
+    "vite": "^7.2.2",
     "vite-bundle-visualizer": "1.0.0"
   }
 }
