@@ -16,8 +16,6 @@ Please report any bugs on Discord, and we will fix them promptly.
 
 Replace Chess eBoards with your phone camera using ChessCam (https://www.chesscam.net).
 
-Download the free app on [Google Play](https://play.google.com/store/apps/details?id=com.camerachess.www.twa).
-
 Do you have ideas, bugs to report or training footage? Join our [Discord Server](https://discord.gg/3yQth8YBp8).
 
 </div>

@@ -14,16 +14,6 @@ const data = {
         </p>
       },
       {
-        title: "Is there a mobile app?",
-        content:
-        <p>
-          If you have an Android, you can download the free ChessCam app&nbsp;
-          <a target="_blank" href="https://play.google.com/store/apps/details?id=com.camerachess.www.twa" rel="noreferrer">here</a>.
-          If you have an IPhone, you can add ChessCam to your home screen from the browser.
-          See <a target="blank" href="https://support.google.com/chrome/answer/9658361?hl=en-GB&co=GENIE.Platform%3DiOS" rel="noreferrer">here</a> for more detail.
-        </p>
-      },
-      {
         title: "How do I setup my camera?",
         content: 
         <div>
