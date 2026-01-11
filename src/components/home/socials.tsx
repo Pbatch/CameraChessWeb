@@ -7,7 +7,6 @@ const Socials = () => {
   const socials = [
     {"network": "github", "url": "https://github.com/Pbatch/CameraChessWeb", "bgColor": "#111111"},
     {"network": "youtube", "url": "https://www.youtube.com/channel/UCtgc3RevHj6UHq1D8Ymarmw"},
-    {"network": "google_play", "url": "https://play.google.com/store/apps/details?id=com.camerachess.www.twa"}
   ]
 
   const icons: any[] = [];
