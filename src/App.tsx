@@ -6,19 +6,19 @@ import { ModelRefs } from "./types";
 import { userSelect } from "./slices/userSlice";
 import { useDispatch } from "react-redux";
 import { lichessTrySetUser } from "./utils/lichess";
-import { AnyAction } from "redux";
+import { UnknownAction } from "@reduxjs/toolkit";
 
 const App = () => {
-  const dispatch: Dispatch<AnyAction> = useDispatch();
+  const dispatch: Dispatch<UnknownAction> = useDispatch();
   const navigate: NavigateFunction = useNavigate();
   const token = userSelect().token;
   const [loading, setLoading] = useState(true);
-  
+
   const piecesModelRef = useRef<GraphModel>();
   const xcornersModelRef = useRef<GraphModel>();
   const modelRefs: ModelRefs = {
     "piecesModelRef": piecesModelRef,
-    "xcornersModelRef": xcornersModelRef,           
+    "xcornersModelRef": xcornersModelRef,
   }
 
   useEffect(() => {
@@ -30,7 +30,7 @@ const App = () => {
 
   return (
     <>
-      {!loading && <Outlet context={modelRefs}/>}
+      {!loading && <Outlet context={modelRefs} />}
     </>
   );
 };

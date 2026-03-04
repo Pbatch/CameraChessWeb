@@ -1,7 +1,7 @@
 import { AccessContext, OAuth2AuthCodePKCE } from '@bity/oauth2-auth-code-pkce';
 import { userReset, userSetToken, userSetUsername } from '../slices/userSlice';
 import { Dispatch } from 'react';
-import { AnyAction } from 'redux';
+import { UnknownAction } from '@reduxjs/toolkit';
 import { NavigateFunction } from 'react-router-dom';
 import { Study } from '../types';
 
@@ -30,7 +30,7 @@ const readStream = (processLine: any) => (response: any) => {
   let buf: any = '';
 
   const loop = () =>
-    stream.read().then(({ done, value }: {done: boolean, value: any}) => {
+    stream.read().then(({ done, value }: { done: boolean, value: any }) => {
       if (done) {
         if (buf.length > 0) processLine(JSON.parse(buf));
       } else {
@@ -78,16 +78,16 @@ const setBroadcastlessStudies = async (token: string, username: string, setStudi
 
   const studies: Study[] = [];
   fetchResponse(token, path)
-  .then(readStream(async (response: any) => {
-    const id_ = response.id;
-    if (!(broadcastIds.includes(id_))) {
-      studies.push({
-        "id": id_, 
-        "name": response.name
-      });
-    }
-  }))
-  .then(() => setStudies(studies));
+    .then(readStream(async (response: any) => {
+      const id_ = response.id;
+      if (!(broadcastIds.includes(id_))) {
+        studies.push({
+          "id": id_,
+          "name": response.name
+        });
+      }
+    }))
+    .then(() => setStudies(studies));
 }
 
 export const lichessLogin = () => {
@@ -95,7 +95,7 @@ export const lichessLogin = () => {
   oauth.fetchAuthorizationCode();
 }
 
-export const lichessLogout = (dispatch: Dispatch<AnyAction>) => {
+export const lichessLogout = (dispatch: Dispatch<UnknownAction>) => {
   localStorage.removeItem("oauth2authcodepkce-state");
   dispatch(userReset());
 }
@@ -110,25 +110,25 @@ export const lichessSetStudies = (token: string, setStudies: any, username: stri
   const path = `/api/broadcast/my-rounds`;
   const broadcasts: Study[] = [];
   fetchResponse(token, path)
-  .then(readStream(async (response: any) => {
-    broadcasts.push({
-      "id": response.round.id, 
-      "name": response.round.name
+    .then(readStream(async (response: any) => {
+      broadcasts.push({
+        "id": response.round.id,
+        "name": response.round.name
+      });
+    }))
+    .then(() => {
+      if (onlyBroadcasts) {
+        setStudies(broadcasts);
+      } else {
+        setBroadcastlessStudies(token, username, setStudies, broadcasts);
+      }
     });
-  }))
-  .then(() => {
-    if (onlyBroadcasts) {
-      setStudies(broadcasts);
-    } else {
-      setBroadcastlessStudies(token, username, setStudies, broadcasts);
-    }
-  });
 }
 
 export const lichessImportPgn = (token: string, pgn: string) => {
   const path = "/api/import";
   const options = {
-    body: new URLSearchParams({ pgn }), 
+    body: new URLSearchParams({ pgn }),
     method: "POST"
   };
   const data = fetchBody(token, path, options);
@@ -138,7 +138,7 @@ export const lichessImportPgn = (token: string, pgn: string) => {
 export const lichessImportPgnToStudy = (token: string, pgn: string, name: string, studyId: string) => {
   const path = `/api/study/${studyId}/import-pgn`;
   const options = {
-    body: new URLSearchParams({ pgn: pgn, name: name }), 
+    body: new URLSearchParams({ pgn: pgn, name: name }),
     method: "POST"
   };
   fetchResponse(token, path, options);
@@ -156,7 +156,7 @@ export const lichessPushRound = (token: string, pgn: string, roundId: string) =>
 export const lichessStreamGame = (token: string, callback: any, gameId: string) => {
   const path = `/api/board/game/stream/${gameId}`;
   fetchResponse(token, path)
-  .then(readStream(callback));
+    .then(readStream(callback));
 }
 
 export const lichessGetPlaying = (token: string) => {
@@ -173,7 +173,7 @@ export const lichessPlayMove = (token: string, gameId: string, move: string) => 
   fetchResponse(token, path, options);
 }
 
-export const lichessTrySetUser = async (navigate: NavigateFunction, dispatch: Dispatch<AnyAction>) => {
+export const lichessTrySetUser = async (navigate: NavigateFunction, dispatch: Dispatch<UnknownAction>) => {
   const oauth: OAuth2AuthCodePKCE = getOauth();
   const returning: boolean = await oauth.isReturningFromAuthServer();
   if (!returning) {
@@ -186,12 +186,12 @@ export const lichessTrySetUser = async (navigate: NavigateFunction, dispatch: Di
     console.log("Access Context token is undefined");
     return;
   }
-  
+
   dispatch(userSetToken(newToken));
 
   const account: any = await lichessGetAccount(newToken);
   const username: string = account.username;
   dispatch(userSetUsername(username))
-  
+
   navigate("/");
 }
