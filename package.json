@@ -21,9 +21,6 @@
     "@tensorflow/tfjs-backend-webgl": "^4.22.0",
     "@tensorflow/tfjs-converter": "^4.22.0",
     "@tensorflow/tfjs-core": "^4.22.0",
-    "@types/react-redux": "^7.1.33",
-    "@types/react-router-dom": "^5.3.3",
-    "@types/redux": "^3.6.0",
     "bootstrap": "^5.3.3",
     "chessops": "^0.15.0",
     "delaunator": "^5.0.1",
@@ -59,8 +56,6 @@
     "gh-pages": "^6.1.1",
     "globals": "^15.9.0",
     "npm-check-updates": "^17.1.16",
-    "source-map-loader": "^5.0.0",
-    "ts-loader": "^9.5.1",
     "typescript": "^5.5.4",
     "vite": "^7.2.2",
     "vite-bundle-visualizer": "1.0.0"
