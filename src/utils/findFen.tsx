@@ -22,7 +22,7 @@ interface findFenInput {
 }
 
 const getFenAndError = (pos: Chess, color: Color) => {
-  let fen = makeFen(pos.toSetup());
+  const fen = makeFen(pos.toSetup());
   const otherColor: Color = opposite(color);
 
   let error = null;
