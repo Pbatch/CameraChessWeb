@@ -1,14 +1,15 @@
-import { renderState} from "./render/renderState";
+import { renderState } from "./render/renderState";
 import * as tf from "@tensorflow/tfjs-core";
 import { getInvTransform, transformBoundary, transformCenters } from "./warp";
 import { gameUpdate, makeUpdatePayload } from "../slices/gameSlice";
 import { getBoxesAndScores, getInput, getXY, invalidVideo } from "./detect";
-import {  Mode, MovesData, MovesPair } from "../types";
+import { Mode, MovesData, MovesPair } from "../types";
 import { zeros } from "./math";
 import { CORNER_KEYS } from "./constants";
-import { Chess } from "chess.js";
+import { parseSan } from "chessops/san";
+import { makeUci } from "chessops/util";
 
-const calculateScore = (state: any, move: MovesData, from_thr=0.6, to_thr=0.6) => {
+const calculateScore = (state: any, move: MovesData, from_thr = 0.6, to_thr = 0.6) => {
   let score = 0;
   move.from.forEach(square => {
     score += 1 - Math.max(...state[square]) - from_thr;
@@ -22,7 +23,7 @@ const calculateScore = (state: any, move: MovesData, from_thr=0.6, to_thr=0.6) =
 }
 
 const processState = (state: any, movesPairs: MovesPair[], possibleMoves: Set<string>): {
-  bestScore1: number, bestScore2: number, bestJointScore: number, 
+  bestScore1: number, bestScore2: number, bestJointScore: number,
   bestMove: MovesData | null, bestMoves: MovesData | null
 } => {
   let bestScore1 = Number.NEGATIVE_INFINITY;
@@ -48,7 +49,7 @@ const processState = (state: any, movesPairs: MovesPair[], possibleMoves: Set<st
     if ((movePair.move2 === null) || (movePair.moves === null) || !(possibleMoves.has(movePair.move1.sans[0]))) {
       return;
     }
-    
+
     const score2: number = calculateScore(state, movePair.move2);
     if (score2 < 0) {
       return;
@@ -63,7 +64,7 @@ const processState = (state: any, movesPairs: MovesPair[], possibleMoves: Set<st
     }
   })
 
-  return {bestScore1, bestScore2, bestJointScore, bestMove, bestMoves};
+  return { bestScore1, bestScore2, bestJointScore, bestMove, bestMoves };
 }
 
 const getBoxCenters = (boxes: tf.Tensor2D) => {
@@ -91,7 +92,7 @@ export const getSquares = (boxes: tf.Tensor2D, centers3D: tf.Tensor3D, boundary3
     ], 1);
 
     const nBoxes: number = boxCenters3D.shape[0];
-    
+
     const a: tf.Tensor2D = tf.squeeze(tf.sub(
       tf.slice(boundary3D, [0, 0, 0], [1, 4, 1]),
       tf.slice(shiftedBoundary3D, [0, 0, 0], [1, 4, 1])
@@ -108,14 +109,14 @@ export const getSquares = (boxes: tf.Tensor2D, centers3D: tf.Tensor3D, boundary3
       tf.slice(boxCenters3D, [0, 0, 1], [nBoxes, 1, 1]),
       tf.slice(shiftedBoundary3D, [0, 0, 1], [1, 4, 1])
     ), [2]);
-    
+
     const det: tf.Tensor2D = tf.sub(tf.mul(a, d), tf.mul(b, c));
     const newSquares: tf.Tensor1D = tf.where(
-      tf.any(tf.less(det, 0), 1), 
-      tf.scalar(-1), 
+      tf.any(tf.less(det, 0), 1),
+      tf.scalar(-1),
       squares
     );
-    
+
     return newSquares.arraySync();
   });
 
@@ -138,7 +139,7 @@ export const getUpdate = (scoresTensor: tf.Tensor2D, squares: number[]) => {
   return update;
 }
 
-const updateState = (state: number[][], update: number[][], decay: number=0.5) => {
+const updateState = (state: number[][], update: number[][], decay: number = 0.5) => {
   for (let i = 0; i < 64; i++) {
     for (let j = 0; j < 12; j++) {
       state[i][j] = decay * state[i][j] + (1 - decay) * update[i][j]
@@ -147,25 +148,23 @@ const updateState = (state: number[][], update: number[][], decay: number=0.5) =
   return state
 }
 
-const sanToLan = (board: Chess, san: string): string => {
-  board.move(san);
-  const history: any = board.history({ verbose: true });
-  const lan: string = history[history.length - 1].lan;
-  board.undo();
-  return lan;
+const sanToLan = (board: any, san: string): string => {
+  const move = parseSan(board, san);
+  if (!move) return "";
+  return makeUci(move);
 }
 
 export const detect = async (modelRef: any, videoRef: any, keypoints: number[][]):
-  Promise<{boxes: tf.Tensor2D, scores: tf.Tensor2D}> => {
-  const {image4D, width, height, padding, roi} = getInput(videoRef, keypoints);
+  Promise<{ boxes: tf.Tensor2D, scores: tf.Tensor2D }> => {
+  const { image4D, width, height, padding, roi } = getInput(videoRef, keypoints);
   const videoWidth: number = videoRef.current.videoWidth;
   const videoHeight: number = videoRef.current.videoHeight;
   const preds: tf.Tensor3D = modelRef.current.predict(image4D);
-  const {boxes, scores} = getBoxesAndScores(preds, width, height, videoWidth, videoHeight, padding, roi);
-  
+  const { boxes, scores } = getBoxesAndScores(preds, width, height, videoWidth, videoHeight, padding, roi);
+
   tf.dispose([image4D, preds]);
 
-  return {boxes, scores}
+  return { boxes, scores }
 }
 
 export const getKeypoints = (cornersRef: any, canvasRef: any): number[][] => {
@@ -176,8 +175,8 @@ export const getKeypoints = (cornersRef: any, canvasRef: any): number[][] => {
 }
 
 export const findPieces = (modelRef: any, videoRef: any, canvasRef: any,
-playingRef: any, setText: any, dispatch: any, cornersRef: any, boardRef: any, 
-movesPairsRef: any, lastMoveRef: any, moveTextRef: any, mode: Mode) => {
+  playingRef: any, setText: any, dispatch: any, cornersRef: any, boardRef: any,
+  movesPairsRef: any, lastMoveRef: any, moveTextRef: any, mode: Mode) => {
   let centers: number[][] | null = null;
   let boundary: number[][];
   let centers3D: tf.Tensor3D;
@@ -186,7 +185,7 @@ movesPairsRef: any, lastMoveRef: any, moveTextRef: any, mode: Mode) => {
   let keypoints: number[][];
   let possibleMoves: Set<string>;
   let requestId: number;
-  let greedyMoveToTime: { [move: string] : number};
+  let greedyMoveToTime: { [move: string]: number };
 
   const loop = async () => {
     if (playingRef.current === false || invalidVideo(videoRef)) {
@@ -204,21 +203,21 @@ movesPairsRef: any, lastMoveRef: any, moveTextRef: any, mode: Mode) => {
       const startTime: number = performance.now();
       const startTensors: number = tf.memory().numTensors;
 
-      const {boxes, scores} = await detect(modelRef, videoRef, keypoints);
+      const { boxes, scores } = await detect(modelRef, videoRef, keypoints);
       const squares: number[] = getSquares(boxes, centers3D, boundary3D);
       const update: number[][] = getUpdate(scores, squares);
       state = updateState(state, update);
-      const {bestScore1, bestScore2, bestJointScore, bestMove, bestMoves} = processState(state, movesPairsRef.current, possibleMoves);
+      const { bestScore1, bestScore2, bestJointScore, bestMove, bestMoves } = processState(state, movesPairsRef.current, possibleMoves);
 
       const endTime: number = performance.now();
       const fps: string = (1000 / (endTime - startTime)).toFixed(1);
-      
+
       let hasMove: boolean = false;
       if ((bestMoves !== null) && (mode !== "play")) {
         const move: string = bestMoves.sans[0];
         hasMove = (bestScore2 > 0) && (bestJointScore > 0) && (possibleMoves.has(move));
         if (hasMove) {
-          boardRef.current.move(move);
+          boardRef.current.playSan(move);
           possibleMoves.clear();
           greedyMoveToTime = {};
         }
@@ -227,7 +226,7 @@ movesPairsRef: any, lastMoveRef: any, moveTextRef: any, mode: Mode) => {
       let hasGreedyMove: boolean = false;
       if (bestMove !== null && !(hasMove) && (bestScore1 > 0)) {
         const move: string = bestMove.sans[0];
-        if (!(move in greedyMoveToTime)) { 
+        if (!(move in greedyMoveToTime)) {
           greedyMoveToTime[move] = endTime;
         }
 
@@ -235,11 +234,11 @@ movesPairsRef: any, lastMoveRef: any, moveTextRef: any, mode: Mode) => {
         const newMove = sanToLan(boardRef.current, move) !== lastMoveRef.current;
         hasGreedyMove = secondElapsed && newMove;
         if (hasGreedyMove) {
-          boardRef.current.move(move);
-          greedyMoveToTime = {greedyMove: greedyMoveToTime[move]};
+          boardRef.current.playSan(move);
+          greedyMoveToTime = { greedyMove: greedyMoveToTime[move] };
         }
       }
-      
+
       if (hasMove || hasGreedyMove) {
         // No takebacks in "play" mode
         const greedy = (mode === "play") ? false : hasGreedyMove;
@@ -248,7 +247,7 @@ movesPairsRef: any, lastMoveRef: any, moveTextRef: any, mode: Mode) => {
         dispatch(gameUpdate(payload));
       }
       setText([`FPS: ${fps}`, moveTextRef.current]);
-      
+
       renderState(canvasRef.current, centers, boundary, state);
 
       tf.dispose([boxes, scores]);
