@@ -1,41 +1,70 @@
-import { Chess, Move } from "chess.js";
-import { SQUARE_MAP, LABEL_MAP } from "./constants";
+import { parseFen, makeFen } from "chessops/fen";
+import { Chess, Position } from "chessops/chess";
+import { Move, Role, Color, isNormal } from "chessops/types";
+import { makeSan } from "chessops/san";
+import { kingCastlesTo } from "chessops/util";
+import { SQUARE_MAP, LABEL_MAP, SQUARE_NAMES } from "./constants";
 import { MovesData, MovesPair } from "../types";
 
-const castlingMap: {[id: string]: number[]} = {
+function* legalMoves(pos: Position): Generator<Move> {
+  const ctx = pos.ctx();
+  for (const [from, dests] of pos.allDests(ctx)) {
+    for (const to of dests) {
+      const piece = pos.board.get(from);
+      if (piece?.role === 'pawn' && (to < 8 || to >= 56)) {
+        for (const promotion of ['queen', 'rook', 'bishop', 'knight'] as Role[]) {
+          yield { from, to, promotion };
+        }
+      } else if (piece?.role === 'king' && pos.board.get(to)?.color === pos.turn) {
+        const side = to % 8 < from % 8 ? 'a' : 'h';
+        yield { from, to: kingCastlesTo(pos.turn, side) };
+      } else {
+        yield { from, to };
+      }
+    }
+  }
+}
+
+const castlingMap: { [id: string]: number[] } = {
   "g1": [SQUARE_MAP["h1"], SQUARE_MAP["f1"], LABEL_MAP["R"]],
   "c1": [SQUARE_MAP["a1"], SQUARE_MAP["d1"], LABEL_MAP["R"]],
   "g8": [SQUARE_MAP["h8"], SQUARE_MAP["f8"], LABEL_MAP["r"]],
   "c8": [SQUARE_MAP["a8"], SQUARE_MAP["d8"], LABEL_MAP["r"]]
 }
 
-const getPieceIdx = (move: Move) => {
-  let piece: string = move.piece;
-  if (move?.promotion) {
-    piece = move.promotion;
-  }
-  if (move.color == "w") {
-    piece = piece.toUpperCase();
-  }
-  const pieceIdx: number = LABEL_MAP[piece];
-  return pieceIdx;
+const roleToLabel = (role: Role, color: Color): string => {
+  const label = role === 'knight' ? 'n' : role[0];
+  return color === 'white' ? label.toUpperCase() : label.toLowerCase();
 }
 
-const getData = (move: Move) => {
-  const fromSquares: number[] = [SQUARE_MAP[move.from]];
-  const toSquares = [SQUARE_MAP[move.to]];
-  const targets = [getPieceIdx(move)];
-  if (move.isKingsideCastle() || move.isQueensideCastle()) {
-    const [from, to, target] = castlingMap[move.to];
-    fromSquares.push(from);
-    toSquares.push(to);
-    targets.push(target);
-  } else if (move.isEnPassant()) {
-    const capturedPawnSquare = SQUARE_MAP[move.to[0] + move.from[1]];
+const getData = (pos: any, move: any) => {
+  if (!isNormal(move)) return null;
+
+  const fromSquares: number[] = [move.from];
+  const toSquares: number[] = [move.to];
+
+  const piece = pos.board.get(move.from);
+  const targetRole = move.promotion || piece?.role || 'pawn';
+  const targets = [LABEL_MAP[roleToLabel(targetRole, pos.turn)]];
+
+  // Castling
+  if (piece?.role === 'king' && Math.abs(move.to - move.from) === 2) {
+    const squareName = SQUARE_NAMES[move.to];
+    if (castlingMap[squareName]) {
+      const [from, to, target] = castlingMap[squareName];
+      fromSquares.push(from);
+      toSquares.push(to);
+      targets.push(target);
+    }
+  }
+  // En Passant
+  else if (piece?.role === 'pawn' && move.to !== move.from && !pos.board.get(move.to) && (move.from % 8 !== move.to % 8)) {
+    const capturedPawnSquare = (move.to % 8) + (move.from / 8 | 0) * 8;
     fromSquares.push(capturedPawnSquare);
   }
+
   const moveData: MovesData = {
-    "sans": [move.san],
+    "sans": [makeSan(pos, move)],
     "from": fromSquares,
     "to": toSquares,
     "targets": targets
@@ -60,7 +89,7 @@ const combineData = (move1Data: MovesData, move2Data: MovesData) => {
   const from = from1.concat(move2Data.from);
   const to = to1.concat(move2Data.to);
   const targets = targets1.concat(move2Data.targets);
-  
+
   const data: MovesData = {
     "sans": [move1Data.sans[0], move2Data.sans[0]],
     "from": from,
@@ -70,23 +99,35 @@ const combineData = (move1Data: MovesData, move2Data: MovesData) => {
   return data;
 }
 
-export const getMovesPairs = (board: Chess) => {
+export const getMovesPairs = (board: any) => {
+  const fen = makeFen(board.toSetup());
+  const setup = parseFen(fen).unwrap();
+  const pos = Chess.fromSetup(setup).unwrap();
+
   const movesPairs: MovesPair[] = [];
-  board.moves({ verbose: true }).forEach(move1 => {
-    const move1Data = getData(move1);
-    board.move(move1);
+
+  for (const move1 of legalMoves(pos)) {
+    const move1Data = getData(pos, move1);
+    if (!move1Data) continue;
+
+    const pos2 = pos.clone();
+    pos2.play(move1);
+
     let done = true;
-    board.moves({ verbose: true }).forEach(move2 => {
-      const move2Data = getData(move2);
+    for (const move2 of legalMoves(pos2)) {
+      const move2Data = getData(pos2, move2);
+      if (!move2Data) continue;
+
       const movesData = combineData(move1Data, move2Data);
       const movesPair: MovesPair = {
         "move1": move1Data,
         "move2": move2Data,
-        "moves": movesData           
+        "moves": movesData
       }
       movesPairs.push(movesPair);
       done = false;
-    });
+    }
+
     if (done) {
       const movesPair: MovesPair = {
         "move1": move1Data,
@@ -95,7 +136,7 @@ export const getMovesPairs = (board: Chess) => {
       }
       movesPairs.push(movesPair);
     }
-    board.undo();
-  });
+  }
+
   return movesPairs;
 }

@@ -1,8 +1,11 @@
 import * as tf from "@tensorflow/tfjs-core";
 import { getInvTransform, transformBoundary, transformCenters } from "./warp";
 import { invalidVideo } from "./detect";
-import { detect, getKeypoints, getSquares, getUpdate} from "./findPieces";
-import { Chess, Color, Piece, PieceSymbol, Square } from "chess.js";
+import { detect, getKeypoints, getSquares, getUpdate } from "./findPieces";
+import { parseFen, makeFen } from "chessops/fen";
+import { Chess } from "chessops/chess";
+import { Color, Role } from "chessops/types";
+import { opposite } from "chessops/util";
 import { PIECE_SYMBOLS, SQUARE_NAMES } from "./constants";
 import { gameResetMoves, gameSetFen, gameSetStart } from "../slices/gameSlice";
 import { renderState } from "./render/renderState";
@@ -18,32 +21,22 @@ interface findFenInput {
   color: Color
 }
 
-const getFenAndError = (board: Chess, color: Color) => {
-  let fen = board.fen();
-  const otherColor: Color = (color === "w") ? "b" : "w";
-  fen = fen.replace(` ${otherColor} `, ` ${color} `);
+const getFenAndError = (pos: Chess, color: Color) => {
+  let fen = makeFen(pos.toSetup());
+  const otherColor: Color = opposite(color);
 
   let error = null;
 
   // Side to move has opponent in check
-  for (let i = 0; i < 64; i++) {
-    const square: Square = SQUARE_NAMES[i];
-    const piece: Piece | undefined = board.get(square);
-    if (piece === undefined) {
-      continue;
-    }
-
-    const isKing: boolean = (piece.type === "k");
-    const isOtherColor: boolean = (piece.color === otherColor);
-    const isAttacked: boolean = board.isAttacked(square, color);
-
-    if (isKing && isOtherColor && isAttacked) {
+  const otherKing = pos.board.kingOf(otherColor);
+  if (otherKing !== undefined) {
+    if (pos.kingAttackers(otherKing, color, pos.board.occupied).nonEmpty()) {
       error = "Side to move has opponent in check";
-      return {fen, error}
+      return { fen, error };
     }
   }
 
-  return {fen, error}
+  return { fen, error };
 }
 
 const setFenFromState = (state: number[][], color: Color, dispatch: any, setText: SetStringArray) => {
@@ -59,7 +52,7 @@ const setFenFromState = (state: number[][], color: Color, dispatch: any, setText
       bestBlackKingIdx = i;
     }
   }
-  assignment[bestBlackKingIdx] = 1; 
+  assignment[bestBlackKingIdx] = 1;
 
   // In the second pass, assign the white king
   let bestWhiteKingScore = -1;
@@ -74,7 +67,7 @@ const setFenFromState = (state: number[][], color: Color, dispatch: any, setText
       bestWhiteKingIdx = i;
     }
   }
-  assignment[bestWhiteKingIdx] = 7; 
+  assignment[bestWhiteKingIdx] = 7;
 
   // In the third pass, assign the remaining pieces
   const remainingPieceIdxs = [0, 2, 3, 4, 5, 6, 8, 9, 10, 11];
@@ -87,13 +80,13 @@ const setFenFromState = (state: number[][], color: Color, dispatch: any, setText
     let bestIdx = null;
     let bestScore = 0.3;
     remainingPieceIdxs.forEach(j => {
-      const square: Square = SQUARE_NAMES[i];
-      const badRank: boolean = (square[1] === "1") || (square[1] === "8");
-      const isPawn: boolean = (PIECE_SYMBOLS[j % 6] === "p");
+      const squareName = SQUARE_NAMES[i];
+      const badRank: boolean = (squareName[1] === "1") || (squareName[1] === "8");
+      const isPawn: boolean = (PIECE_SYMBOLS[j % 6] === "pawn");
       if (isPawn && badRank) {
         return;
       }
-      
+
       const score = state[i][j];
       if (score > bestScore) {
         bestIdx = j;
@@ -106,19 +99,18 @@ const setFenFromState = (state: number[][], color: Color, dispatch: any, setText
     }
   }
 
-  const board = new Chess();
-  board.clear();
+  const setup = parseFen("8/8/8/8/8/8/8/8 w - - 0 1").unwrap();
+  const board = Chess.fromSetup(setup).unwrap();
   for (let i = 0; i < 64; i++) {
     if (assignment[i] === -1) {
       continue;
     }
-    const piece: PieceSymbol = PIECE_SYMBOLS[assignment[i] % 6];
-    const color: Color = (assignment[i] > 5) ? 'w' : 'b';
-    const square: Square = SQUARE_NAMES[i];
-    board.put({'type': piece, 'color': color}, square);
+    const role: Role = PIECE_SYMBOLS[assignment[i] % 6];
+    const pieceColor: Color = (assignment[i] > 5) ? 'white' : 'black';
+    board.board.set(i, { role, color: pieceColor });
   }
 
-  const {fen, error} = getFenAndError(board, color);
+  const { fen, error } = getFenAndError(board, color);
   if (error === null) {
     dispatch(gameSetStart(fen));
     dispatch(gameSetFen(fen));
@@ -129,17 +121,17 @@ const setFenFromState = (state: number[][], color: Color, dispatch: any, setText
   }
 }
 
-export const _findFen = async ({piecesModelRef, videoRef, 
-  cornersRef, canvasRef, dispatch, setText, color}: findFenInput) => {
+export const _findFen = async ({ piecesModelRef, videoRef,
+  cornersRef, canvasRef, dispatch, setText, color }: findFenInput) => {
   if (invalidVideo(videoRef)) {
     return;
   }
   const keypoints: number[][] = getKeypoints(cornersRef, canvasRef);
-  
+
   const invTransform = getInvTransform(keypoints);
   const [centers, centers3D] = transformCenters(invTransform);
   const [boundary, boundary3D] = transformBoundary(invTransform);
-  const {boxes, scores} = await detect(piecesModelRef, videoRef, keypoints);
+  const { boxes, scores } = await detect(piecesModelRef, videoRef, keypoints);
   const squares: number[] = getSquares(boxes, centers3D, boundary3D);
   const state = getUpdate(scores, squares);
   setFenFromState(state, color, dispatch, setText);
@@ -149,11 +141,11 @@ export const _findFen = async ({piecesModelRef, videoRef,
   tf.dispose([boxes, scores, centers3D, boundary3D]);
 }
 
-export const findFen = async ({piecesModelRef, videoRef, cornersRef, canvasRef, dispatch, setText, color}: 
+export const findFen = async ({ piecesModelRef, videoRef, cornersRef, canvasRef, dispatch, setText, color }:
   findFenInput) => {
   const startTensors = tf.memory().numTensors;
 
-  await _findFen({piecesModelRef, videoRef, cornersRef, canvasRef, dispatch, setText, color});
+  await _findFen({ piecesModelRef, videoRef, cornersRef, canvasRef, dispatch, setText, color });
 
   const endTensors = tf.memory().numTensors;
   if (startTensors < endTensors) {
