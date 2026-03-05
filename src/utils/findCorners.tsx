@@ -26,31 +26,31 @@ const processBoxesAndScores = async (boxes: tf.Tensor2D, scores: tf.Tensor2D) =>
   });
   const res: number[][] = resTensor.arraySync();
 
-  tf.dispose([nms, resTensor, boxes, scores, argmaxScores, maxScores])
-  return res
+  tf.dispose([nms, resTensor, boxes, scores, argmaxScores, maxScores]);
+  return res;
 }
 
 const runPiecesModel = async (videoRef: any, piecesModelRef: any): Promise<number[][]> => {
   const videoWidth: number = videoRef.current.videoWidth;
   const videoHeight: number = videoRef.current.videoHeight;
 
-  const {image4D, width, height, padding, roi} = getInput(videoRef);
+  const { image4D, width, height, padding, roi } = getInput(videoRef);
   const piecesPreds: tf.Tensor3D = piecesModelRef.current.predict(image4D);
   const boxesAndScores = getBoxesAndScores(piecesPreds, width, height, videoWidth, videoHeight, padding, roi);
   const pieces: number[][] = await processBoxesAndScores(boxesAndScores.boxes, boxesAndScores.scores);
-  
+
   tf.dispose([piecesPreds, image4D, boxesAndScores]);
   return pieces;
 }
 
-const runXcornersModel = async (videoRef: any, xcornersModelRef: any, pieces: number[][]): 
-Promise<number[][]> => {
+const runXcornersModel = async (videoRef: any, xcornersModelRef: any, pieces: number[][]):
+  Promise<number[][]> => {
   const keypoints: number[][] = pieces.map(x => [x[0], x[1]]);
   const videoWidth: number = videoRef.current.videoWidth;
   const videoHeight: number = videoRef.current.videoHeight;
 
-  const {image4D, width, height, padding, roi} = getInput(videoRef, keypoints);
-  const xcornersPreds: tf.Tensor3D = xcornersModelRef.current.predict(image4D); 
+  const { image4D, width, height, padding, roi } = getInput(videoRef, keypoints);
+  const xcornersPreds: tf.Tensor3D = xcornersModelRef.current.predict(image4D);
   const boxesAndScores = getBoxesAndScores(xcornersPreds, width, height, videoWidth, videoHeight, padding, roi);
   tf.dispose([xcornersPreds, image4D]);
 
@@ -82,7 +82,7 @@ const getQuads = (xCorners: number[][]) => {
         break;
       }
     }
-    
+
     if (quad[3] !== -1) {
       quads.push(quad.map(x => xCorners[x]));
     }
@@ -105,7 +105,7 @@ const cdist = (a: number[][], b: number[][]) => {
 const calculateOffsetScore = (warpedXcorners: number[][], shift: number[]) => {
   const grid = GRID.map(x => [x[0] + shift[0], x[1] + shift[1]]);
   const dist = cdist(grid, warpedXcorners);
-  
+
   let assignmentCost = 0;
   for (let i = 0; i < dist.length; i++) {
     assignmentCost += Math.min(...dist[i]);
@@ -172,9 +172,9 @@ const findCornersFromXcorners = (xCorners: number[][]) => {
 
   const invM = bestM.inv()
   const warpedCorners = [[bestOffset[0] - 1, bestOffset[1] - 1],
-                         [bestOffset[0] - 1, bestOffset[1] + 7],
-                         [bestOffset[0] + 7, bestOffset[1] + 7],
-                         [bestOffset[0] + 7, bestOffset[1] - 1]]
+  [bestOffset[0] - 1, bestOffset[1] + 7],
+  [bestOffset[0] + 7, bestOffset[1] + 7],
+  [bestOffset[0] + 7, bestOffset[1] - 1]]
   const corners = perspectiveTransform(warpedCorners, invM);
 
   // Clip bad corners
@@ -202,14 +202,14 @@ const euclidean = (a: number[], b: number[]) => {
 const calculateKeypoints = (blackPieces: number[][], whitePieces: number[][], corners: number[][]) => {
   const blackCenter = getCenter(blackPieces);
   const whiteCenter = getCenter(whitePieces);
-  
+
   let bestShift = 0;
   let bestScore = 0;
   for (let shift = 0; shift < 4; shift++) {
     const cw = [(corners[shift % 4][0] + corners[(shift + 1) % 4][0]) / 2,
-                (corners[shift % 4][1] + corners[(shift + 1) % 4][1]) / 2];
+    (corners[shift % 4][1] + corners[(shift + 1) % 4][1]) / 2];
     const cb = [(corners[(shift + 2) % 4][0] + corners[(shift + 3) % 4][0]) / 2,
-                (corners[(shift + 2) % 4][1] + corners[(shift + 3) % 4][1]) / 2];
+    (corners[(shift + 2) % 4][1] + corners[(shift + 3) % 4][1]) / 2];
     const score = 1 / (1 + euclidean(whiteCenter, cw) + euclidean(blackCenter, cb));
     if (score > bestScore) {
       bestScore = score;
@@ -226,7 +226,7 @@ const calculateKeypoints = (blackPieces: number[][], whitePieces: number[][], co
   return keypoints
 }
 
-export const _findCorners = async (piecesModelRef: any, xcornersModelRef: any, videoRef: any, 
+export const _findCorners = async (piecesModelRef: any, xcornersModelRef: any, videoRef: any,
   canvasRef: any, dispatch: any, setText: any) => {
   if (invalidVideo(videoRef)) {
     return;
@@ -261,14 +261,14 @@ export const _findCorners = async (piecesModelRef: any, xcornersModelRef: any, v
       "xy": getMarkerXY(xy, canvasRef.current.height, canvasRef.current.width),
       "key": key
     }
-    dispatch(cornersSet(payload)) 
+    dispatch(cornersSet(payload))
   })
   renderCorners(canvasRef.current, xCorners);
   setText(["Found corners", "Ready to record"])
 }
 
 export const findCorners = async (piecesModelRef: any, xcornersModelRef: any, videoRef: any, canvasRef: any,
-   dispatch: any, setText: any) => {
+  dispatch: any, setText: any) => {
   const startTensors = tf.memory().numTensors;
 
   await _findCorners(piecesModelRef, xcornersModelRef, videoRef, canvasRef, dispatch, setText);
