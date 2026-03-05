@@ -34,7 +34,7 @@ const processState = (state: any, movesPairs: MovesPair[], possibleMoves: Set<st
   const seen: Set<string> = new Set();
 
   movesPairs.forEach(movePair => {
-    if (!(movePair.move1.sans[0] in seen)) {
+    if (!seen.has(movePair.move1.sans[0])) {
       seen.add(movePair.move1.sans[0]);
       const score = calculateScore(state, movePair.move1);
       if (score > 0) {
