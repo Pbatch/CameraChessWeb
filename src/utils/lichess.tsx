@@ -65,7 +65,7 @@ const fetchResponse = async (token: string, path: string, options: any = {}) => 
   const res: any = await window.fetch(`${lichessHost}${path}`, config);
   if (!res.ok) {
     const err = `${res.status} ${res.statusText}`;
-    alert(err);
+    console.error(err);
     throw err;
   }
   return res;

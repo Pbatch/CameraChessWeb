@@ -129,7 +129,7 @@ export const getUpdate = (scoresTensor: tf.Tensor2D, squares: number[]) => {
 
   for (let i = 0; i < squares.length; i++) {
     const square = squares[i];
-    if (square == -1) {
+    if (typeof square !== 'number' || !Number.isInteger(square) || square < 0 || square >= 64) {
       continue;
     }
     for (let j = 0; j < 12; j++) {
@@ -220,6 +220,7 @@ export const findPieces = (modelRef: any, videoRef: any, canvasRef: any,
           boardRef.current.playSan(move);
           possibleMoves.clear();
           greedyMoveToTime = {};
+          state = zeros(64, 12);
         }
       }
 
@@ -236,6 +237,7 @@ export const findPieces = (modelRef: any, videoRef: any, canvasRef: any,
         if (hasGreedyMove) {
           boardRef.current.playSan(move);
           greedyMoveToTime = { greedyMove: greedyMoveToTime[move] };
+          state = zeros(64, 12);
         }
       }
 

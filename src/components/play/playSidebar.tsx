@@ -31,7 +31,8 @@ const PlaySidebar = ({ piecesModelRef, xcornersModelRef, videoRef, canvasRef, si
   useEffect(() => {
     const colorToMove = gameRef.current.fen.split(" ")[1];
     const lastMove = gameRef.current.lastMove;
-    if ((colorToMove === color) || (lastMove === "") || (gameId === undefined) || (color === undefined)) {
+    const fromOpponent = gameRef.current.fromOpponent;
+    if ((colorToMove === color) || (lastMove === "") || (gameId === undefined) || (color === undefined) || fromOpponent) {
       return;
     }
 
@@ -51,8 +52,8 @@ const PlaySidebar = ({ piecesModelRef, xcornersModelRef, videoRef, canvasRef, si
     }
 
     const board = makeBoard(gameRef.current);
-    board.move(lastMove);
-    const payload = makeUpdatePayload(board);
+    board.playUci(lastMove);
+    const payload = makeUpdatePayload(board, false, true);
     console.log("payload", payload);
     dispatch(gameUpdate(payload));
   }

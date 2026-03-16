@@ -5,15 +5,16 @@ import { START_FEN } from '../utils/constants';
 import { parseFen, makeFen } from 'chessops/fen';
 import { Chess } from 'chessops/chess';
 import { parsePgn } from 'chessops/pgn';
-import { parseSan } from 'chessops/san';
-import { makeUci } from 'chessops/util';
+import { parseSan, makeSan } from 'chessops/san';
+import { makeUci, parseUci } from 'chessops/util';
 
 const initialState: Game = {
   "moves": "",
   "fen": START_FEN,
   "start": START_FEN,
   "lastMove": "",
-  "greedy": false
+  "greedy": false,
+  "fromOpponent": false
 };
 
 const gameSlice = createSlice({
@@ -50,7 +51,8 @@ const gameSlice = createSlice({
         "moves": action.payload.moves,
         "fen": action.payload.fen,
         "lastMove": action.payload.lastMove,
-        "greedy": action.payload.greedy
+        "greedy": action.payload.greedy,
+        "fromOpponent": action.payload.fromOpponent
       }
       return newState
     }
@@ -82,7 +84,7 @@ export const makePgn = (game: Game) => {
   return `[FEN "${game.start}"]` + "\n \n" + game.moves;
 }
 
-export const makeUpdatePayload = (board: any, greedy: boolean = false) => {
+export const makeUpdatePayload = (board: any, greedy: boolean = false, fromOpponent: boolean = false) => {
   const history = board.history || [];
   const startFen = board.startFen || START_FEN;
 
@@ -94,7 +96,8 @@ export const makeUpdatePayload = (board: any, greedy: boolean = false) => {
     "moves": moves,
     "fen": fen,
     "lastMove": lastMove,
-    "greedy": greedy
+    "greedy": greedy,
+    "fromOpponent": fromOpponent
   }
 
   return payload
@@ -122,6 +125,18 @@ export const makeBoard = (game: Game): any => {
   board.playSan = (san: string) => {
     const move = parseSan(board, san);
     if (move) {
+      (move as any).san = san;
+      board.history.push(move);
+      board.play(move);
+      return move;
+    }
+    return null;
+  };
+
+  board.playUci = (uci: string) => {
+    const move = parseUci(uci);
+    if (move) {
+      const san = makeSan(board, move);
       (move as any).san = san;
       board.history.push(move);
       board.play(move);
