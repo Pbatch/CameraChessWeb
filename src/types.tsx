@@ -32,7 +32,8 @@ interface Game {
   moves: string,
   start: string,
   lastMove: string,
-  greedy: boolean
+  greedy: boolean,
+  fromOpponent: boolean
 }
 
 interface User {
