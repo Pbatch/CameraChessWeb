@@ -58,7 +58,8 @@ const VideoAndSidebar = ({ mode }: { mode: Mode }) => {
       "",
       moves
     ].join("\r");
-    lichessPushRound(token, broadcastPgn, study.id);
+    void lichessPushRound(token, broadcastPgn, study.id)
+      .catch((error: unknown) => console.error('Unable to push Lichess broadcast round.', error));
   }, [moves])
 
   useEffect(() => {

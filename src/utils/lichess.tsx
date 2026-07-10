@@ -6,8 +6,8 @@ import { NavigateFunction } from 'react-router-dom';
 import { Study } from '../types';
 
 const lichessHost = 'https://lichess.org';
-const scopes = ["study:write", "study:read", "challenge:read", "bot:play", "board:play"];
-const clientId = 'lichess-api-demo';
+const scopes = ["study:write", "study:read", "board:play"];
+const clientId = 'camera-chess-web';
 const clientUrl = `${location.protocol}//${location.host}/`;
 
 const getOauth = () => {
@@ -17,77 +17,89 @@ const getOauth = () => {
     clientId,
     scopes,
     redirectUrl: clientUrl,
-    onAccessTokenExpiry: refreshAccessToken => refreshAccessToken(),
+    // Lichess OAuth tokens are long-lived and cannot be refreshed.
+    onAccessTokenExpiry: () => Promise.reject(new Error('Your Lichess session has expired. Please log in again.')),
     onInvalidGrant: console.warn,
   });
   return oauth
 }
 
-const readStream = (processLine: any) => (response: any) => {
+const readStream = <T,>(processLine: (line: T) => void | Promise<void>) => async (response: Response) => {
+  if (response.body === null) {
+    throw new Error('Lichess returned an empty stream.');
+  }
+
   const stream = response.body.getReader();
-  const matcher = /\r?\n/;
   const decoder = new TextDecoder();
-  let buf: any = '';
+  let buffer = '';
 
-  const loop = () =>
-    stream.read().then(({ done, value }: { done: boolean, value: any }) => {
-      if (done) {
-        if (buf.length > 0) processLine(JSON.parse(buf));
-      } else {
-        const chunk = decoder.decode(value, {
-          stream: true
-        });
-        buf += chunk;
-
-        const parts = buf.split(matcher);
-        buf = parts.pop();
-        for (const i of parts.filter((p: any) => p)) processLine(JSON.parse(i));
-        return loop();
+  const processBuffer = async (flush: boolean) => {
+    const lines = buffer.split(/\r?\n/);
+    buffer = flush ? '' : lines.pop() ?? '';
+    for (const line of lines) {
+      if (line.trim() !== '') {
+        await processLine(JSON.parse(line) as T);
       }
-    });
+    }
+  };
 
-  return loop();
+  try {
+    while (true) {
+      const { done, value } = await stream.read();
+      if (done) {
+        buffer += decoder.decode();
+        await processBuffer(true);
+        return;
+      }
+
+      buffer += decoder.decode(value, { stream: true });
+      await processBuffer(false);
+    }
+  } finally {
+    stream.releaseLock();
+  }
 }
 
-const fetchBody = async (token: string, path: string, options: any = {}) => {
-  const res: any = await fetchResponse(token, path, options);
-  const body: any = await res.json();
-  return body;
+const fetchBody = async <T,>(token: string, path: string, options: RequestInit = {}): Promise<T> => {
+  const response = await fetchResponse(token, path, options);
+  return response.json() as Promise<T>;
 }
 
-const fetchResponse = async (token: string, path: string, options: any = {}) => {
-  const config: any = {
+const fetchResponse = async (token: string, path: string, options: RequestInit = {}): Promise<Response> => {
+  const headers = new Headers(options.headers);
+  headers.set('Authorization', `Bearer ${token}`);
+
+  const config: RequestInit = {
     ...options,
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+    headers,
   }
-  const res: any = await window.fetch(`${lichessHost}${path}`, config);
-  if (!res.ok) {
-    const err = `${res.status} ${res.statusText}`;
-    console.error(err);
-    throw err;
+  const response = await fetch(`${lichessHost}${path}`, config);
+  if (!response.ok) {
+    const details = await response.text();
+    throw new Error(`${response.status} ${response.statusText}${details ? `: ${details}` : ''}`);
   }
-  return res;
+  return response;
 };
 
-const setBroadcastlessStudies = async (token: string, username: string, setStudies: any, broadcasts: any) => {
-  const path = `/api/study/by/${username}`;
+type Broadcast = { round: Study };
+type Account = { username: string };
+type Playing = { nowPlaying: unknown[] };
+type ImportResult = { id: string; url: string };
+type BroadcastPushResult = { games: { error?: string }[] };
+type BoardStreamEvent = { type: string; moves?: string; state?: { moves?: string } };
 
-  const broadcastIds = broadcasts.map((x: any) => x.id);
+const setBroadcastlessStudies = async (token: string, username: string, setStudies: (studies: Study[]) => void, broadcasts: Study[]) => {
+  const path = `/api/study/by/${username}`;
+  const broadcastIds = new Set(broadcasts.map(({ id }) => id));
 
   const studies: Study[] = [];
-  fetchResponse(token, path)
-    .then(readStream(async (response: any) => {
-      const id_ = response.id;
-      if (!(broadcastIds.includes(id_))) {
-        studies.push({
-          "id": id_,
-          "name": response.name
-        });
-      }
-    }))
-    .then(() => setStudies(studies));
+  const response = await fetchResponse(token, path, { headers: { Accept: 'application/x-ndjson' } });
+  await readStream<Study>((study) => {
+    if (!broadcastIds.has(study.id)) {
+      studies.push(study);
+    }
+  })(response);
+  setStudies(studies);
 }
 
 export const lichessLogin = () => {
@@ -95,74 +107,89 @@ export const lichessLogin = () => {
   oauth.fetchAuthorizationCode();
 }
 
-export const lichessLogout = (dispatch: Dispatch<UnknownAction>) => {
-  localStorage.removeItem("oauth2authcodepkce-state");
+export const lichessLogout = async (dispatch: Dispatch<UnknownAction>, token: string) => {
+  try {
+    await fetchResponse(token, '/api/token', { method: 'DELETE' });
+  } catch (error) {
+    console.warn('Unable to revoke Lichess token.', error);
+  }
+  getOauth().reset();
   dispatch(userReset());
 }
 
-export const lichessGetAccount = (token: string) => {
+export const lichessGetAccount = (token: string): Promise<Account> => {
   const path = "/api/account";
-  const account = fetchBody(token, path);
-  return account;
+  return fetchBody<Account>(token, path);
 }
 
-export const lichessSetStudies = (token: string, setStudies: any, username: string, onlyBroadcasts: boolean) => {
+export const lichessSetStudies = async (token: string, setStudies: (studies: Study[]) => void, username: string, onlyBroadcasts: boolean) => {
   const path = `/api/broadcast/my-rounds`;
   const broadcasts: Study[] = [];
-  fetchResponse(token, path)
-    .then(readStream(async (response: any) => {
-      broadcasts.push({
-        "id": response.round.id,
-        "name": response.round.name
-      });
-    }))
-    .then(() => {
-      if (onlyBroadcasts) {
-        setStudies(broadcasts);
-      } else {
-        setBroadcastlessStudies(token, username, setStudies, broadcasts);
-      }
-    });
+  const response = await fetchResponse(token, path, { headers: { Accept: 'application/x-ndjson' } });
+  await readStream<Broadcast>((broadcast) => {
+    broadcasts.push(broadcast.round);
+  })(response);
+  if (onlyBroadcasts) {
+    setStudies(broadcasts);
+    return;
+  }
+  await setBroadcastlessStudies(token, username, setStudies, broadcasts);
 }
 
-export const lichessImportPgn = (token: string, pgn: string) => {
+export const lichessImportPgn = (token: string, pgn: string): Promise<ImportResult> => {
   const path = "/api/import";
   const options = {
     body: new URLSearchParams({ pgn }),
-    method: "POST"
+    method: "POST",
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
   };
-  const data = fetchBody(token, path, options);
-  return data
+  return fetchBody<ImportResult>(token, path, options);
 }
 
 export const lichessImportPgnToStudy = (token: string, pgn: string, name: string, studyId: string) => {
   const path = `/api/study/${studyId}/import-pgn`;
   const options = {
     body: new URLSearchParams({ pgn: pgn, name: name }),
-    method: "POST"
+    method: "POST",
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
   };
-  fetchResponse(token, path, options);
+  return fetchResponse(token, path, options);
 }
 
-export const lichessPushRound = (token: string, pgn: string, roundId: string) => {
+export const lichessPushRound = async (token: string, pgn: string, roundId: string): Promise<BroadcastPushResult> => {
   const path = `/api/broadcast/round/${roundId}/push`;
   const options = {
     body: pgn,
-    method: "POST"
+    method: "POST",
+    headers: { 'Content-Type': 'text/plain' }
   }
-  fetchResponse(token, path, options);
+  const result = await fetchBody<BroadcastPushResult>(token, path, options);
+  const errors = result.games.flatMap(({ error }) => error === undefined ? [] : [error]);
+  if (errors.length > 0) {
+    throw new Error(errors.join('\n'));
+  }
+  return result;
 }
 
-export const lichessStreamGame = (token: string, callback: any, gameId: string) => {
+export const lichessStreamGame = (token: string, callback: (event: BoardStreamEvent) => void | Promise<void>, gameId: string) => {
   const path = `/api/board/game/stream/${gameId}`;
-  fetchResponse(token, path)
-    .then(readStream(callback));
+  const controller = new AbortController();
+  void fetchResponse(token, path, {
+    signal: controller.signal,
+    headers: { Accept: 'application/x-ndjson' }
+  })
+    .then(readStream(callback))
+    .catch((error: unknown) => {
+      if (!controller.signal.aborted) {
+        console.error('Lichess game stream failed.', error);
+      }
+    });
+  return controller;
 }
 
-export const lichessGetPlaying = (token: string) => {
+export const lichessGetPlaying = (token: string): Promise<Playing> => {
   const path = "/api/account/playing";
-  const playing = fetchBody(token, path);
-  return playing;
+  return fetchBody<Playing>(token, path);
 }
 
 export const lichessPlayMove = (token: string, gameId: string, move: string) => {

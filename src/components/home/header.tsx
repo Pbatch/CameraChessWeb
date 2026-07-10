@@ -6,13 +6,13 @@ import { useDispatch } from "react-redux";
 const Header = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const username: string = userSelect().username;
+  const { username, token } = userSelect();
 
-  const handleClick = () => {
+  const handleClick = async () => {
     if (username === "") {
       lichessLogin();
     } else {
-      lichessLogout(dispatch);
+      await lichessLogout(dispatch, token);
       navigate("/")
     }
   }
