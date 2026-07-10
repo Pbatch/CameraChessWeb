@@ -20,7 +20,7 @@ const updateSW = registerSW({
   onNeedRefresh() {
     if (confirm("New content available. Reload?")) {
       localStorage.clear();
-      updateSW(true);
+      void updateSW(true);
     }
   },
 });

@@ -1,10 +1,10 @@
 import { Chessboard } from "kokopu-react";
 import { HomeButton, PgnButton } from "./index.tsx";
 import { Game } from "../../types.tsx";
-import { gameSelect } from "../../slices/gameSlice.tsx";
+import { useGame } from "../../slices/gameSlice.tsx";
 
 const Sidebar = (props: any) => {
-  const game: Game = gameSelect();
+  const game: Game = useGame();
 
   const boardDisplay = () => {
     return (

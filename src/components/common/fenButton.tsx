@@ -11,15 +11,18 @@ const FenButton = ({ piecesModelRef, videoRef, canvasRef, setText, cornersRef }:
   const dispatch = useDispatch();
   const [option, setOption] = useState<string>(options[0]);
 
-  const handleClick = (e: any, option: string) => {
-    e.preventDefault();
+  const handleClick = (option: string) => {
     if (option === "Normal") {
       dispatch(gameResetStart());
       dispatch(gameResetMoves());
       dispatch(gameResetFen());
     } else {
       const color: Color = option.includes("White to move") ? "white" : "black";
-      findFen({ piecesModelRef, videoRef, cornersRef, canvasRef, dispatch, setText, color });
+      void findFen({ piecesModelRef, videoRef, cornersRef, canvasRef, dispatch, setText, color })
+        .catch((error: unknown) => {
+          console.error("Unable to infer the starting position", error);
+          setText(["Unable to infer the starting position"]);
+        });
     }
     setOption(option);
   }
@@ -32,7 +35,7 @@ const FenButton = ({ piecesModelRef, videoRef, canvasRef, setText, cornersRef }:
       <ul className="dropdown-menu" aria-labelledby="dropdownMenuButton1">
         {options.map((option) =>
           <li key={option}>
-            <a onClick={(e) => handleClick(e, option)} className="dropdown-item" href="#">{option}</a>
+            <button type="button" onClick={() => handleClick(option)} className="dropdown-item">{option}</button>
           </li>
         )}
       </ul>

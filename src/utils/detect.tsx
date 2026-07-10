@@ -2,23 +2,28 @@ import { MODEL_WIDTH, MODEL_HEIGHT, MARKER_DIAMETER } from "./constants";
 import * as tf from "@tensorflow/tfjs-core";
 
 export const invalidVideo = (videoRef: any) => {
-  if (videoRef.current === null) {
+  const video = videoRef.current;
+  if (video === null) {
     return true;
   }
 
-  if (videoRef.current.autoplay) {
+  if (video.videoWidth === 0 || video.videoHeight === 0 || video.readyState < 2) {
+    return true;
+  }
+
+  if (video.autoplay) {
     // Record check
-    if (videoRef.current?.srcObject === null) {
+    if (video.srcObject === null) {
       return true;
     }
   } else {
     // Upload check
-    const src = videoRef.current?.src;
+    const src = video.getAttribute("src");
     if (src === null) {
       return true;
     }
 
-    if (!(src.startsWith("blob"))) {
+    if (!(src.startsWith("blob:"))) {
       return true;
     }
   }

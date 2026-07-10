@@ -2,15 +2,15 @@ import { useRef, useState, useEffect } from "react";
 import Video from "../common/video";
 import { useOutletContext } from "react-router-dom";
 import { useDispatch } from 'react-redux';
-import { cornersReset, cornersSelect } from '../../slices/cornersSlice';
+import { cornersReset, useCorners } from '../../slices/cornersSlice';
 import { Container } from "../common";
 import { CornersDict, Mode, ModelRefs, Study } from "../../types";
 import RecordSidebar from "../record/recordSidebar";
 import UploadSidebar from "../upload/uploadSidebar";
 import BroadcastSidebar from "../broadcast/broadcastSidebar";
-import { gameResetFen, gameResetMoves, gameResetStart, gameSelect } from "../../slices/gameSlice";
+import { gameResetFen, gameResetMoves, gameResetStart, useGame } from "../../slices/gameSlice";
 import { lichessPushRound } from "../../utils/lichess";
-import { userSelect } from "../../slices/userSlice";
+import { useUser } from "../../slices/userSlice";
 import { START_FEN } from "../../utils/constants";
 import PlaySidebar from "../play/playSidebar";
 import { useMediaQuery } from 'react-responsive';
@@ -26,9 +26,9 @@ const PortraitWarning = () => {
 const VideoAndSidebar = ({ mode }: { mode: Mode }) => {
   const context = useOutletContext<ModelRefs>();
   const dispatch = useDispatch();
-  const corners: CornersDict = cornersSelect();
-  const token: string = userSelect().token;
-  const moves: string = gameSelect().moves;
+  const corners: CornersDict = useCorners();
+  const token: string = useUser().token;
+  const moves: string = useGame().moves;
   const isPortrait = useMediaQuery({ orientation: 'portrait' });
 
   const [text, setText] = useState<string[]>([]);
@@ -60,7 +60,7 @@ const VideoAndSidebar = ({ mode }: { mode: Mode }) => {
     ].join("\r");
     void lichessPushRound(token, broadcastPgn, study.id)
       .catch((error: unknown) => console.error('Unable to push Lichess broadcast round.', error));
-  }, [moves])
+  }, [boardNumber, mode, moves, study, token])
 
   useEffect(() => {
     playingRef.current = playing;
@@ -75,7 +75,7 @@ const VideoAndSidebar = ({ mode }: { mode: Mode }) => {
     dispatch(gameResetStart());
     dispatch(gameResetMoves());
     dispatch(gameResetFen());
-  }, []);
+  }, [dispatch]);
 
   const props = {
     "playing": playing,

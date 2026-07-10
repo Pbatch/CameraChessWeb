@@ -99,8 +99,12 @@ const setFenFromState = (state: number[][], color: Color, dispatch: any, setText
     }
   }
 
-  const setup = parseFen("8/8/8/8/8/8/8/8 w - - 0 1").unwrap();
+  // chessops rejects an entirely empty position, so start from a legal board
+  // before replacing its pieces with the detected assignment.
+  const turn = color === "white" ? "w" : "b";
+  const setup = parseFen(`4k3/8/8/8/8/8/8/4K3 ${turn} - - 0 1`).unwrap();
   const board = Chess.fromSetup(setup).unwrap();
+  board.board.clear();
   for (let i = 0; i < 64; i++) {
     if (assignment[i] === -1) {
       continue;
@@ -132,13 +136,15 @@ export const _findFen = async ({ piecesModelRef, videoRef,
   const [centers, centers3D] = transformCenters(invTransform);
   const [boundary, boundary3D] = transformBoundary(invTransform);
   const { boxes, scores } = await detect(piecesModelRef, videoRef, keypoints);
-  const squares: number[] = getSquares(boxes, centers3D, boundary3D);
-  const state = getUpdate(scores, squares);
-  setFenFromState(state, color, dispatch, setText);
+  try {
+    const squares: number[] = getSquares(boxes, centers3D, boundary3D);
+    const state = getUpdate(scores, squares);
+    setFenFromState(state, color, dispatch, setText);
 
-  renderState(canvasRef.current, centers, boundary, state);
-
-  tf.dispose([boxes, scores, centers3D, boundary3D]);
+    renderState(canvasRef.current, centers, boundary, state);
+  } finally {
+    tf.dispose([boxes, scores, centers3D, boundary3D]);
+  }
 }
 
 export const findFen = async ({ piecesModelRef, videoRef, cornersRef, canvasRef, dispatch, setText, color }:

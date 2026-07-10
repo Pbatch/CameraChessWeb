@@ -104,7 +104,7 @@ const setBroadcastlessStudies = async (token: string, username: string, setStudi
 
 export const lichessLogin = () => {
   const oauth = getOauth();
-  oauth.fetchAuthorizationCode();
+  void oauth.fetchAuthorizationCode();
 }
 
 export const lichessLogout = async (dispatch: Dispatch<UnknownAction>, token: string) => {
@@ -220,5 +220,5 @@ export const lichessTrySetUser = async (navigate: NavigateFunction, dispatch: Di
   const username: string = account.username;
   dispatch(userSetUsername(username))
 
-  navigate("/");
+  void navigate("/");
 }

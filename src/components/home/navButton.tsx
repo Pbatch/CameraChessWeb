@@ -1,9 +1,9 @@
 import { useNavigate } from "react-router-dom";
-import { userSelect } from "../../slices/userSlice";
+import { useUser } from "../../slices/userSlice";
 
 const NavButton = ({ text, tokenRequired }: { text: string, tokenRequired: boolean }) => {
   const navigate = useNavigate();
-  const token = userSelect().token;
+  const token = useUser().token;
 
   const noNavigate = (token === "") && tokenRequired;
 
@@ -11,7 +11,7 @@ const NavButton = ({ text, tokenRequired }: { text: string, tokenRequired: boole
     if (noNavigate) {
       return;
     }
-    navigate(`/${text.toLowerCase()}`);
+    void navigate(`/${text.toLowerCase()}`);
   }
 
   return (

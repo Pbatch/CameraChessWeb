@@ -1,9 +1,9 @@
-import { cornersSelect } from "../../slices/cornersSlice";
+import { useCorners } from "../../slices/cornersSlice";
 import { CornersDict } from "../../types";
 import Marker from "./marker";
 
 const Corners = () => {
-  const corners: CornersDict = cornersSelect();
+  const corners: CornersDict = useCorners();
 
   return (
     <>

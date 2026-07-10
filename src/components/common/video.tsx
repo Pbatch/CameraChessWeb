@@ -1,5 +1,5 @@
 import { findPieces } from "../../utils/findPieces";
-import { useEffect, useRef } from "react";
+import { useEffect, useEffectEvent, useRef, useState } from "react";
 import { CORNER_KEYS, MARKER_DIAMETER, MARKER_RADIUS, MEDIA_ASPECT_RATIO, MEDIA_CONSTRAINTS } from "../../utils/constants";
 import { Corners } from ".";
 import { useWindowWidth, useWindowHeight } from '@react-hook/window-size';
@@ -7,7 +7,7 @@ import { useDispatch } from 'react-redux';
 import { cornersSet } from "../../slices/cornersSlice";
 import { getMarkerXY, getXY } from "../../utils/detect";
 import { CornersPayload, Game, Mode, MovesPair, SetBoolean, SetStringArray } from "../../types";
-import { gameSelect, makeBoard } from "../../slices/gameSlice";
+import { makeBoard, useGame } from "../../slices/gameSlice";
 import { getMovesPairs } from "../../utils/moves";
 
 
@@ -18,13 +18,14 @@ const Video = ({ piecesModelRef, canvasRef, videoRef, sidebarRef, playing,
     setText: SetStringArray, mode: Mode,
     cornersRef: any
   }) => {
-  const game: Game = gameSelect();
+  const game: Game = useGame();
 
   const displayRef = useRef<any>(null);
   const boardRef = useRef<any>(makeBoard(game));
   const movesPairsRef = useRef<MovesPair[]>(getMovesPairs(boardRef.current));
   const lastMoveRef = useRef<string>(game.lastMove);
   const moveTextRef = useRef<string>("");
+  const [canPlay, setCanPlay] = useState(false);
 
   const windowWidth = useWindowWidth();
   const windowHeight = useWindowHeight();
@@ -63,19 +64,7 @@ const Video = ({ piecesModelRef, canvasRef, videoRef, sidebarRef, playing,
     return `${nHalfMoves}...${firstMove} ${nHalfMoves + 1}.${secondMove}`
   }
 
-  const setupWebcam = async () => {
-    const stream = await navigator.mediaDevices.getUserMedia(MEDIA_CONSTRAINTS);
-    if (videoRef.current !== null) {
-      videoRef.current.srcObject = stream;
-    }
-    return stream;
-  };
-
-  const awaitSetupWebcam = async () => {
-    return setupWebcam();
-  }
-
-  const updateWidthHeight = () => {
+  const updateWidthHeight = useEffectEvent(() => {
     let height = ((windowWidth - sidebarRef.current.offsetWidth - MARKER_DIAMETER)
       / MEDIA_ASPECT_RATIO) + MARKER_DIAMETER;
     if (height > windowHeight) {
@@ -105,17 +94,23 @@ const Video = ({ piecesModelRef, canvasRef, videoRef, sidebarRef, playing,
       }
       dispatch(cornersSet(payload))
     })
-  }
+  });
 
   useEffect(() => {
     updateWidthHeight();
 
-    let streamPromise: any = null;
+    let streamPromise: Promise<MediaStream> | null = null;
     if (mode !== "upload") {
-      streamPromise = awaitSetupWebcam()
+      streamPromise = navigator.mediaDevices.getUserMedia(MEDIA_CONSTRAINTS)
+        .then((stream) => {
+          if (videoRef.current !== null) {
+            videoRef.current.srcObject = stream;
+          }
+          return stream;
+        });
     }
 
-    findPieces(piecesModelRef, videoRef, canvasRef, playingRef, setText, dispatch,
+    const stopDetection = findPieces(piecesModelRef, videoRef, canvasRef, playingRef, setText, dispatch,
       cornersRef, boardRef, movesPairsRef, lastMoveRef, moveTextRef, mode);
 
     const stopWebcam = async () => {
@@ -126,25 +121,36 @@ const Video = ({ piecesModelRef, canvasRef, videoRef, sidebarRef, playing,
     }
 
     return () => {
-      stopWebcam();
+      stopDetection();
+      void stopWebcam();
     }
-  }, []);
+  }, [canvasRef, cornersRef, dispatch, mode, piecesModelRef, playingRef, setText, videoRef]);
 
   useEffect(() => {
     updateWidthHeight();
   }, [windowWidth, windowHeight]);
 
   useEffect(() => {
-    if ((mode !== "upload") || (videoRef.current.src === "")) {
+    if (canPlay) {
+      updateWidthHeight();
+    }
+  }, [canPlay]);
+
+  useEffect(() => {
+    if ((mode !== "upload") || !canPlay || (videoRef.current.getAttribute("src") === null)) {
       return;
     }
 
-    if (playingRef.current === true) {
+    if (!playing) {
       videoRef.current.pause();
-    } else {
-      videoRef.current.play();
+      return;
     }
-  }, [playing])
+
+    void videoRef.current.play().catch(() => {
+      setPlaying(false);
+      setText(["Unable to play this video", "Use a browser-supported H.264/AAC MP4 or WebM file"]);
+    });
+  }, [canPlay, mode, playing, setPlaying, setText, videoRef])
 
   const canvasStyle: React.CSSProperties = {
     position: "absolute",
@@ -205,7 +211,18 @@ const Video = ({ piecesModelRef, canvasRef, videoRef, sidebarRef, playing,
   };
 
   const onCanPlay = () => {
-    updateWidthHeight();
+    setCanPlay(true);
+  }
+
+  const onLoadStart = () => {
+    setCanPlay(false);
+  }
+
+  const onError = () => {
+    if (mode === "upload") {
+      setPlaying(false);
+      setText(["Unable to load this video", "Use a browser-supported H.264/AAC MP4 or WebM file"]);
+    }
   }
 
   const onEnded = () => {
@@ -222,7 +239,7 @@ const Video = ({ piecesModelRef, canvasRef, videoRef, sidebarRef, playing,
         <div style={videoContainerStyle} >
           <video ref={videoRef} autoPlay={mode !== "upload"} playsInline={true} muted={true}
             onLoadedMetadata={onLoadedMetadata} style={videoStyle}
-            onCanPlay={onCanPlay} onEnded={onEnded} />
+            onCanPlay={onCanPlay} onLoadStart={onLoadStart} onError={onError} onEnded={onEnded} />
           <canvas ref={canvasRef} style={canvasStyle} />
         </div>
         <Corners />
@@ -232,4 +249,3 @@ const Video = ({ piecesModelRef, canvasRef, videoRef, sidebarRef, playing,
 };
 
 export default Video;
-

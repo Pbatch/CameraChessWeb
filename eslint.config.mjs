@@ -1,4 +1,5 @@
 import react from "eslint-plugin-react";
+import reactHooks from "eslint-plugin-react-hooks";
 import globals from "globals";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -17,9 +18,11 @@ export default [...compat.extends(
     "eslint:recommended",
     "plugin:react/recommended",
     "plugin:@typescript-eslint/recommended",
+    "plugin:jsx-a11y/recommended",
 ), {
     plugins: {
         react,
+        "react-hooks": reactHooks,
     },
 
     languageOptions: {
@@ -29,6 +32,10 @@ export default [...compat.extends(
 
         ecmaVersion: "latest",
         sourceType: "module",
+        parserOptions: {
+            projectService: true,
+            tsconfigRootDir: __dirname,
+        },
     },
 
     settings: {
@@ -38,6 +45,10 @@ export default [...compat.extends(
     },
 
     rules: {
+        "react-hooks/rules-of-hooks": "error",
+        "react-hooks/exhaustive-deps": "error",
+        "@typescript-eslint/no-floating-promises": "error",
+        "@typescript-eslint/no-misused-promises": "error",
         "react/react-in-jsx-scope": "off",
         "react/no-unescaped-entities": 0,
         "no-unused-vars": 0,

@@ -5,9 +5,7 @@ const DeviceButton = ({ videoRef }: {videoRef: any }) => {
   const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
   const [device, setDevice] = useState<MediaDeviceInfo | null>(null);
 
-  const handleClick = async (e: any, newDevice: MediaDeviceInfo) => {
-    e.preventDefault();
-
+  const handleClick = async (newDevice: MediaDeviceInfo) => {
     if (device?.deviceId === newDevice.deviceId) {
       return;
     }
@@ -47,9 +45,9 @@ const DeviceButton = ({ videoRef }: {videoRef: any }) => {
       <ul className="dropdown-menu" aria-labelledby="deviceButton">
         {devices.map(device => 
           <li key={device.deviceId}>
-            <a onClick={(e) => handleClick(e, device)} className="dropdown-item" href="#">
+            <button type="button" onClick={() => { void handleClick(device).catch(console.error); }} className="dropdown-item">
               {device.label.split("(")[0]}
-            </a>
+            </button>
           </li>
         )}
       </ul>
