@@ -1,26 +1,26 @@
 import { useNavigate } from "react-router-dom";
-import { userSelect } from "../../slices/userSlice";
+import { useUser } from "../../slices/userSlice";
 import { lichessLogin, lichessLogout } from "../../utils/lichess";
 import { useDispatch } from "react-redux";
 
 const Header = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { username, token } = userSelect();
+  const { username, token } = useUser();
 
-  const handleClick = async () => {
+  const handleClick = () => {
     if (username === "") {
       lichessLogin();
     } else {
-      await lichessLogout(dispatch, token);
-      navigate("/")
+      void lichessLogout(dispatch, token)
+        .then(() => void navigate("/"));
     }
   }
   
   return (
     <div className="row m-2">
       <div className="h1 col-6 h-100 d-flex justify-content-center align-items-end m-0">
-        <img src="favicon.ico"></img>
+        <img src="favicon.ico" alt="ChessCam logo" />
         <>&nbsp;</>
         <div>ChessCam</div>
       </div>

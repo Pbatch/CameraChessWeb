@@ -22,7 +22,7 @@ const cornersSlice = createSlice({
   }
 })
 
-export const cornersSelect = () => {
+export const useCorners = () => {
   return useSelector((state: RootState) => state.corners)
 }
 

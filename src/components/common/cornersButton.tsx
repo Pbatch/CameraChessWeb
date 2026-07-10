@@ -9,7 +9,11 @@ const CornersButton = ({ piecesModelRef, xcornersModelRef, videoRef, canvasRef, 
   const handleClick = (e: any) => {
     e.preventDefault();
 
-    findCorners(piecesModelRef, xcornersModelRef, videoRef, canvasRef, dispatch, setText);
+    void findCorners(piecesModelRef, xcornersModelRef, videoRef, canvasRef, dispatch, setText)
+      .catch((error: unknown) => {
+        console.error("Unable to find chessboard corners", error);
+        setText(["Unable to find chessboard corners"]);
+      });
   }
 
   return (

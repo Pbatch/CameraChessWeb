@@ -1,24 +1,20 @@
 import { useEffect, useState } from "react";
-import { userSelect } from "../../slices/userSlice";
+import { useUser } from "../../slices/userSlice";
 import { lichessImportPgn } from "../../utils/lichess";
 
 const Board = ({ pgn }: { pgn: string }) => {
   const [emb, setEmb] = useState<string>("");
-  const token = userSelect().token;
-
-  const getEmb = async () => {
-    const data = await lichessImportPgn(token, pgn);
-    const emb: string = `https://lichess.org/embed/game/${data.id}?theme=brown&bg=dark`;
-    setEmb(emb);
-  }
+  const token = useUser().token;
 
   useEffect(() => {
-    getEmb();
-  }, [])
+    void lichessImportPgn(token, pgn).then((data) => {
+      setEmb(`https://lichess.org/embed/game/${data.id}?theme=brown&bg=dark`);
+    });
+  }, [pgn, token])
 
   return (
     <div className="ratio ratio-21x9">
-      <iframe src={emb} />
+      <iframe src={emb} title="Imported Lichess game board" />
     </div>
   );
 }

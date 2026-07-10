@@ -10,9 +10,11 @@ const VideoButton = ({ videoRef, canvasRef, setPlaying }: {
   const [streaming, setStreaming] = useState(false);
 
   const closeVideo = () => {
-    if (videoRef.current.src !== undefined) {
-      const url = videoRef.current.src;
-      videoRef.current.src = "";
+    const url = videoRef.current.currentSrc || videoRef.current.src;
+    videoRef.current.pause();
+    videoRef.current.removeAttribute("src");
+    videoRef.current.load();
+    if (url.startsWith("blob:")) {
       URL.revokeObjectURL(url);
     }
 
@@ -24,8 +26,14 @@ const VideoButton = ({ videoRef, canvasRef, setPlaying }: {
   };
 
   const handleOnChange = (e: any) => {
-    const url = URL.createObjectURL(e.target.files[0]); 
+    const file = e.target.files[0];
+    if (file === undefined) {
+      return;
+    }
+
+    const url = URL.createObjectURL(file);
     videoRef.current.src = url;
+    videoRef.current.load();
     videoRef.current.style.display = "block";
     setStreaming(true);
   }
@@ -56,4 +64,3 @@ const VideoButton = ({ videoRef, canvasRef, setPlaying }: {
 };
 
 export default VideoButton;
-

@@ -1,18 +1,25 @@
 import SidebarButton from "./sidebarButton";
 import { SetStringArray } from "../../types";
-import { gameSelect, makePgn } from "../../slices/gameSlice";
+import { makePgn, useGame } from "../../slices/gameSlice";
 
 const PgnButton = ({ setText, playing }: {setText: SetStringArray, playing: boolean}) => {
-  const pgn: string = makePgn(gameSelect());
+  const pgn: string = makePgn(useGame());
 
   const handleClick = (e: any) => {
     e.preventDefault();
 
-    navigator.clipboard.writeText(pgn);
-
-    if (!playing) {
-      setText(["Copied PGN"]);
-    }
+    void navigator.clipboard.writeText(pgn)
+      .then(() => {
+        if (!playing) {
+          setText(["Copied PGN"]);
+        }
+      })
+      .catch((error: unknown) => {
+        console.error("Unable to copy PGN", error);
+        if (!playing) {
+          setText(["Unable to copy PGN"]);
+        }
+      });
   }
 
   return (

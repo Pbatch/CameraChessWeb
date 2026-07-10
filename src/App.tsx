@@ -3,7 +3,7 @@ import { NavigateFunction, Outlet, useNavigate } from "react-router-dom";
 import { GraphModel } from "@tensorflow/tfjs-converter";
 import "@tensorflow/tfjs-backend-webgl";
 import { ModelRefs } from "./types";
-import { userSelect } from "./slices/userSlice";
+import { useUser } from "./slices/userSlice";
 import { useDispatch } from "react-redux";
 import { lichessTrySetUser } from "./utils/lichess";
 import { UnknownAction } from "@reduxjs/toolkit";
@@ -13,7 +13,7 @@ import LoadModels from "./utils/loadModels";
 const App = () => {
   const dispatch: Dispatch<UnknownAction> = useDispatch();
   const navigate: NavigateFunction = useNavigate();
-  const token = userSelect().token;
+  const token = useUser().token;
   const [loading, setLoading] = useState(true);
 
   const piecesModelRef = useRef<GraphModel | null>(null);
@@ -25,9 +25,12 @@ const App = () => {
 
   useEffect(() => {
     if (token === "") {
-      lichessTrySetUser(navigate, dispatch);
+      void lichessTrySetUser(navigate, dispatch)
+        .catch((error: unknown) => console.error("Failed to restore Lichess session", error));
     }
+  }, [dispatch, navigate, token]);
 
+  useEffect(() => {
     LoadModels(piecesModelRef, xcornersModelRef)
       .then(() => setLoading(false))
       .catch((error) => console.error("Failed to load TensorFlow models", error));

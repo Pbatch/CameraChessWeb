@@ -1,11 +1,11 @@
 import { CornersButton, Sidebar, RecordButton, DeviceButton } from "../common";
 import { Game, SetBoolean, SetStringArray } from "../../types";
-import { userSelect } from "../../slices/userSlice";
+import { useUser } from "../../slices/userSlice";
 import { useEffect, useRef, useState } from "react";
 import { lichessPlayMove, lichessStreamGame } from "../../utils/lichess";
 import { Color } from "chessops/types";
 import { useDispatch } from "react-redux";
-import { gameSelect, gameUpdate, gameSetError, makeBoard, makeUpdatePayload } from "../../slices/gameSlice";
+import { gameUpdate, gameSetError, makeBoard, makeUpdatePayload, useGame } from "../../slices/gameSlice";
 import GamesButton from "./gamesButton";
 
 const PlaySidebar = ({ piecesModelRef, xcornersModelRef, videoRef, canvasRef, sidebarRef,
@@ -14,8 +14,8 @@ const PlaySidebar = ({ piecesModelRef, xcornersModelRef, videoRef, canvasRef, si
     playing: boolean, setPlaying: SetBoolean,
     text: string[], setText: SetStringArray
   }) => {
-  const token: string = userSelect().token;
-  const game: Game = gameSelect();
+  const token: string = useUser().token;
+  const game: Game = useGame();
   const gameRef = useRef<Game>(game);
   const [gameId, setGameId] = useState<string>();
   const [color, setColor] = useState<Color>();
@@ -29,9 +29,9 @@ const PlaySidebar = ({ piecesModelRef, xcornersModelRef, videoRef, canvasRef, si
   }, [game]);
 
   useEffect(() => {
-    const colorToMove = gameRef.current.fen.split(" ")[1];
-    const lastMove = gameRef.current.lastMove;
-    const fromOpponent = gameRef.current.fromOpponent;
+    const colorToMove = game.fen.split(" ")[1];
+    const lastMove = game.lastMove;
+    const fromOpponent = game.fromOpponent;
     if ((colorToMove === color) || (lastMove === "") || (gameId === undefined) || (color === undefined) || fromOpponent) {
       return;
     }
@@ -40,40 +40,40 @@ const PlaySidebar = ({ piecesModelRef, xcornersModelRef, videoRef, canvasRef, si
       .catch((err: string) => {
         dispatch(gameSetError(err));
       });
-  }, [gameRef.current])
-
-  const streamGameCallback = async (response: any) => {
-    // The selected game is already initialized from nowPlaying.fen.
-    if (response.type === "gameFull") {
-      return;
-    }
-
-    const moves = response.moves;
-    if (moves === undefined) {
-      return;
-    }
-
-    const splitMoves = moves.split(" ");
-    const lastMove = splitMoves[splitMoves.length - 1];
-    if (lastMove === gameRef.current.lastMove) {
-      return;
-    }
-
-    const board = makeBoard(gameRef.current);
-    board.playUci(lastMove);
-    const payload = makeUpdatePayload(board, false, true);
-    console.log("payload", payload);
-    dispatch(gameUpdate(payload));
-  }
+  }, [color, dispatch, game, gameId, token])
 
   useEffect(() => {
     if (gameId === undefined) {
       return;
     }
 
+    const streamGameCallback = async (response: any) => {
+      // The selected game is already initialized from nowPlaying.fen.
+      if (response.type === "gameFull") {
+        return;
+      }
+
+      const moves = response.moves;
+      if (moves === undefined) {
+        return;
+      }
+
+      const splitMoves = moves.split(" ");
+      const lastMove = splitMoves[splitMoves.length - 1];
+      if (lastMove === gameRef.current.lastMove) {
+        return;
+      }
+
+      const board = makeBoard(gameRef.current);
+      board.playUci(lastMove);
+      const payload = makeUpdatePayload(board, false, true);
+      console.log("payload", payload);
+      dispatch(gameUpdate(payload));
+    };
+
     const controller = lichessStreamGame(token, streamGameCallback, gameId);
     return () => controller.abort();
-  }, [gameId]);
+  }, [dispatch, gameId, token]);
 
   return (
     <Sidebar sidebarRef={sidebarRef} playing={playing} text={text} setText={setText} >

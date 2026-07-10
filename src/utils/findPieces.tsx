@@ -186,82 +186,95 @@ export const findPieces = (modelRef: any, videoRef: any, canvasRef: any,
   let possibleMoves: Set<string>;
   let requestId: number;
   let greedyMoveToTime: { [move: string]: number };
+  let active = true;
 
   const loop = async () => {
-    if (playingRef.current === false || invalidVideo(videoRef)) {
-      centers = null
-    } else {
-      if (centers === null) {
-        keypoints = getKeypoints(cornersRef, canvasRef);
-        const invTransform = getInvTransform(keypoints);
-        [centers, centers3D] = transformCenters(invTransform);
-        [boundary, boundary3D] = transformBoundary(invTransform);
-        state = zeros(64, 12);
-        possibleMoves = new Set<string>;
-        greedyMoveToTime = {};
-      }
-      const startTime: number = performance.now();
-      const startTensors: number = tf.memory().numTensors;
-
-      const { boxes, scores } = await detect(modelRef, videoRef, keypoints);
-      const squares: number[] = getSquares(boxes, centers3D, boundary3D);
-      const update: number[][] = getUpdate(scores, squares);
-      state = updateState(state, update);
-      const { bestScore1, bestScore2, bestJointScore, bestMove, bestMoves } = processState(state, movesPairsRef.current, possibleMoves);
-
-      const endTime: number = performance.now();
-      const fps: string = (1000 / (endTime - startTime)).toFixed(1);
-
-      let hasMove: boolean = false;
-      if ((bestMoves !== null) && (mode !== "play")) {
-        const move: string = bestMoves.sans[0];
-        hasMove = (bestScore2 > 0) && (bestJointScore > 0) && (possibleMoves.has(move));
-        if (hasMove) {
-          boardRef.current.playSan(move);
-          possibleMoves.clear();
+    try {
+      if (playingRef.current === false || invalidVideo(videoRef)) {
+        centers = null
+      } else {
+        if (centers === null) {
+          keypoints = getKeypoints(cornersRef, canvasRef);
+          const invTransform = getInvTransform(keypoints);
+          [centers, centers3D] = transformCenters(invTransform);
+          [boundary, boundary3D] = transformBoundary(invTransform);
+          state = zeros(64, 12);
+          possibleMoves = new Set<string>;
           greedyMoveToTime = {};
         }
-      }
+        const startTime: number = performance.now();
+        const startTensors: number = tf.memory().numTensors;
 
-      let hasGreedyMove: boolean = false;
-      if (bestMove !== null && !(hasMove) && (bestScore1 > 0)) {
-        const move: string = bestMove.sans[0];
-        if (!(move in greedyMoveToTime)) {
-          greedyMoveToTime[move] = endTime;
+        const { boxes, scores } = await detect(modelRef, videoRef, keypoints);
+        const squares: number[] = getSquares(boxes, centers3D, boundary3D);
+        const update: number[][] = getUpdate(scores, squares);
+        state = updateState(state, update);
+        const { bestScore1, bestScore2, bestJointScore, bestMove, bestMoves } = processState(state, movesPairsRef.current, possibleMoves);
+
+        const endTime: number = performance.now();
+        const fps: string = (1000 / (endTime - startTime)).toFixed(1);
+
+        let hasMove: boolean = false;
+        if ((bestMoves !== null) && (mode !== "play")) {
+          const move: string = bestMoves.sans[0];
+          hasMove = (bestScore2 > 0) && (bestJointScore > 0) && (possibleMoves.has(move));
+          if (hasMove) {
+            boardRef.current.playSan(move);
+            possibleMoves.clear();
+            greedyMoveToTime = {};
+          }
         }
 
-        const secondElapsed = (endTime - greedyMoveToTime[move]) > 1000;
-        const newMove = sanToLan(boardRef.current, move) !== lastMoveRef.current;
-        hasGreedyMove = secondElapsed && newMove;
-        if (hasGreedyMove) {
-          boardRef.current.playSan(move);
-          greedyMoveToTime = { greedyMove: greedyMoveToTime[move] };
+        let hasGreedyMove: boolean = false;
+        if (bestMove !== null && !(hasMove) && (bestScore1 > 0)) {
+          const move: string = bestMove.sans[0];
+          if (!(move in greedyMoveToTime)) {
+            greedyMoveToTime[move] = endTime;
+          }
+
+          const secondElapsed = (endTime - greedyMoveToTime[move]) > 1000;
+          const newMove = sanToLan(boardRef.current, move) !== lastMoveRef.current;
+          hasGreedyMove = secondElapsed && newMove;
+          if (hasGreedyMove) {
+            boardRef.current.playSan(move);
+            greedyMoveToTime = { greedyMove: greedyMoveToTime[move] };
+          }
+        }
+
+        if (hasMove || hasGreedyMove) {
+          // No takebacks in "play" mode
+          const greedy = (mode === "play") ? false : hasGreedyMove;
+          const payload = makeUpdatePayload(boardRef.current, greedy);
+          console.log("payload", payload);
+          dispatch(gameUpdate(payload));
+        }
+        setText([`FPS: ${fps}`, moveTextRef.current]);
+
+        renderState(canvasRef.current, centers, boundary, state);
+
+        tf.dispose([boxes, scores]);
+
+        const endTensors: number = tf.memory().numTensors;
+        if (startTensors < endTensors) {
+          console.error(`Memory Leak! (${endTensors} > ${startTensors})`)
         }
       }
-
-      if (hasMove || hasGreedyMove) {
-        // No takebacks in "play" mode
-        const greedy = (mode === "play") ? false : hasGreedyMove;
-        const payload = makeUpdatePayload(boardRef.current, greedy);
-        console.log("payload", payload);
-        dispatch(gameUpdate(payload));
-      }
-      setText([`FPS: ${fps}`, moveTextRef.current]);
-
-      renderState(canvasRef.current, centers, boundary, state);
-
-      tf.dispose([boxes, scores]);
-
-      const endTensors: number = tf.memory().numTensors;
-      if (startTensors < endTensors) {
-        console.error(`Memory Leak! (${endTensors} > ${startTensors})`)
+    } catch (error) {
+      console.error("Piece detection failed", error);
+    } finally {
+      if (active) {
+        requestId = requestAnimationFrame(() => {
+          void loop();
+        });
       }
     }
-    requestId = requestAnimationFrame(loop);
   }
-  requestId = requestAnimationFrame(loop);
+  requestId = requestAnimationFrame(() => {
+    void loop();
+  });
 
   return () => {
+    active = false;
     tf.disposeVariables();
     if (requestId) {
       window.cancelAnimationFrame(requestId);

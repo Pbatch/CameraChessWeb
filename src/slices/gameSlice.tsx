@@ -39,6 +39,8 @@ const gameSlice = createSlice({
     },
     gameResetMoves(state) {
       state.moves = initialState.moves;
+      state.lastMove = initialState.lastMove;
+      state.greedy = initialState.greedy;
     },
     gameResetFen(state) {
       state.fen = initialState.fen;
@@ -83,7 +85,7 @@ const getMovesFromPgn = (pos: any, startFen: string) => {
   return pgn.trim();
 }
 
-export const gameSelect = () => {
+export const useGame = () => {
   return useSelector((state: RootState) => state.game)
 }
 

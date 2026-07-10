@@ -7,7 +7,7 @@ const PlayButton = ({ videoRef, playing, setPlaying }: {
   const handleClick = (e: any) => {
     e.preventDefault();
     
-    if (videoRef.current.src.startsWith("blob")) {
+    if (videoRef.current.getAttribute("src")?.startsWith("blob:")) {
       setPlaying(!playing);
     }
   }

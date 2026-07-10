@@ -1,20 +1,20 @@
 import { useState, useEffect } from "react";
 import { SetStudy, Study } from "../../types";
-import { userSelect } from "../../slices/userSlice";
+import { useUser } from "../../slices/userSlice";
 import { lichessSetStudies } from "../../utils/lichess";
 
 const StudyButton = ({ study, setStudy, onlyBroadcasts }: 
   {study: Study | null, setStudy: SetStudy, onlyBroadcasts: boolean }
 ) => {
   const [studies, setStudies] = useState<Study[]>([]);
-  const user = userSelect();
+  const user = useUser();
 
   useEffect(() => {
-    lichessSetStudies(user.token, setStudies, user.username, onlyBroadcasts);
-  }, []);
+    void lichessSetStudies(user.token, setStudies, user.username, onlyBroadcasts)
+      .catch((error: unknown) => console.error("Unable to load Lichess studies", error));
+  }, [onlyBroadcasts, user.token, user.username]);
 
-  const handleClick = (e: any, study: Study) => {
-    e.preventDefault();
+  const handleClick = (study: Study) => {
     setStudy(study);
   }
 
@@ -26,7 +26,7 @@ const StudyButton = ({ study, setStudy, onlyBroadcasts }:
       <ul className="dropdown-menu" aria-labelledby="dropdownMenuButton1">
         {studies.map(study => 
           <li key={study.id}>
-            <a onClick={(e) => handleClick(e, study)} className="dropdown-item" href="#">{study.name} ({study.id})</a>
+            <button type="button" onClick={() => handleClick(study)} className="dropdown-item">{study.name} ({study.id})</button>
           </li>
         )}
       </ul>

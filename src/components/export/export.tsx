@@ -1,10 +1,10 @@
 import ExportSidebar from "./exportSidebar";
 import Board from "./board";
 import { Container } from "../common";
-import { gameSelect, makePgn } from "../../slices/gameSlice";
+import { makePgn, useGame } from "../../slices/gameSlice";
 
 const Export = () => {
-  const pgn: string = makePgn(gameSelect());
+  const pgn: string = makePgn(useGame());
 
   return (
     <Container>

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { lichessGetPlaying } from "../../utils/lichess";
-import { userSelect } from "../../slices/userSlice";
+import { useUser } from "../../slices/userSlice";
 import { parseFen } from "chessops/fen";
 import { Chess } from "chessops/chess";
 import { gameSetStart, gameUpdate, makeUpdatePayload } from "../../slices/gameSlice";
@@ -9,14 +9,12 @@ import { SetStringArray } from "../../types";
 
 const GamesButton = ({ setGameId, setColor, setText }:
   { setGameId: any, setColor: any, setText: SetStringArray }) => {
-  const token: string = userSelect().token;
+  const token: string = useUser().token;
   const [games, setGames] = useState<any[]>([]);
   const [game, setGame] = useState<any>(null);
   const dispatch = useDispatch();
 
-  const handleClick = async (e: any, newGame: any) => {
-    e.preventDefault();
-
+  const handleClick = (newGame: any) => {
     if (game?.fullId === newGame.fullId) {
       return;
     }
@@ -36,25 +34,26 @@ const GamesButton = ({ setGameId, setColor, setText }:
     dispatch(gameSetStart(newGame.fen));
   }
 
-  const getGames = async (e: any) => {
-    e.preventDefault();
-
+  const getGames = async () => {
     const playing = await lichessGetPlaying(token);
     setGames(playing.nowPlaying);
   }
 
   return (
     <div className="dropdown">
-      <button className="btn btn-dark btn-sm btn-outline-light dropdown-toggle w-100" id="deviceButton" data-bs-toggle="dropdown" aria-expanded="false"
-        onClick={(e) => getGames(e)}>
+      <button className="btn btn-dark btn-sm btn-outline-light dropdown-toggle w-100" id="gamesButton" data-bs-toggle="dropdown" aria-expanded="false"
+        onClick={() => { void getGames().catch((error: unknown) => {
+          console.error("Unable to load Lichess games", error);
+          setText(["Unable to load Lichess games"]);
+        }); }}>
         {(game === null) ? "Select a Game" : `Game: ${game.opponent.username}`}
       </button>
-      <ul className="dropdown-menu" aria-labelledby="deviceButton">
+      <ul className="dropdown-menu" aria-labelledby="gamesButton">
         {games.map((game: any) =>
           <li key={game.fullId}>
-            <a onClick={(e) => handleClick(e, game)} className="dropdown-item" href="#">
+            <button type="button" onClick={() => handleClick(game)} className="dropdown-item">
               {game.opponent.username} ({game.gameId})
-            </a>
+            </button>
           </li>
         )}
       </ul>

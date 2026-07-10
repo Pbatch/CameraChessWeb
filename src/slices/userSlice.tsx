@@ -23,7 +23,7 @@ const userSlice = createSlice({
   }
 })
 
-export const userSelect = () => {
+export const useUser = () => {
   return useSelector((state: RootState) => state.user)
 }
 
