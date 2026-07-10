@@ -10,6 +10,15 @@ import { CornersPayload, Game, Mode, MovesPair, SetBoolean, SetStringArray } fro
 import { gameSelect, makeBoard } from "../../slices/gameSlice";
 import { getMovesPairs } from "../../utils/moves";
 
+type ZoomCapabilities = MediaTrackCapabilities & {
+  zoom?: {
+    min: number;
+  };
+};
+
+type ZoomConstraints = MediaTrackConstraints & {
+  zoom?: number;
+};
 
 const Video = ({ piecesModelRef, canvasRef, videoRef, sidebarRef, playing,
   setPlaying, playingRef, setText, mode, cornersRef }: {
@@ -110,24 +119,21 @@ const Video = ({ piecesModelRef, canvasRef, videoRef, sidebarRef, playing,
   useEffect(() => {
     updateWidthHeight();
 
-    let streamPromise: any = null;
+    let streamPromise: Promise<MediaStream | null> = Promise.resolve(null);
     if (mode !== "upload") {
-      streamPromise = awaitSetupWebcam()
+      streamPromise = awaitSetupWebcam();
     }
 
     findPieces(piecesModelRef, videoRef, canvasRef, playingRef, setText, dispatch,
       cornersRef, boardRef, movesPairsRef, lastMoveRef, moveTextRef, mode);
 
-    const stopWebcam = async () => {
-      const stream = await streamPromise;
-      if (stream !== null) {
-        stream.getTracks().forEach((track: any) => track.stop());
-      }
-    }
-
     return () => {
-      stopWebcam();
-    }
+      streamPromise.then((stream) => {
+        if (stream !== null) {
+          stream.getTracks().forEach(track => track.stop());
+        }
+      });
+    };
   }, []);
 
   useEffect(() => {
@@ -172,36 +178,36 @@ const Video = ({ piecesModelRef, canvasRef, videoRef, sidebarRef, playing,
     if (mode === "upload") {
       return;
     }
-    window.setTimeout(() => {
-      if (!(videoRef.current)) {
+
+    const applySettings = () => {
+      if (!(videoRef.current) || !(videoRef.current.srcObject)) {
         return;
       }
 
-      const tracks = videoRef.current.srcObject.getVideoTracks();
-      if (tracks.length == 0) {
+      const stream = videoRef.current.srcObject as MediaStream;
+      const tracks = stream.getVideoTracks();
+      if (tracks.length === 0) {
         return;
       }
 
       try {
-        const capabilities = tracks[0].getCapabilities();
-        console.log("Capabilties", capabilities);
-
-        if (capabilities.zoom) {
-          tracks[0].applyConstraints({
-            zoom: capabilities.zoom.min,
-          })
+        const track = tracks[0];
+        if (typeof track.getCapabilities === 'function') {
+          const capabilities = track.getCapabilities() as ZoomCapabilities;
+          if (capabilities.zoom) {
+            const constraints: ZoomConstraints = {
+              zoom: capabilities.zoom.min,
+            };
+            track.applyConstraints(constraints).catch(e => console.debug("Apply constraints failed", e));
+          }
         }
-      } catch (_) {
-        console.log("Cannot update track capabilities")
+      } catch (e) {
+        console.debug("Capabilities check failed", e);
       }
+    };
 
-      try {
-        const settings = tracks[0].getSettings();
-        console.log("Settings", settings);
-      } catch (_) {
-        console.log("Cannot log track settings")
-      }
-    }, 2000);
+    applySettings();
+    window.setTimeout(applySettings, 500);
   };
 
   const onCanPlay = () => {
