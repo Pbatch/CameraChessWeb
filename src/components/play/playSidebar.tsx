@@ -43,7 +43,12 @@ const PlaySidebar = ({ piecesModelRef, xcornersModelRef, videoRef, canvasRef, si
   }, [gameRef.current])
 
   const streamGameCallback = async (response: any) => {
-    const moves = response.type === "gameFull" ? response.state?.moves : response.moves;
+    // The selected game is already initialized from nowPlaying.fen.
+    if (response.type === "gameFull") {
+      return;
+    }
+
+    const moves = response.moves;
     if (moves === undefined) {
       return;
     }
