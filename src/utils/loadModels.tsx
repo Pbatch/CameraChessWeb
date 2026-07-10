@@ -2,12 +2,18 @@ import * as tf from "@tensorflow/tfjs-core";
 import { loadGraphModel, GraphModel } from "@tensorflow/tfjs-converter";
 import { MODEL_HEIGHT, MODEL_WIDTH } from "../utils/constants";
 
-const LoadModels = (piecesModelRef: any, xcornersModelRef: any) => {
-  if ((piecesModelRef.current !== undefined) && (xcornersModelRef.current !== undefined)) {
-    return;
+let loadingModels: Promise<void> | null = null;
+
+const LoadModels = (piecesModelRef: any, xcornersModelRef: any): Promise<void> => {
+  if (piecesModelRef.current !== null && xcornersModelRef.current !== null) {
+    return Promise.resolve();
   }
 
-  tf.ready().then(async () => {
+  if (loadingModels !== null) {
+    return loadingModels;
+  }
+
+  loadingModels = tf.ready().then(async () => {
     tf.env().set('WEBGL_EXP_CONV', true);
     tf.env().set('WEBGL_PACK', false);
     tf.env().set('ENGINE_COMPILE_ONLY', true);
@@ -29,7 +35,12 @@ const LoadModels = (piecesModelRef: any, xcornersModelRef: any) => {
 
     piecesModelRef.current = piecesModel;
     xcornersModelRef.current = xcornersModel;
-  })
+  }).catch((error) => {
+    loadingModels = null;
+    throw error;
+  });
+
+  return loadingModels;
 };
 
 export default LoadModels;
