@@ -8,6 +8,7 @@ import { useDispatch } from "react-redux";
 import { lichessTrySetUser } from "./utils/lichess";
 import { UnknownAction } from "@reduxjs/toolkit";
 import { Toast } from "./components/common";
+import LoadModels from "./utils/loadModels";
 
 const App = () => {
   const dispatch: Dispatch<UnknownAction> = useDispatch();
@@ -26,7 +27,10 @@ const App = () => {
     if (token === "") {
       lichessTrySetUser(navigate, dispatch);
     }
-    setLoading(false);
+
+    LoadModels(piecesModelRef, xcornersModelRef)
+      .then(() => setLoading(false))
+      .catch((error) => console.error("Failed to load TensorFlow models", error));
   }, []);
 
   return (

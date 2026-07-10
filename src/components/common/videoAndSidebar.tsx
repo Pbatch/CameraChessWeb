@@ -4,7 +4,6 @@ import { useOutletContext } from "react-router-dom";
 import { useDispatch } from 'react-redux';
 import { cornersReset, cornersSelect } from '../../slices/cornersSlice';
 import { Container } from "../common";
-import LoadModels from "../../utils/loadModels";
 import { CornersDict, Mode, ModelRefs, Study } from "../../types";
 import RecordSidebar from "../record/recordSidebar";
 import UploadSidebar from "../upload/uploadSidebar";
@@ -71,7 +70,6 @@ const VideoAndSidebar = ({ mode }: { mode: Mode }) => {
   }, [corners])
 
   useEffect(() => {
-    LoadModels(context.piecesModelRef, context.xcornersModelRef);
     dispatch(cornersReset());
     dispatch(gameResetStart());
     dispatch(gameResetMoves());
