@@ -43,7 +43,7 @@ const PlaySidebar = ({ piecesModelRef, xcornersModelRef, videoRef, canvasRef, si
   }, [gameRef.current])
 
   const streamGameCallback = async (response: any) => {
-    const moves = response.moves;
+    const moves = response.type === "gameFull" ? response.state?.moves : response.moves;
     if (moves === undefined) {
       return;
     }
@@ -66,7 +66,8 @@ const PlaySidebar = ({ piecesModelRef, xcornersModelRef, videoRef, canvasRef, si
       return;
     }
 
-    lichessStreamGame(token, streamGameCallback, gameId);
+    const controller = lichessStreamGame(token, streamGameCallback, gameId);
+    return () => controller.abort();
   }, [gameId]);
 
   return (
