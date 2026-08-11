@@ -7,7 +7,7 @@ import { cornersSet } from '../slices/cornersSlice';
 import { MODEL_WIDTH, MODEL_HEIGHT, CORNER_KEYS } from "./constants";
 import { clamp } from "./math";
 import { CornersDict, CornersPayload } from "../types";
-import { NDArray } from "vectorious";
+import { array, NDArray } from "vectorious";
 
 const x: number[] = Array.from({ length: 7 }, (_, i) => i);
 const y: number[] = Array.from({ length: 7 }, (_, i) => i);
@@ -63,28 +63,34 @@ const getQuads = (xCorners: number[][]) => {
   const intXcorners = xCorners.flat().map(x => Math.round(x));
   const delaunay = new Delaunator(intXcorners);
   const triangles = delaunay.triangles;
-  const quads = [];
+  const quads: number[][][] = [];
+  const seen = new Set<string>();
   for (let i = 0; i < triangles.length; i += 3) {
-    const t1 = triangles[i];
-    const t2 = triangles[i + 1];
-    const t3 = triangles[i + 2];
-    const quad = [t1, t2, t3, -1];
+    const first = [triangles[i], triangles[i + 1], triangles[i + 2]];
 
-    for (let j = 0; j < triangles.length; j += 3) {
+    for (let j = i + 3; j < triangles.length; j += 3) {
       if (i === j) {
         continue;
       }
-      const cond1 = (t1 === triangles[j] && t2 === triangles[j + 1]) || (t1 === triangles[j + 1] && t2 === triangles[j]);
-      const cond2 = (t2 === triangles[j] && t3 === triangles[j + 1]) || (t2 === triangles[j + 1] && t3 === triangles[j]);
-      const cond3 = (t3 === triangles[j] && t1 === triangles[j + 1]) || (t3 === triangles[j + 1] && t1 === triangles[j]);
-      if ((cond1 || cond2 || cond3)) {
-        quad[3] = triangles[j + 2];
-        break;
-      }
-    }
+      const second = [triangles[j], triangles[j + 1], triangles[j + 2]];
+      if (first.filter(index => second.includes(index)).length !== 2) continue;
 
-    if (quad[3] !== -1) {
-      quads.push(quad.map(x => xCorners[x]));
+      const indices = Array.from(new Set([...first, ...second]));
+      if (indices.length !== 4) continue;
+      const key = [...indices].sort((a, b) => a - b).join(',');
+      if (seen.has(key)) continue;
+      seen.add(key);
+
+      const points = indices.map(index => xCorners[index]);
+      const center = getCenter(points);
+      points.sort((a, b) => Math.atan2(a[1] - center[1], a[0] - center[0])
+        - Math.atan2(b[1] - center[1], b[0] - center[0]));
+      const signedArea = points.reduce((area, point, index) => {
+        const next = points[(index + 1) % points.length];
+        return area + point[0] * next[1] - next[0] * point[1];
+      }, 0);
+      if (signedArea > 0) points.reverse();
+      quads.push(points);
     }
   }
   return quads;
@@ -102,41 +108,95 @@ const cdist = (a: number[][], b: number[][]) => {
   return dist;
 }
 
+type GridMatch = { grid: number[]; image: number[]; error: number };
+
+const getGridMatches = (warpedXcorners: number[][], xCorners: number[][], shift: number[], threshold = 0.34) => {
+  const matches = new Map<string, GridMatch>();
+  for (let index = 0; index < warpedXcorners.length; index++) {
+    const warped = warpedXcorners[index];
+    const gx = Math.round(warped[0]);
+    const gy = Math.round(warped[1]);
+    if (gx < shift[0] || gx > shift[0] + 6 || gy < shift[1] || gy > shift[1] + 6) continue;
+
+    const error = Math.hypot(warped[0] - gx, warped[1] - gy);
+    if (error > threshold) continue;
+    const key = `${gx},${gy}`;
+    const current = matches.get(key);
+    if (!current || error < current.error) {
+      matches.set(key, { grid: [gx, gy], image: xCorners[index], error });
+    }
+  }
+  return Array.from(matches.values());
+};
+
+// Robust projective fit using every visible intersection of the 7 x 7 inner lattice.
+const fitGridHomography = (matches: GridMatch[]): NDArray => {
+  const normal = Array.from({ length: 8 }, () => Array(8).fill(0));
+  const rhs = Array(8).fill(0);
+
+  const accumulate = (row: number[], value: number) => {
+    for (let i = 0; i < 8; i++) {
+      rhs[i] += row[i] * value;
+      for (let j = 0; j < 8; j++) normal[i][j] += row[i] * row[j];
+    }
+  };
+
+  matches.forEach(({ grid: [u, v], image: [x, y] }) => {
+    accumulate([u, v, 1, 0, 0, 0, -x * u, -x * v], x);
+    accumulate([0, 0, 0, u, v, 1, -y * u, -y * v], y);
+  });
+
+  const solution = array(normal).solve(array(rhs, { shape: [8, 1] })).toArray();
+  return array([...solution, 1], { shape: [3, 3] });
+};
+
+const refineGridHomography = (matches: GridMatch[]) => {
+  let transform = fitGridHomography(matches);
+  const projected = perspectiveTransform(matches.map(match => match.grid), transform);
+  const errors = matches.map((match, index) => euclidean(projected[index], match.image));
+  const sortedErrors = [...errors].sort((a, b) => a - b);
+  const medianError = sortedErrors[Math.floor(sortedErrors.length / 2)];
+  const robustLimit = Math.max(2, medianError * 2.5);
+  const inliers = matches.filter((_, index) => errors[index] <= robustLimit);
+  if (inliers.length >= 8) transform = fitGridHomography(inliers);
+  return { transform, inlierCount: inliers.length, medianError };
+};
+
 const calculateOffsetScore = (warpedXcorners: number[][], shift: number[]) => {
   const grid = GRID.map(x => [x[0] + shift[0], x[1] + shift[1]]);
   const dist = cdist(grid, warpedXcorners);
 
-  let assignmentCost = 0;
-  for (let i = 0; i < dist.length; i++) {
-    assignmentCost += Math.min(...dist[i]);
-  }
-  const score = 1 / (1 + assignmentCost);
+  const gridCost = dist.reduce((sum, row) => sum + Math.min(1.5, Math.min(...row)), 0) / grid.length;
+  const detectionCost = warpedXcorners.reduce((sum, _, detectionIndex) => {
+    const nearest = Math.min(...dist.map(row => row[detectionIndex]));
+    return sum + Math.min(1.5, nearest);
+  }, 0) / warpedXcorners.length;
+  const score = 1 / (1 + gridCost + detectionCost);
 
   return score;
 }
 
-const findOffset = (warpedXcorners: number[][]) => {
-  const bestOffset = [0, 0];
-  for (let i = 0; i < 2; i++) {
-    let low = -7;
-    let high = 1;
-    const scores: any = {};
-    while ((high - low) > 1) {
-      const mid = (high + low) >> 1;
-      [mid, mid + 1].forEach(x => {
-        if (!(x in scores)) {
-          const shift = [0, 0];
-          shift[i] = x;
-          scores[x] = calculateOffsetScore(warpedXcorners, shift);
-        }
-      });
-      if (scores[mid] > scores[mid + 1]) {
-        high = mid
-      } else {
-        low = mid
+const calculateLatticeScore = (warpedXcorners: number[][], xCorners: number[][], shift: number[]) => {
+  const matches = getGridMatches(warpedXcorners, xCorners, shift);
+  if (matches.length < 4) return Number.NEGATIVE_INFINITY;
+  const xs = matches.map(match => match.grid[0]);
+  const ys = matches.map(match => match.grid[1]);
+  const span = (Math.max(...xs) - Math.min(...xs)) + (Math.max(...ys) - Math.min(...ys));
+  const meanError = matches.reduce((sum, match) => sum + match.error, 0) / matches.length;
+  return matches.length * 10 + span - meanError * 5 + calculateOffsetScore(warpedXcorners, shift);
+};
+
+const findOffset = (warpedXcorners: number[][], xCorners: number[][]) => {
+  let bestOffset = [0, 0];
+  let bestScore = Number.NEGATIVE_INFINITY;
+  for (let dx = -7; dx <= 1; dx++) {
+    for (let dy = -7; dy <= 1; dy++) {
+      const score = calculateLatticeScore(warpedXcorners, xCorners, [dx, dy]);
+      if (score > bestScore) {
+        bestScore = score;
+        bestOffset = [dx, dy];
       }
     }
-    bestOffset[i] = low + 1;
   }
 
   return bestOffset;
@@ -145,9 +205,9 @@ const findOffset = (warpedXcorners: number[][]) => {
 const scoreQuad = (quad: number[][], xCorners: number[][]): [number, NDArray, number[]] => {
   const M: NDArray = getPerspectiveTransform(IDEAL_QUAD, quad);
   const warpedXcorners: number[][] = perspectiveTransform(xCorners, M);
-  const offset: number[] = findOffset(warpedXcorners);
+  const offset: number[] = findOffset(warpedXcorners, xCorners);
 
-  const score: number = calculateOffsetScore(warpedXcorners, offset);
+  const score: number = calculateLatticeScore(warpedXcorners, xCorners, offset);
   return [score, M, offset]
 }
 
@@ -157,25 +217,52 @@ const findCornersFromXcorners = (xCorners: number[][]) => {
     return;
   }
 
-  let bestScore: number;
-  let bestM: NDArray;
-  let bestOffset: number[];
-  [bestScore, bestM, bestOffset] = scoreQuad(quads[0], xCorners);
-  for (let i = 1; i < quads.length; i++) {
-    const [score, M, offset] = scoreQuad(quads[i], xCorners);
-    if (score > bestScore) {
-      bestScore = score;
-      bestM = M;
-      bestOffset = offset;
+  let bestScore = Number.NEGATIVE_INFINITY;
+  let bestM: NDArray | undefined;
+  let bestOffset: number[] | undefined;
+  for (const quad of quads) {
+    try {
+      const [score, M, offset] = scoreQuad(quad, xCorners);
+      if (score > bestScore) {
+        bestScore = score;
+        bestM = M;
+        bestOffset = offset;
+      }
+    } catch (_) {
+      // Degenerate Delaunay quads can produce a singular homography.
     }
   }
 
-  const invM = bestM.inv()
+  if (!bestM || !bestOffset) return;
+
+  const warpedXcorners = perspectiveTransform(xCorners, bestM);
+  const matches = getGridMatches(warpedXcorners, xCorners, bestOffset);
+  let gridToImage = bestM.inv();
+  if (matches.length >= 8) {
+    try {
+      const refined = refineGridHomography(matches);
+      if (refined.inlierCount >= 8 && refined.medianError < 8) {
+        gridToImage = refined.transform;
+      }
+    } catch (_) {
+      // Keep the four-point hypothesis when the all-grid fit is ill-conditioned.
+    }
+  }
   const warpedCorners = [[bestOffset[0] - 1, bestOffset[1] - 1],
   [bestOffset[0] - 1, bestOffset[1] + 7],
   [bestOffset[0] + 7, bestOffset[1] + 7],
   [bestOffset[0] + 7, bestOffset[1] - 1]]
-  const corners = perspectiveTransform(warpedCorners, invM);
+  const corners = perspectiveTransform(warpedCorners, gridToImage);
+
+  const area = Math.abs(corners.reduce((sum, point, index) => {
+    const next = corners[(index + 1) % corners.length];
+    return sum + point[0] * next[1] - next[0] * point[1];
+  }, 0)) / 2;
+  const shortestEdge = Math.min(...corners.map((point, index) => euclidean(point, corners[(index + 1) % 4])));
+  if (!Number.isFinite(bestScore) || area < MODEL_WIDTH * MODEL_HEIGHT * 0.04 || shortestEdge < 20
+    || corners.flat().some(value => !Number.isFinite(value))) {
+    return;
+  }
 
   // Clip bad corners
   for (let i = 0; i < 4; i++) {
@@ -226,7 +313,41 @@ const calculateKeypoints = (blackPieces: number[][], whitePieces: number[][], co
   return keypoints
 }
 
-export const _findCorners = async (piecesModelRef: any, xcornersModelRef: any, videoRef: any,
+const waitForVideoFrame = () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+
+const median = (values: number[]) => {
+  const sorted = [...values].sort((a, b) => a - b);
+  const middle = Math.floor(sorted.length / 2);
+  return sorted.length % 2 === 0
+    ? (sorted[middle - 1] + sorted[middle]) / 2
+    : sorted[middle];
+};
+
+const consensusKeypoints = (samples: CornersDict[]): CornersDict => {
+  const result = {} as CornersDict;
+  CORNER_KEYS.forEach((key) => {
+    result[key] = [
+      median(samples.map(sample => sample[key][0])),
+      median(samples.map(sample => sample[key][1]))
+    ];
+  });
+  return result;
+};
+
+const detectCornersSample = async (piecesModelRef: any, xcornersModelRef: any, videoRef: any) => {
+  const pieces = await runPiecesModel(videoRef, piecesModelRef);
+  const blackPieces = pieces.filter(x => (x[2] <= 5));
+  const whitePieces = pieces.filter(x => (x[2] > 5));
+  if (blackPieces.length === 0 || whitePieces.length === 0) return null;
+
+  const xCorners = await runXcornersModel(videoRef, xcornersModelRef, pieces);
+  if (xCorners.length < 5) return null;
+  const corners = findCornersFromXcorners(xCorners);
+  if (!corners) return null;
+  return { keypoints: calculateKeypoints(blackPieces, whitePieces, corners), xCorners };
+};
+
+export const findCornersSingleFrame = async (piecesModelRef: any, xcornersModelRef: any, videoRef: any,
   canvasRef: any, dispatch: any, setText: any) => {
   if (invalidVideo(videoRef)) {
     return;
@@ -266,6 +387,47 @@ export const _findCorners = async (piecesModelRef: any, xcornersModelRef: any, v
   renderCorners(canvasRef.current, xCorners);
   setText(["Found corners", "Ready to record"])
 }
+
+export const _findCorners = async (piecesModelRef: any, xcornersModelRef: any, videoRef: any,
+  canvasRef: any, dispatch: any, setText: any) => {
+  if (invalidVideo(videoRef)) return;
+
+  const samples: { keypoints: CornersDict, xCorners: number[][] }[] = [];
+  const sampleCount = 5;
+  setText(["Finding corners", "Hold the camera still..."]);
+  for (let index = 0; index < sampleCount; index++) {
+    try {
+      const sample = await detectCornersSample(piecesModelRef, xcornersModelRef, videoRef);
+      if (sample) samples.push(sample);
+    } catch (error) {
+      console.warn(`Corner sample ${index + 1} failed`, error);
+    }
+    await waitForVideoFrame();
+  }
+
+  if (samples.length < 3) {
+    setText(["Could not find stable corners", `Valid frames: ${samples.length}/${sampleCount}`]);
+    return;
+  }
+
+  const roughConsensus = consensusKeypoints(samples.map(sample => sample.keypoints));
+  const deviations = samples.map(sample => CORNER_KEYS.reduce((sum, key) =>
+    sum + euclidean(sample.keypoints[key], roughConsensus[key]), 0) / CORNER_KEYS.length);
+  const deviationLimit = Math.max(10, median(deviations) * 2.5);
+  const stableSamples = samples.filter((_, index) => deviations[index] <= deviationLimit);
+  const keypoints = consensusKeypoints(stableSamples.map(sample => sample.keypoints));
+  const bestSampleIndex = deviations.indexOf(Math.min(...deviations));
+
+  CORNER_KEYS.forEach((key) => {
+    const payload: CornersPayload = {
+      xy: getMarkerXY(keypoints[key], canvasRef.current.height, canvasRef.current.width),
+      key
+    };
+    dispatch(cornersSet(payload));
+  });
+  renderCorners(canvasRef.current, samples[bestSampleIndex].xCorners);
+  setText(["Found stable corners", `${stableSamples.length}/${sampleCount} frames agreed`]);
+};
 
 export const findCorners = async (piecesModelRef: any, xcornersModelRef: any, videoRef: any, canvasRef: any,
   dispatch: any, setText: any) => {

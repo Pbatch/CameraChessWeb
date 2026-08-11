@@ -24,6 +24,7 @@ const Video = ({ piecesModelRef, canvasRef, videoRef, sidebarRef, playing,
   const boardRef = useRef<any>(makeBoard(game));
   const movesPairsRef = useRef<MovesPair[]>(getMovesPairs(boardRef.current));
   const lastMoveRef = useRef<string>(game.lastMove);
+  const syncRequiredRef = useRef<boolean>(game.syncRequired ?? false);
   const moveTextRef = useRef<string>("");
   const [canPlay, setCanPlay] = useState(false);
 
@@ -41,6 +42,7 @@ const Video = ({ piecesModelRef, canvasRef, videoRef, sidebarRef, playing,
     }
     boardRef.current = board;
     lastMoveRef.current = game.lastMove;
+    syncRequiredRef.current = game.syncRequired ?? false;
   }, [game])
 
   const getMoveText = (board: any): string => {
@@ -111,7 +113,7 @@ const Video = ({ piecesModelRef, canvasRef, videoRef, sidebarRef, playing,
     }
 
     const stopDetection = findPieces(piecesModelRef, videoRef, canvasRef, playingRef, setText, dispatch,
-      cornersRef, boardRef, movesPairsRef, lastMoveRef, moveTextRef, mode);
+      cornersRef, boardRef, movesPairsRef, lastMoveRef, moveTextRef, syncRequiredRef, mode);
 
     const stopWebcam = async () => {
       const stream = await streamPromise;

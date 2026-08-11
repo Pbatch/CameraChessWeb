@@ -18,7 +18,8 @@ const initialState: Game = {
   "lastMove": "",
   "greedy": false,
   "fromOpponent": false,
-  "error": null
+  "error": null,
+  "syncRequired": false
 };
 
 const gameSlice = createSlice({
@@ -52,7 +53,13 @@ const gameSlice = createSlice({
       state.lastMove = initialState.lastMove;
     },
     gameSetError(state, action) {
-      state.error = action.payload;
+      const error = action.payload;
+      state.error = error === null || typeof error === "string"
+        ? error
+        : error instanceof Error ? error.message : String(error);
+    },
+    gameSetSyncRequired(state, action) {
+      state.syncRequired = Boolean(action.payload);
     },
     gameUpdate(state, action) {
       const newState: Game = {
@@ -62,7 +69,8 @@ const gameSlice = createSlice({
         "lastMove": action.payload.lastMove,
         "greedy": action.payload.greedy,
         "fromOpponent": action.payload.fromOpponent ?? false,
-        "error": action.payload.error ?? null
+        "error": action.payload.error ?? null,
+        "syncRequired": action.payload.syncRequired ?? state.syncRequired ?? false
       }
       return newState
     }
@@ -107,7 +115,8 @@ export const makeUpdatePayload = (board: any, greedy: boolean = false, fromOppon
     "lastMove": lastMove,
     "greedy": greedy,
     "fromOpponent": fromOpponent,
-    "error": error
+    "error": error,
+    "syncRequired": false
   }
 
   return payload
@@ -171,11 +180,27 @@ export const makeBoard = (game: Game): any => {
   return board;
 }
 
+export const makeBoardFromUci = (startFen: string, moves: string): any => {
+  const normalizedStart = startFen === "startpos" ? START_FEN : startFen;
+  const seed: Game = {
+    ...initialState,
+    start: normalizedStart,
+    fen: normalizedStart
+  };
+  const board = makeBoard(seed);
+  for (const uci of moves.trim().split(/\s+/).filter(Boolean)) {
+    if (board.playUci(uci) === null) {
+      throw new Error(`Lichess sent an invalid move: ${uci}`);
+    }
+  }
+  return board;
+};
+
 export const {
   gameSetMoves, gameResetMoves,
   gameSetFen, gameResetFen,
   gameSetStart, gameResetStart,
   gameSetLastMove, gameResetLastMove,
-  gameUpdate, gameSetError
+  gameUpdate, gameSetError, gameSetSyncRequired
 } = gameSlice.actions
 export default gameSlice.reducer

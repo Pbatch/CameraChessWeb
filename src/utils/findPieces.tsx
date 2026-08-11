@@ -1,11 +1,11 @@
 import { renderState } from "./render/renderState";
 import * as tf from "@tensorflow/tfjs-core";
 import { getInvTransform, transformBoundary, transformCenters } from "./warp";
-import { gameUpdate, makeUpdatePayload } from "../slices/gameSlice";
+import { gameSetSyncRequired, gameUpdate, makeUpdatePayload } from "../slices/gameSlice";
 import { getBoxesAndScores, getInput, getXY, invalidVideo } from "./detect";
 import { Mode, MovesData, MovesPair } from "../types";
 import { zeros } from "./math";
-import { CORNER_KEYS } from "./constants";
+import { CORNER_KEYS, LABEL_MAP } from "./constants";
 import { parseSan } from "chessops/san";
 import { makeUci } from "chessops/util";
 
@@ -139,6 +139,24 @@ export const getUpdate = (scoresTensor: tf.Tensor2D, squares: number[]) => {
   return update;
 }
 
+const physicalBoardMatches = (state: number[][], board: any): boolean => {
+  for (let square = 0; square < 64; square++) {
+    const scores = state[square];
+    const bestScore = Math.max(...scores);
+    const piece = board.board.get(square);
+    if (!piece) {
+      if (bestScore > 0.28) return false;
+      continue;
+    }
+
+    const roleLetter = piece.role === "knight" ? "n" : piece.role[0];
+    const label = piece.color === "white" ? roleLetter.toUpperCase() : roleLetter;
+    const expectedScore = scores[LABEL_MAP[label]];
+    if (expectedScore < 0.32 || expectedScore + 0.08 < bestScore) return false;
+  }
+  return true;
+};
+
 const updateState = (state: number[][], update: number[][], decay: number = 0.5) => {
   for (let i = 0; i < 64; i++) {
     for (let j = 0; j < 12; j++) {
@@ -176,7 +194,7 @@ export const getKeypoints = (cornersRef: any, canvasRef: any): number[][] => {
 
 export const findPieces = (modelRef: any, videoRef: any, canvasRef: any,
   playingRef: any, setText: any, dispatch: any, cornersRef: any, boardRef: any,
-  movesPairsRef: any, lastMoveRef: any, moveTextRef: any, mode: Mode) => {
+  movesPairsRef: any, lastMoveRef: any, moveTextRef: any, syncRequiredRef: any, mode: Mode) => {
   let centers: number[][] | null = null;
   let boundary: number[][];
   let centers3D: tf.Tensor3D;
@@ -187,6 +205,7 @@ export const findPieces = (modelRef: any, videoRef: any, canvasRef: any,
   let requestId: number;
   let greedyMoveToTime: { [move: string]: number };
   let active = true;
+  let synchronizedFrames = 0;
 
   const loop = async () => {
     try {
@@ -209,6 +228,26 @@ export const findPieces = (modelRef: any, videoRef: any, canvasRef: any,
         const squares: number[] = getSquares(boxes, centers3D, boundary3D);
         const update: number[][] = getUpdate(scores, squares);
         state = updateState(state, update);
+
+        if (syncRequiredRef.current) {
+          synchronizedFrames = physicalBoardMatches(state, boardRef.current)
+            ? synchronizedFrames + 1
+            : 0;
+          setText(["Desynchronization detected", "Rearrange the pieces to match Lichess"]);
+          if (synchronizedFrames >= 6) {
+            syncRequiredRef.current = false;
+            synchronizedFrames = 0;
+            possibleMoves.clear();
+            greedyMoveToTime = {};
+            dispatch(gameSetSyncRequired(false));
+            setText(["Board synchronized", "Detection resumed"]);
+          }
+          renderState(canvasRef.current, centers, boundary, state);
+          tf.dispose([boxes, scores]);
+          return;
+        }
+
+        synchronizedFrames = 0;
         const { bestScore1, bestScore2, bestJointScore, bestMove, bestMoves } = processState(state, movesPairsRef.current, possibleMoves);
 
         const endTime: number = performance.now();
@@ -228,17 +267,18 @@ export const findPieces = (modelRef: any, videoRef: any, canvasRef: any,
         let hasGreedyMove: boolean = false;
         if (bestMove !== null && !(hasMove) && (bestScore1 > 0)) {
           const move: string = bestMove.sans[0];
-          if (!(move in greedyMoveToTime)) {
-            greedyMoveToTime[move] = endTime;
-          }
+          const firstSeen = greedyMoveToTime[move] ?? endTime;
+          greedyMoveToTime = { [move]: firstSeen };
 
-          const secondElapsed = (endTime - greedyMoveToTime[move]) > 1000;
+          const secondElapsed = (endTime - firstSeen) > 1000;
           const newMove = sanToLan(boardRef.current, move) !== lastMoveRef.current;
           hasGreedyMove = secondElapsed && newMove;
           if (hasGreedyMove) {
             boardRef.current.playSan(move);
-            greedyMoveToTime = { greedyMove: greedyMoveToTime[move] };
+            greedyMoveToTime = {};
           }
+        } else if (!hasMove) {
+          greedyMoveToTime = {};
         }
 
         if (hasMove || hasGreedyMove) {
