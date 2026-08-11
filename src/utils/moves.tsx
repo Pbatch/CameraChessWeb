@@ -6,7 +6,7 @@ import { kingCastlesTo } from "chessops/util";
 import { SQUARE_MAP, LABEL_MAP, SQUARE_NAMES } from "./constants";
 import { MovesData, MovesPair } from "../types";
 
-function* legalMoves(pos: Position): Generator<Move> {
+export function* legalMoves(pos: Position): Generator<Move> {
   const ctx = pos.ctx();
   for (const [from, dests] of pos.allDests(ctx)) {
     for (const to of dests) {

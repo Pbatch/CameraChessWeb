@@ -4,7 +4,7 @@ import { useOutletContext } from "react-router-dom";
 import { useDispatch } from 'react-redux';
 import { cornersReset, useCorners } from '../../slices/cornersSlice';
 import { Container } from "../common";
-import { CornersDict, Mode, ModelRefs, Study } from "../../types";
+import { CornersDict, Mode, ModelRefs, PlayInputMode, Study, VoiceLanguage } from "../../types";
 import RecordSidebar from "../record/recordSidebar";
 import UploadSidebar from "../upload/uploadSidebar";
 import BroadcastSidebar from "../broadcast/broadcastSidebar";
@@ -33,6 +33,8 @@ const VideoAndSidebar = ({ mode }: { mode: Mode }) => {
 
   const [text, setText] = useState<string[]>([]);
   const [playing, setPlaying] = useState<boolean>(false);
+  const [playInputMode, setPlayInputMode] = useState<PlayInputMode>("camera");
+  const [voiceLanguage, setVoiceLanguage] = useState<VoiceLanguage>("es-ES");
   const [study, setStudy] = useState<Study | null>(null);
   const [boardNumber, setBoardNumber] = useState<number>(-1);
   
@@ -63,8 +65,8 @@ const VideoAndSidebar = ({ mode }: { mode: Mode }) => {
   }, [boardNumber, mode, moves, study, token])
 
   useEffect(() => {
-    playingRef.current = playing;
-  }, [playing]);
+    playingRef.current = playing && (mode !== "play" || playInputMode === "camera");
+  }, [mode, playInputMode, playing]);
 
   useEffect(() => {
     cornersRef.current = corners;
@@ -82,6 +84,10 @@ const VideoAndSidebar = ({ mode }: { mode: Mode }) => {
     "text": text,
     "study": study,
     "setPlaying": setPlaying,
+    "playInputMode": playInputMode,
+    "setPlayInputMode": setPlayInputMode,
+    "voiceLanguage": voiceLanguage,
+    "setVoiceLanguage": setVoiceLanguage,
     "setText": setText,
     "setBoardNumber": setBoardNumber,
     "setStudy": setStudy,

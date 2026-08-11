@@ -34,7 +34,8 @@ interface Game {
   lastMove: string,
   greedy: boolean,
   fromOpponent: boolean,
-  error: string | null
+  error: string | null,
+  syncRequired: boolean
 }
 
 interface User {
@@ -49,6 +50,8 @@ interface RootState {
 }
 
 type Mode = "record" | "upload" | "broadcast" | "play";
+type PlayInputMode = "camera" | "voice";
+type VoiceLanguage = "es-ES" | "en-US";
 
 type SetBoolean = React.Dispatch<React.SetStateAction<boolean>>
 type SetString = React.Dispatch<React.SetStateAction<string>>
@@ -60,5 +63,5 @@ export type {
   RootState, Study, ModelRefs, MovesData, MovesPair, 
   CornersDict, CornersKey, CornersPayload, Game,
   SetBoolean, SetString, SetStringArray, SetNumber, Mode,
-  SetStudy
+  SetStudy, PlayInputMode, VoiceLanguage
 }

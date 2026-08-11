@@ -41,6 +41,8 @@ const Toast = () => {
 
   if (!show || !game.error) return null;
 
+  const message = typeof game.error === "string" ? game.error : String(game.error);
+
   return (
     <div
       className="position-fixed top-0 end-0 m-3"
@@ -57,7 +59,7 @@ const Toast = () => {
         }}
       >
         <div className="toast-body d-flex justify-content-between align-items-center">
-          {game.error}
+          {message}
           <button
             type="button"
             className="btn-close btn-close-white"

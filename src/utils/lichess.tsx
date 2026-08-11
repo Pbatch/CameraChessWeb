@@ -86,7 +86,22 @@ type Account = { username: string };
 type Playing = { nowPlaying: unknown[] };
 type ImportResult = { id: string; url: string };
 type BroadcastPushResult = { games: { error?: string }[] };
-type BoardStreamEvent = { type: string; moves?: string; state?: { moves?: string } };
+export type BoardStreamEvent = {
+  type: string;
+  moves?: string;
+  initialFen?: string;
+  state?: { moves?: string };
+};
+
+export const errorMessage = (error: unknown): string => {
+  if (error instanceof Error) return error.message;
+  if (typeof error === 'string') return error;
+  try {
+    return JSON.stringify(error);
+  } catch (_) {
+    return String(error);
+  }
+};
 
 const setBroadcastlessStudies = async (token: string, username: string, setStudies: (studies: Study[]) => void, broadcasts: Study[]) => {
   const path = `/api/study/by/${username}`;
@@ -171,19 +186,42 @@ export const lichessPushRound = async (token: string, pgn: string, roundId: stri
   return result;
 }
 
-export const lichessStreamGame = (token: string, callback: (event: BoardStreamEvent) => void | Promise<void>, gameId: string) => {
+export const lichessStreamGame = (token: string, callback: (event: BoardStreamEvent) => void | Promise<void>, gameId: string,
+  onError?: (error: unknown) => void) => {
   const path = `/api/board/game/stream/${gameId}`;
   const controller = new AbortController();
-  void fetchResponse(token, path, {
-    signal: controller.signal,
-    headers: { Accept: 'application/x-ndjson' }
-  })
-    .then(readStream(callback))
-    .catch((error: unknown) => {
-      if (!controller.signal.aborted) {
-        console.error('Lichess game stream failed.', error);
+
+  const wait = (milliseconds: number) => new Promise<void>((resolve) => {
+    const timeout = window.setTimeout(resolve, milliseconds);
+    controller.signal.addEventListener('abort', () => {
+      window.clearTimeout(timeout);
+      resolve();
+    }, { once: true });
+  });
+
+  const connect = async () => {
+    let retryDelay = 1000;
+    while (!controller.signal.aborted) {
+      try {
+        const response = await fetchResponse(token, path, {
+          signal: controller.signal,
+          headers: { Accept: 'application/x-ndjson' }
+        });
+        retryDelay = 1000;
+        await readStream(callback)(response);
+      } catch (error: unknown) {
+        if (controller.signal.aborted) break;
+        console.error('Lichess game stream failed; reconnecting.', error);
+        onError?.(error);
       }
-    });
+      if (!controller.signal.aborted) {
+        await wait(retryDelay);
+        retryDelay = Math.min(retryDelay * 2, 10000);
+      }
+    }
+  };
+
+  void connect();
   return controller;
 }
 
