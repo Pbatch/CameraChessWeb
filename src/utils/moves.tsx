@@ -1,10 +1,10 @@
 import { parseFen, makeFen } from "chessops/fen";
-import { Chess, Position } from "chessops/chess";
-import { Move, Role, Color, isNormal } from "chessops/types";
+import { Chess, type Position } from "chessops/chess";
+import { type Move, type Role, type Color, isNormal } from "chessops/types";
 import { makeSan } from "chessops/san";
 import { kingCastlesTo } from "chessops/util";
 import { SQUARE_MAP, LABEL_MAP, SQUARE_NAMES } from "./constants";
-import { MovesData, MovesPair } from "../types";
+import type { MovesData, MovesPair } from "../types";
 
 function* legalMoves(pos: Position): Generator<Move> {
   const ctx = pos.ctx();
@@ -26,10 +26,10 @@ function* legalMoves(pos: Position): Generator<Move> {
 }
 
 const castlingMap: { [id: string]: number[] } = {
-  "g1": [SQUARE_MAP["h1"], SQUARE_MAP["f1"], LABEL_MAP["R"]],
-  "c1": [SQUARE_MAP["a1"], SQUARE_MAP["d1"], LABEL_MAP["R"]],
-  "g8": [SQUARE_MAP["h8"], SQUARE_MAP["f8"], LABEL_MAP["r"]],
-  "c8": [SQUARE_MAP["a8"], SQUARE_MAP["d8"], LABEL_MAP["r"]]
+  "g1": [SQUARE_MAP.h1, SQUARE_MAP.f1, LABEL_MAP.R],
+  "c1": [SQUARE_MAP.a1, SQUARE_MAP.d1, LABEL_MAP.R],
+  "g8": [SQUARE_MAP.h8, SQUARE_MAP.f8, LABEL_MAP.r],
+  "c8": [SQUARE_MAP.a8, SQUARE_MAP.d8, LABEL_MAP.r]
 }
 
 const roleToLabel = (role: Role, color: Color): string => {

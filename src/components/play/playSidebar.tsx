@@ -6,7 +6,7 @@ import { useUser } from "../../slices/userSlice";
 import { useEffect, useRef, useState } from "react";
 import { lichessPlayMove, lichessStreamGame } from "../../utils/lichess";
 import type { BoardStreamEvent } from "../../utils/lichess";
-import { Color } from "chessops/types";
+import type { Color } from "chessops/types";
 import { useDispatch } from "react-redux";
 import { gameUpdate, gameSetError, makeBoard, makeUpdatePayload, useGame } from "../../slices/gameSlice";
 import GamesButton from "./gamesButton";

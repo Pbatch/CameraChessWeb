@@ -16,6 +16,7 @@ const NavButton = ({ text, tokenRequired }: { text: string, tokenRequired: boole
 
   return (
     <button 
+      type="button"
       className="btn btn-dark btn-lg btn-outline-light w-100" 
       onClick={handleClick}
     > 

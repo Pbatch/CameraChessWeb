@@ -1,9 +1,9 @@
-import { AccessContext, OAuth2AuthCodePKCE } from '@bity/oauth2-auth-code-pkce';
+import { type AccessContext, OAuth2AuthCodePKCE } from '@bity/oauth2-auth-code-pkce';
 import { userReset, userSetToken, userSetUsername } from '../slices/userSlice';
-import { Dispatch } from 'react';
-import { UnknownAction } from '@reduxjs/toolkit';
-import { NavigateFunction } from 'react-router-dom';
-import { Study } from '../types';
+import type { Dispatch } from 'react';
+import type { UnknownAction } from '@reduxjs/toolkit';
+import type { NavigateFunction } from 'react-router-dom';
+import type { Study } from '../types';
 
 const lichessHost = 'https://lichess.org';
 const scopes = ["study:write", "study:read", "board:play"];

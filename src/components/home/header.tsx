@@ -26,7 +26,7 @@ const Header = () => {
       </div>
       <div className="col-6 h-100">
         <div className="h-100 d-flex justify-content-center align-items-end m-0">
-          <button className="btn btn-dark btn-outline-light m-0" onClick={handleClick}>
+          <button type="button" className="btn btn-dark btn-outline-light m-0" onClick={handleClick}>
             {username === "" ? "Login" : `Logout from "${username}"`}
           </button> 
         </div>

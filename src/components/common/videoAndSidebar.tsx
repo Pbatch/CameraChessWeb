@@ -4,7 +4,7 @@ import { useOutletContext } from "react-router-dom";
 import { useDispatch } from 'react-redux';
 import { cornersReset, useCorners } from '../../slices/cornersSlice';
 import { Container } from "../common";
-import { CornersDict, Mode, ModelRefs, Study } from "../../types";
+import type { CornersDict, Mode, ModelRefs, Study } from "../../types";
 import RecordSidebar from "../record/recordSidebar";
 import UploadSidebar from "../upload/uploadSidebar";
 import BroadcastSidebar from "../broadcast/broadcastSidebar";

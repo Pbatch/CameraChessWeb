@@ -1,7 +1,7 @@
 import { useDispatch } from "react-redux";
 import { gameResetFen, gameResetMoves } from "../../../slices/gameSlice";
 import { SidebarButton, Icon } from "../../common";
-import { SetStringArray, VideoRef } from "../../../types";
+import type { SetStringArray, VideoRef } from "../../../types";
 
 const RestartButton = ({ videoRef, setText }: { videoRef: VideoRef, setText: SetStringArray}) => {
   const dispatch = useDispatch();

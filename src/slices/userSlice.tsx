@@ -1,6 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit'
 import { useSelector } from 'react-redux';
-import { RootState } from '../types';
+import type { RootState } from '../types';
 
 const initialState = {
   "token": "",

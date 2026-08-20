@@ -1,5 +1,5 @@
 import * as tf from "@tensorflow/tfjs-core";
-import { loadGraphModel, GraphModel } from "@tensorflow/tfjs-converter";
+import { loadGraphModel, type GraphModel } from "@tensorflow/tfjs-converter";
 import { MODEL_HEIGHT, MODEL_WIDTH } from "../utils/constants";
 import type { ModelRefs } from "../types";
 

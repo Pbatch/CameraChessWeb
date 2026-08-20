@@ -1,5 +1,5 @@
 import { SidebarButton } from "../common";
-import { Study, SetStringArray } from "../../types";
+import type { Study, SetStringArray } from "../../types";
 import { useUser } from "../../slices/userSlice";
 import { lichessImportPgnToStudy } from "../../utils/lichess";
 

@@ -1,6 +1,6 @@
 import { Chessboard } from "kokopu-react";
 import { HomeButton, PgnButton } from "./index.tsx";
-import { Game, SetStringArray, SidebarRef } from "../../types.tsx";
+import type { Game, SetStringArray, SidebarRef } from "../../types.tsx";
 import { useGame } from "../../slices/gameSlice.tsx";
 import type { ReactNode } from "react";
 
@@ -29,9 +29,7 @@ const Sidebar = ({ sidebarRef, playing, text, setText, children }: SidebarProps)
   const textDisplay = () => {
     return (
       <div className="text-white">
-        {text.map(function(t, i){
-            return <div key={i}>{t}</div>;
-        })}
+        {text.map((t) => <div key={t}>{t}</div>)}
       </div>
     )
   }

@@ -1,5 +1,5 @@
 import { useDispatch } from "react-redux";
-import { SetBoolean, SetStringArray } from "../../types";
+import type { SetBoolean, SetStringArray } from "../../types";
 import { gameResetFen, gameResetMoves } from "../../slices/gameSlice";
 import SidebarButton from "./sidebarButton";
 import Icon from "./icon";

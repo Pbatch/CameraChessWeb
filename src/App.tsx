@@ -1,12 +1,12 @@
-import { Dispatch, useEffect, useRef, useState } from "react";
-import { NavigateFunction, Outlet, useNavigate } from "react-router-dom";
-import { GraphModel } from "@tensorflow/tfjs-converter";
+import { type Dispatch, useEffect, useRef, useState } from "react";
+import { type NavigateFunction, Outlet, useNavigate } from "react-router-dom";
+import type { GraphModel } from "@tensorflow/tfjs-converter";
 import "@tensorflow/tfjs-backend-webgl";
-import { ModelRefs } from "./types";
+import type { ModelRefs } from "./types";
 import { useUser } from "./slices/userSlice";
 import { useDispatch } from "react-redux";
 import { lichessTrySetUser } from "./utils/lichess";
-import { UnknownAction } from "@reduxjs/toolkit";
+import type { UnknownAction } from "@reduxjs/toolkit";
 import { Toast } from "./components/common";
 import LoadModels from "./utils/loadModels";
 

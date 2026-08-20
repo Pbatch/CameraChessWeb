@@ -4,7 +4,7 @@ import { invalidVideo } from "./detect";
 import { detect, getKeypoints, getSquares, getUpdate } from "./findPieces";
 import { parseFen, makeFen } from "chessops/fen";
 import { Chess } from "chessops/chess";
-import { Color, Role } from "chessops/types";
+import type { Color, Role } from "chessops/types";
 import { opposite } from "chessops/util";
 import { PIECE_SYMBOLS, SQUARE_NAMES } from "./constants";
 import { gameResetMoves, gameSetFen, gameSetStart } from "../slices/gameSlice";
@@ -64,7 +64,7 @@ const setFenFromState = (
   let bestWhiteKingScore = -1;
   let bestWhiteKingIdx = -1;
   for (let i = 0; i < 64; i++) {
-    if (i == bestBlackKingIdx) {
+    if (i === bestBlackKingIdx) {
       continue
     }
     const whiteKingScore = state[i][7];

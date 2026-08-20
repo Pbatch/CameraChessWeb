@@ -62,7 +62,11 @@ const router = createBrowserRouter([
   }
 ]);
 
-const root = createRoot(document.getElementById('root')!);
+const rootElement = document.getElementById('root');
+if (rootElement === null) {
+  throw new Error("Unable to find the application root element");
+}
+const root = createRoot(rootElement);
 const persistor = persistStore(store);
 
 root.render(

@@ -48,7 +48,7 @@ const GamesButton = ({ setGameId, setColor, setText }:
 
   return (
     <div className="dropdown">
-      <button className="btn btn-dark btn-sm btn-outline-light dropdown-toggle w-100" id="gamesButton" data-bs-toggle="dropdown" aria-expanded="false"
+      <button type="button" className="btn btn-dark btn-sm btn-outline-light dropdown-toggle w-100" id="gamesButton" data-bs-toggle="dropdown" aria-expanded="false"
         onClick={() => { void getGames().catch((error: unknown) => {
           console.error("Unable to load Lichess games", error);
           setText(["Unable to load Lichess games"]);

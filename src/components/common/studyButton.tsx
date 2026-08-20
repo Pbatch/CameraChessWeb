@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { SetStudy, Study } from "../../types";
+import type { SetStudy, Study } from "../../types";
 import { useUser } from "../../slices/userSlice";
 import { lichessSetStudies } from "../../utils/lichess";
 
@@ -20,7 +20,7 @@ const StudyButton = ({ study, setStudy, onlyBroadcasts }:
 
   return (
     <div className="dropdown">
-      <button className="btn btn-dark btn-sm btn-outline-light dropdown-toggle w-100" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+      <button type="button" className="btn btn-dark btn-sm btn-outline-light dropdown-toggle w-100" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
         {(study === null) ? "Select a Study": `Study: ${study.name}`}
       </button>
       <ul className="dropdown-menu" aria-labelledby="dropdownMenuButton1">
