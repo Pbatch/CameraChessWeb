@@ -1,8 +1,8 @@
 import { LABELS, PALETTE } from "../constants";
 import { setupCtx, drawBox, drawPoints, drawPolygon } from "./common";
 
-export const renderState = (canvasRef: any, centers: number[][], boundary: number[][], state: number[][]) => {
-  const [ctx, fontHeight, lineWidth, sx, sy] = setupCtx(canvasRef);
+export const renderState = (canvas: HTMLCanvasElement, centers: number[][], boundary: number[][], state: number[][]) => {
+  const [ctx, fontHeight, lineWidth, sx, sy] = setupCtx(canvas);
 
   drawPoints(ctx, centers, "blue", sx, sy);
   drawPolygon(ctx, boundary, "blue", sx, sy);

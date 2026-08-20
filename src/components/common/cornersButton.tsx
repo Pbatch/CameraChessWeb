@@ -1,12 +1,13 @@
 import { findCorners } from "../../utils/findCorners";
 import { useDispatch } from 'react-redux';
 import SidebarButton from "./sidebarButton";
+import type { CanvasRef, ModelRefs, SetStringArray, VideoRef } from "../../types";
 
 const CornersButton = ({ piecesModelRef, xcornersModelRef, videoRef, canvasRef, setText}: 
-  {piecesModelRef: any, xcornersModelRef: any, videoRef: any, canvasRef: any, setText: any}) => {
+  ModelRefs & { videoRef: VideoRef, canvasRef: CanvasRef, setText: SetStringArray }) => {
   const dispatch = useDispatch();
 
-  const handleClick = (e: any) => {
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
 
     void findCorners(piecesModelRef, xcornersModelRef, videoRef, canvasRef, dispatch, setText)

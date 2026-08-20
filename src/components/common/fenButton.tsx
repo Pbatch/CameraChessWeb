@@ -3,9 +3,15 @@ import { findFen } from "../../utils/findFen";
 import { useDispatch } from 'react-redux';
 import { gameResetFen, gameResetMoves, gameResetStart } from "../../slices/gameSlice";
 import { Color } from "chessops/types";
+import type { CanvasRef, CornersRef, ModelRefs, SetStringArray, VideoRef } from "../../types";
 
 const FenButton = ({ piecesModelRef, videoRef, canvasRef, setText, cornersRef }:
-  { piecesModelRef: any, videoRef: any, canvasRef: any, setText: any, cornersRef: any }) => {
+  Pick<ModelRefs, "piecesModelRef"> & {
+    videoRef: VideoRef,
+    canvasRef: CanvasRef,
+    setText: SetStringArray,
+    cornersRef: CornersRef
+  }) => {
   const options = ["Normal", "Infer (White to move)", "Infer (Black to move)"];
 
   const dispatch = useDispatch();

@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { MEDIA_CONSTRAINTS } from "../../utils/constants";
+import { VideoRef } from "../../types";
 
-const DeviceButton = ({ videoRef }: {videoRef: any }) => {
+const DeviceButton = ({ videoRef }: {videoRef: VideoRef }) => {
   const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
   const [device, setDevice] = useState<MediaDeviceInfo | null>(null);
 
@@ -12,10 +13,17 @@ const DeviceButton = ({ videoRef }: {videoRef: any }) => {
 
     setDevice(newDevice);
 
-    const constraints: any = {...MEDIA_CONSTRAINTS}
-    constraints["video"]["deviceId"] = newDevice.deviceId
+    const baseVideoConstraints = typeof MEDIA_CONSTRAINTS.video === "object"
+      ? MEDIA_CONSTRAINTS.video
+      : {};
+    const constraints: MediaStreamConstraints = {
+      ...MEDIA_CONSTRAINTS,
+      video: { ...baseVideoConstraints, deviceId: newDevice.deviceId }
+    };
     const stream = await navigator.mediaDevices.getUserMedia(constraints);
-    videoRef.current.srcObject = stream;
+    if (videoRef.current !== null) {
+      videoRef.current.srcObject = stream;
+    }
   }
 
   useEffect(() => {
@@ -24,14 +32,14 @@ const DeviceButton = ({ videoRef }: {videoRef: any }) => {
     .enumerateDevices()
     .then((devices) => {
       devices.forEach((device: MediaDeviceInfo) => {
-        if (device.kind != "videoinput") {
+        if (device.kind !== "videoinput") {
           return;
         }
         newDevices.push(device);
       });
     })
-    .catch((err) => {
-      console.error(`${err.name}: ${err.message}`);
+    .catch((error: unknown) => {
+      console.error("Unable to enumerate media devices", error);
     });
 
     setDevices(newDevices);

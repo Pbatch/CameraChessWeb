@@ -1,13 +1,19 @@
 import { VideoButton, PlayButton, RestartButton, PlaybackButtons, StopButton } from "./buttons";
 import { CornersButton, Sidebar, FenButton } from "../common";
-import { SetBoolean, SetStringArray } from "../../types";
+import type {
+  CanvasRef, CornersRef, ModelRefs, SetBoolean, SetStringArray, SidebarRef, VideoRef
+} from "../../types";
 
 const UploadSidebar = ({ videoRef, xcornersModelRef, piecesModelRef, canvasRef, 
   sidebarRef, text, setText, playing, setPlaying, cornersRef }: {
-  videoRef: any, xcornersModelRef: any, piecesModelRef: any, canvasRef: any, sidebarRef: any,
+  videoRef: VideoRef,
+  xcornersModelRef: ModelRefs["xcornersModelRef"],
+  piecesModelRef: ModelRefs["piecesModelRef"],
+  canvasRef: CanvasRef,
+  sidebarRef: SidebarRef,
   text: string[], setText: SetStringArray,
   playing: boolean, setPlaying: SetBoolean,
-  cornersRef: any
+  cornersRef: CornersRef
 }) => {
 
   const inputStyle = {

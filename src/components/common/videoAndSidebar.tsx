@@ -36,10 +36,10 @@ const VideoAndSidebar = ({ mode }: { mode: Mode }) => {
   const [study, setStudy] = useState<Study | null>(null);
   const [boardNumber, setBoardNumber] = useState<number>(-1);
   
-  const videoRef = useRef<any>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const playingRef = useRef<boolean>(playing);
-  const canvasRef = useRef<any>(null);
-  const sidebarRef = useRef<any>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const sidebarRef = useRef<HTMLDivElement>(null);
   const cornersRef = useRef<CornersDict>(corners);
 
   useEffect(() => {

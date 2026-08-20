@@ -1,7 +1,8 @@
 import { MODEL_WIDTH, MODEL_HEIGHT, MARKER_DIAMETER } from "./constants";
 import * as tf from "@tensorflow/tfjs-core";
+import type { VideoRef } from "../types";
 
-export const invalidVideo = (videoRef: any) => {
+export const invalidVideo = (videoRef: VideoRef) => {
   const video = videoRef.current;
   if (video === null) {
     return true;
@@ -31,7 +32,16 @@ export const invalidVideo = (videoRef: any) => {
   return false;
 }
 
-export const getBbox = (points: number[][]) => {
+type BoundingBox = {
+  xmin: number;
+  xmax: number;
+  ymin: number;
+  ymax: number;
+  width: number;
+  height: number;
+};
+
+export const getBbox = (points: number[][]): BoundingBox => {
   const xs: number[] = points.map(p => p[0]);
   const ys: number[] = points.map(p => p[1]);
   const xmin: number = Math.min(...xs);
@@ -42,7 +52,7 @@ export const getBbox = (points: number[][]) => {
   const width: number = xmax - xmin;
   const height: number = ymax - ymin;
 
-  const bbox: any = {
+  const bbox: BoundingBox = {
     "xmin": xmin,
     "xmax": xmax,
     "ymin": ymin,
@@ -54,12 +64,16 @@ export const getBbox = (points: number[][]) => {
   return bbox
 }
 
-export const getInput = (videoRef: any, keypoints: number[][] | null=null, paddingRatio: number=12): {
+export const getInput = (videoRef: VideoRef, keypoints: number[][] | null=null, paddingRatio: number=12): {
   image4D: tf.Tensor4D, width: number, height: number, padding: number[], roi: number[]
 } => {
   let roi: number[];
-  const videoWidth: number = videoRef.current.videoWidth;
-  const videoHeight: number = videoRef.current.videoHeight;
+  const video = videoRef.current;
+  if (video === null) {
+    throw new Error("Video is not ready");
+  }
+  const videoWidth: number = video.videoWidth;
+  const videoHeight: number = video.videoHeight;
   if (keypoints !== null) {
     const bbox = getBbox(keypoints);
     let paddingLeft: number = Math.floor(bbox.width / paddingRatio);
@@ -89,7 +103,7 @@ export const getInput = (videoRef: any, keypoints: number[][] | null=null, paddi
     roi = [0, 0, videoWidth, videoHeight];
   }
   const [image4D, width, height, padding]: [tf.Tensor4D, number, number, number[]] = tf.tidy(() => {
-    let image: tf.Tensor3D = tf.browser.fromPixels(videoRef.current);
+    let image: tf.Tensor3D = tf.browser.fromPixels(video);
     
     // Cropping
     image = tf.slice(image,

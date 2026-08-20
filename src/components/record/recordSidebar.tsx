@@ -1,12 +1,18 @@
 import { CornersButton, Sidebar, RecordButton, StopButton, FenButton, DeviceButton } from "../common";
-import { SetBoolean, SetStringArray } from "../../types";
+import type {
+  CanvasRef, CornersRef, ModelRefs, SetBoolean, SetStringArray, SidebarRef, VideoRef
+} from "../../types";
 
 const RecordSidebar = ({ piecesModelRef, xcornersModelRef, videoRef, canvasRef, sidebarRef, 
   playing, setPlaying, text, setText, cornersRef }: {
-  piecesModelRef: any, xcornersModelRef: any, videoRef: any, canvasRef: any, sidebarRef: any,
+  piecesModelRef: ModelRefs["piecesModelRef"],
+  xcornersModelRef: ModelRefs["xcornersModelRef"],
+  videoRef: VideoRef,
+  canvasRef: CanvasRef,
+  sidebarRef: SidebarRef,
   playing: boolean, setPlaying: SetBoolean, 
   text: string[], setText: SetStringArray,
-  cornersRef: any
+  cornersRef: CornersRef
 }) => {
   const inputStyle = {
     display: playing ? "none": "inline-block"

@@ -5,7 +5,7 @@ import { makePgn, useGame } from "../../slices/gameSlice";
 const PgnButton = ({ setText, playing }: {setText: SetStringArray, playing: boolean}) => {
   const pgn: string = makePgn(useGame());
 
-  const handleClick = (e: any) => {
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
 
     void navigator.clipboard.writeText(pgn)

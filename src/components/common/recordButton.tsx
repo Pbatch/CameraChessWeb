@@ -4,7 +4,7 @@ import SidebarButton from "./sidebarButton";
 
 const RecordButton = ({ playing, setPlaying }: 
   { playing: boolean, setPlaying: SetBoolean }) => {
-  const handleClick = (e: any) => {
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
 
     setPlaying(!playing);

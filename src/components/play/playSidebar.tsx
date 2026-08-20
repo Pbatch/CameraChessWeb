@@ -1,8 +1,11 @@
 import { CornersButton, Sidebar, RecordButton, DeviceButton } from "../common";
-import { Game, SetBoolean, SetStringArray } from "../../types";
+import type {
+  CanvasRef, Game, ModelRefs, SetBoolean, SetStringArray, SidebarRef, VideoRef
+} from "../../types";
 import { useUser } from "../../slices/userSlice";
 import { useEffect, useRef, useState } from "react";
 import { lichessPlayMove, lichessStreamGame } from "../../utils/lichess";
+import type { BoardStreamEvent } from "../../utils/lichess";
 import { Color } from "chessops/types";
 import { useDispatch } from "react-redux";
 import { gameUpdate, gameSetError, makeBoard, makeUpdatePayload, useGame } from "../../slices/gameSlice";
@@ -10,7 +13,11 @@ import GamesButton from "./gamesButton";
 
 const PlaySidebar = ({ piecesModelRef, xcornersModelRef, videoRef, canvasRef, sidebarRef,
   playing, setPlaying, text, setText }: {
-    piecesModelRef: any, xcornersModelRef: any, videoRef: any, canvasRef: any, sidebarRef: any,
+    piecesModelRef: ModelRefs["piecesModelRef"],
+    xcornersModelRef: ModelRefs["xcornersModelRef"],
+    videoRef: VideoRef,
+    canvasRef: CanvasRef,
+    sidebarRef: SidebarRef,
     playing: boolean, setPlaying: SetBoolean,
     text: string[], setText: SetStringArray
   }) => {
@@ -37,8 +44,8 @@ const PlaySidebar = ({ piecesModelRef, xcornersModelRef, videoRef, canvasRef, si
     }
 
     lichessPlayMove(token, gameId, lastMove)
-      .catch((err: string) => {
-        dispatch(gameSetError(err));
+      .catch((error: unknown) => {
+        dispatch(gameSetError(error instanceof Error ? error.message : String(error)));
       });
   }, [color, dispatch, game, gameId, token])
 
@@ -47,7 +54,7 @@ const PlaySidebar = ({ piecesModelRef, xcornersModelRef, videoRef, canvasRef, si
       return;
     }
 
-    const streamGameCallback = async (response: any) => {
+    const streamGameCallback = async (response: BoardStreamEvent) => {
       // The selected game is already initialized from nowPlaying.fen.
       if (response.type === "gameFull") {
         return;

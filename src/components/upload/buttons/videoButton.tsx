@@ -1,15 +1,17 @@
 import { useRef, useState } from "react";
 import { clearCtx } from "../../../utils/render/common";
 import { Icon, SidebarButton } from "../../common";
-import { SetBoolean } from "../../../types";
+import { CanvasRef, SetBoolean, VideoRef } from "../../../types";
 
 const VideoButton = ({ videoRef, canvasRef, setPlaying }: {
-  videoRef: any, canvasRef: any, setPlaying: SetBoolean
+  videoRef: VideoRef, canvasRef: CanvasRef, setPlaying: SetBoolean
 }) => {
-  const inputVideoRef: any = useRef(null);
+  const inputVideoRef = useRef<HTMLInputElement>(null);
   const [streaming, setStreaming] = useState(false);
 
   const closeVideo = () => {
+    if (videoRef.current === null) return;
+
     const url = videoRef.current.currentSrc || videoRef.current.src;
     videoRef.current.pause();
     videoRef.current.removeAttribute("src");
@@ -18,20 +20,26 @@ const VideoButton = ({ videoRef, canvasRef, setPlaying }: {
       URL.revokeObjectURL(url);
     }
 
-    clearCtx(canvasRef.current.getContext('2d'));
+    const context = canvasRef.current?.getContext('2d');
+    if (context !== null && context !== undefined) {
+      clearCtx(context);
+    }
 
     setStreaming(false);
-    inputVideoRef.current.value = "";
+    if (inputVideoRef.current !== null) {
+      inputVideoRef.current.value = "";
+    }
     videoRef.current.style.display = "none";
   };
 
-  const handleOnChange = (e: any) => {
-    const file = e.target.files[0];
+  const handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
     if (file === undefined) {
       return;
     }
 
     const url = URL.createObjectURL(file);
+    if (videoRef.current === null) return;
     videoRef.current.src = url;
     videoRef.current.load();
     videoRef.current.style.display = "block";
@@ -40,7 +48,7 @@ const VideoButton = ({ videoRef, canvasRef, setPlaying }: {
 
   const handleOnClick = () => {
     if (streaming === false) {
-      inputVideoRef.current.click();
+      inputVideoRef.current?.click();
     } else {
       closeVideo();
     }

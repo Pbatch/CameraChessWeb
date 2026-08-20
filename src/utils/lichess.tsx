@@ -83,10 +83,17 @@ const fetchResponse = async (token: string, path: string, options: RequestInit =
 
 type Broadcast = { round: Study };
 type Account = { username: string };
-type Playing = { nowPlaying: unknown[] };
+export type NowPlayingGame = {
+  fullId: string;
+  gameId: string;
+  color: "white" | "black";
+  fen: string;
+  opponent: { username: string };
+};
+type Playing = { nowPlaying: NowPlayingGame[] };
 type ImportResult = { id: string; url: string };
 type BroadcastPushResult = { games: { error?: string }[] };
-type BoardStreamEvent = { type: string; moves?: string; state?: { moves?: string } };
+export type BoardStreamEvent = { type: string; moves?: string; state?: { moves?: string } };
 
 const setBroadcastlessStudies = async (token: string, username: string, setStudies: (studies: Study[]) => void, broadcasts: Study[]) => {
   const path = `/api/study/by/${username}`;
@@ -216,7 +223,7 @@ export const lichessTrySetUser = async (navigate: NavigateFunction, dispatch: Di
 
   dispatch(userSetToken(newToken));
 
-  const account: any = await lichessGetAccount(newToken);
+  const account = await lichessGetAccount(newToken);
   const username: string = account.username;
   dispatch(userSetUsername(username))
 
