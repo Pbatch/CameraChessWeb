@@ -1,5 +1,3 @@
-// @ts-expect-error (react-faq-component has no type declaration)
-import Faq from "react-faq-component";
 import { HomeButton } from "../common";
 
 const data = {
@@ -189,22 +187,23 @@ const data = {
   ],
 };
 
-const styles = {
-  bgColor: '#212529',
-  titleTextColor: "white",
-  rowTitleColor: "white",
-  rowContentColor: "white",
-  arrowColor: "white",
-};
-
 const FAQ = () => {
   return (
-    <div className="bg-dark h-100 text-white justify-content-center">
-      <Faq
-        data={data}
-        styles={styles}
-      />
-      <HomeButton />
+    <div className="faq-page-wrapper bg-dark min-vh-100 text-white">
+      <main className="faq-page container py-4">
+        <h1 className="h2 mb-4">{data.title}</h1>
+        <section className="faq-list" aria-label={data.title}>
+          {data.rows.map(({ title, content }) => (
+            <details className="faq-item" key={title}>
+              <summary className="faq-question">{title}</summary>
+              <div className="faq-answer">{content}</div>
+            </details>
+          ))}
+        </section>
+        <div className="mt-4">
+          <HomeButton />
+        </div>
+      </main>
     </div>
   );
 }
