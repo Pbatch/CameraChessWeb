@@ -62,6 +62,8 @@ const Toast = () => {
             type="button"
             className="btn-close btn-close-white"
             onClick={dismiss}
+            aria-label="Dismiss error"
+            title="Dismiss error"
             style={{ filter: "invert(1)" }}
           />
         </div>

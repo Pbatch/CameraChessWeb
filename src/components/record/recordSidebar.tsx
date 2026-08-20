@@ -31,7 +31,7 @@ const RecordSidebar = ({ piecesModelRef, xcornersModelRef, videoRef, canvasRef, 
         canvasRef={canvasRef} setText={setText} cornersRef={cornersRef} />
       </li>
       <li className="my-1">
-        <div className="btn-group w-100" role="group">
+        <div className="btn-group w-100" role="group" aria-label="Move detection controls">
           <RecordButton playing={playing} setPlaying={setPlaying} />
           <StopButton setPlaying={setPlaying} setText={setText} />
         </div>

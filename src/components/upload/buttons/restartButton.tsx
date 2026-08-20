@@ -3,7 +3,9 @@ import { gameResetFen, gameResetMoves } from "../../../slices/gameSlice";
 import { SidebarButton, Icon } from "../../common";
 import type { SetStringArray, VideoRef } from "../../../types";
 
-const RestartButton = ({ videoRef, setText }: { videoRef: VideoRef, setText: SetStringArray}) => {
+const RestartButton = ({ videoRef, setText, videoSelected }: {
+  videoRef: VideoRef, setText: SetStringArray, videoSelected: boolean
+}) => {
   const dispatch = useDispatch();
   
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -18,7 +20,12 @@ const RestartButton = ({ videoRef, setText }: { videoRef: VideoRef, setText: Set
   }
 
  return (
-    <SidebarButton onClick={handleClick}>
+    <SidebarButton
+      onClick={handleClick}
+      disabled={!videoSelected}
+      aria-label="Restart video"
+      title="Restart video"
+    >
       <Icon iconName="bi-skip-start" />
     </SidebarButton>
   );

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { VideoButton, PlayButton, RestartButton, PlaybackButtons, StopButton } from "./buttons";
 import { CornersButton, Sidebar, FenButton } from "../common";
 import type {
@@ -15,6 +16,7 @@ const UploadSidebar = ({ videoRef, xcornersModelRef, piecesModelRef, canvasRef,
   playing: boolean, setPlaying: SetBoolean,
   cornersRef: CornersRef
 }) => {
+  const [videoSelected, setVideoSelected] = useState(false);
 
   const inputStyle = {
     display: playing ? "none": "inline-block"
@@ -23,7 +25,13 @@ const UploadSidebar = ({ videoRef, xcornersModelRef, piecesModelRef, canvasRef,
   return (
     <Sidebar sidebarRef={sidebarRef} playing={playing} text={text} setText={setText} >
       <li className="my-1" style={inputStyle}>
-        <VideoButton videoRef={videoRef} canvasRef={canvasRef} setPlaying={setPlaying} />
+        <VideoButton
+          videoRef={videoRef}
+          canvasRef={canvasRef}
+          setPlaying={setPlaying}
+          videoSelected={videoSelected}
+          setVideoSelected={setVideoSelected}
+        />
       </li>
       <li className="my-1" style={inputStyle}>
         <CornersButton piecesModelRef={piecesModelRef} xcornersModelRef={xcornersModelRef} 
@@ -34,13 +42,13 @@ const UploadSidebar = ({ videoRef, xcornersModelRef, piecesModelRef, canvasRef,
         canvasRef={canvasRef} setText={setText} cornersRef={cornersRef} />
       </li>
       <li className="my-1" style={inputStyle}>
-        <PlaybackButtons videoRef={videoRef} />
+        <PlaybackButtons videoRef={videoRef} videoSelected={videoSelected} />
       </li>
       <li className="my-1">
-        <div className="btn-group w-100" role="group">
-          <PlayButton videoRef={videoRef} playing={playing} setPlaying={setPlaying} />
-          <StopButton videoRef={videoRef} setPlaying={setPlaying} setText={setText} />
-          <RestartButton videoRef={videoRef} setText={setText} />
+        <div className="btn-group w-100" role="group" aria-label="Video controls">
+          <PlayButton videoRef={videoRef} playing={playing} setPlaying={setPlaying} videoSelected={videoSelected} />
+          <StopButton videoRef={videoRef} setPlaying={setPlaying} setText={setText} videoSelected={videoSelected} />
+          <RestartButton videoRef={videoRef} setText={setText} videoSelected={videoSelected} />
         </div>
       </li>
     </Sidebar>
