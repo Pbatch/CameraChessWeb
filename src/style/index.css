@@ -17,3 +17,144 @@ html, body {
   width: 100%;
   height: 100%;
 }
+
+.chessboard-preview {
+  display: grid;
+  grid-template-columns: repeat(8, var(--chess-square-size));
+  overflow: hidden;
+}
+
+.chessboard-preview__square {
+  display: grid;
+  width: var(--chess-square-size);
+  height: var(--chess-square-size);
+  place-items: center;
+}
+
+.chessboard-preview__square--light {
+  background-color: #f0dec7;
+}
+
+.chessboard-preview__square--dark {
+  background-color: #b5876b;
+}
+
+.chessboard-preview__piece {
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  user-select: none;
+}
+
+.faq-page {
+  max-width: 60rem;
+}
+
+.faq-list {
+  border-top: 1px solid rgb(255 255 255 / 25%);
+}
+
+.faq-item {
+  border-bottom: 1px solid rgb(255 255 255 / 25%);
+}
+
+.faq-question {
+  display: flex;
+  min-height: 3rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.9rem 0.75rem;
+  cursor: pointer;
+  font-weight: 600;
+  list-style: none;
+}
+
+.faq-question::-webkit-details-marker {
+  display: none;
+}
+
+.faq-question::after {
+  width: 0.65rem;
+  height: 0.65rem;
+  flex: 0 0 auto;
+  border-right: 2px solid currentcolor;
+  border-bottom: 2px solid currentcolor;
+  content: "";
+  transform: rotate(45deg);
+  transition: transform 150ms ease;
+}
+
+.faq-item[open] > .faq-question::after {
+  transform: rotate(225deg);
+}
+
+.faq-question:hover {
+  background-color: rgb(255 255 255 / 7%);
+}
+
+.faq-question:focus-visible {
+  border-radius: 0.25rem;
+  outline: 3px solid #6ea8fe;
+  outline-offset: -3px;
+}
+
+.faq-answer {
+  padding: 0 0.75rem 1rem;
+  color: #dee2e6;
+}
+
+.faq-answer :last-child {
+  margin-bottom: 0;
+}
+
+.faq-answer ul,
+.faq-answer ol {
+  padding-left: 1.5rem;
+}
+
+.faq-answer a {
+  color: #6edff6;
+}
+
+.social-link {
+  display: inline-grid;
+  width: 3.125rem;
+  height: 3.125rem;
+  border-radius: 50%;
+  color: #fff;
+  place-items: center;
+  transition: filter 150ms ease, transform 150ms ease;
+}
+
+.social-link--github {
+  background-color: #111;
+}
+
+.social-link--youtube {
+  background-color: #f00;
+}
+
+.social-link:hover {
+  color: #fff;
+  filter: brightness(1.15);
+  transform: translateY(-2px);
+}
+
+.social-link:focus-visible {
+  outline: 3px solid #6ea8fe;
+  outline-offset: 3px;
+}
+
+.social-link__icon {
+  width: 55%;
+  height: 55%;
+  fill: currentcolor;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .social-link {
+    transition: none;
+  }
+}

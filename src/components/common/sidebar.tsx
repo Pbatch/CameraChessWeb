@@ -1,8 +1,8 @@
-import { Chessboard } from "kokopu-react";
 import { HomeButton, PgnButton } from "./index.tsx";
 import type { Game, SetStringArray, SidebarRef } from "../../types.tsx";
 import { useGame } from "../../slices/gameSlice.tsx";
 import type { ReactNode } from "react";
+import ChessboardPreview from "./chessboardPreview.tsx";
 
 type SidebarProps = {
   sidebarRef?: SidebarRef;
@@ -17,12 +17,7 @@ const Sidebar = ({ sidebarRef, playing, text, setText, children }: SidebarProps)
 
   const boardDisplay = () => {
     return (
-      <Chessboard 
-        turnVisible={false} 
-        squareSize={20} 
-        position={game.fen}
-        coordinateVisible={false}
-      />
+      <ChessboardPreview fen={game.fen} squareSize={20} />
     );
   }
 
