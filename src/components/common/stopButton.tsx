@@ -7,7 +7,7 @@ import Icon from "./icon";
 const StopButton = ({ setPlaying, setText }: { setPlaying: SetBoolean, setText: SetStringArray }) => {
   const dispatch = useDispatch();
 
-  const handleClick = (e: any) => {
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
 
     setPlaying(false);

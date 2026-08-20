@@ -52,7 +52,7 @@ export default [...compat.extends(
         "react/react-in-jsx-scope": "off",
         "react/no-unescaped-entities": 0,
         "no-unused-vars": 0,
-        "@typescript-eslint/no-explicit-any": "off",
+        "@typescript-eslint/no-explicit-any": "error",
 
         "@typescript-eslint/no-unused-vars": ["error", {
             argsIgnorePattern: "^_",

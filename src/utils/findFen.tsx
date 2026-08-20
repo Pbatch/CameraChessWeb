@@ -9,14 +9,15 @@ import { opposite } from "chessops/util";
 import { PIECE_SYMBOLS, SQUARE_NAMES } from "./constants";
 import { gameResetMoves, gameSetFen, gameSetStart } from "../slices/gameSlice";
 import { renderState } from "./render/renderState";
-import { SetStringArray } from "../types";
+import type { CanvasRef, CornersRef, ModelRefs, SetStringArray, VideoRef } from "../types";
+import type { Dispatch, UnknownAction } from "@reduxjs/toolkit";
 
-interface findFenInput {
-  piecesModelRef: any,
-  videoRef: any,
-  cornersRef: any,
-  canvasRef: any,
-  dispatch: any,
+interface FindFenInput {
+  piecesModelRef: ModelRefs["piecesModelRef"],
+  videoRef: VideoRef,
+  cornersRef: CornersRef,
+  canvasRef: CanvasRef,
+  dispatch: Dispatch<UnknownAction>,
   setText: SetStringArray,
   color: Color
 }
@@ -39,7 +40,12 @@ const getFenAndError = (pos: Chess, color: Color) => {
   return { fen, error };
 }
 
-const setFenFromState = (state: number[][], color: Color, dispatch: any, setText: SetStringArray) => {
+const setFenFromState = (
+  state: number[][],
+  color: Color,
+  dispatch: Dispatch<UnknownAction>,
+  setText: SetStringArray
+) => {
   const assignment = Array(64).fill(-1);
 
   // In the first pass, assign the black king
@@ -126,8 +132,12 @@ const setFenFromState = (state: number[][], color: Color, dispatch: any, setText
 }
 
 export const _findFen = async ({ piecesModelRef, videoRef,
-  cornersRef, canvasRef, dispatch, setText, color }: findFenInput) => {
+  cornersRef, canvasRef, dispatch, setText, color }: FindFenInput) => {
   if (invalidVideo(videoRef)) {
+    return;
+  }
+  const canvas = canvasRef.current;
+  if (canvas === null) {
     return;
   }
   const keypoints: number[][] = getKeypoints(cornersRef, canvasRef);
@@ -141,14 +151,14 @@ export const _findFen = async ({ piecesModelRef, videoRef,
     const state = getUpdate(scores, squares);
     setFenFromState(state, color, dispatch, setText);
 
-    renderState(canvasRef.current, centers, boundary, state);
+    renderState(canvas, centers, boundary, state);
   } finally {
     tf.dispose([boxes, scores, centers3D, boundary3D]);
   }
 }
 
 export const findFen = async ({ piecesModelRef, videoRef, cornersRef, canvasRef, dispatch, setText, color }:
-  findFenInput) => {
+  FindFenInput) => {
   const startTensors = tf.memory().numTensors;
 
   await _findFen({ piecesModelRef, videoRef, cornersRef, canvasRef, dispatch, setText, color });

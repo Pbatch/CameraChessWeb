@@ -1,13 +1,13 @@
-import { SetBoolean } from "../../../types";
+import { SetBoolean, VideoRef } from "../../../types";
 import { SidebarButton, Icon } from "../../common";
 
 const PlayButton = ({ videoRef, playing, setPlaying }: {
-  videoRef: any, playing: boolean, setPlaying: SetBoolean
+  videoRef: VideoRef, playing: boolean, setPlaying: SetBoolean
 }) => {
-  const handleClick = (e: any) => {
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     
-    if (videoRef.current.getAttribute("src")?.startsWith("blob:")) {
+    if (videoRef.current?.getAttribute("src")?.startsWith("blob:")) {
       setPlaying(!playing);
     }
   }

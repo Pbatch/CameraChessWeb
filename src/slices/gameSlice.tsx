@@ -9,7 +9,14 @@ import { parsePgn } from 'chessops/pgn';
 import { parseSan, makeSan } from 'chessops/san';
 import { makeUci, parseUci } from 'chessops/util';
 
-type HistoryEntry = { move: Move; san: string };
+export type HistoryEntry = { move: Move; san: string };
+export type CameraChessBoard = Chess & {
+  startFen: string;
+  history: HistoryEntry[];
+  playSan: (san: string) => Move | null;
+  playUci: (uci: string) => Move | null;
+  undo: () => void;
+};
 
 const initialState: Game = {
   "moves": "",
@@ -69,7 +76,12 @@ const gameSlice = createSlice({
   }
 })
 
-const getMovesFromPgn = (pos: any, startFen: string) => {
+type BoardWithMetadata = Chess & {
+  startFen?: string;
+  history?: HistoryEntry[];
+};
+
+const getMovesFromPgn = (pos: BoardWithMetadata, startFen: string) => {
   const setup = parseFen(startFen).unwrap();
   const tempPos = Chess.fromSetup(setup).unwrap();
   const history = pos.history as HistoryEntry[] || [];
@@ -93,7 +105,7 @@ export const makePgn = (game: Game) => {
   return `[FEN "${game.start}"]` + "\n \n" + game.moves;
 }
 
-export const makeUpdatePayload = (board: any, greedy: boolean = false, fromOpponent: boolean = false, error: string | null = null) => {
+export const makeUpdatePayload = (board: BoardWithMetadata, greedy: boolean = false, fromOpponent: boolean = false, error: string | null = null) => {
   const history = board.history as HistoryEntry[] || [];
   const startFen = board.startFen || START_FEN;
 
@@ -113,9 +125,9 @@ export const makeUpdatePayload = (board: any, greedy: boolean = false, fromOppon
   return payload
 }
 
-export const makeBoard = (game: Game): any => {
+export const makeBoard = (game: Game): CameraChessBoard => {
   const setup = parseFen(game.start).unwrap();
-  const board: any = Chess.fromSetup(setup).unwrap();
+  const board = Chess.fromSetup(setup).unwrap() as CameraChessBoard;
   board.startFen = game.start;
   board.history = [] as HistoryEntry[];
 

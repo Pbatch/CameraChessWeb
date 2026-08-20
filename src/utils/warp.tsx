@@ -2,11 +2,11 @@ import { array, NDArray, zeros } from 'vectorious';
 import { BOARD_SIZE, SQUARE_SIZE } from "./constants";
 import * as tf from "@tensorflow/tfjs-core";
 
-export const perspectiveTransform = (src: number[][], transform: any): number[][] => {
+export const perspectiveTransform = (src: number[][], transform: NDArray): number[][] => {
     if (src[0].length == 2) {
       src = src.map(x => [x[0], x[1], 1]);
     }
-    const warpedSrc: any = array(src).multiply(transform.T);
+    const warpedSrc: NDArray = array(src).multiply(transform.T);
 
     for (let i = 0; i < warpedSrc.shape[0]; i++) {
       const x = warpedSrc.get(i, 0);
@@ -64,7 +64,7 @@ export const getInvTransform = (keypoints: number[][]): NDArray => {
   return invTransform
 }
 
-export const transformCenters = (invTransform: any): [number[][], tf.Tensor3D] => {
+export const transformCenters = (invTransform: NDArray): [number[][], tf.Tensor3D] => {
   const x: number[] = Array.from({ length: 8 }, (_, i) => 0.5 + i);
   const y: number[] = Array.from({ length: 8 }, (_, i) => 7.5 - i);
   const warpedCenters: number[][] = y.map(yy => 
@@ -79,7 +79,7 @@ export const transformCenters = (invTransform: any): [number[][], tf.Tensor3D] =
   return [centers, centers3D]
 }
 
-export const transformBoundary = (invTransform: any): [number[][], tf.Tensor3D] => {
+export const transformBoundary = (invTransform: NDArray): [number[][], tf.Tensor3D] => {
   const warpedBoundary: number[][] = [
     [-0.5 * SQUARE_SIZE, -0.5 * SQUARE_SIZE, 1],
     [-0.5 * SQUARE_SIZE, 8.5 * SQUARE_SIZE, 1],

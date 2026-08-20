@@ -2,14 +2,20 @@ import { renderState } from "./render/renderState";
 import * as tf from "@tensorflow/tfjs-core";
 import { getInvTransform, transformBoundary, transformCenters } from "./warp";
 import { gameUpdate, makeUpdatePayload } from "../slices/gameSlice";
+import type { CameraChessBoard } from "../slices/gameSlice";
 import { getBoxesAndScores, getInput, getXY, invalidVideo } from "./detect";
-import { Mode, MovesData, MovesPair } from "../types";
+import type {
+  CanvasRef, CornersRef, Mode, ModelRefs, MovesData, MovesPair, SetStringArray, VideoRef
+} from "../types";
 import { zeros } from "./math";
 import { CORNER_KEYS } from "./constants";
 import { parseSan } from "chessops/san";
 import { makeUci } from "chessops/util";
+import type { Dispatch, UnknownAction } from "@reduxjs/toolkit";
+import type { RefObject } from "react";
+import type { Position } from "chessops/chess";
 
-const calculateScore = (state: any, move: MovesData, from_thr = 0.6, to_thr = 0.6) => {
+const calculateScore = (state: number[][], move: MovesData, from_thr = 0.6, to_thr = 0.6) => {
   let score = 0;
   move.from.forEach(square => {
     score += 1 - Math.max(...state[square]) - from_thr;
@@ -22,7 +28,7 @@ const calculateScore = (state: any, move: MovesData, from_thr = 0.6, to_thr = 0.
   return score
 }
 
-const processState = (state: any, movesPairs: MovesPair[], possibleMoves: Set<string>): {
+const processState = (state: number[][], movesPairs: MovesPair[], possibleMoves: Set<string>): {
   bestScore1: number, bestScore2: number, bestJointScore: number,
   bestMove: MovesData | null, bestMoves: MovesData | null
 } => {
@@ -84,7 +90,7 @@ export const getSquares = (boxes: tf.Tensor2D, centers3D: tf.Tensor3D, boundary3
   const squares: number[] = tf.tidy(() => {
     const boxCenters3D: tf.Tensor3D = tf.expandDims(getBoxCenters(boxes), 1);
     const dist: tf.Tensor2D = tf.sum(tf.square(tf.sub(boxCenters3D, centers3D)), 2);
-    const squares: any = tf.argMin(dist, 1);
+    const squares = tf.argMin(dist, 1);
 
     const shiftedBoundary3D: tf.Tensor3D = tf.concat([
       tf.slice(boundary3D, [0, 1, 0], [1, 3, 2]),
@@ -111,11 +117,11 @@ export const getSquares = (boxes: tf.Tensor2D, centers3D: tf.Tensor3D, boundary3
     ), [2]);
 
     const det: tf.Tensor2D = tf.sub(tf.mul(a, d), tf.mul(b, c));
-    const newSquares: tf.Tensor1D = tf.where(
+    const newSquares = tf.where(
       tf.any(tf.less(det, 0), 1),
       tf.scalar(-1),
       squares
-    );
+    ) as tf.Tensor1D;
 
     return newSquares.arraySync();
   });
@@ -148,18 +154,27 @@ const updateState = (state: number[][], update: number[][], decay: number = 0.5)
   return state
 }
 
-const sanToLan = (board: any, san: string): string => {
+const sanToLan = (board: Position, san: string): string => {
   const move = parseSan(board, san);
   if (!move) return "";
   return makeUci(move);
 }
 
-export const detect = async (modelRef: any, videoRef: any, keypoints: number[][]):
+export const detect = async (
+  modelRef: ModelRefs["piecesModelRef"],
+  videoRef: VideoRef,
+  keypoints: number[][]
+):
   Promise<{ boxes: tf.Tensor2D, scores: tf.Tensor2D }> => {
+  const model = modelRef.current;
+  const video = videoRef.current;
+  if (model === null || video === null) {
+    throw new Error("Piece detection is not ready");
+  }
   const { image4D, width, height, padding, roi } = getInput(videoRef, keypoints);
-  const videoWidth: number = videoRef.current.videoWidth;
-  const videoHeight: number = videoRef.current.videoHeight;
-  const preds: tf.Tensor3D = modelRef.current.predict(image4D);
+  const videoWidth: number = video.videoWidth;
+  const videoHeight: number = video.videoHeight;
+  const preds = model.predict(image4D) as tf.Tensor3D;
   const { boxes, scores } = getBoxesAndScores(preds, width, height, videoWidth, videoHeight, padding, roi);
 
   tf.dispose([image4D, preds]);
@@ -167,16 +182,31 @@ export const detect = async (modelRef: any, videoRef: any, keypoints: number[][]
   return { boxes, scores }
 }
 
-export const getKeypoints = (cornersRef: any, canvasRef: any): number[][] => {
+export const getKeypoints = (cornersRef: CornersRef, canvasRef: CanvasRef): number[][] => {
+  const canvas = canvasRef.current;
+  if (canvas === null) {
+    throw new Error("Canvas is not ready");
+  }
   const keypoints = CORNER_KEYS.map(x =>
-    getXY(cornersRef.current[x], canvasRef.current.height, canvasRef.current.width)
+    getXY(cornersRef.current[x], canvas.height, canvas.width)
   );
   return keypoints
 }
 
-export const findPieces = (modelRef: any, videoRef: any, canvasRef: any,
-  playingRef: any, setText: any, dispatch: any, cornersRef: any, boardRef: any,
-  movesPairsRef: any, lastMoveRef: any, moveTextRef: any, mode: Mode) => {
+export const findPieces = (
+  modelRef: ModelRefs["piecesModelRef"],
+  videoRef: VideoRef,
+  canvasRef: CanvasRef,
+  playingRef: RefObject<boolean>,
+  setText: SetStringArray,
+  dispatch: Dispatch<UnknownAction>,
+  cornersRef: CornersRef,
+  boardRef: RefObject<CameraChessBoard>,
+  movesPairsRef: RefObject<MovesPair[]>,
+  lastMoveRef: RefObject<string>,
+  moveTextRef: RefObject<string>,
+  mode: Mode
+) => {
   let centers: number[][] | null = null;
   let boundary: number[][];
   let centers3D: tf.Tensor3D;
@@ -250,7 +280,11 @@ export const findPieces = (modelRef: any, videoRef: any, canvasRef: any,
         }
         setText([`FPS: ${fps}`, moveTextRef.current]);
 
-        renderState(canvasRef.current, centers, boundary, state);
+        const canvas = canvasRef.current;
+        if (canvas === null) {
+          throw new Error("Canvas is not ready");
+        }
+        renderState(canvas, centers, boundary, state);
 
         tf.dispose([boxes, scores]);
 

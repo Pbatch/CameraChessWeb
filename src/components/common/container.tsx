@@ -1,7 +1,9 @@
-const Container = (props: any) => {
+import type { PropsWithChildren } from "react";
+
+const Container = ({ children }: PropsWithChildren) => {
   return (
     <div className="d-flex bg-dark h-100">
-      {props.children}
+      {children}
     </div>
   )
 }

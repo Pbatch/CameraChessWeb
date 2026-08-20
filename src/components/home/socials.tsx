@@ -9,16 +9,12 @@ const Socials = () => {
     {"network": "youtube", "url": "https://www.youtube.com/channel/UCtgc3RevHj6UHq1D8Ymarmw"},
   ]
 
-  const icons: any[] = [];
-  socials.forEach(social => {
-    icons.push(
+  return socials.map(social =>
       <div key={social.network} className="col">
         <SocialIcon target="_blank" 
         network={social.network} url={social.url} bgColor={social?.bgColor} />
       </div>
-    );
-  });
-  return icons;
+  );
 };
 
 export default Socials;

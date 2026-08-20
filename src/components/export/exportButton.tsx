@@ -35,7 +35,7 @@ const ExportButton = ({ study, setText, pgn }:
   }
 
   return (
-    <SidebarButton onClick={importPgnToStudy}>
+    <SidebarButton onClick={() => { void importPgnToStudy(); }}>
       Export Game 
     </SidebarButton>
   );

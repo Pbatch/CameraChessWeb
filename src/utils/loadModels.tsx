@@ -1,10 +1,14 @@
 import * as tf from "@tensorflow/tfjs-core";
 import { loadGraphModel, GraphModel } from "@tensorflow/tfjs-converter";
 import { MODEL_HEIGHT, MODEL_WIDTH } from "../utils/constants";
+import type { ModelRefs } from "../types";
 
 let loadingModels: Promise<void> | null = null;
 
-const LoadModels = (piecesModelRef: any, xcornersModelRef: any): Promise<void> => {
+const LoadModels = (
+  piecesModelRef: ModelRefs["piecesModelRef"],
+  xcornersModelRef: ModelRefs["xcornersModelRef"]
+): Promise<void> => {
   if (piecesModelRef.current !== null && xcornersModelRef.current !== null) {
     return Promise.resolve();
   }
@@ -28,7 +32,10 @@ const LoadModels = (piecesModelRef: any, xcornersModelRef: any): Promise<void> =
 
     tf.dispose([dummyInput, piecesOutput, xcornersOutput]);
     
-    const backend: any = tf.backend()
+    const backend = tf.backend() as unknown as {
+      checkCompileCompletion: () => void;
+      getUniformLocations: () => void;
+    };
     backend.checkCompileCompletion();
     backend.getUniformLocations();
     tf.env().set('ENGINE_COMPILE_ONLY', false);

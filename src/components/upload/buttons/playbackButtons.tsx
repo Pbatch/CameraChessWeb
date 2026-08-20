@@ -1,8 +1,12 @@
-const PlayButton = ({ videoRef }: { videoRef: any }) => {
+import { VideoRef } from "../../../types";
+
+const PlayButton = ({ videoRef }: { videoRef: VideoRef }) => {
   const PlaybackButton = ({ playbackRate}: { playbackRate: number } ) => {
-    const handleClick = (e: any) => {
+    const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
       e.preventDefault();
-      videoRef.current.playbackRate = playbackRate 
+      if (videoRef.current !== null) {
+        videoRef.current.playbackRate = playbackRate;
+      }
     }
     
     return (

@@ -1,8 +1,8 @@
 import { SetNumber } from "../../types";
 
 const BoardNumberInput = ({ setBoardNumber }: {setBoardNumber: SetNumber }) => {
-  const handleChange = (e: any) => {
-    setBoardNumber(parseInt(e.target.value));
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setBoardNumber(Number.parseInt(e.target.value));
   }
   
   return (

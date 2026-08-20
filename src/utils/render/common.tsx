@@ -1,11 +1,14 @@
 import { MODEL_WIDTH, MODEL_HEIGHT } from "../constants";
 
-export const clearCtx = (ctx: any) => {
+export const clearCtx = (ctx: CanvasRenderingContext2D) => {
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 }
 
-export const setupCtx = (canvasRef: any) => {
-  const ctx = canvasRef.getContext("2d");
+export const setupCtx = (canvas: HTMLCanvasElement): [CanvasRenderingContext2D, number, number, number, number] => {
+  const ctx = canvas.getContext("2d");
+  if (ctx === null) {
+    throw new Error("Unable to create a 2D canvas context");
+  }
   ctx.globalAlpha = 0.8;
   const width = ctx.canvas.width;
   const height = ctx.canvas.height;
@@ -27,14 +30,14 @@ export const setupCtx = (canvasRef: any) => {
   return [ctx, fontHeight, lineWidth, sx, sy];
 }
 
-export const drawPoints = (ctx: any, points: number[][], colour: string, sx: number, sy: number) => {
+export const drawPoints = (ctx: CanvasRenderingContext2D, points: number[][], colour: string, sx: number, sy: number) => {
   ctx.strokeStyle = colour;
   points.forEach((p, _) => {
     ctx.strokeRect(p[0] * sx, p[1] * sy, 1, 1);
   })
 }
 
-export const drawDict = (ctx: any, dict: { [id: string]: number[] }, colour: string, sx: number, sy: number, fontHeight: number, lineWidth: number) => {
+export const drawDict = (ctx: CanvasRenderingContext2D, dict: { [id: string]: number[] }, colour: string, sx: number, sy: number, fontHeight: number, lineWidth: number) => {
   ctx.strokeStyle = colour;
   for (const [text, p] of Object.entries(dict)) {
     const x = p[0] * sx;
@@ -52,7 +55,7 @@ export const drawDict = (ctx: any, dict: { [id: string]: number[] }, colour: str
   }
 }
 
-export const drawPolygon = (ctx: any, polygon: number[][], colour: string, sx: number, sy: number) => {
+export const drawPolygon = (ctx: CanvasRenderingContext2D, polygon: number[][], colour: string, sx: number, sy: number) => {
   ctx.strokeStyle = colour;
   ctx.beginPath();
   const n = polygon.length;
@@ -63,7 +66,7 @@ export const drawPolygon = (ctx: any, polygon: number[][], colour: string, sx: n
   ctx.stroke();
 }
 
-export const drawBox = (ctx: any, colour: string, cx: number, cy: number, text: string, fontHeight: number, lineWidth: number) => {
+export const drawBox = (ctx: CanvasRenderingContext2D, colour: string, cx: number, cy: number, text: string, fontHeight: number, lineWidth: number) => {
   ctx.fillStyle = colour;
   const textWidth = ctx.measureText(text).width;
   const y = cy - lineWidth - fontHeight / 2;

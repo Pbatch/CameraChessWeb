@@ -37,7 +37,7 @@ const roleToLabel = (role: Role, color: Color): string => {
   return color === 'white' ? label.toUpperCase() : label.toLowerCase();
 }
 
-const getData = (pos: any, move: any) => {
+const getData = (pos: Position, move: Move) => {
   if (!isNormal(move)) return null;
 
   const fromSquares: number[] = [move.from];
@@ -99,7 +99,7 @@ const combineData = (move1Data: MovesData, move2Data: MovesData) => {
   return data;
 }
 
-export const getMovesPairs = (board: any) => {
+export const getMovesPairs = (board: Position) => {
   const fen = makeFen(board.toSetup());
   const setup = parseFen(fen).unwrap();
   const pos = Chess.fromSetup(setup).unwrap();

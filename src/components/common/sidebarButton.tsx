@@ -1,7 +1,11 @@
-const SidebarButton = (props: any) => {
+import type { ButtonHTMLAttributes } from "react";
+
+const SidebarButton = ({ children, className = "", ...buttonProps }:
+  ButtonHTMLAttributes<HTMLButtonElement>) => {
   return (
-    <button onClick={props.onClick} className="btn btn-dark btn-sm btn-outline-light w-100">
-      {props.children}
+    <button {...buttonProps} type={buttonProps.type ?? "button"}
+      className={`btn btn-dark btn-sm btn-outline-light w-100 ${className}`.trim()}>
+      {children}
     </button>
   )
 }

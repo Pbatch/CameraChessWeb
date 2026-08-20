@@ -6,8 +6,11 @@ import { getBoxesAndScores, getInput, getCenters, getMarkerXY, invalidVideo } fr
 import { cornersSet } from '../slices/cornersSlice';
 import { MODEL_WIDTH, MODEL_HEIGHT, CORNER_KEYS } from "./constants";
 import { clamp } from "./math";
-import { CornersDict, CornersPayload } from "../types";
+import type {
+  CanvasRef, CornersDict, CornersPayload, ModelRefs, SetStringArray, VideoRef
+} from "../types";
 import { NDArray } from "vectorious";
+import type { Dispatch, UnknownAction } from "@reduxjs/toolkit";
 
 const x: number[] = Array.from({ length: 7 }, (_, i) => i);
 const y: number[] = Array.from({ length: 7 }, (_, i) => i);
@@ -30,12 +33,20 @@ const processBoxesAndScores = async (boxes: tf.Tensor2D, scores: tf.Tensor2D) =>
   return res;
 }
 
-const runPiecesModel = async (videoRef: any, piecesModelRef: any): Promise<number[][]> => {
-  const videoWidth: number = videoRef.current.videoWidth;
-  const videoHeight: number = videoRef.current.videoHeight;
+const runPiecesModel = async (
+  videoRef: VideoRef,
+  piecesModelRef: ModelRefs["piecesModelRef"]
+): Promise<number[][]> => {
+  const video = videoRef.current;
+  const model = piecesModelRef.current;
+  if (video === null || model === null) {
+    throw new Error("Piece detection is not ready");
+  }
+  const videoWidth: number = video.videoWidth;
+  const videoHeight: number = video.videoHeight;
 
   const { image4D, width, height, padding, roi } = getInput(videoRef);
-  const piecesPreds: tf.Tensor3D = piecesModelRef.current.predict(image4D);
+  const piecesPreds = model.predict(image4D) as tf.Tensor3D;
   const boxesAndScores = getBoxesAndScores(piecesPreds, width, height, videoWidth, videoHeight, padding, roi);
   const pieces: number[][] = await processBoxesAndScores(boxesAndScores.boxes, boxesAndScores.scores);
 
@@ -43,14 +54,23 @@ const runPiecesModel = async (videoRef: any, piecesModelRef: any): Promise<numbe
   return pieces;
 }
 
-const runXcornersModel = async (videoRef: any, xcornersModelRef: any, pieces: number[][]):
+const runXcornersModel = async (
+  videoRef: VideoRef,
+  xcornersModelRef: ModelRefs["xcornersModelRef"],
+  pieces: number[][]
+):
   Promise<number[][]> => {
   const keypoints: number[][] = pieces.map(x => [x[0], x[1]]);
-  const videoWidth: number = videoRef.current.videoWidth;
-  const videoHeight: number = videoRef.current.videoHeight;
+  const video = videoRef.current;
+  const model = xcornersModelRef.current;
+  if (video === null || model === null) {
+    throw new Error("Corner detection is not ready");
+  }
+  const videoWidth: number = video.videoWidth;
+  const videoHeight: number = video.videoHeight;
 
   const { image4D, width, height, padding, roi } = getInput(videoRef, keypoints);
-  const xcornersPreds: tf.Tensor3D = xcornersModelRef.current.predict(image4D);
+  const xcornersPreds = model.predict(image4D) as tf.Tensor3D;
   const boxesAndScores = getBoxesAndScores(xcornersPreds, width, height, videoWidth, videoHeight, padding, roi);
   tf.dispose([xcornersPreds, image4D]);
 
@@ -120,7 +140,7 @@ const findOffset = (warpedXcorners: number[][]) => {
   for (let i = 0; i < 2; i++) {
     let low = -7;
     let high = 1;
-    const scores: any = {};
+    const scores: Record<number, number> = {};
     while ((high - low) > 1) {
       const mid = (high + low) >> 1;
       [mid, mid + 1].forEach(x => {
@@ -226,9 +246,19 @@ const calculateKeypoints = (blackPieces: number[][], whitePieces: number[][], co
   return keypoints
 }
 
-export const _findCorners = async (piecesModelRef: any, xcornersModelRef: any, videoRef: any,
-  canvasRef: any, dispatch: any, setText: any) => {
+export const _findCorners = async (
+  piecesModelRef: ModelRefs["piecesModelRef"],
+  xcornersModelRef: ModelRefs["xcornersModelRef"],
+  videoRef: VideoRef,
+  canvasRef: CanvasRef,
+  dispatch: Dispatch<UnknownAction>,
+  setText: SetStringArray
+) => {
   if (invalidVideo(videoRef)) {
+    return;
+  }
+  const canvas = canvasRef.current;
+  if (canvas === null) {
     return;
   }
 
@@ -258,17 +288,23 @@ export const _findCorners = async (piecesModelRef: any, xcornersModelRef: any, v
   CORNER_KEYS.forEach((key) => {
     const xy: number[] = keypoints[key];
     const payload: CornersPayload = {
-      "xy": getMarkerXY(xy, canvasRef.current.height, canvasRef.current.width),
+      "xy": getMarkerXY(xy, canvas.height, canvas.width),
       "key": key
     }
     dispatch(cornersSet(payload))
   })
-  renderCorners(canvasRef.current, xCorners);
+  renderCorners(canvas, xCorners);
   setText(["Found corners", "Ready to record"])
 }
 
-export const findCorners = async (piecesModelRef: any, xcornersModelRef: any, videoRef: any, canvasRef: any,
-  dispatch: any, setText: any) => {
+export const findCorners = async (
+  piecesModelRef: ModelRefs["piecesModelRef"],
+  xcornersModelRef: ModelRefs["xcornersModelRef"],
+  videoRef: VideoRef,
+  canvasRef: CanvasRef,
+  dispatch: Dispatch<UnknownAction>,
+  setText: SetStringArray
+) => {
   const startTensors = tf.memory().numTensors;
 
   await _findCorners(piecesModelRef, xcornersModelRef, videoRef, canvasRef, dispatch, setText);

@@ -5,16 +5,23 @@ import { parseFen } from "chessops/fen";
 import { Chess } from "chessops/chess";
 import { gameSetStart, gameUpdate, makeUpdatePayload } from "../../slices/gameSlice";
 import { useDispatch } from "react-redux";
-import { SetStringArray } from "../../types";
+import type { Dispatch, SetStateAction } from "react";
+import type { Color } from "chessops/types";
+import type { SetStringArray } from "../../types";
+import type { NowPlayingGame } from "../../utils/lichess";
 
 const GamesButton = ({ setGameId, setColor, setText }:
-  { setGameId: any, setColor: any, setText: SetStringArray }) => {
+  {
+    setGameId: Dispatch<SetStateAction<string | undefined>>,
+    setColor: Dispatch<SetStateAction<Color | undefined>>,
+    setText: SetStringArray
+  }) => {
   const token: string = useUser().token;
-  const [games, setGames] = useState<any[]>([]);
-  const [game, setGame] = useState<any>(null);
+  const [games, setGames] = useState<NowPlayingGame[]>([]);
+  const [game, setGame] = useState<NowPlayingGame | null>(null);
   const dispatch = useDispatch();
 
-  const handleClick = (newGame: any) => {
+  const handleClick = (newGame: NowPlayingGame) => {
     if (game?.fullId === newGame.fullId) {
       return;
     }
@@ -49,7 +56,7 @@ const GamesButton = ({ setGameId, setColor, setText }:
         {(game === null) ? "Select a Game" : `Game: ${game.opponent.username}`}
       </button>
       <ul className="dropdown-menu" aria-labelledby="gamesButton">
-        {games.map((game: any) =>
+        {games.map((game) =>
           <li key={game.fullId}>
             <button type="button" onClick={() => handleClick(game)} className="dropdown-item">
               {game.opponent.username} ({game.gameId})

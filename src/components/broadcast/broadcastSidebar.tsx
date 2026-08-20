@@ -1,10 +1,16 @@
 import { CornersButton, Sidebar, RecordButton, StopButton, StudyButton, DeviceButton } from "../common";
-import { SetBoolean, SetNumber, SetStringArray, SetStudy, Study } from "../../types";
+import type {
+  CanvasRef, ModelRefs, SetBoolean, SetNumber, SetStringArray, SetStudy, SidebarRef, Study, VideoRef
+} from "../../types";
 import BoardNumberInput from "./boardNumberInput";
 
 const BroadcastSidebar = ({ piecesModelRef, xcornersModelRef, videoRef, canvasRef, sidebarRef, 
   playing, setPlaying, text, setText, study, setStudy, setBoardNumber }: {
-  piecesModelRef: any, xcornersModelRef: any, videoRef: any, canvasRef: any, sidebarRef: any,
+  piecesModelRef: ModelRefs["piecesModelRef"],
+  xcornersModelRef: ModelRefs["xcornersModelRef"],
+  videoRef: VideoRef,
+  canvasRef: CanvasRef,
+  sidebarRef: SidebarRef,
   playing: boolean, setPlaying: SetBoolean, 
   text: string[], setText: SetStringArray,
   study: Study | null, setStudy: SetStudy,
