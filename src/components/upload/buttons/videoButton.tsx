@@ -1,13 +1,16 @@
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { clearCtx } from "../../../utils/render/common";
 import { Icon, SidebarButton } from "../../common";
 import type { CanvasRef, SetBoolean, VideoRef } from "../../../types";
 
-const VideoButton = ({ videoRef, canvasRef, setPlaying }: {
-  videoRef: VideoRef, canvasRef: CanvasRef, setPlaying: SetBoolean
+const VideoButton = ({ videoRef, canvasRef, setPlaying, videoSelected, setVideoSelected }: {
+  videoRef: VideoRef,
+  canvasRef: CanvasRef,
+  setPlaying: SetBoolean,
+  videoSelected: boolean,
+  setVideoSelected: SetBoolean
 }) => {
   const inputVideoRef = useRef<HTMLInputElement>(null);
-  const [streaming, setStreaming] = useState(false);
 
   const closeVideo = () => {
     if (videoRef.current === null) return;
@@ -25,7 +28,7 @@ const VideoButton = ({ videoRef, canvasRef, setPlaying }: {
       clearCtx(context);
     }
 
-    setStreaming(false);
+    setVideoSelected(false);
     if (inputVideoRef.current !== null) {
       inputVideoRef.current.value = "";
     }
@@ -43,11 +46,11 @@ const VideoButton = ({ videoRef, canvasRef, setPlaying }: {
     videoRef.current.src = url;
     videoRef.current.load();
     videoRef.current.style.display = "block";
-    setStreaming(true);
+    setVideoSelected(true);
   }
 
   const handleOnClick = () => {
-    if (streaming === false) {
+    if (!videoSelected) {
       inputVideoRef.current?.click();
     } else {
       closeVideo();
@@ -64,8 +67,12 @@ const VideoButton = ({ videoRef, canvasRef, setPlaying }: {
         onChange={handleOnChange}
         ref={inputVideoRef}
       />
-      <SidebarButton onClick={handleOnClick}>
-        <Icon iconName={streaming ? "bi-folder-x" : "bi-folder"} />
+      <SidebarButton
+        onClick={handleOnClick}
+        aria-label={videoSelected ? "Remove selected video" : "Choose a video"}
+        title={videoSelected ? "Remove selected video" : "Choose a video"}
+      >
+        <Icon iconName={videoSelected ? "bi-folder-x" : "bi-folder"} />
       </SidebarButton>
     </>
   );

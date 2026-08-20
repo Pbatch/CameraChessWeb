@@ -3,8 +3,8 @@ import { gameResetFen, gameResetMoves } from "../../../slices/gameSlice";
 import { SidebarButton, Icon } from "../../common";
 import type { SetBoolean, SetStringArray, VideoRef } from "../../../types";
 
-const StopButton = ({ videoRef, setPlaying, setText }: {
-  videoRef: VideoRef, setPlaying: SetBoolean, setText: SetStringArray
+const StopButton = ({ videoRef, setPlaying, setText, videoSelected }: {
+  videoRef: VideoRef, setPlaying: SetBoolean, setText: SetStringArray, videoSelected: boolean
 }) => {
   const dispatch = useDispatch();
 
@@ -20,7 +20,12 @@ const StopButton = ({ videoRef, setPlaying, setText }: {
   }
 
  return (
-    <SidebarButton onClick={handleClick}>
+    <SidebarButton
+      onClick={handleClick}
+      disabled={!videoSelected}
+      aria-label="Stop and reset video"
+      title="Stop and reset video"
+    >
       <Icon iconName="bi-stop" />
     </SidebarButton>
   );

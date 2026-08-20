@@ -11,7 +11,12 @@ const RecordButton = ({ playing, setPlaying }:
   }
 
  return (
-    <SidebarButton onClick={handleClick}>
+    <SidebarButton
+      onClick={handleClick}
+      aria-label="Move detection"
+      aria-pressed={playing}
+      title={playing ? "Pause" : "Play"}
+    >
       <Icon iconName={playing ? "bi-pause" : "bi-play"} />
     </SidebarButton>
   );

@@ -28,7 +28,7 @@ const Sidebar = ({ sidebarRef, playing, text, setText, children }: SidebarProps)
 
   const textDisplay = () => {
     return (
-      <div className="text-white">
+      <div className="text-white" role="status" aria-live="polite" aria-atomic="true">
         {text.map((t) => <div key={t}>{t}</div>)}
       </div>
     )
@@ -36,7 +36,7 @@ const Sidebar = ({ sidebarRef, playing, text, setText, children }: SidebarProps)
 
   const buttons = () => {
     return (
-      <div className="btn-group w-100" role="group">
+      <div className="btn-group w-100" role="group" aria-label="Game actions">
         <PgnButton setText={setText} playing={playing} />
         <HomeButton />
       </div>

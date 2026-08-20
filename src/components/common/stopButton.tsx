@@ -17,7 +17,7 @@ const StopButton = ({ setPlaying, setText }: { setPlaying: SetBoolean, setText: 
   }
 
  return (
-    <SidebarButton onClick={handleClick}>
+    <SidebarButton onClick={handleClick} aria-label="Stop and reset game" title="Stop and reset game">
       <Icon iconName="bi-stop" />
     </SidebarButton>
   );

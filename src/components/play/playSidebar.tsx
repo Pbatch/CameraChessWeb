@@ -95,7 +95,7 @@ const PlaySidebar = ({ piecesModelRef, xcornersModelRef, videoRef, canvasRef, si
           setText={setText} />
       </li>
       <li className="my-1">
-        <div className="btn-group w-100" role="group">
+        <div className="btn-group w-100" role="group" aria-label="Move detection controls">
           <RecordButton playing={playing} setPlaying={setPlaying} />
         </div>
       </li>

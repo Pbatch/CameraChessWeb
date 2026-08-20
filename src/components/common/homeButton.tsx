@@ -10,7 +10,7 @@ const HomeButton = () => {
   }
   
   return (
-    <SidebarButton onClick={handleClick} >
+    <SidebarButton onClick={handleClick} aria-label="Go to home" title="Go to home">
       <Icon iconName="bi-house"/>
     </SidebarButton>
   );
