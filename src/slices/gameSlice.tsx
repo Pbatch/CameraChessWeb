@@ -1,9 +1,9 @@
 import { createSlice } from '@reduxjs/toolkit'
 import { useSelector } from 'react-redux';
-import { Game, RootState } from '../types';
+import type { Game, RootState } from '../types';
 import { START_FEN } from '../utils/constants';
 import { parseFen, makeFen } from 'chessops/fen';
-import { Move } from 'chessops';
+import type { Move } from 'chessops';
 import { Chess } from 'chessops/chess';
 import { parsePgn } from 'chessops/pgn';
 import { parseSan, makeSan } from 'chessops/san';
@@ -102,7 +102,7 @@ export const useGame = () => {
 }
 
 export const makePgn = (game: Game) => {
-  return `[FEN "${game.start}"]` + "\n \n" + game.moves;
+  return `[FEN "${game.start}"]\n \n${game.moves}`;
 }
 
 export const makeUpdatePayload = (board: BoardWithMetadata, greedy: boolean = false, fromOpponent: boolean = false, error: string | null = null) => {
@@ -141,7 +141,9 @@ export const makeBoard = (game: Game): CameraChessBoard => {
     board.halfmoves = freshBoard.halfmoves;
     board.fullmoves = freshBoard.fullmoves;
 
-    board.history.forEach((entry: HistoryEntry) => board.play(entry.move));
+    board.history.forEach((entry: HistoryEntry) => {
+      board.play(entry.move);
+    });
   };
 
   board.playSan = (san: string) => {

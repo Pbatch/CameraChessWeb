@@ -1,5 +1,5 @@
-import { Role, SquareName } from "chessops/types";
-import { CornersKey } from "../types";
+import type { Role, SquareName } from "chessops/types";
+import type { CornersKey } from "../types";
 
 export const START_FEN: string = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 export const MODEL_WIDTH: number = 480;

@@ -1,4 +1,4 @@
-import { SetBoolean } from "../../types";
+import type { SetBoolean } from "../../types";
 import Icon from "./icon";
 import SidebarButton from "./sidebarButton";
 

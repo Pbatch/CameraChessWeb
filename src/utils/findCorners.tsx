@@ -9,12 +9,12 @@ import { clamp } from "./math";
 import type {
   CanvasRef, CornersDict, CornersPayload, ModelRefs, SetStringArray, VideoRef
 } from "../types";
-import { NDArray } from "vectorious";
+import type { NDArray } from "vectorious";
 import type { Dispatch, UnknownAction } from "@reduxjs/toolkit";
 
 const x: number[] = Array.from({ length: 7 }, (_, i) => i);
 const y: number[] = Array.from({ length: 7 }, (_, i) => i);
-const GRID: number[][] = y.map(yy => x.map(xx => [xx, yy])).flat();
+const GRID: number[][] = y.flatMap(yy => x.map(xx => [xx, yy]));
 const IDEAL_QUAD: number[][] = [[0, 1], [1, 1], [1, 0], [0, 0]];
 
 const processBoxesAndScores = async (boxes: tf.Tensor2D, scores: tf.Tensor2D) => {
@@ -173,7 +173,7 @@ const scoreQuad = (quad: number[][], xCorners: number[][]): [number, NDArray, nu
 
 const findCornersFromXcorners = (xCorners: number[][]) => {
   const quads: number[][][] = getQuads(xCorners);
-  if (quads.length == 0) {
+  if (quads.length === 0) {
     return;
   }
 
@@ -265,7 +265,7 @@ export const _findCorners = async (
   const pieces = await runPiecesModel(videoRef, piecesModelRef);
   const blackPieces = pieces.filter(x => (x[2] <= 5));
   const whitePieces = pieces.filter(x => (x[2] > 5));
-  if ((blackPieces.length == 0) || (whitePieces.length == 0)) {
+  if ((blackPieces.length === 0) || (whitePieces.length === 0)) {
     setText(["No pieces to label corners"]);
     return;
   }

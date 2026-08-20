@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { CornersDict, CornersPayload, RootState } from "../types";
+import type { CornersDict, CornersPayload, RootState } from "../types";
 import { useSelector } from 'react-redux';
 
 const initialState: CornersDict = {"h1": [50, -100], "a1": [0, -100], "a8": [0, -150], "h8": [50, -150]}

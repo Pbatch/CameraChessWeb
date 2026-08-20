@@ -14,6 +14,26 @@ import { makeBoard, useGame } from "../../slices/gameSlice";
 import type { CameraChessBoard } from "../../slices/gameSlice";
 import { getMovesPairs } from "../../utils/moves";
 
+const getMoveText = (board: CameraChessBoard): string => {
+  const history = board.history;
+
+  if (history.length === 0) {
+    return "";
+  }
+
+  if (history.length === 1) {
+    return `1. ${history[history.length - 1].san}`
+  }
+
+  const firstMove: string = history[history.length - 2].san;
+  const secondMove: string = history[history.length - 1].san;
+  const nHalfMoves: number = Math.floor(history.length / 2);
+  if (history.length % 2 === 0) {
+    return `${nHalfMoves}.${firstMove} ${secondMove}`
+  }
+
+  return `${nHalfMoves}...${firstMove} ${nHalfMoves + 1}.${secondMove}`
+}
 
 const Video = ({ piecesModelRef, canvasRef, videoRef, sidebarRef, playing,
   setPlaying, playingRef, setText, mode, cornersRef }: {
@@ -52,27 +72,6 @@ const Video = ({ piecesModelRef, canvasRef, videoRef, sidebarRef, playing,
     lastMoveRef.current = game.lastMove;
   }, [game])
 
-  const getMoveText = (board: CameraChessBoard): string => {
-    const history = board.history;
-
-    if (history.length == 0) {
-      return "";
-    }
-
-    if (history.length == 1) {
-      return `1. ${history[history.length - 1].san}`
-    }
-
-    const firstMove: string = history[history.length - 2].san;
-    const secondMove: string = history[history.length - 1].san;
-    const nHalfMoves: number = Math.floor(history.length / 2);
-    if (history.length % 2 == 0) {
-      return `${nHalfMoves}.${firstMove} ${secondMove}`
-    }
-
-    return `${nHalfMoves}...${firstMove} ${nHalfMoves + 1}.${secondMove}`
-  }
-
   const updateWidthHeight = useEffectEvent(() => {
     const sidebar = sidebarRef.current;
     const canvas = canvasRef.current;
@@ -88,7 +87,7 @@ const Video = ({ piecesModelRef, canvasRef, videoRef, sidebarRef, playing,
       height = windowHeight;
     }
 
-    if ((canvas.offsetHeight == 0) || (canvas.offsetWidth) == 0) {
+    if ((canvas.offsetHeight === 0) || (canvas.offsetWidth) === 0) {
       return;
     }
     const width: number = ((height - MARKER_DIAMETER) * MEDIA_ASPECT_RATIO) + MARKER_DIAMETER;
@@ -131,7 +130,9 @@ const Video = ({ piecesModelRef, canvasRef, videoRef, sidebarRef, playing,
     const stopWebcam = async () => {
       const stream = await streamPromise;
       if (stream !== null) {
-        stream.getTracks().forEach((track) => track.stop());
+        stream.getTracks().forEach((track) => {
+          track.stop();
+        });
       }
     }
 
@@ -141,6 +142,7 @@ const Video = ({ piecesModelRef, canvasRef, videoRef, sidebarRef, playing,
     }
   }, [canvasRef, cornersRef, dispatch, mode, piecesModelRef, playingRef, setText, videoRef]);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: window size changes intentionally trigger this effect event.
   useEffect(() => {
     updateWidthHeight();
   }, [windowWidth, windowHeight]);
@@ -204,7 +206,7 @@ const Video = ({ piecesModelRef, canvasRef, videoRef, sidebarRef, playing,
         return;
       }
       const tracks = source.getVideoTracks();
-      if (tracks.length == 0) {
+      if (tracks.length === 0) {
         return;
       }
 

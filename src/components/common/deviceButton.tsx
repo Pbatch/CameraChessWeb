@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { MEDIA_CONSTRAINTS } from "../../utils/constants";
-import { VideoRef } from "../../types";
+import type { VideoRef } from "../../types";
 
 const DeviceButton = ({ videoRef }: {videoRef: VideoRef }) => {
   const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
@@ -47,7 +47,7 @@ const DeviceButton = ({ videoRef }: {videoRef: VideoRef }) => {
 
   return (
     <div className="dropdown">
-      <button className="btn btn-dark btn-sm btn-outline-light dropdown-toggle w-100" id="deviceButton" data-bs-toggle="dropdown" aria-expanded="false">
+      <button type="button" className="btn btn-dark btn-sm btn-outline-light dropdown-toggle w-100" id="deviceButton" data-bs-toggle="dropdown" aria-expanded="false">
       {(device === null) ? "Select a Device": `Device: ${device.label.split("(")[0]}`}
       </button>
       <ul className="dropdown-menu" aria-labelledby="deviceButton">

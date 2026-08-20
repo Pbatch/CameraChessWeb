@@ -1,5 +1,5 @@
 import SidebarButton from "./sidebarButton";
-import { SetStringArray } from "../../types";
+import type { SetStringArray } from "../../types";
 import { makePgn, useGame } from "../../slices/gameSlice";
 
 const PgnButton = ({ setText, playing }: {setText: SetStringArray, playing: boolean}) => {

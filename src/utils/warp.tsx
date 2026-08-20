@@ -1,9 +1,9 @@
-import { array, NDArray, zeros } from 'vectorious';
+import { array, type NDArray, zeros } from 'vectorious';
 import { BOARD_SIZE, SQUARE_SIZE } from "./constants";
 import * as tf from "@tensorflow/tfjs-core";
 
 export const perspectiveTransform = (src: number[][], transform: NDArray): number[][] => {
-    if (src[0].length == 2) {
+    if (src[0].length === 2) {
       src = src.map(x => [x[0], x[1], 1]);
     }
     const warpedSrc: NDArray = array(src).multiply(transform.T);
@@ -67,11 +67,11 @@ export const getInvTransform = (keypoints: number[][]): NDArray => {
 export const transformCenters = (invTransform: NDArray): [number[][], tf.Tensor3D] => {
   const x: number[] = Array.from({ length: 8 }, (_, i) => 0.5 + i);
   const y: number[] = Array.from({ length: 8 }, (_, i) => 7.5 - i);
-  const warpedCenters: number[][] = y.map(yy => 
+  const warpedCenters: number[][] = y.flatMap(yy =>
     x.map(xx => 
       [xx * SQUARE_SIZE, yy * SQUARE_SIZE, 1]
     )
-  ).flat();
+  );
   const centers: number[][] = perspectiveTransform(warpedCenters, invTransform);
   const centers3D: tf.Tensor3D = tf.tidy(() => {
     return tf.expandDims(tf.tensor2d(centers), 0);

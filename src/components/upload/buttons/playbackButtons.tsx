@@ -1,4 +1,4 @@
-import { VideoRef } from "../../../types";
+import type { VideoRef } from "../../../types";
 
 const PlayButton = ({ videoRef }: { videoRef: VideoRef }) => {
   const PlaybackButton = ({ playbackRate}: { playbackRate: number } ) => {

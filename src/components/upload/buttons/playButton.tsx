@@ -1,4 +1,4 @@
-import { SetBoolean, VideoRef } from "../../../types";
+import type { SetBoolean, VideoRef } from "../../../types";
 import { SidebarButton, Icon } from "../../common";
 
 const PlayButton = ({ videoRef, playing, setPlaying }: {

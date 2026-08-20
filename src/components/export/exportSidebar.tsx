@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Sidebar, StudyButton } from "../common";
 import ExportButton from "./exportButton";
-import { Study } from "../../types";
+import type { Study } from "../../types";
 
 const UploadSidebar = ({ pgn }: { pgn: string }) => {
   const [study, setStudy] = useState<Study | null>(null);

@@ -3,7 +3,7 @@ import React from "react";
 import { MARKER_DIAMETER } from "../../utils/constants";
 import { useDispatch } from 'react-redux';
 import { cornersSet } from '../../slices/cornersSlice';
-import { CornersPayload, CornersKey } from '../../types';
+import type { CornersPayload, CornersKey } from '../../types';
 
 const Marker = ({ name, xy }: { name: CornersKey, xy: number[] }) => {
   const boxStyle: React.CSSProperties = {

@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { clearCtx } from "../../../utils/render/common";
 import { Icon, SidebarButton } from "../../common";
-import { CanvasRef, SetBoolean, VideoRef } from "../../../types";
+import type { CanvasRef, SetBoolean, VideoRef } from "../../../types";
 
 const VideoButton = ({ videoRef, canvasRef, setPlaying }: {
   videoRef: VideoRef, canvasRef: CanvasRef, setPlaying: SetBoolean

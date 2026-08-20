@@ -1,7 +1,7 @@
 import { useDispatch } from "react-redux";
 import { gameResetFen, gameResetMoves } from "../../../slices/gameSlice";
 import { SidebarButton, Icon } from "../../common";
-import { SetBoolean, SetStringArray, VideoRef } from "../../../types";
+import type { SetBoolean, SetStringArray, VideoRef } from "../../../types";
 
 const StopButton = ({ videoRef, setPlaying, setText }: {
   videoRef: VideoRef, setPlaying: SetBoolean, setText: SetStringArray

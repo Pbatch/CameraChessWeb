@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { gameSetError, useGame } from "../../slices/gameSlice";
-import { Game } from "../../types";
+import type { Game } from "../../types";
 
 const Toast = () => {
   const game: Game = useGame();
