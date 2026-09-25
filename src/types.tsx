@@ -26,13 +26,22 @@ interface MovesPair {
   "moves": MovesData | null
 }
 
-type CornersKey = "h1" | "a1" | "a8" | "h8"; 
+type CornersKey = "h1" | "a1" | "a8" | "h8";
 interface CornersPayload {
   key: CornersKey,
   xy: number[]
 }
 type CornersDict = {[key in CornersKey]: number[]};
 type CornersRef = React.RefObject<CornersDict>;
+
+export type Clock = {
+  wtime: number;      // white's remaining time, in milliseconds
+  btime: number;      // black's remaining time, in milliseconds
+  turn: "w" | "b";    // whose turn it is right now
+  updatedAt: number;  // Date.now() at the moment these values arrived
+  running: boolean;   // false when the game is paused or finished
+  clock: Clock | null;
+};
 
 interface Game {
   fen: string,
@@ -41,7 +50,8 @@ interface Game {
   lastMove: string,
   greedy: boolean,
   fromOpponent: boolean,
-  error: string | null
+  error: string | null,
+  clock: Clock | null
 }
 
 interface User {
@@ -63,8 +73,8 @@ type SetStringArray = React.Dispatch<React.SetStateAction<string[]>>
 type SetNumber = React.Dispatch<React.SetStateAction<number>>
 type SetStudy = React.Dispatch<React.SetStateAction<Study | null>>
 
-export type { 
-  RootState, Study, ModelRefs, MovesData, MovesPair, 
+export type {
+  RootState, Study, ModelRefs, MovesData, MovesPair,
   CornersDict, CornersKey, CornersPayload, Game,
   SetBoolean, SetString, SetStringArray, SetNumber, Mode,
   SetStudy, VideoRef, CanvasRef, SidebarRef, CornersRef

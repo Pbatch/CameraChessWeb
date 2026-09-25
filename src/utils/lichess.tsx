@@ -93,7 +93,19 @@ export type NowPlayingGame = {
 type Playing = { nowPlaying: NowPlayingGame[] };
 type ImportResult = { id: string; url: string };
 type BroadcastPushResult = { games: { error?: string }[] };
-export type BoardStreamEvent = { type: string; moves?: string; state?: { moves?: string } };
+export type BoardStreamEvent = {
+  type: string;
+  moves?: string;
+  wtime?: number;
+  btime?: number;
+  status?: string;
+  state?: {
+    moves?: string;
+    wtime?: number;
+    btime?: number;
+    status?: string;
+  };
+};
 
 const setBroadcastlessStudies = async (token: string, username: string, setStudies: (studies: Study[]) => void, broadcasts: Study[]) => {
   const path = `/api/study/by/${username}`;

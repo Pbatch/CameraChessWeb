@@ -158,3 +158,18 @@ html, body {
     transition: none;
   }
 }
+
+.clock {
+  font-variant-numeric: tabular-nums;
+  color: #fff;
+  background-color: #444;
+}
+
+.clock span {
+  padding: 2px 6px;
+  width: 50%;
+}
+
+.clock__time--active {
+  background-color: #aaa;
+}
