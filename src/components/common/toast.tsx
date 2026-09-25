@@ -1,43 +1,25 @@
 import { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
-import { gameSetError, useGame } from "../../slices/gameSlice";
+import { useGame } from "../../slices/gameSlice";
 import type { Game } from "../../types";
 
 const Toast = () => {
   const game: Game = useGame();
-  const dispatch = useDispatch();
   const [visible, setVisible] = useState(false);
   const [show, setShow] = useState(false);
 
   const dismiss = () => {
     setVisible(false);
     setTimeout(() => {
-      dispatch(gameSetError(null));
       setShow(false);
     }, 300);
   };
 
   useEffect(() => {
-    let dismissTimer: ReturnType<typeof setTimeout>;
-    let resetTimer: ReturnType<typeof setTimeout>;
-
     if (game.error) {
       setShow(true);
       setVisible(true);
-      dismissTimer = setTimeout(() => {
-        setVisible(false);
-        resetTimer = setTimeout(() => {
-          dispatch(gameSetError(null));
-          setShow(false);
-        }, 300);
-      }, 3000);
     }
-
-    return () => {
-      if (dismissTimer) clearTimeout(dismissTimer);
-      if (resetTimer) clearTimeout(resetTimer);
-    };
-  }, [dispatch, game.error]);
+  }, [game.error]);
 
   if (!show || !game.error) return null;
 
