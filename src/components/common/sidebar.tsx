@@ -3,6 +3,7 @@ import type { Game, SetStringArray, SidebarRef } from "../../types.tsx";
 import { useGame } from "../../slices/gameSlice.tsx";
 import type { ReactNode } from "react";
 import ChessboardPreview from "./chessboardPreview.tsx";
+import Clock from "../play/clock.tsx";
 
 type SidebarProps = {
   sidebarRef?: SidebarRef;
@@ -17,7 +18,10 @@ const Sidebar = ({ sidebarRef, playing, text, setText, children }: SidebarProps)
 
   const boardDisplay = () => {
     return (
-      <ChessboardPreview fen={game.fen} squareSize={20} />
+      <>
+        <ChessboardPreview fen={game.fen} squareSize={20} />
+        <Clock />
+      </>
     );
   }
 
