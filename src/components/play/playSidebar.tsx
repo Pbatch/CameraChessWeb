@@ -43,9 +43,23 @@ const PlaySidebar = ({ piecesModelRef, xcornersModelRef, videoRef, canvasRef, si
       return;
     }
 
+    const getFriendlyError = (error: unknown): string => {
+      const raw = error instanceof Error ? error.message : String(error);
+      const match = raw.match(/^(\d{3})\s*:/);
+      if (match) {
+        const status = Number(match[1]);
+        if (status === 400) return "This mode can't be played through the API. Try a Rapid or Classical.";
+        if (status === 401) return "You're not signed in. Please log in again.";
+        if (status === 403) return "You don't have permission to do that.";
+        if (status === 404) return "That game doesn't exist.";
+        if (status >= 500) return "Lichess is having a moment. Try again shortly.";
+      }
+      return raw;
+    };
+
     lichessPlayMove(token, gameId, lastMove)
       .catch((error: unknown) => {
-        dispatch(gameSetError(error instanceof Error ? error.message : String(error)));
+        dispatch(gameSetError(getFriendlyError(error)));
       });
   }, [color, dispatch, game, gameId, token])
 
