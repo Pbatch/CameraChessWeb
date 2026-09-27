@@ -19,7 +19,7 @@ const Sidebar = ({ sidebarRef, playing, text, setText, children }: SidebarProps)
   const boardDisplay = () => {
     return (
       <>
-        <ChessboardPreview fen={game.fen} squareSize={20} />
+        <ChessboardPreview fen={game.fen} squareSize={20} lastMove={game.lastMove} />
         <Clock />
       </>
     );

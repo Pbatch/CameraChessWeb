@@ -39,6 +39,10 @@ html, body {
   background-color: #b5876b;
 }
 
+.chessboard-preview__square--last-move {
+  box-shadow: inset 0 0 0 100px rgba(255, 235, 59, 0.55);
+}
+
 .chessboard-preview__piece {
   display: block;
   width: 100%;

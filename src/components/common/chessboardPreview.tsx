@@ -28,6 +28,7 @@ type BoardSquare = {
 type ChessboardPreviewProps = {
   fen: string;
   squareSize?: number;
+  lastMove: string | null;
 };
 
 const emptyBoard = (): BoardSquare[] => Array.from({ length: 64 }, (_, index) => ({
@@ -74,7 +75,7 @@ const parseFen = (fen: string): BoardSquare[] => {
   return board;
 };
 
-const ChessboardPreview = ({ fen, squareSize = 20 }: ChessboardPreviewProps) => {
+const ChessboardPreview = ({ fen, squareSize = 20, lastMove = null }: ChessboardPreviewProps) => {
   const board = parseFen(fen);
   const positionDescription = board
     .filter((square): square is BoardSquare & { piece: PieceCode } => square.piece !== undefined)
@@ -86,6 +87,9 @@ const ChessboardPreview = ({ fen, squareSize = 20 }: ChessboardPreviewProps) => 
     height: squareSize * 8,
   } as CSSProperties;
 
+  const from = lastMove?.slice(0, 2);
+  const to = lastMove?.slice(2, 4);
+
   return (
     <div
       className="chessboard-preview mx-auto"
@@ -93,14 +97,15 @@ const ChessboardPreview = ({ fen, squareSize = 20 }: ChessboardPreviewProps) => 
       role="img"
       aria-label={`Current chess position: ${positionDescription || "empty board"}`}
     >
-      {board.map(({ coordinate, piece }, index) => (
-        <span
+      {board.map(({ coordinate, piece }, index) => {
+        const isLastMove = (coordinate == from) || (coordinate == to);
+
+        return (<span
           key={coordinate}
-          className={`chessboard-preview__square ${
-            (Math.floor(index / 8) + index) % 2 === 0
-              ? "chessboard-preview__square--light"
-              : "chessboard-preview__square--dark"
-          }`}
+          className={`chessboard-preview__square ${(Math.floor(index / 8) + index) % 2 === 0
+            ? "chessboard-preview__square--light"
+            : "chessboard-preview__square--dark"
+            }${isLastMove ? " chessboard-preview__square--last-move" : ""}`}
           aria-hidden="true"
         >
           {piece && (
@@ -111,8 +116,8 @@ const ChessboardPreview = ({ fen, squareSize = 20 }: ChessboardPreviewProps) => 
               draggable={false}
             />
           )}
-        </span>
-      ))}
+        </span>);
+      })}
     </div>
   );
 };
