@@ -25,7 +25,8 @@ const initialState: Game = {
   "lastMove": "",
   "greedy": false,
   "fromOpponent": false,
-  "error": null
+  "error": null,
+  "clock": null
 };
 
 const gameSlice = createSlice({
@@ -69,9 +70,13 @@ const gameSlice = createSlice({
         "lastMove": action.payload.lastMove,
         "greedy": action.payload.greedy,
         "fromOpponent": action.payload.fromOpponent ?? false,
-        "error": action.payload.error ?? null
+        "error": action.payload.error ?? null,
+        "clock": state.clock
       }
       return newState
+    },
+    gameSetClock(state, action) {
+      state.clock = action.payload;
     }
   }
 })
@@ -190,6 +195,6 @@ export const {
   gameSetFen, gameResetFen,
   gameSetStart, gameResetStart,
   gameSetLastMove, gameResetLastMove,
-  gameUpdate, gameSetError
+  gameUpdate, gameSetError, gameSetClock
 } = gameSlice.actions
 export default gameSlice.reducer

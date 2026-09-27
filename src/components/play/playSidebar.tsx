@@ -8,7 +8,7 @@ import { lichessPlayMove, lichessStreamGame } from "../../utils/lichess";
 import type { BoardStreamEvent } from "../../utils/lichess";
 import type { Color } from "chessops/types";
 import { useDispatch } from "react-redux";
-import { gameUpdate, gameSetError, makeBoard, makeUpdatePayload, useGame } from "../../slices/gameSlice";
+import { gameUpdate, gameSetError, makeBoard, makeUpdatePayload, useGame, gameSetClock } from "../../slices/gameSlice";
 import GamesButton from "./gamesButton";
 
 const PlaySidebar = ({ piecesModelRef, xcornersModelRef, videoRef, canvasRef, sidebarRef,
@@ -43,9 +43,23 @@ const PlaySidebar = ({ piecesModelRef, xcornersModelRef, videoRef, canvasRef, si
       return;
     }
 
+    const getFriendlyError = (error: unknown): string => {
+      const raw = error instanceof Error ? error.message : String(error);
+      const match = raw.match(/^(\d{3})\s*:/);
+      if (match) {
+        const status = Number(match[1]);
+        if (status === 400) return "This mode can't be played through the API. Try a Rapid or Classical.";
+        if (status === 401) return "You're not signed in. Please log in again.";
+        if (status === 403) return "You don't have permission to do that.";
+        if (status === 404) return "That game doesn't exist.";
+        if (status >= 500) return "Lichess is having a moment. Try again shortly.";
+      }
+      return raw;
+    };
+
     lichessPlayMove(token, gameId, lastMove)
       .catch((error: unknown) => {
-        dispatch(gameSetError(error instanceof Error ? error.message : String(error)));
+        dispatch(gameSetError(getFriendlyError(error)));
       });
   }, [color, dispatch, game, gameId, token])
 
@@ -55,26 +69,36 @@ const PlaySidebar = ({ piecesModelRef, xcornersModelRef, videoRef, canvasRef, si
     }
 
     const streamGameCallback = async (response: BoardStreamEvent) => {
-      // The selected game is already initialized from nowPlaying.fen.
-      if (response.type === "gameFull") {
-        return;
-      }
+      // gameFull nests clock data under `state`; gameState puts it at the top level.
+      const data = response.type === "gameFull" ? response.state : response;
 
-      const moves = response.moves;
-      if (moves === undefined) {
-        return;
+      if (data === undefined) return;
+
+      const moves = data.moves;
+      if (moves === undefined) return;
+
+      const wtime = data.wtime;
+      const btime = data.btime;
+      const status = data.status;
+
+      if (wtime !== undefined && btime !== undefined) {
+        const moveCount = moves.trim() === "" ? 0 : moves.trim().split(" ").length;
+        dispatch(gameSetClock({
+          wtime,
+          btime,
+          turn: moveCount % 2 === 0 ? "w" : "b",
+          updatedAt: Date.now(),
+          running: status === "started",
+        }));
       }
 
       const splitMoves = moves.split(" ");
       const lastMove = splitMoves[splitMoves.length - 1];
-      if (lastMove === gameRef.current.lastMove) {
-        return;
-      }
+      if (lastMove === gameRef.current.lastMove) return;
 
       const board = makeBoard(gameRef.current);
       board.playUci(lastMove);
       const payload = makeUpdatePayload(board, false, true);
-      console.log("payload", payload);
       dispatch(gameUpdate(payload));
     };
 
