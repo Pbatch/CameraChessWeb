@@ -1,7 +1,6 @@
 import { type Dispatch, useEffect, useRef, useState } from "react";
 import { type NavigateFunction, Outlet, useNavigate } from "react-router-dom";
-import type { GraphModel } from "@tensorflow/tfjs-converter";
-import "@tensorflow/tfjs-backend-webgl";
+import type { CompiledModel } from "@litertjs/core";
 import type { ModelRefs } from "./types";
 import { useUser } from "./slices/userSlice";
 import { useDispatch } from "react-redux";
@@ -17,11 +16,9 @@ const App = () => {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
 
-  const piecesModelRef = useRef<GraphModel | null>(null);
-  const xcornersModelRef = useRef<GraphModel | null>(null);
+  const chessqueriesModelRef = useRef<CompiledModel | null>(null);
   const modelRefs: ModelRefs = {
-    "piecesModelRef": piecesModelRef,
-    "xcornersModelRef": xcornersModelRef,
+    "chessqueriesModelRef": chessqueriesModelRef,
   }
 
   useEffect(() => {
@@ -32,11 +29,12 @@ const App = () => {
   }, [dispatch, navigate, token]);
 
   useEffect(() => {
-    LoadModels(piecesModelRef, xcornersModelRef)
+    LoadModels(chessqueriesModelRef)
       .then(() => setLoading(false))
       .catch((error: unknown) => {
-        console.error("Failed to load TensorFlow models", error);
-        setLoadError("ChessCam could not load its board-recognition models. Please reload and try again.");
+        console.error("Failed to load models", error);
+        const reason: string = (error instanceof Error) ? ` (${error.message})` : "";
+        setLoadError(`ChessCam could not load its board-recognition model${reason}. Please reload and try again.`);
       });
   }, []);
 

@@ -1,18 +1,18 @@
-import { CornersButton, Sidebar, RecordButton, StopButton, FenButton, DeviceButton } from "../common";
+import { Sidebar, RecordButton, StopButton, FenButton, DeviceButton, RoiButton } from "../common";
 import type {
-  CanvasRef, CornersRef, ModelRefs, SetBoolean, SetStringArray, SidebarRef, VideoRef
+  ModelRefs, Roi, SetBoolean, SetRoi, SetStringArray, SidebarRef, VideoRef
 } from "../../types";
 
-const RecordSidebar = ({ piecesModelRef, xcornersModelRef, videoRef, canvasRef, sidebarRef, 
-  playing, setPlaying, text, setText, cornersRef }: {
-  piecesModelRef: ModelRefs["piecesModelRef"],
-  xcornersModelRef: ModelRefs["xcornersModelRef"],
+const RecordSidebar = ({ chessqueriesModelRef, videoRef, sidebarRef,
+  playing, setPlaying, text, setText, roi, setRoi, selecting, setSelecting, canPlay }: {
+  chessqueriesModelRef: ModelRefs["chessqueriesModelRef"],
   videoRef: VideoRef,
-  canvasRef: CanvasRef,
   sidebarRef: SidebarRef,
   playing: boolean, setPlaying: SetBoolean, 
   text: string[], setText: SetStringArray,
-  cornersRef: CornersRef
+  roi: Roi | null, setRoi: SetRoi,
+  selecting: boolean, setSelecting: SetBoolean,
+  canPlay: boolean
 }) => {
   const inputStyle = {
     display: playing ? "none": "inline-block"
@@ -23,12 +23,11 @@ const RecordSidebar = ({ piecesModelRef, xcornersModelRef, videoRef, canvasRef, 
         <DeviceButton videoRef={videoRef} />
       </li>
       <li className="my-1" style={inputStyle}>
-        <CornersButton piecesModelRef={piecesModelRef} xcornersModelRef={xcornersModelRef} videoRef={videoRef} canvasRef={canvasRef} 
-        setText={setText} />
+        <FenButton chessqueriesModelRef={chessqueriesModelRef} videoRef={videoRef} roi={roi} setText={setText} />
       </li>
       <li className="my-1" style={inputStyle}>
-        <FenButton piecesModelRef={piecesModelRef} videoRef={videoRef} 
-        canvasRef={canvasRef} setText={setText} cornersRef={cornersRef} />
+        <RoiButton roi={roi} setRoi={setRoi} selecting={selecting} setSelecting={setSelecting}
+          canPlay={canPlay} />
       </li>
       <li className="my-1">
         <div className="btn-group w-100" role="group" aria-label="Move detection controls">

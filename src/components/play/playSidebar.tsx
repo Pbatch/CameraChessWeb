@@ -1,6 +1,6 @@
-import { CornersButton, Sidebar, RecordButton, DeviceButton } from "../common";
+import { Sidebar, RecordButton, DeviceButton, RoiButton } from "../common";
 import type {
-  CanvasRef, Game, ModelRefs, SetBoolean, SetStringArray, SidebarRef, VideoRef
+  Game, Roi, SetBoolean, SetRoi, SetStringArray, SidebarRef, VideoRef
 } from "../../types";
 import { useUser } from "../../slices/userSlice";
 import { useEffect, useRef, useState } from "react";
@@ -11,15 +11,15 @@ import { useDispatch } from "react-redux";
 import { gameUpdate, gameSetError, makeBoard, makeUpdatePayload, useGame, gameSetClock } from "../../slices/gameSlice";
 import GamesButton from "./gamesButton";
 
-const PlaySidebar = ({ piecesModelRef, xcornersModelRef, videoRef, canvasRef, sidebarRef,
-  playing, setPlaying, text, setText }: {
-    piecesModelRef: ModelRefs["piecesModelRef"],
-    xcornersModelRef: ModelRefs["xcornersModelRef"],
+const PlaySidebar = ({ videoRef, sidebarRef,
+  playing, setPlaying, text, setText, roi, setRoi, selecting, setSelecting, canPlay }: {
     videoRef: VideoRef,
-    canvasRef: CanvasRef,
     sidebarRef: SidebarRef,
     playing: boolean, setPlaying: SetBoolean,
-    text: string[], setText: SetStringArray
+    text: string[], setText: SetStringArray,
+    roi: Roi | null, setRoi: SetRoi,
+    selecting: boolean, setSelecting: SetBoolean,
+    canPlay: boolean
   }) => {
   const token: string = useUser().token;
   const game: Game = useGame();
@@ -112,11 +112,11 @@ const PlaySidebar = ({ piecesModelRef, xcornersModelRef, videoRef, canvasRef, si
         <DeviceButton videoRef={videoRef} />
       </li>
       <li className="my-1" style={inputStyle}>
-        <GamesButton setGameId={setGameId} setColor={setColor} setText={setText} />
+        <RoiButton roi={roi} setRoi={setRoi} selecting={selecting} setSelecting={setSelecting}
+          canPlay={canPlay} />
       </li>
       <li className="my-1" style={inputStyle}>
-        <CornersButton piecesModelRef={piecesModelRef} xcornersModelRef={xcornersModelRef} videoRef={videoRef} canvasRef={canvasRef}
-          setText={setText} />
+        <GamesButton setGameId={setGameId} setColor={setColor} setText={setText} />
       </li>
       <li className="my-1">
         <div className="btn-group w-100" role="group" aria-label="Move detection controls">

@@ -98,7 +98,7 @@ const ChessboardPreview = ({ fen, squareSize = 20, lastMove = null }: Chessboard
       aria-label={`Current chess position: ${positionDescription || "empty board"}`}
     >
       {board.map(({ coordinate, piece }, index) => {
-        const isLastMove = (coordinate == from) || (coordinate == to);
+        const isLastMove = (coordinate === from) || (coordinate === to);
 
         return (<span
           key={coordinate}

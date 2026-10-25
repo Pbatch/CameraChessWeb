@@ -9,7 +9,7 @@ import {
   PURGE,
   REGISTER,
 } from 'redux-persist'
-import { cornersReducer, gameReducer, userReducer } from "./slices";
+import { gameReducer, userReducer } from "./slices";
 
 const storage = {
   getItem: (key: string) => Promise.resolve(localStorage.getItem(key)),
@@ -19,7 +19,6 @@ const storage = {
 
 const reducer = combineReducers({
   game: gameReducer,
-  corners: cornersReducer,
   user: userReducer
 })
 

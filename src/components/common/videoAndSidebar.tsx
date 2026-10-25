@@ -2,9 +2,8 @@ import { useRef, useState, useEffect } from "react";
 import Video from "../common/video";
 import { useOutletContext } from "react-router-dom";
 import { useDispatch } from 'react-redux';
-import { cornersReset, useCorners } from '../../slices/cornersSlice';
 import { Container } from "../common";
-import type { CornersDict, Mode, ModelRefs, Study } from "../../types";
+import type { Mode, ModelRefs, Roi, Study } from "../../types";
 import RecordSidebar from "../record/recordSidebar";
 import UploadSidebar from "../upload/uploadSidebar";
 import BroadcastSidebar from "../broadcast/broadcastSidebar";
@@ -26,7 +25,6 @@ const PortraitWarning = () => {
 const VideoAndSidebar = ({ mode }: { mode: Mode }) => {
   const context = useOutletContext<ModelRefs>();
   const dispatch = useDispatch();
-  const corners: CornersDict = useCorners();
   const token: string = useUser().token;
   const moves: string = useGame().moves;
   const isPortrait = useMediaQuery({ orientation: 'portrait' });
@@ -35,12 +33,14 @@ const VideoAndSidebar = ({ mode }: { mode: Mode }) => {
   const [playing, setPlaying] = useState<boolean>(false);
   const [study, setStudy] = useState<Study | null>(null);
   const [boardNumber, setBoardNumber] = useState<number>(-1);
+  const [roi, setRoi] = useState<Roi | null>(null);
+  const [selecting, setSelecting] = useState<boolean>(false);
+  const [canPlay, setCanPlay] = useState<boolean>(false);
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const playingRef = useRef<boolean>(playing);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
   const sidebarRef = useRef<HTMLDivElement>(null);
-  const cornersRef = useRef<CornersDict>(corners);
+  const roiRef = useRef<Roi | null>(roi);
 
   useEffect(() => {
     if (mode !== "broadcast" || (study === null) || (boardNumber === -1)) {
@@ -67,11 +67,10 @@ const VideoAndSidebar = ({ mode }: { mode: Mode }) => {
   }, [playing]);
 
   useEffect(() => {
-    cornersRef.current = corners;
-  }, [corners])
+    roiRef.current = roi;
+  }, [roi]);
 
   useEffect(() => {
-    dispatch(cornersReset());
     dispatch(gameResetStart());
     dispatch(gameResetMoves());
     dispatch(gameResetFen());
@@ -85,12 +84,16 @@ const VideoAndSidebar = ({ mode }: { mode: Mode }) => {
     "setText": setText,
     "setBoardNumber": setBoardNumber,
     "setStudy": setStudy,
-    "piecesModelRef": context.piecesModelRef,
-    "xcornersModelRef": context.xcornersModelRef,
+    "roi": roi,
+    "setRoi": setRoi,
+    "selecting": selecting,
+    "setSelecting": setSelecting,
+    "canPlay": canPlay,
+    "setCanPlay": setCanPlay,
+    "roiRef": roiRef,
+    "chessqueriesModelRef": context.chessqueriesModelRef,
     "videoRef": videoRef,
-    "canvasRef": canvasRef,
     "sidebarRef": sidebarRef,
-    "cornersRef": cornersRef,
     "playingRef": playingRef,
     "mode": mode
   }

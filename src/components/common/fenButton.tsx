@@ -3,14 +3,13 @@ import { findFen } from "../../utils/findFen";
 import { useDispatch } from 'react-redux';
 import { gameResetFen, gameResetMoves, gameResetStart } from "../../slices/gameSlice";
 import type { Color } from "chessops/types";
-import type { CanvasRef, CornersRef, ModelRefs, SetStringArray, VideoRef } from "../../types";
+import type { ModelRefs, Roi, SetStringArray, VideoRef } from "../../types";
 
-const FenButton = ({ piecesModelRef, videoRef, canvasRef, setText, cornersRef }:
-  Pick<ModelRefs, "piecesModelRef"> & {
+const FenButton = ({ chessqueriesModelRef, videoRef, roi, setText }:
+  Pick<ModelRefs, "chessqueriesModelRef"> & {
     videoRef: VideoRef,
-    canvasRef: CanvasRef,
-    setText: SetStringArray,
-    cornersRef: CornersRef
+    roi: Roi | null,
+    setText: SetStringArray
   }) => {
   const options = ["Normal", "Infer (White to move)", "Infer (Black to move)"];
 
@@ -24,7 +23,7 @@ const FenButton = ({ piecesModelRef, videoRef, canvasRef, setText, cornersRef }:
       dispatch(gameResetFen());
     } else {
       const color: Color = option.includes("White to move") ? "white" : "black";
-      void findFen({ piecesModelRef, videoRef, cornersRef, canvasRef, dispatch, setText, color })
+      void findFen({ chessqueriesModelRef, videoRef, roi, dispatch, setText, color })
         .catch((error: unknown) => {
           console.error("Unable to infer the starting position", error);
           setText(["Unable to infer the starting position"]);

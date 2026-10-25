@@ -1,11 +1,7 @@
 import type { Role, SquareName } from "chessops/types";
-import type { CornersKey } from "../types";
 
 export const START_FEN: string = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-export const MODEL_WIDTH: number = 480;
-export const MODEL_HEIGHT: number = 288;
-export const MARKER_RADIUS: number = 25;
-export const MARKER_DIAMETER: number = 2 * MARKER_RADIUS;
+export const CHESSQUERIES_SIZE: number = 644;
 export const LABELS: string[] = ["b", "k", "n", "p", "q", "r", "B", "K", "N", "P", "Q", "R"];
 export const PIECE_SYMBOLS: Role[] = ["bishop", "king", "knight", "pawn", "queen", "rook"];
 export const SQUARE_NAMES: SquareName[] = ['a1', 'b1', 'c1', 'd1', 'e1', 'f1', 'g1', 'h1',
@@ -18,7 +14,6 @@ export const SQUARE_NAMES: SquareName[] = ['a1', 'b1', 'c1', 'd1', 'e1', 'f1', '
   'a8', 'b8', 'c8', 'd8', 'e8', 'f8', 'g8', 'h8'];
 export const SQUARE_SIZE: number = 128;
 export const BOARD_SIZE: number = 8 * SQUARE_SIZE;
-export const CORNER_KEYS: CornersKey[] = ["h1", "a1", "a8", "h8"];
 
 const makeLabelMap = () => {
   const d: { [id: string]: number } = {};
@@ -37,21 +32,6 @@ const makeSquareMap = () => {
   return d;
 }
 export const SQUARE_MAP: { [id: string]: number } = makeSquareMap();
-
-export const PALETTE: string[] = [
-  "#FF3838",
-  "#FF9D97",
-  "#FF701F",
-  "#FFB21D",
-  "#CFD231",
-  "#48F90A",
-  "#92CC17",
-  "#3DDB86",
-  "#1A9334",
-  "#00D4BB",
-  "#2C99A8",
-  "#00C2FF",
-];
 
 export const MEDIA_ASPECT_RATIO: number = 16 / 9;
 type ExtendedMediaTrackConstraints = MediaTrackConstraints & {

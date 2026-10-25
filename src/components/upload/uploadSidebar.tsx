@@ -1,20 +1,20 @@
 import { useState } from "react";
 import { VideoButton, PlayButton, RestartButton, PlaybackButtons, StopButton } from "./buttons";
-import { CornersButton, Sidebar, FenButton } from "../common";
+import { Sidebar, FenButton, RoiButton } from "../common";
 import type {
-  CanvasRef, CornersRef, ModelRefs, SetBoolean, SetStringArray, SidebarRef, VideoRef
+  ModelRefs, Roi, SetBoolean, SetRoi, SetStringArray, SidebarRef, VideoRef
 } from "../../types";
 
-const UploadSidebar = ({ videoRef, xcornersModelRef, piecesModelRef, canvasRef, 
-  sidebarRef, text, setText, playing, setPlaying, cornersRef }: {
+const UploadSidebar = ({ videoRef, chessqueriesModelRef,
+  sidebarRef, text, setText, playing, setPlaying, roi, setRoi, selecting, setSelecting, canPlay }: {
   videoRef: VideoRef,
-  xcornersModelRef: ModelRefs["xcornersModelRef"],
-  piecesModelRef: ModelRefs["piecesModelRef"],
-  canvasRef: CanvasRef,
+  chessqueriesModelRef: ModelRefs["chessqueriesModelRef"],
   sidebarRef: SidebarRef,
   text: string[], setText: SetStringArray,
   playing: boolean, setPlaying: SetBoolean,
-  cornersRef: CornersRef
+  roi: Roi | null, setRoi: SetRoi,
+  selecting: boolean, setSelecting: SetBoolean,
+  canPlay: boolean
 }) => {
   const [videoSelected, setVideoSelected] = useState(false);
 
@@ -27,19 +27,17 @@ const UploadSidebar = ({ videoRef, xcornersModelRef, piecesModelRef, canvasRef,
       <li className="my-1" style={inputStyle}>
         <VideoButton
           videoRef={videoRef}
-          canvasRef={canvasRef}
           setPlaying={setPlaying}
           videoSelected={videoSelected}
           setVideoSelected={setVideoSelected}
         />
       </li>
       <li className="my-1" style={inputStyle}>
-        <CornersButton piecesModelRef={piecesModelRef} xcornersModelRef={xcornersModelRef} 
-        videoRef={videoRef} canvasRef={canvasRef} setText={setText} />
+        <FenButton chessqueriesModelRef={chessqueriesModelRef} videoRef={videoRef} roi={roi} setText={setText} />
       </li>
       <li className="my-1" style={inputStyle}>
-        <FenButton piecesModelRef={piecesModelRef} videoRef={videoRef} 
-        canvasRef={canvasRef} setText={setText} cornersRef={cornersRef} />
+        <RoiButton roi={roi} setRoi={setRoi} selecting={selecting} setSelecting={setSelecting}
+          canPlay={canPlay} />
       </li>
       <li className="my-1" style={inputStyle}>
         <PlaybackButtons videoRef={videoRef} videoSelected={videoSelected} />

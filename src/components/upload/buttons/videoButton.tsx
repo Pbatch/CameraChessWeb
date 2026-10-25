@@ -1,11 +1,9 @@
 import { useRef } from "react";
-import { clearCtx } from "../../../utils/render/common";
 import { Icon, SidebarButton } from "../../common";
-import type { CanvasRef, SetBoolean, VideoRef } from "../../../types";
+import type { SetBoolean, VideoRef } from "../../../types";
 
-const VideoButton = ({ videoRef, canvasRef, setPlaying, videoSelected, setVideoSelected }: {
+const VideoButton = ({ videoRef, setPlaying, videoSelected, setVideoSelected }: {
   videoRef: VideoRef,
-  canvasRef: CanvasRef,
   setPlaying: SetBoolean,
   videoSelected: boolean,
   setVideoSelected: SetBoolean
@@ -21,11 +19,6 @@ const VideoButton = ({ videoRef, canvasRef, setPlaying, videoSelected, setVideoS
     videoRef.current.load();
     if (url.startsWith("blob:")) {
       URL.revokeObjectURL(url);
-    }
-
-    const context = canvasRef.current?.getContext('2d');
-    if (context !== null && context !== undefined) {
-      clearCtx(context);
     }
 
     setVideoSelected(false);

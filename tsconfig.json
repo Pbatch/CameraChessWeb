@@ -31,7 +31,8 @@
       "strictPropertyInitialization": true,
       
       "types": [
-        "vite-plugin-pwa/client"
+        "vite-plugin-pwa/client",
+        "vite/client"
       ]
     },
     "include": ["src"],

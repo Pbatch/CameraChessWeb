@@ -20,7 +20,10 @@ const data = {
               Place your camera on the stand to the side of the board. 
             </li>
             <li>
-              Make sure that the stand is stable and that the camera can see all 4 corners.
+              Make sure that the stand is stable and that the camera can see the whole board.
+            </li>
+            <li>
+              If the board is small in the shot, click <b>Region</b> and drag a box around it.
             </li>
             <li>
               If you are using your devices native camera app and have 0.5x zoom available, use it.  
@@ -47,9 +50,8 @@ const data = {
         title: "Will the app work if the board or the camera move mid-way through?",
         content:
         <p>
-          If the camera moves so that the squares are not aligned then the app will break.
-          When the corners algorithm is fast and consistent enough the app may support a moving board/camera.
-          See <a target="_blank" href="https://www.youtube.com/watch?v=XV8EKqScaKs" rel="noreferrer">https://www.youtube.com/watch?v=XV8EKqScaKs</a> for a brief demo.
+          Yes, as long as the whole board stays in shot.
+          The app finds the board in every frame, so it does not need to be set up again.
         </p>
       },
       {
@@ -71,11 +73,6 @@ const data = {
             Setup your device (see "How do I set up my camera?")
           </li>
           <li>
-            Click <b>Find Corners</b> to align the 4 corners with your board.
-            If they are not correct, then adjust them manually.
-            Clockwise the corners go "h1", "a1", "a8", "h8", starting from the bottom-right corner (relative to White).
-          </li>
-          <li>
             Click the <b>Play</b> button to start recording your game.
           </li>
         </ol>,
@@ -91,11 +88,6 @@ const data = {
             </li>
             <li>
               Setup your device (see "How do I set up my camera?")
-            </li>
-            <li>
-              Click <b>Find Corners</b> to align the 4 corners with your board.
-              If they are not correct, then adjust them manually.
-              Clockwise the corners go "h1", "a1", "a8", "h8", starting from the bottom-right corner (relative to White).
             </li>
             <li>
               Click the <b>Play</b> button to start recording your game. 

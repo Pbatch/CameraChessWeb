@@ -1,4 +1,4 @@
-import type { GraphModel } from "@tensorflow/tfjs-converter";
+import type { CompiledModel } from "@litertjs/core";
 
 interface Study {
   id: string,
@@ -6,13 +6,22 @@ interface Study {
 }
 
 interface ModelRefs {
-  piecesModelRef: React.RefObject<GraphModel | null>,
-  xcornersModelRef: React.RefObject<GraphModel | null>
+  chessqueriesModelRef: React.RefObject<CompiledModel | null>
 }
 
 type VideoRef = React.RefObject<HTMLVideoElement | null>;
-type CanvasRef = React.RefObject<HTMLCanvasElement | null>;
 type SidebarRef = React.RefObject<HTMLDivElement | null>;
+
+// Region of interest, in video pixels
+interface Roi {
+  x: number,
+  y: number,
+  width: number,
+  height: number
+}
+type RoiRef = React.RefObject<Roi | null>;
+
+type CornerName = "a8" | "h8" | "h1" | "a1";
 
 interface MovesData {
   sans: string[],
@@ -25,14 +34,6 @@ interface MovesPair {
   "move2": MovesData | null,
   "moves": MovesData | null
 }
-
-type CornersKey = "h1" | "a1" | "a8" | "h8";
-interface CornersPayload {
-  key: CornersKey,
-  xy: number[]
-}
-type CornersDict = {[key in CornersKey]: number[]};
-type CornersRef = React.RefObject<CornersDict>;
 
 export type Clock = {
   wtime: number;      // white's remaining time, in milliseconds
@@ -60,8 +61,7 @@ interface User {
 }
 
 interface RootState {
-  game: Game
-  corners: CornersDict,
+  game: Game,
   user: User
 }
 
@@ -72,10 +72,12 @@ type SetString = React.Dispatch<React.SetStateAction<string>>
 type SetStringArray = React.Dispatch<React.SetStateAction<string[]>>
 type SetNumber = React.Dispatch<React.SetStateAction<number>>
 type SetStudy = React.Dispatch<React.SetStateAction<Study | null>>
+type SetRoi = React.Dispatch<React.SetStateAction<Roi | null>>
+type SetOrientation = React.Dispatch<React.SetStateAction<CornerName[] | null>>
 
-export type {
-  RootState, Study, ModelRefs, MovesData, MovesPair,
-  CornersDict, CornersKey, CornersPayload, Game,
+export type { 
+  RootState, Study, ModelRefs, MovesData, MovesPair, 
+  Game,
   SetBoolean, SetString, SetStringArray, SetNumber, Mode,
-  SetStudy, VideoRef, CanvasRef, SidebarRef, CornersRef
+  SetStudy, VideoRef, SidebarRef, Roi, RoiRef, SetRoi, CornerName, SetOrientation
 }

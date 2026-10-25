@@ -1,18 +1,17 @@
 import { findPieces } from "../../utils/findPieces";
 import { useEffect, useEffectEvent, useRef, useState } from "react";
-import { CORNER_KEYS, MARKER_DIAMETER, MARKER_RADIUS, MEDIA_ASPECT_RATIO, MEDIA_CONSTRAINTS } from "../../utils/constants";
-import { Corners } from ".";
+import { MEDIA_ASPECT_RATIO, MEDIA_CONSTRAINTS } from "../../utils/constants";
 import { useWindowWidth, useWindowHeight } from '@react-hook/window-size';
 import { useDispatch } from 'react-redux';
-import { cornersSet } from "../../slices/cornersSlice";
-import { getMarkerXY, getXY } from "../../utils/detect";
 import type {
-  CanvasRef, CornersPayload, CornersRef, Game, Mode, ModelRefs, MovesPair,
+  CornerName, Game, Mode, ModelRefs, MovesPair, Roi, RoiRef, SetRoi,
   SetBoolean, SetStringArray, SidebarRef, VideoRef
 } from "../../types";
 import { makeBoard, useGame } from "../../slices/gameSlice";
 import type { CameraChessBoard } from "../../slices/gameSlice";
 import { getMovesPairs } from "../../utils/moves";
+import RoiSelector from "./roiSelector";
+import OrientationMarkers from "./orientationMarkers";
 
 const getMoveText = (board: CameraChessBoard): string => {
   const history = board.history;
@@ -35,17 +34,19 @@ const getMoveText = (board: CameraChessBoard): string => {
   return `${nHalfMoves}...${firstMove} ${nHalfMoves + 1}.${secondMove}`
 }
 
-const Video = ({ piecesModelRef, canvasRef, videoRef, sidebarRef, playing,
-  setPlaying, playingRef, setText, mode, cornersRef }: {
-    piecesModelRef: ModelRefs["piecesModelRef"],
-    canvasRef: CanvasRef,
+const Video = ({ chessqueriesModelRef, videoRef, sidebarRef, playing,
+  setPlaying, playingRef, setText, mode, roi, setRoi, roiRef, selecting, setSelecting,
+  canPlay, setCanPlay }: {
+    chessqueriesModelRef: ModelRefs["chessqueriesModelRef"],
     videoRef: VideoRef,
     sidebarRef: SidebarRef,
     playing: boolean,
     setPlaying: SetBoolean,
     playingRef: React.RefObject<boolean>,
     setText: SetStringArray, mode: Mode,
-    cornersRef: CornersRef
+    roi: Roi | null, setRoi: SetRoi, roiRef: RoiRef,
+    selecting: boolean, setSelecting: SetBoolean,
+    canPlay: boolean, setCanPlay: SetBoolean
   }) => {
   const game: Game = useGame();
 
@@ -54,7 +55,7 @@ const Video = ({ piecesModelRef, canvasRef, videoRef, sidebarRef, playing,
   const movesPairsRef = useRef<MovesPair[]>(getMovesPairs(boardRef.current));
   const lastMoveRef = useRef<string>(game.lastMove);
   const moveTextRef = useRef<string>("");
-  const [canPlay, setCanPlay] = useState(false);
+  const [orientation, setOrientation] = useState<CornerName[] | null>(null);
 
   const windowWidth = useWindowWidth();
   const windowHeight = useWindowHeight();
@@ -74,40 +75,19 @@ const Video = ({ piecesModelRef, canvasRef, videoRef, sidebarRef, playing,
 
   const updateWidthHeight = useEffectEvent(() => {
     const sidebar = sidebarRef.current;
-    const canvas = canvasRef.current;
     const display = displayRef.current;
-    const video = videoRef.current;
-    if (sidebar === null || canvas === null || display === null || video === null) {
+    if (sidebar === null || display === null) {
       return;
     }
 
-    let height = ((windowWidth - sidebar.offsetWidth - MARKER_DIAMETER)
-      / MEDIA_ASPECT_RATIO) + MARKER_DIAMETER;
+    let height = (windowWidth - sidebar.offsetWidth) / MEDIA_ASPECT_RATIO;
     if (height > windowHeight) {
       height = windowHeight;
     }
-
-    if ((canvas.offsetHeight === 0) || (canvas.offsetWidth) === 0) {
-      return;
-    }
-    const width: number = ((height - MARKER_DIAMETER) * MEDIA_ASPECT_RATIO) + MARKER_DIAMETER;
-    const oldHeight: number = canvas.height;
-    const oldWidth: number = canvas.width;
+    const width: number = height * MEDIA_ASPECT_RATIO;
 
     display.style.width = `${width}px`;
     display.style.height = `${height}px`;
-
-    canvas.width = video.offsetWidth;
-    canvas.height = video.offsetHeight;
-
-    CORNER_KEYS.forEach((key) => {
-      const xy = getXY(cornersRef.current[key], oldHeight, oldWidth);
-      const payload: CornersPayload = {
-        "xy": getMarkerXY(xy, canvas.height, canvas.width),
-        "key": key
-      }
-      dispatch(cornersSet(payload))
-    })
   });
 
   useEffect(() => {
@@ -124,8 +104,8 @@ const Video = ({ piecesModelRef, canvasRef, videoRef, sidebarRef, playing,
         });
     }
 
-    const stopDetection = findPieces(piecesModelRef, videoRef, canvasRef, playingRef, setText, dispatch,
-      cornersRef, boardRef, movesPairsRef, lastMoveRef, moveTextRef, mode);
+    const stopDetection = findPieces(chessqueriesModelRef, videoRef, roiRef, playingRef, setText, setOrientation,
+      dispatch, boardRef, movesPairsRef, lastMoveRef, moveTextRef, mode);
 
     const stopWebcam = async () => {
       const stream = await streamPromise;
@@ -140,7 +120,7 @@ const Video = ({ piecesModelRef, canvasRef, videoRef, sidebarRef, playing,
       stopDetection();
       void stopWebcam();
     }
-  }, [canvasRef, cornersRef, dispatch, mode, piecesModelRef, playingRef, setText, videoRef]);
+  }, [dispatch, mode, chessqueriesModelRef, playingRef, roiRef, setText, videoRef]);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: window size changes intentionally trigger this effect event.
   useEffect(() => {
@@ -170,16 +150,15 @@ const Video = ({ piecesModelRef, canvasRef, videoRef, sidebarRef, playing,
     });
   }, [canPlay, mode, playing, setPlaying, setText, videoRef])
 
-  const canvasStyle: React.CSSProperties = {
-    position: "absolute",
-    left: MARKER_RADIUS,
-    top: MARKER_RADIUS
-  }
-
   const videoContainerStyle: React.CSSProperties = {
     width: "100%",
-    height: "100%",
-    padding: MARKER_RADIUS
+    height: "100%"
+  }
+
+  const videoWrapperStyle: React.CSSProperties = {
+    position: "relative",
+    display: "inline-block",
+    height: "100%"
   }
 
   const videoStyle: React.CSSProperties = {
@@ -243,6 +222,10 @@ const Video = ({ piecesModelRef, canvasRef, videoRef, sidebarRef, playing,
 
   const onLoadStart = () => {
     setCanPlay(false);
+    // A new source may have a different resolution
+    setRoi(null);
+    setOrientation(null);
+    setSelecting(false);
   }
 
   const onError = () => {
@@ -267,12 +250,15 @@ const Video = ({ piecesModelRef, canvasRef, videoRef, sidebarRef, playing,
     <div className="d-flex align-top justify-content-center">
       <div ref={displayRef} style={liveStyle} >
         <div style={videoContainerStyle} >
-          <video ref={videoRef} autoPlay={mode !== "upload"} playsInline={true} muted={true}
-            onLoadedMetadata={onLoadedMetadata} style={videoStyle}
-            onCanPlay={onCanPlay} onLoadStart={onLoadStart} onError={onError} onEnded={onEnded} />
-          <canvas ref={canvasRef} style={canvasStyle} />
+          <div style={videoWrapperStyle}>
+            <video ref={videoRef} autoPlay={mode !== "upload"} playsInline={true} muted={true}
+              onLoadedMetadata={onLoadedMetadata} style={videoStyle}
+              onCanPlay={onCanPlay} onLoadStart={onLoadStart} onError={onError} onEnded={onEnded} />
+            <RoiSelector videoRef={videoRef} roi={roi} setRoi={setRoi}
+              selecting={selecting} setSelecting={setSelecting} />
+            {!selecting && <OrientationMarkers videoRef={videoRef} roi={roi} orientation={orientation} />}
+          </div>
         </div>
-        <Corners />
       </div>
     </div>
   );

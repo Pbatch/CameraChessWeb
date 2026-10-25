@@ -1,22 +1,18 @@
-import * as tf from "@tensorflow/tfjs-core";
-import { getInvTransform, transformBoundary, transformCenters } from "./warp";
 import { invalidVideo } from "./detect";
-import { detect, getKeypoints, getSquares, getUpdate } from "./findPieces";
+import { runChessqueries } from "./chessqueries";
 import { parseFen, makeFen } from "chessops/fen";
 import { Chess } from "chessops/chess";
 import type { Color, Role } from "chessops/types";
 import { opposite } from "chessops/util";
 import { PIECE_SYMBOLS, SQUARE_NAMES } from "./constants";
 import { gameResetMoves, gameSetFen, gameSetStart } from "../slices/gameSlice";
-import { renderState } from "./render/renderState";
-import type { CanvasRef, CornersRef, ModelRefs, SetStringArray, VideoRef } from "../types";
+import type { ModelRefs, Roi, SetStringArray, VideoRef } from "../types";
 import type { Dispatch, UnknownAction } from "@reduxjs/toolkit";
 
 interface FindFenInput {
-  piecesModelRef: ModelRefs["piecesModelRef"],
+  chessqueriesModelRef: ModelRefs["chessqueriesModelRef"],
   videoRef: VideoRef,
-  cornersRef: CornersRef,
-  canvasRef: CanvasRef,
+  roi: Roi | null,
   dispatch: Dispatch<UnknownAction>,
   setText: SetStringArray,
   color: Color
@@ -131,44 +127,11 @@ const setFenFromState = (
   }
 }
 
-export const _findFen = async ({ piecesModelRef, videoRef,
-  cornersRef, canvasRef, dispatch, setText, color }: FindFenInput) => {
+export const findFen = async ({ chessqueriesModelRef, videoRef, roi,
+  dispatch, setText, color }: FindFenInput) => {
   if (invalidVideo(videoRef)) {
     return;
   }
-  const canvas = canvasRef.current;
-  if (canvas === null) {
-    return;
-  }
-  const keypoints: number[][] = getKeypoints(cornersRef, canvasRef);
-
-  const invTransform = getInvTransform(keypoints);
-  const [centers, centers3D] = transformCenters(invTransform);
-  const [boundary, boundary3D] = transformBoundary(invTransform);
-  const { boxes, scores } = await detect(piecesModelRef, videoRef, keypoints);
-  try {
-    const squares: number[] = getSquares(boxes, centers3D, boundary3D);
-    const state = getUpdate(scores, squares);
-    setFenFromState(state, color, dispatch, setText);
-
-    renderState(canvas, centers, boundary, state);
-  } finally {
-    tf.dispose([boxes, scores, centers3D, boundary3D]);
-  }
-}
-
-export const findFen = async ({ piecesModelRef, videoRef, cornersRef, canvasRef, dispatch, setText, color }:
-  FindFenInput) => {
-  const startTensors = tf.memory().numTensors;
-
-  await _findFen({ piecesModelRef, videoRef, cornersRef, canvasRef, dispatch, setText, color });
-
-  const endTensors = tf.memory().numTensors;
-  if (startTensors < endTensors) {
-    console.error(`Memory Leak! (${endTensors} > ${startTensors})`)
-  }
-
-  return () => {
-    tf.disposeVariables();
-  };
+  const { update } = await runChessqueries(chessqueriesModelRef, videoRef, roi);
+  setFenFromState(update, color, dispatch, setText);
 }
