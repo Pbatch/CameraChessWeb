@@ -35,7 +35,7 @@ interface MovesPair {
   "moves": MovesData | null
 }
 
-export type Clock = {
+type Clock = {
   wtime: number;      // white's remaining time, in milliseconds
   btime: number;      // black's remaining time, in milliseconds
   turn: "w" | "b";    // whose turn it is right now
@@ -68,7 +68,6 @@ interface RootState {
 type Mode = "record" | "upload" | "broadcast" | "play";
 
 type SetBoolean = React.Dispatch<React.SetStateAction<boolean>>
-type SetString = React.Dispatch<React.SetStateAction<string>>
 type SetStringArray = React.Dispatch<React.SetStateAction<string[]>>
 type SetNumber = React.Dispatch<React.SetStateAction<number>>
 type SetStudy = React.Dispatch<React.SetStateAction<Study | null>>
@@ -78,6 +77,6 @@ type SetOrientation = React.Dispatch<React.SetStateAction<CornerName[] | null>>
 export type { 
   RootState, Study, ModelRefs, MovesData, MovesPair, 
   Game,
-  SetBoolean, SetString, SetStringArray, SetNumber, Mode,
+  SetBoolean, SetStringArray, SetNumber, Mode,
   SetStudy, VideoRef, SidebarRef, Roi, RoiRef, SetRoi, CornerName, SetOrientation
 }

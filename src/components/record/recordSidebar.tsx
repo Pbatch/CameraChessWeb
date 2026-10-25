@@ -23,10 +23,11 @@ const RecordSidebar = ({ chessqueriesModelRef, videoRef, sidebarRef,
         <DeviceButton videoRef={videoRef} />
       </li>
       <li className="my-1" style={inputStyle}>
-        <FenButton chessqueriesModelRef={chessqueriesModelRef} videoRef={videoRef} roi={roi} setText={setText} />
+        <RoiButton roi={roi} setRoi={setRoi} selecting={selecting} setSelecting={setSelecting}
+          canPlay={canPlay} />
       </li>
       <li className="my-1" style={inputStyle}>
-        <RoiButton roi={roi} setRoi={setRoi} selecting={selecting} setSelecting={setSelecting}
+        <FenButton chessqueriesModelRef={chessqueriesModelRef} videoRef={videoRef} roi={roi} setText={setText}
           canPlay={canPlay} />
       </li>
       <li className="my-1">

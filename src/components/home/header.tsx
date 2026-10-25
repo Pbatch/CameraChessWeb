@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../../slices/userSlice";
-import { lichessLogin, lichessLogout } from "../../utils/lichess";
+import { lichessLogin, lichessLogout } from "../../api/lichess";
 import { useDispatch } from "react-redux";
 
 const Header = () => {
@@ -10,7 +10,7 @@ const Header = () => {
 
   const handleClick = () => {
     if (username === "") {
-      lichessLogin();
+      void lichessLogin();
     } else {
       void lichessLogout(dispatch, token)
         .then(() => void navigate("/"));

@@ -1,7 +1,7 @@
-import { findPieces } from "../../utils/findPieces";
+import { findPieces } from "../../vision/findPieces";
 import { useEffect, useEffectEvent, useRef, useState } from "react";
 import { MEDIA_ASPECT_RATIO, MEDIA_CONSTRAINTS } from "../../utils/constants";
-import { useWindowWidth, useWindowHeight } from '@react-hook/window-size';
+import { useWindowWidth, useWindowHeight } from '../../utils/hooks';
 import { useDispatch } from 'react-redux';
 import type {
   CornerName, Game, Mode, ModelRefs, MovesPair, Roi, RoiRef, SetRoi,
@@ -9,30 +9,9 @@ import type {
 } from "../../types";
 import { makeBoard, useGame } from "../../slices/gameSlice";
 import type { CameraChessBoard } from "../../slices/gameSlice";
-import { getMovesPairs } from "../../utils/moves";
+import { getMovesPairs, getMoveText } from "../../chess/moves";
 import RoiSelector from "./roiSelector";
 import OrientationMarkers from "./orientationMarkers";
-
-const getMoveText = (board: CameraChessBoard): string => {
-  const history = board.history;
-
-  if (history.length === 0) {
-    return "";
-  }
-
-  if (history.length === 1) {
-    return `1. ${history[history.length - 1].san}`
-  }
-
-  const firstMove: string = history[history.length - 2].san;
-  const secondMove: string = history[history.length - 1].san;
-  const nHalfMoves: number = Math.floor(history.length / 2);
-  if (history.length % 2 === 0) {
-    return `${nHalfMoves}.${firstMove} ${secondMove}`
-  }
-
-  return `${nHalfMoves}...${firstMove} ${nHalfMoves + 1}.${secondMove}`
-}
 
 const Video = ({ chessqueriesModelRef, videoRef, sidebarRef, playing,
   setPlaying, playingRef, setText, mode, roi, setRoi, roiRef, selecting, setSelecting,
@@ -104,8 +83,8 @@ const Video = ({ chessqueriesModelRef, videoRef, sidebarRef, playing,
         });
     }
 
-    const stopDetection = findPieces(chessqueriesModelRef, videoRef, roiRef, playingRef, setText, setOrientation,
-      dispatch, boardRef, movesPairsRef, lastMoveRef, moveTextRef, mode);
+    const stopDetection = findPieces({ chessqueriesModelRef, videoRef, roiRef, playingRef, setText, setOrientation,
+      dispatch, boardRef, movesPairsRef, lastMoveRef, moveTextRef, mode });
 
     const stopWebcam = async () => {
       const stream = await streamPromise;

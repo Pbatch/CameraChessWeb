@@ -1,10 +1,11 @@
 import { parseFen, makeFen } from "chessops/fen";
 import { Chess, type Position } from "chessops/chess";
-import { type Move, type Role, type Color, isNormal } from "chessops/types";
+import { type Move, type Role, isNormal } from "chessops/types";
 import { makeSan } from "chessops/san";
 import { kingCastlesTo } from "chessops/util";
-import { SQUARE_MAP, LABEL_MAP, SQUARE_NAMES } from "./constants";
+import { SQUARE_MAP, LABEL_MAP, SQUARE_NAMES, pieceToLabel } from "../utils/constants";
 import type { MovesData, MovesPair } from "../types";
+import type { CameraChessBoard } from "../slices/gameSlice";
 
 function* legalMoves(pos: Position): Generator<Move> {
   const ctx = pos.ctx();
@@ -32,11 +33,6 @@ const castlingMap: { [id: string]: number[] } = {
   "c8": [SQUARE_MAP.a8, SQUARE_MAP.d8, LABEL_MAP.r]
 }
 
-const roleToLabel = (role: Role, color: Color): string => {
-  const label = role === 'knight' ? 'n' : role[0];
-  return color === 'white' ? label.toUpperCase() : label.toLowerCase();
-}
-
 const getData = (pos: Position, move: Move) => {
   if (!isNormal(move)) return null;
 
@@ -45,7 +41,7 @@ const getData = (pos: Position, move: Move) => {
 
   const piece = pos.board.get(move.from);
   const targetRole = move.promotion || piece?.role || 'pawn';
-  const targets = [LABEL_MAP[roleToLabel(targetRole, pos.turn)]];
+  const targets = [pieceToLabel({ role: targetRole, color: pos.turn })];
 
   // Castling
   if (piece?.role === 'king' && Math.abs(move.to - move.from) === 2) {
@@ -139,4 +135,20 @@ export const getMovesPairs = (board: Position) => {
   }
 
   return movesPairs;
+}
+
+// The last one or two moves, numbered from the board's start position, e.g. "3...Nc6 4.Bb5"
+export const getMoveText = (board: CameraChessBoard): string => {
+  const setup = parseFen(board.startFen).unwrap();
+  const initialPly = (setup.fullmoves - 1) * 2 + (setup.turn === 'white' ? 0 : 1);
+  const firstIndex = Math.max(0, board.history.length - 2);
+
+  return board.history.slice(firstIndex).map(({ san }, offset) => {
+    const ply = initialPly + firstIndex + offset;
+    const moveNumber = Math.floor(ply / 2) + 1;
+    if (ply % 2 === 0) {
+      return `${moveNumber}.${san}`;
+    }
+    return offset === 0 ? `${moveNumber}...${san}` : san;
+  }).join(" ");
 }

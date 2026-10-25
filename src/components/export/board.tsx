@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useUser } from "../../slices/userSlice";
-import { lichessImportPgn } from "../../utils/lichess";
+import { lichessImportPgn } from "../../api/lichess";
 
 const Board = ({ pgn }: { pgn: string }) => {
   const [emb, setEmb] = useState<string>("");

@@ -1,4 +1,3 @@
-import { type AccessContext, OAuth2AuthCodePKCE } from '@bity/oauth2-auth-code-pkce';
 import { userReset, userSetToken, userSetUsername } from '../slices/userSlice';
 import type { Dispatch } from 'react';
 import type { UnknownAction } from '@reduxjs/toolkit';
@@ -10,18 +9,44 @@ const scopes = ["study:write", "study:read", "board:play"];
 const clientId = 'camera-chess-web';
 const clientUrl = `${location.protocol}//${location.host}/`;
 
-const getOauth = () => {
-  const oauth: OAuth2AuthCodePKCE = new OAuth2AuthCodePKCE({
-    authorizationUrl: `${lichessHost}/oauth`,
-    tokenUrl: `${lichessHost}/api/token`,
-    clientId,
-    scopes,
-    redirectUrl: clientUrl,
-    // Lichess OAuth tokens are long-lived and cannot be refreshed.
-    onAccessTokenExpiry: () => Promise.reject(new Error('Your Lichess session has expired. Please log in again.')),
-    onInvalidGrant: console.warn,
+// Pending authorization request, kept in session storage across the redirect to Lichess.
+const pkceStorageKey = 'lichess-oauth-pkce';
+type PkceState = { verifier: string; state: string };
+
+const base64Url = (bytes: Uint8Array) =>
+  btoa(String.fromCharCode(...bytes)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+
+const randomString = () => base64Url(crypto.getRandomValues(new Uint8Array(32)));
+
+const codeChallenge = async (verifier: string) => {
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(verifier));
+  return base64Url(new Uint8Array(digest));
+}
+
+const takePkceState = (): PkceState | null => {
+  const stored = sessionStorage.getItem(pkceStorageKey);
+  sessionStorage.removeItem(pkceStorageKey);
+  return stored === null ? null : JSON.parse(stored) as PkceState;
+}
+
+// Lichess OAuth tokens are long-lived and cannot be refreshed, so a code is only exchanged once at login.
+const exchangeCode = async (code: string, verifier: string): Promise<string> => {
+  const response = await fetch(`${lichessHost}/api/token`, {
+    method: 'POST',
+    body: new URLSearchParams({
+      grant_type: 'authorization_code',
+      code,
+      code_verifier: verifier,
+      redirect_uri: clientUrl,
+      client_id: clientId,
+    }),
   });
-  return oauth
+  if (!response.ok) {
+    const details = await response.text();
+    throw new Error(`${response.status} ${response.statusText}${details ? `: ${details}` : ''}`);
+  }
+  const { access_token } = await response.json() as TokenResult;
+  return access_token;
 }
 
 const readStream = <T,>(processLine: (line: T) => void | Promise<void>) => async (response: Response) => {
@@ -81,7 +106,8 @@ const fetchResponse = async (token: string, path: string, options: RequestInit =
   return response;
 };
 
-type Broadcast = { round: Study };
+type TokenResult = { access_token: string };
+type Broadcast = { round: Study; study: { writeable: boolean } };
 type Account = { username: string };
 export type NowPlayingGame = {
   fullId: string;
@@ -121,9 +147,20 @@ const setBroadcastlessStudies = async (token: string, username: string, setStudi
   setStudies(studies);
 }
 
-export const lichessLogin = () => {
-  const oauth = getOauth();
-  void oauth.fetchAuthorizationCode();
+export const lichessLogin = async () => {
+  const pkce: PkceState = { verifier: randomString(), state: randomString() };
+  sessionStorage.setItem(pkceStorageKey, JSON.stringify(pkce));
+
+  const params = new URLSearchParams({
+    response_type: 'code',
+    client_id: clientId,
+    redirect_uri: clientUrl,
+    code_challenge_method: 'S256',
+    code_challenge: await codeChallenge(pkce.verifier),
+    scope: scopes.join(' '),
+    state: pkce.state,
+  });
+  location.assign(`${lichessHost}/oauth?${params}`);
 }
 
 export const lichessLogout = async (dispatch: Dispatch<UnknownAction>, token: string) => {
@@ -132,11 +169,11 @@ export const lichessLogout = async (dispatch: Dispatch<UnknownAction>, token: st
   } catch (error) {
     console.warn('Unable to revoke Lichess token.', error);
   }
-  getOauth().reset();
+  sessionStorage.removeItem(pkceStorageKey);
   dispatch(userReset());
 }
 
-export const lichessGetAccount = (token: string): Promise<Account> => {
+const lichessGetAccount = (token: string): Promise<Account> => {
   const path = "/api/account";
   return fetchBody<Account>(token, path);
 }
@@ -146,7 +183,10 @@ export const lichessSetStudies = async (token: string, setStudies: (studies: Stu
   const broadcasts: Study[] = [];
   const response = await fetchResponse(token, path, { headers: { Accept: 'application/x-ndjson' } });
   await readStream<Broadcast>((broadcast) => {
-    broadcasts.push(broadcast.round);
+    // my-rounds also lists rounds we're only a viewing member of; we can't push to those.
+    if (broadcast.study.writeable) {
+      broadcasts.push(broadcast.round);
+    }
   })(response);
   if (onlyBroadcasts) {
     setStudies(broadcasts);
@@ -220,19 +260,26 @@ export const lichessPlayMove = (token: string, gameId: string, move: string) => 
 }
 
 export const lichessTrySetUser = async (navigate: NavigateFunction, dispatch: Dispatch<UnknownAction>) => {
-  const oauth: OAuth2AuthCodePKCE = getOauth();
-  const returning: boolean = await oauth.isReturningFromAuthServer();
-  if (!returning) {
+  const params = new URLSearchParams(location.search);
+  const code = params.get('code');
+  const error = params.get('error');
+  if (code === null && error === null) {
     return;
   }
 
-  const accessContext: AccessContext = await oauth.getAccessToken();
-  const newToken: string | undefined = accessContext?.token?.value;
-  if (newToken === undefined) {
-    console.log("Access Context token is undefined");
+  // Taking the stored state also stops a second effect run from exchanging the same code twice.
+  const pkce = takePkceState();
+  if (pkce === null) {
     return;
   }
 
+  if (error !== null || code === null || params.get('state') !== pkce.state) {
+    console.warn('Lichess authorization failed.', error ?? 'state mismatch', params.get('error_description') ?? '');
+    void navigate("/");
+    return;
+  }
+
+  const newToken = await exchangeCode(code, pkce.verifier);
   dispatch(userSetToken(newToken));
 
   const account = await lichessGetAccount(newToken);

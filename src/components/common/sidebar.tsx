@@ -1,6 +1,6 @@
 import { HomeButton, PgnButton } from "./index.tsx";
-import type { Game, SetStringArray, SidebarRef } from "../../types.tsx";
-import { useGame } from "../../slices/gameSlice.tsx";
+import type { Game, SetStringArray, SidebarRef } from "../../types.ts";
+import { useGame } from "../../slices/gameSlice.ts";
 import type { ReactNode } from "react";
 import ChessboardPreview from "./chessboardPreview.tsx";
 import Clock from "../play/clock.tsx";

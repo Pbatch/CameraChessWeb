@@ -5,7 +5,7 @@ import { START_FEN } from '../utils/constants';
 import { parseFen, makeFen } from 'chessops/fen';
 import type { Move } from 'chessops';
 import { Chess } from 'chessops/chess';
-import { parsePgn } from 'chessops/pgn';
+import { defaultGame, defaultHeaders, makeOutcome, makePgn as writePgn, parsePgn } from 'chessops/pgn';
 import { parseSan, makeSan } from 'chessops/san';
 import { makeUci, parseUci } from 'chessops/util';
 
@@ -33,17 +33,11 @@ const gameSlice = createSlice({
   name: 'game',
   initialState,
   reducers: {
-    gameSetMoves(state, action) {
-      state.moves = action.payload
-    },
     gameSetFen(state, action) {
       state.fen = action.payload;
     },
     gameSetStart(state, action) {
       state.start = action.payload;
-    },
-    gameSetLastMove(state, action) {
-      state.lastMove = action.payload;
     },
     gameResetMoves(state) {
       state.moves = initialState.moves;
@@ -55,9 +49,6 @@ const gameSlice = createSlice({
     },
     gameResetStart(state) {
       state.start = initialState.start;
-    },
-    gameResetLastMove(state) {
-      state.lastMove = initialState.lastMove;
     },
     gameSetError(state, action) {
       state.error = action.payload;
@@ -92,9 +83,11 @@ const getMovesFromPgn = (pos: BoardWithMetadata, startFen: string) => {
   const history = pos.history as HistoryEntry[] || [];
 
   let pgn = "";
-  history.forEach((entry: HistoryEntry) => {
+  history.forEach((entry: HistoryEntry, index: number) => {
     if (tempPos.turn === 'white') {
       pgn += `${tempPos.fullmoves}. `;
+    } else if (index === 0) {
+      pgn += `${tempPos.fullmoves}... `;
     }
     pgn += `${entry.san} `;
     tempPos.play(entry.move);
@@ -106,8 +99,19 @@ export const useGame = () => {
   return useSelector((state: RootState) => state.game)
 }
 
-export const makePgn = (game: Game) => {
-  return `[FEN "${game.start}"]\n \n${game.moves}`;
+// Full PGN for export, with the seven standard tags plus any extra headers
+export const makePgn = (game: Pick<Game, 'moves' | 'start'>, headers: Record<string, string> = {}) => {
+  const pgnGame = parsePgn(game.moves)[0] ?? defaultGame();
+  pgnGame.headers = defaultHeaders();
+  pgnGame.headers.set('Result', makeOutcome(makeBoard(game).outcome()));
+  if (game.start !== START_FEN) {
+    pgnGame.headers.set('SetUp', '1');
+    pgnGame.headers.set('FEN', game.start);
+  }
+  for (const [key, value] of Object.entries(headers)) {
+    pgnGame.headers.set(key, value);
+  }
+  return writePgn(pgnGame);
 }
 
 export const makeUpdatePayload = (board: BoardWithMetadata, greedy: boolean = false, fromOpponent: boolean = false, error: string | null = null) => {
@@ -130,7 +134,7 @@ export const makeUpdatePayload = (board: BoardWithMetadata, greedy: boolean = fa
   return payload
 }
 
-export const makeBoard = (game: Game): CameraChessBoard => {
+export const makeBoard = (game: Pick<Game, 'moves' | 'start'>): CameraChessBoard => {
   const setup = parseFen(game.start).unwrap();
   const board = Chess.fromSetup(setup).unwrap() as CameraChessBoard;
   board.startFen = game.start;
@@ -191,10 +195,9 @@ export const makeBoard = (game: Game): CameraChessBoard => {
 }
 
 export const {
-  gameSetMoves, gameResetMoves,
+  gameResetMoves,
   gameSetFen, gameResetFen,
   gameSetStart, gameResetStart,
-  gameSetLastMove, gameResetLastMove,
   gameUpdate, gameSetError, gameSetClock
 } = gameSlice.actions
 export default gameSlice.reducer

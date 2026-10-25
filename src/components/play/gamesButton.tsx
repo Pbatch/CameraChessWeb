@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { lichessGetPlaying } from "../../utils/lichess";
+import { lichessGetPlaying } from "../../api/lichess";
 import { useUser } from "../../slices/userSlice";
 import { parseFen } from "chessops/fen";
 import { Chess } from "chessops/chess";
@@ -8,7 +8,7 @@ import { useDispatch } from "react-redux";
 import type { Dispatch, SetStateAction } from "react";
 import type { Color } from "chessops/types";
 import type { SetStringArray } from "../../types";
-import type { NowPlayingGame } from "../../utils/lichess";
+import type { NowPlayingGame } from "../../api/lichess";
 
 const GamesButton = ({ setGameId, setColor, setText }:
   {

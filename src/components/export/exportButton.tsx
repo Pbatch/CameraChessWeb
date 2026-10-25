@@ -1,7 +1,7 @@
 import { SidebarButton } from "../common";
 import type { Study, SetStringArray } from "../../types";
 import { useUser } from "../../slices/userSlice";
-import { lichessImportPgnToStudy } from "../../utils/lichess";
+import { lichessImportPgnToStudy } from "../../api/lichess";
 
 const ExportButton = ({ study, setText, pgn }: 
   {study: Study | null, setText: SetStringArray, pgn: string}) => {

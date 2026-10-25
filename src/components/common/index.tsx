@@ -12,10 +12,9 @@ import FenButton from "./fenButton";
 import DeviceButton from "./deviceButton";
 import Toast from "./toast";
 import RoiButton from "./roiButton";
-import RoiSelector from "./roiSelector";
 
 export {
   SidebarButton, PgnButton, Icon,
   HomeButton, Sidebar, Container, VideoAndSidebar, RecordButton, StopButton, StudyButton,
-  FenButton, DeviceButton, Toast, RoiButton, RoiSelector,
+  FenButton, DeviceButton, Toast, RoiButton,
 };

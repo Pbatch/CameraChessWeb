@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import type { SetStudy, Study } from "../../types";
 import { useUser } from "../../slices/userSlice";
-import { lichessSetStudies } from "../../utils/lichess";
+import { lichessSetStudies } from "../../api/lichess";
 
 const StudyButton = ({ study, setStudy, onlyBroadcasts }: 
   {study: Study | null, setStudy: SetStudy, onlyBroadcasts: boolean }

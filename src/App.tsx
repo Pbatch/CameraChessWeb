@@ -4,10 +4,10 @@ import type { CompiledModel } from "@litertjs/core";
 import type { ModelRefs } from "./types";
 import { useUser } from "./slices/userSlice";
 import { useDispatch } from "react-redux";
-import { lichessTrySetUser } from "./utils/lichess";
+import { lichessTrySetUser } from "./api/lichess";
 import type { UnknownAction } from "@reduxjs/toolkit";
 import { Toast } from "./components/common";
-import LoadModels from "./utils/loadModels";
+import { loadChessqueriesOnce } from "./vision/chessqueries";
 
 const App = () => {
   const dispatch: Dispatch<UnknownAction> = useDispatch();
@@ -29,7 +29,7 @@ const App = () => {
   }, [dispatch, navigate, token]);
 
   useEffect(() => {
-    LoadModels(chessqueriesModelRef)
+    loadChessqueriesOnce(chessqueriesModelRef)
       .then(() => setLoading(false))
       .catch((error: unknown) => {
         console.error("Failed to load models", error);

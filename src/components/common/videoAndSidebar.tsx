@@ -7,12 +7,11 @@ import type { Mode, ModelRefs, Roi, Study } from "../../types";
 import RecordSidebar from "../record/recordSidebar";
 import UploadSidebar from "../upload/uploadSidebar";
 import BroadcastSidebar from "../broadcast/broadcastSidebar";
-import { gameResetFen, gameResetMoves, gameResetStart, useGame } from "../../slices/gameSlice";
-import { lichessPushRound } from "../../utils/lichess";
+import { gameResetFen, gameResetMoves, gameResetStart, makePgn, useGame } from "../../slices/gameSlice";
+import { lichessPushRound } from "../../api/lichess";
 import { useUser } from "../../slices/userSlice";
-import { START_FEN } from "../../utils/constants";
 import PlaySidebar from "../play/playSidebar";
-import { useMediaQuery } from 'react-responsive';
+import { useMediaQuery } from "../../utils/hooks";
 
 const PortraitWarning = () => {
   return (
@@ -26,8 +25,8 @@ const VideoAndSidebar = ({ mode }: { mode: Mode }) => {
   const context = useOutletContext<ModelRefs>();
   const dispatch = useDispatch();
   const token: string = useUser().token;
-  const moves: string = useGame().moves;
-  const isPortrait = useMediaQuery({ orientation: 'portrait' });
+  const { moves, start } = useGame();
+  const isPortrait = useMediaQuery('(orientation: portrait)');
 
   const [text, setText] = useState<string[]>([]);
   const [playing, setPlaying] = useState<boolean>(false);
@@ -47,20 +46,16 @@ const VideoAndSidebar = ({ mode }: { mode: Mode }) => {
       return;
     }
     
-    const broadcastPgn = [
-      `[Result "*"]`,
-      `[FEN "${START_FEN}"]`,
-      `[Board "${boardNumber}"]`,
-      `[Site "${boardNumber}"]`,
-      `[White "White ${boardNumber}"]`,
-      `[Black "Black ${boardNumber}"]`,
-      `[Annotator "ChessCam"]`,
-      "",
-      moves
-    ].join("\r");
+    const broadcastPgn = makePgn({ moves, start }, {
+      Site: `${boardNumber}`,
+      White: `White ${boardNumber}`,
+      Black: `Black ${boardNumber}`,
+      Board: `${boardNumber}`,
+      Annotator: "ChessCam"
+    });
     void lichessPushRound(token, broadcastPgn, study.id)
       .catch((error: unknown) => console.error('Unable to push Lichess broadcast round.', error));
-  }, [boardNumber, mode, moves, study, token])
+  }, [boardNumber, mode, moves, start, study, token])
 
   useEffect(() => {
     playingRef.current = playing;
@@ -97,7 +92,7 @@ const VideoAndSidebar = ({ mode }: { mode: Mode }) => {
     "playingRef": playingRef,
     "mode": mode
   }
-  const Sidebar = () => {
+  const renderSidebar = () => {
     switch(mode) {
       case "record": return <RecordSidebar {...props} />
       case "upload": return <UploadSidebar {...props} />
@@ -112,7 +107,7 @@ const VideoAndSidebar = ({ mode }: { mode: Mode }) => {
         <PortraitWarning />
       ) : (
         <>
-          {Sidebar()}
+          {renderSidebar()}
           <Video {...props} />
         </>
       )}

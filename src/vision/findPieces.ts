@@ -5,17 +5,18 @@ import { getAccelerator, getOrientation, runChessqueries } from "./chessqueries"
 import type {
   Mode, ModelRefs, MovesData, MovesPair, RoiRef, SetOrientation, SetStringArray, VideoRef
 } from "../types";
-import { zeros } from "./math";
+import { EMPTY, NUM_LABELS } from "../utils/constants";
 import { parseSan } from "chessops/san";
 import { makeUci } from "chessops/util";
 import type { Dispatch, UnknownAction } from "@reduxjs/toolkit";
 import type { RefObject } from "react";
 import type { Position } from "chessops/chess";
 
-const calculateScore = (state: number[][], move: MovesData, from_thr = 0.6, to_thr = 0.6) => {
+// Above 0.5, a class must be the most likely for its square, as the probabilities sum to 1
+const calculateScore = (state: number[][], move: MovesData, from_thr = 0.5, to_thr = 0.5) => {
   let score = 0;
   move.from.forEach(square => {
-    score += 1 - Math.max(...state[square]) - from_thr;
+    score += state[square][EMPTY] - from_thr;
   })
 
   for (let i = 0; i < move.to.length; i++) {
@@ -72,7 +73,7 @@ const processState = (state: number[][], movesPairs: MovesPair[], possibleMoves:
 
 const updateState = (state: number[][], update: number[][], decay: number = 0.5) => {
   for (let i = 0; i < 64; i++) {
-    for (let j = 0; j < 12; j++) {
+    for (let j = 0; j < NUM_LABELS; j++) {
       state[i][j] = decay * state[i][j] + (1 - decay) * update[i][j]
     }
   }
@@ -85,8 +86,8 @@ const sanToLan = (board: Position, san: string): string => {
   return makeUci(move);
 }
 
-export const findPieces = (
-  modelRef: ModelRefs["chessqueriesModelRef"],
+interface FindPiecesInput {
+  chessqueriesModelRef: ModelRefs["chessqueriesModelRef"],
   videoRef: VideoRef,
   roiRef: RoiRef,
   playingRef: RefObject<boolean>,
@@ -98,13 +99,18 @@ export const findPieces = (
   lastMoveRef: RefObject<string>,
   moveTextRef: RefObject<string>,
   mode: Mode
-) => {
+}
+
+export const findPieces = ({ chessqueriesModelRef, videoRef, roiRef, playingRef, setText, setOrientation,
+  dispatch, boardRef, movesPairsRef, lastMoveRef, moveTextRef, mode }: FindPiecesInput) => {
   let state: number[][] | null = null;
   let direction: number[] | null = null;
   let orientationKey: string = "";
   let possibleMoves: Set<string>;
   let requestId: number;
-  let greedyMoveToTime: { [move: string]: number };
+  // The best single move, and since when it has been the best without a break
+  let greedyMove: string | null = null;
+  let greedySince: number = 0;
   let active = true;
 
   const loop = async () => {
@@ -113,14 +119,14 @@ export const findPieces = (
         state = null
       } else {
         if (state === null) {
-          state = zeros(64, 12);
           possibleMoves = new Set<string>;
-          greedyMoveToTime = {};
+          greedyMove = null;
         }
         const startTime: number = performance.now();
 
-        const { update, direction: newDirection } = await runChessqueries(modelRef, videoRef, roiRef.current);
-        state = updateState(state, update);
+        const { update, direction: newDirection } = await runChessqueries(chessqueriesModelRef, videoRef, roiRef.current);
+        // The first frame starts the state, so detection does not wait for it to climb from zero
+        state = (state === null) ? update : updateState(state, update);
 
         if (newDirection !== null) {
           // Smoothed like the state, so a board near 45 degrees does not flicker between orientations
@@ -140,27 +146,31 @@ export const findPieces = (
         let hasMove: boolean = false;
         if ((bestMoves !== null) && (mode !== "play")) {
           const move: string = bestMoves.sans[0];
-          hasMove = (bestScore2 > 0) && (bestJointScore > 0) && (possibleMoves.has(move));
+          hasMove = (bestScore2 > 0) && (bestJointScore > 0);
           if (hasMove) {
             boardRef.current.playSan(move);
             possibleMoves.clear();
-            greedyMoveToTime = {};
+            greedyMove = null;
           }
         }
 
         let hasGreedyMove: boolean = false;
-        if (bestMove !== null && !(hasMove) && (bestScore1 > 0)) {
+        if (bestMove === null || hasMove || (bestScore1 <= 0)) {
+          greedyMove = null;
+        } else {
           const move: string = bestMove.sans[0];
-          if (!(move in greedyMoveToTime)) {
-            greedyMoveToTime[move] = endTime;
+          // A different best move, or a frame without one, restarts the second
+          if (move !== greedyMove) {
+            greedyMove = move;
+            greedySince = endTime;
           }
 
-          const secondElapsed = (endTime - greedyMoveToTime[move]) > 1000;
+          const secondElapsed = (endTime - greedySince) > 1000;
           const newMove = sanToLan(boardRef.current, move) !== lastMoveRef.current;
           hasGreedyMove = secondElapsed && newMove;
           if (hasGreedyMove) {
             boardRef.current.playSan(move);
-            greedyMoveToTime = { greedyMove: greedyMoveToTime[move] };
+            greedyMove = null;
           }
         }
 
@@ -168,7 +178,6 @@ export const findPieces = (
           // No takebacks in "play" mode
           const greedy = (mode === "play") ? false : hasGreedyMove;
           const payload = makeUpdatePayload(boardRef.current, greedy);
-          console.log("payload", payload);
           dispatch(gameUpdate(payload));
         }
         const device: string = (getAccelerator() === "wasm") ? " (CPU)" : "";
