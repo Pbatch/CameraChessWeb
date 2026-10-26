@@ -4,6 +4,7 @@ import { useDispatch } from 'react-redux';
 import { gameResetFen, gameResetMoves, gameResetStart } from "../../slices/gameSlice";
 import type { Color } from "chessops/types";
 import type { ModelRefs, Roi, SetStringArray, VideoRef } from "../../types";
+import Icon from "./icon";
 
 const FenButton = ({ chessqueriesModelRef, videoRef, roi, setText, canPlay }:
   Pick<ModelRefs, "chessqueriesModelRef"> & {
@@ -37,6 +38,7 @@ const FenButton = ({ chessqueriesModelRef, videoRef, roi, setText, canPlay }:
     <div className="dropdown">
       <button type="button" className="btn btn-dark btn-sm btn-outline-light dropdown-toggle w-100" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false"
         disabled={!canPlay}>
+        <Icon iconName="bi-grid-3x3" className="me-2" />
         Position: {option}
       </button>
       <ul className="dropdown-menu" aria-labelledby="dropdownMenuButton1">

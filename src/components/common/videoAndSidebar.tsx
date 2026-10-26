@@ -15,9 +15,10 @@ import { useMediaQuery } from "../../utils/hooks";
 
 const PortraitWarning = () => {
   return (
-    <h1 className="text-white text-center w-100 p-3 h-2">
-      Please use your device in landscape mode
-    </h1>
+    <div className="d-flex flex-column align-items-center justify-content-center gap-3 w-100 p-3 text-white text-center">
+      <i className="bi bi-phone-landscape display-1" aria-hidden="true" />
+      <h1 className="h4 m-0">Rotate your device to landscape</h1>
+    </div>
   )
 }
 
@@ -29,6 +30,7 @@ const VideoAndSidebar = ({ mode }: { mode: Mode }) => {
   const isPortrait = useMediaQuery('(orientation: portrait)');
 
   const [text, setText] = useState<string[]>([]);
+  const [fps, setFps] = useState<number | null>(null);
   const [playing, setPlaying] = useState<boolean>(false);
   const [study, setStudy] = useState<Study | null>(null);
   const [boardNumber, setBoardNumber] = useState<number>(-1);
@@ -38,7 +40,6 @@ const VideoAndSidebar = ({ mode }: { mode: Mode }) => {
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const playingRef = useRef<boolean>(playing);
-  const sidebarRef = useRef<HTMLDivElement>(null);
   const roiRef = useRef<Roi | null>(roi);
 
   useEffect(() => {
@@ -77,6 +78,8 @@ const VideoAndSidebar = ({ mode }: { mode: Mode }) => {
     "study": study,
     "setPlaying": setPlaying,
     "setText": setText,
+    "fps": fps,
+    "setFps": setFps,
     "setBoardNumber": setBoardNumber,
     "setStudy": setStudy,
     "roi": roi,
@@ -88,7 +91,6 @@ const VideoAndSidebar = ({ mode }: { mode: Mode }) => {
     "roiRef": roiRef,
     "chessqueriesModelRef": context.chessqueriesModelRef,
     "videoRef": videoRef,
-    "sidebarRef": sidebarRef,
     "playingRef": playingRef,
     "mode": mode
   }
@@ -102,8 +104,9 @@ const VideoAndSidebar = ({ mode }: { mode: Mode }) => {
   }
 
   return (
-    <Container>
-      {isPortrait ? (
+    <Container className="video-and-sidebar">
+      {/* Uploads play a file, so only the camera modes need landscape */}
+      {(isPortrait && mode !== "upload") ? (
         <PortraitWarning />
       ) : (
         <>

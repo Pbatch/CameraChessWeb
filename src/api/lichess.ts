@@ -3,6 +3,7 @@ import type { Dispatch } from 'react';
 import type { UnknownAction } from '@reduxjs/toolkit';
 import type { NavigateFunction } from 'react-router-dom';
 import type { Study } from '../types';
+import type { components, operations } from '@lichess-org/types';
 
 const lichessHost = 'https://lichess.org';
 const scopes = ["study:write", "study:read", "board:play"];
@@ -106,32 +107,19 @@ const fetchResponse = async (token: string, path: string, options: RequestInit =
   return response;
 };
 
-type TokenResult = { access_token: string };
-type Broadcast = { round: Study; study: { writeable: boolean } };
-type Account = { username: string };
-export type NowPlayingGame = {
-  fullId: string;
-  gameId: string;
-  color: "white" | "black";
-  fen: string;
-  opponent: { username: string };
-};
-type Playing = { nowPlaying: NowPlayingGame[] };
-type ImportResult = { id: string; url: string };
-type BroadcastPushResult = { games: { error?: string }[] };
-export type BoardStreamEvent = {
-  type: string;
-  moves?: string;
-  wtime?: number;
-  btime?: number;
-  status?: string;
-  state?: {
-    moves?: string;
-    wtime?: number;
-    btime?: number;
-    status?: string;
-  };
-};
+type Schemas = components["schemas"];
+type JsonResponse<Op extends keyof operations> =
+  operations[Op] extends { responses: { 200: { content: { "application/json": infer T } } } } ? T : never;
+
+type TokenResult = JsonResponse<"apiToken">;
+type Account = JsonResponse<"accountMe">;
+type Playing = JsonResponse<"apiAccountPlaying">;
+export type NowPlayingGame = Playing["nowPlaying"][number];
+export type BoardStreamEvent =
+  | Schemas["GameFullEvent"]
+  | Schemas["GameStateEvent"]
+  | Schemas["ChatLineEvent"]
+  | Schemas["OpponentGoneEvent"];
 
 const setBroadcastlessStudies = async (token: string, username: string, setStudies: (studies: Study[]) => void, broadcasts: Study[]) => {
   const path = `/api/study/by/${username}`;
@@ -139,7 +127,7 @@ const setBroadcastlessStudies = async (token: string, username: string, setStudi
 
   const studies: Study[] = [];
   const response = await fetchResponse(token, path, { headers: { Accept: 'application/x-ndjson' } });
-  await readStream<Study>((study) => {
+  await readStream<Schemas["StudyMetadata"]>((study) => {
     if (!broadcastIds.has(study.id)) {
       studies.push(study);
     }
@@ -182,7 +170,7 @@ export const lichessSetStudies = async (token: string, setStudies: (studies: Stu
   const path = `/api/broadcast/my-rounds`;
   const broadcasts: Study[] = [];
   const response = await fetchResponse(token, path, { headers: { Accept: 'application/x-ndjson' } });
-  await readStream<Broadcast>((broadcast) => {
+  await readStream<Schemas["BroadcastMyRound"]>((broadcast) => {
     // my-rounds also lists rounds we're only a viewing member of; we can't push to those.
     if (broadcast.study.writeable) {
       broadcasts.push(broadcast.round);
@@ -195,16 +183,6 @@ export const lichessSetStudies = async (token: string, setStudies: (studies: Stu
   await setBroadcastlessStudies(token, username, setStudies, broadcasts);
 }
 
-export const lichessImportPgn = (token: string, pgn: string): Promise<ImportResult> => {
-  const path = "/api/import";
-  const options = {
-    body: new URLSearchParams({ pgn }),
-    method: "POST",
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-  };
-  return fetchBody<ImportResult>(token, path, options);
-}
-
 export const lichessImportPgnToStudy = (token: string, pgn: string, name: string, studyId: string) => {
   const path = `/api/study/${studyId}/import-pgn`;
   const options = {
@@ -215,14 +193,14 @@ export const lichessImportPgnToStudy = (token: string, pgn: string, name: string
   return fetchResponse(token, path, options);
 }
 
-export const lichessPushRound = async (token: string, pgn: string, roundId: string): Promise<BroadcastPushResult> => {
+export const lichessPushRound = async (token: string, pgn: string, roundId: string): Promise<Schemas["BroadcastPgnPush"]> => {
   const path = `/api/broadcast/round/${roundId}/push`;
   const options = {
     body: pgn,
     method: "POST",
     headers: { 'Content-Type': 'text/plain' }
   }
-  const result = await fetchBody<BroadcastPushResult>(token, path, options);
+  const result = await fetchBody<Schemas["BroadcastPgnPush"]>(token, path, options);
   const errors = result.games.flatMap(({ error }) => error === undefined ? [] : [error]);
   if (errors.length > 0) {
     throw new Error(errors.join('\n'));

@@ -1,4 +1,5 @@
 import SidebarButton from "./sidebarButton";
+import Icon from "./icon";
 import type { Roi, SetBoolean, SetRoi } from "../../types";
 
 const RoiButton = ({ roi, setRoi, selecting, setSelecting, canPlay }: {
@@ -30,6 +31,7 @@ const RoiButton = ({ roi, setRoi, selecting, setSelecting, canPlay }: {
 
   return (
     <SidebarButton onClick={handleClick} disabled={!canPlay} aria-label={title} title={title}>
+      <Icon iconName="bi-bounding-box" className="me-2" />
       {label}
     </SidebarButton>
   );

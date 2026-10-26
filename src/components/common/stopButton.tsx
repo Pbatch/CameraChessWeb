@@ -25,8 +25,8 @@ const StopButton = ({ setPlaying, setText, videoRef, disabled = false }: {
   }
 
  return (
-    <SidebarButton onClick={handleClick} disabled={disabled} aria-label={label} title={label}>
-      <Icon iconName="bi-stop" />
+    <SidebarButton onClick={handleClick} variant="outline-danger" disabled={disabled} aria-label={label} title={label}>
+      <Icon iconName="bi-stop-fill" />
     </SidebarButton>
   );
 };

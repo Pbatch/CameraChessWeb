@@ -1,9 +1,9 @@
 import { gameUpdate, makeUpdatePayload } from "../slices/gameSlice";
 import type { CameraChessBoard } from "../slices/gameSlice";
 import { invalidVideo } from "./detect";
-import { getAccelerator, getOrientation, runChessqueries } from "./chessqueries";
+import { getOrientation, runChessqueries } from "./chessqueries";
 import type {
-  Mode, ModelRefs, MovesData, MovesPair, RoiRef, SetOrientation, SetStringArray, VideoRef
+  Mode, ModelRefs, MovesData, MovesPair, RoiRef, SetFps, SetOrientation, SetStringArray, VideoRef
 } from "../types";
 import { EMPTY, NUM_LABELS } from "../utils/constants";
 import { parseSan } from "chessops/san";
@@ -80,6 +80,9 @@ const updateState = (state: number[][], update: number[][], decay: number = 0.5)
   return state
 }
 
+// How often the FPS shown updates, in ms
+const FPS_INTERVAL = 1000;
+
 const sanToLan = (board: Position, san: string): string => {
   const move = parseSan(board, san);
   if (!move) return "";
@@ -92,6 +95,7 @@ interface FindPiecesInput {
   roiRef: RoiRef,
   playingRef: RefObject<boolean>,
   setText: SetStringArray,
+  setFps: SetFps,
   setOrientation: SetOrientation,
   dispatch: Dispatch<UnknownAction>,
   boardRef: RefObject<CameraChessBoard>,
@@ -101,7 +105,7 @@ interface FindPiecesInput {
   mode: Mode
 }
 
-export const findPieces = ({ chessqueriesModelRef, videoRef, roiRef, playingRef, setText, setOrientation,
+export const findPieces = ({ chessqueriesModelRef, videoRef, roiRef, playingRef, setText, setFps, setOrientation,
   dispatch, boardRef, movesPairsRef, lastMoveRef, moveTextRef, mode }: FindPiecesInput) => {
   let state: number[][] | null = null;
   let direction: number[] | null = null;
@@ -111,11 +115,20 @@ export const findPieces = ({ chessqueriesModelRef, videoRef, roiRef, playingRef,
   // The best single move, and since when it has been the best without a break
   let greedyMove: string | null = null;
   let greedySince: number = 0;
+  // Frame times since the FPS was last shown, which is about once a second so it's readable
+  let fpsSince: number = 0;
+  let fpsFrames: number = 0;
+  let fpsTime: number = 0;
   let active = true;
 
   const loop = async () => {
     try {
       if (playingRef.current === false || invalidVideo(videoRef)) {
+        if (state !== null) {
+          setFps(null);
+          fpsFrames = 0;
+          fpsTime = 0;
+        }
         state = null
       } else {
         if (state === null) {
@@ -141,7 +154,6 @@ export const findPieces = ({ chessqueriesModelRef, videoRef, roiRef, playingRef,
         const { bestScore1, bestScore2, bestJointScore, bestMove, bestMoves } = processState(state, movesPairsRef.current, possibleMoves);
 
         const endTime: number = performance.now();
-        const fps: string = (1000 / (endTime - startTime)).toFixed(1);
 
         let hasMove: boolean = false;
         if ((bestMoves !== null) && (mode !== "play")) {
@@ -180,8 +192,17 @@ export const findPieces = ({ chessqueriesModelRef, videoRef, roiRef, playingRef,
           const payload = makeUpdatePayload(boardRef.current, greedy);
           dispatch(gameUpdate(payload));
         }
-        const device: string = (getAccelerator() === "wasm") ? " (CPU)" : "";
-        setText([`FPS: ${fps}${device}`, moveTextRef.current]);
+        if (fpsFrames === 0) {
+          fpsSince = startTime;
+        }
+        fpsFrames += 1;
+        fpsTime += endTime - startTime;
+        if ((endTime - fpsSince) >= FPS_INTERVAL) {
+          setFps(1000 * fpsFrames / fpsTime);
+          fpsFrames = 0;
+          fpsTime = 0;
+        }
+        setText([moveTextRef.current]);
       }
     } catch (error) {
       console.error("Piece detection failed", error);

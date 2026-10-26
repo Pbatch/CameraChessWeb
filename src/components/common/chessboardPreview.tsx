@@ -27,7 +27,8 @@ type BoardSquare = {
 
 type ChessboardPreviewProps = {
   fen: string;
-  squareSize?: number;
+  // Any CSS length, so the board can scale with the viewport
+  squareSize?: string;
   lastMove: string | null;
 };
 
@@ -75,16 +76,14 @@ const parseFen = (fen: string): BoardSquare[] => {
   return board;
 };
 
-const ChessboardPreview = ({ fen, squareSize = 20, lastMove = null }: ChessboardPreviewProps) => {
+const ChessboardPreview = ({ fen, squareSize = "20px", lastMove = null }: ChessboardPreviewProps) => {
   const board = parseFen(fen);
   const positionDescription = board
     .filter((square): square is BoardSquare & { piece: PieceCode } => square.piece !== undefined)
     .map(({ coordinate, piece }) => `${PIECES[piece].label} on ${coordinate}`)
     .join(", ");
   const style = {
-    "--chess-square-size": `${squareSize}px`,
-    width: squareSize * 8,
-    height: squareSize * 8,
+    "--chess-square-size": squareSize,
   } as CSSProperties;
 
   const from = lastMove?.slice(0, 2);

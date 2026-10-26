@@ -1,6 +1,6 @@
 import type { CornerName, Roi, VideoRef } from "../../types";
 
-const MARKER_DIAMETER: number = 30;
+export const MARKER_DIAMETER: number = 30;
 // Region corners clockwise from the top left, as fractions of its width and height
 const CORNER_XY: number[][] = [[0, 0], [1, 0], [1, 1], [0, 1]];
 
@@ -28,6 +28,8 @@ const OrientationMarkers = ({ videoRef, roi, orientation }: {
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "white",
+    // Set explicitly, as the dark theme's inherited text colour is light
+    color: "#212529",
     userSelect: "none",
     pointerEvents: "none"
   });

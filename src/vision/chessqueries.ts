@@ -214,23 +214,24 @@ export const loadChessqueries = async (): Promise<CompiledModel> => {
   return await loadWasm();
 }
 
-let loading: Promise<void> | null = null;
+let loading: Promise<CompiledModel> | null = null;
 
-// Loads the model into the ref once, however often it is called
+// Loads the model once, however often it is called. Every caller's ref gets it, as a
+// remounted App (e.g. after a hot reload) asks again with a fresh, empty ref.
 export const loadChessqueriesOnce = (modelRef: ModelRefs["chessqueriesModelRef"]): Promise<void> => {
   if (modelRef.current !== null) {
     return Promise.resolve();
   }
 
   if (loading === null) {
-    loading = loadChessqueries().then((model) => {
-      modelRef.current = model;
-    }).catch((error) => {
+    loading = loadChessqueries().catch((error: unknown) => {
       loading = null;
       throw error;
     });
   }
-  return loading;
+  return loading.then((model) => {
+    modelRef.current = model;
+  });
 }
 
 // RGBA bytes as the model takes them, viewing the canvas data without a copy. Only used on the CPU.

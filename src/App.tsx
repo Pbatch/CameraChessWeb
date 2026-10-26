@@ -40,7 +40,7 @@ const App = () => {
 
   if (loadError !== null) {
     return (
-      <main className="d-flex min-vh-100 align-items-center justify-content-center bg-dark text-white p-3">
+      <main className="d-flex h-100 align-items-center justify-content-center bg-dark text-white p-3">
         <p className="m-0 text-center" role="alert">{loadError}</p>
       </main>
     );
@@ -49,12 +49,12 @@ const App = () => {
   if (loading) {
     return (
       <main
-        className="d-flex min-vh-100 align-items-center justify-content-center bg-dark text-white p-3"
+        className="d-flex h-100 align-items-center justify-content-center bg-dark text-white p-3"
         aria-busy="true"
       >
         <div className="d-flex align-items-center gap-2" role="status" aria-live="polite">
           <span className="spinner-border" aria-hidden="true" />
-          <span>Loading board recognition…</span>
+          <span>Loading FEN model...</span>
         </div>
       </main>
     );

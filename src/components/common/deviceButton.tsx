@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { MEDIA_CONSTRAINTS } from "../../utils/constants";
 import type { VideoRef } from "../../types";
+import Icon from "./icon";
 
 const DeviceButton = ({ videoRef }: {videoRef: VideoRef }) => {
   const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
@@ -45,10 +46,14 @@ const DeviceButton = ({ videoRef }: {videoRef: VideoRef }) => {
     setDevices(newDevices);
   }, [])
 
+  const label = (device === null) ? "Select a Device" : `Device: ${device.label.split("(")[0]}`;
+
   return (
     <div className="dropdown">
-      <button type="button" className="btn btn-dark btn-sm btn-outline-light dropdown-toggle w-100" id="deviceButton" data-bs-toggle="dropdown" aria-expanded="false">
-      {(device === null) ? "Select a Device": `Device: ${device.label.split("(")[0]}`}
+      <button type="button" className="btn btn-dark btn-sm btn-outline-light dropdown-toggle w-100 d-flex align-items-center justify-content-center" id="deviceButton" data-bs-toggle="dropdown" aria-expanded="false"
+        title={label}>
+        <Icon iconName="bi-camera-video" className="me-2" />
+        <span className="text-truncate">{label}</span>
       </button>
       <ul className="dropdown-menu" aria-labelledby="deviceButton">
         {devices.map(device => 

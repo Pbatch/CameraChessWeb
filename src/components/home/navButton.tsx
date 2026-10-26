@@ -1,7 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../../slices/userSlice";
 
-const NavButton = ({ text, tokenRequired }: { text: string, tokenRequired: boolean }) => {
+const NavButton = ({ text, description, tokenRequired }:
+  { text: string, description: string, tokenRequired: boolean }) => {
   const navigate = useNavigate();
   const token = useUser().token;
 
@@ -21,7 +22,11 @@ const NavButton = ({ text, tokenRequired }: { text: string, tokenRequired: boole
       onClick={handleClick}
       disabled={noNavigate}
     > 
-      {noNavigate ? `${text} (must Login)` : `${text}`}
+      <span className="d-block">{text}</span>
+      {/* opacity rather than a fixed grey, so it follows the text colour on hover */}
+      <small className="d-block fs-6 opacity-75">
+        {noNavigate ? "Log in with Lichess to use" : description}
+      </small>
     </button>
   )
 }

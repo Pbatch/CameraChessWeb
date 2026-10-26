@@ -5,6 +5,7 @@ import PgnButton from "./pgnButton";
 import Icon from "./icon";
 import HomeButton from "./homeButton";
 import Sidebar from "./sidebar";
+import SidebarSection from "./sidebarSection";
 import Container from "./container";
 import VideoAndSidebar from "./videoAndSidebar";
 import StudyButton from "./studyButton";
@@ -15,6 +16,6 @@ import RoiButton from "./roiButton";
 
 export {
   SidebarButton, PgnButton, Icon,
-  HomeButton, Sidebar, Container, VideoAndSidebar, RecordButton, StopButton, StudyButton,
+  HomeButton, Sidebar, SidebarSection, Container, VideoAndSidebar, RecordButton, StopButton, StudyButton,
   FenButton, DeviceButton, Toast, RoiButton,
 };

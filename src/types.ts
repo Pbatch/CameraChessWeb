@@ -10,7 +10,6 @@ interface ModelRefs {
 }
 
 type VideoRef = React.RefObject<HTMLVideoElement | null>;
-type SidebarRef = React.RefObject<HTMLDivElement | null>;
 
 // Region of interest, in video pixels
 interface Roi {
@@ -70,6 +69,7 @@ type Mode = "record" | "upload" | "broadcast" | "play";
 type SetBoolean = React.Dispatch<React.SetStateAction<boolean>>
 type SetStringArray = React.Dispatch<React.SetStateAction<string[]>>
 type SetNumber = React.Dispatch<React.SetStateAction<number>>
+type SetFps = React.Dispatch<React.SetStateAction<number | null>>
 type SetStudy = React.Dispatch<React.SetStateAction<Study | null>>
 type SetRoi = React.Dispatch<React.SetStateAction<Roi | null>>
 type SetOrientation = React.Dispatch<React.SetStateAction<CornerName[] | null>>
@@ -77,6 +77,6 @@ type SetOrientation = React.Dispatch<React.SetStateAction<CornerName[] | null>>
 export type { 
   RootState, Study, ModelRefs, MovesData, MovesPair, 
   Game,
-  SetBoolean, SetStringArray, SetNumber, Mode,
-  SetStudy, VideoRef, SidebarRef, Roi, RoiRef, SetRoi, CornerName, SetOrientation
+  SetBoolean, SetStringArray, SetNumber, SetFps, Mode,
+  SetStudy, VideoRef, Roi, RoiRef, SetRoi, CornerName, SetOrientation
 }

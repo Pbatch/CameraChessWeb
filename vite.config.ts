@@ -1,8 +1,10 @@
+/// <reference types="vitest/config" />
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { defineConfig, type Plugin } from "vite";
 import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
+import { playwright } from "@vitest/browser-playwright";
 
 const LITERT_WASM_DIR = "node_modules/@litertjs/core/wasm";
 
@@ -37,6 +39,18 @@ export default defineConfig({
         maximumFileSizeToCacheInBytes: 5000000,
         runtimeCaching: [
           {
+            // Cross-origin patterns must match from the start of the URL. The model URL is pinned
+            // to a commit, so it never changes in place, and caching it skips Hugging Face's redirect
+            // to a freshly signed CDN URL that the browser can't cache.
+            urlPattern: /^https:\/\/huggingface\.co\/.*\.tflite$/,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "chessqueries-model",
+              // Only the current model; the old one is dropped once a new one is cached
+              expiration: { maxEntries: 1 }
+            }
+          },
+          {
             urlPattern: /(\.tflite|\/litert\/.*)$/,
             handler: "CacheFirst",
             options: {
@@ -65,8 +79,8 @@ export default defineConfig({
               "type": "image/png"
           }
         ],
-        "theme_color": "#ffffff",
-        "background_color": "#ffffff",
+        "theme_color": "#212529",
+        "background_color": "#212529",
         "display": "standalone"
       }
     })
@@ -76,5 +90,28 @@ export default defineConfig({
   },
   build: {
     chunkSizeWarningLimit: 2000, // handle warning on vendor.js bundle size
+  },
+  test: {
+    projects: [
+      {
+        extends: true,
+        test: { name: "unit", include: ["src/**/*.test.ts"] }
+      },
+      {
+        // Measures real layout, so it needs a browser; jsdom has no layout engine
+        extends: true,
+        test: {
+          name: "layout",
+          include: ["src/**/*.layout.test.tsx"],
+          browser: {
+            enabled: true,
+            provider: playwright(),
+            // Headed, as headless Chrome isn't representative of the real app
+            headless: false,
+            instances: [{ browser: "chromium" }]
+          }
+        }
+      }
+    ]
   },
 });

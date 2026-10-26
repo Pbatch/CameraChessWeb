@@ -26,7 +26,7 @@ const RestartButton = ({ videoRef, setText, videoSelected }: {
       aria-label="Restart video"
       title="Restart video"
     >
-      <Icon iconName="bi-skip-start" />
+      <Icon iconName="bi-skip-start-fill" />
     </SidebarButton>
   );
 };

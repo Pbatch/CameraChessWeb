@@ -1,43 +1,40 @@
 import { findPieces } from "../../vision/findPieces";
-import { useEffect, useEffectEvent, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { MEDIA_ASPECT_RATIO, MEDIA_CONSTRAINTS } from "../../utils/constants";
-import { useWindowWidth, useWindowHeight } from '../../utils/hooks';
 import { useDispatch } from 'react-redux';
 import type {
   CornerName, Game, Mode, ModelRefs, MovesPair, Roi, RoiRef, SetRoi,
-  SetBoolean, SetStringArray, SidebarRef, VideoRef
+  SetBoolean, SetFps, SetStringArray, VideoRef
 } from "../../types";
 import { makeBoard, useGame } from "../../slices/gameSlice";
 import type { CameraChessBoard } from "../../slices/gameSlice";
 import { getMovesPairs, getMoveText } from "../../chess/moves";
 import RoiSelector from "./roiSelector";
-import OrientationMarkers from "./orientationMarkers";
+import OrientationMarkers, { MARKER_DIAMETER } from "./orientationMarkers";
+import FpsDisplay from "./fpsDisplay";
 
-const Video = ({ chessqueriesModelRef, videoRef, sidebarRef, playing,
-  setPlaying, playingRef, setText, mode, roi, setRoi, roiRef, selecting, setSelecting,
-  canPlay, setCanPlay }: {
+const Video = ({ chessqueriesModelRef, videoRef, playing,
+  setPlaying, playingRef, setText, setFps, mode, roi, setRoi, roiRef, selecting, setSelecting,
+  canPlay, setCanPlay, fps }: {
     chessqueriesModelRef: ModelRefs["chessqueriesModelRef"],
     videoRef: VideoRef,
-    sidebarRef: SidebarRef,
     playing: boolean,
     setPlaying: SetBoolean,
     playingRef: React.RefObject<boolean>,
-    setText: SetStringArray, mode: Mode,
+    setText: SetStringArray, setFps: SetFps, mode: Mode,
     roi: Roi | null, setRoi: SetRoi, roiRef: RoiRef,
     selecting: boolean, setSelecting: SetBoolean,
-    canPlay: boolean, setCanPlay: SetBoolean
+    canPlay: boolean, setCanPlay: SetBoolean,
+    fps: number | null
   }) => {
   const game: Game = useGame();
 
-  const displayRef = useRef<HTMLDivElement>(null);
   const boardRef = useRef<CameraChessBoard>(makeBoard(game));
   const movesPairsRef = useRef<MovesPair[]>(getMovesPairs(boardRef.current));
   const lastMoveRef = useRef<string>(game.lastMove);
   const moveTextRef = useRef<string>("");
   const [orientation, setOrientation] = useState<CornerName[] | null>(null);
 
-  const windowWidth = useWindowWidth();
-  const windowHeight = useWindowHeight();
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -52,26 +49,7 @@ const Video = ({ chessqueriesModelRef, videoRef, sidebarRef, playing,
     lastMoveRef.current = game.lastMove;
   }, [game])
 
-  const updateWidthHeight = useEffectEvent(() => {
-    const sidebar = sidebarRef.current;
-    const display = displayRef.current;
-    if (sidebar === null || display === null) {
-      return;
-    }
-
-    let height = (windowWidth - sidebar.offsetWidth) / MEDIA_ASPECT_RATIO;
-    if (height > windowHeight) {
-      height = windowHeight;
-    }
-    const width: number = height * MEDIA_ASPECT_RATIO;
-
-    display.style.width = `${width}px`;
-    display.style.height = `${height}px`;
-  });
-
   useEffect(() => {
-    updateWidthHeight();
-
     let streamPromise: Promise<MediaStream> | null = null;
     if (mode !== "upload") {
       streamPromise = navigator.mediaDevices.getUserMedia(MEDIA_CONSTRAINTS)
@@ -83,7 +61,7 @@ const Video = ({ chessqueriesModelRef, videoRef, sidebarRef, playing,
         });
     }
 
-    const stopDetection = findPieces({ chessqueriesModelRef, videoRef, roiRef, playingRef, setText, setOrientation,
+    const stopDetection = findPieces({ chessqueriesModelRef, videoRef, roiRef, playingRef, setText, setFps, setOrientation,
       dispatch, boardRef, movesPairsRef, lastMoveRef, moveTextRef, mode });
 
     const stopWebcam = async () => {
@@ -99,18 +77,7 @@ const Video = ({ chessqueriesModelRef, videoRef, sidebarRef, playing,
       stopDetection();
       void stopWebcam();
     }
-  }, [dispatch, mode, chessqueriesModelRef, playingRef, roiRef, setText, videoRef]);
-
-  // biome-ignore lint/correctness/useExhaustiveDependencies: window size changes intentionally trigger this effect event.
-  useEffect(() => {
-    updateWidthHeight();
-  }, [windowWidth, windowHeight]);
-
-  useEffect(() => {
-    if (canPlay) {
-      updateWidthHeight();
-    }
-  }, [canPlay]);
+  }, [dispatch, mode, chessqueriesModelRef, playingRef, roiRef, setFps, setText, videoRef]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -145,9 +112,20 @@ const Video = ({ chessqueriesModelRef, videoRef, sidebarRef, playing,
     height: "100%"
   }
 
+  // Fills the space beside (or above) the sidebar, which the display is sized against
+  const stageStyle: React.CSSProperties = {
+    flex: 1,
+    minWidth: 0,
+    minHeight: 0,
+    containerType: "size"
+  }
+
   const liveStyle: React.CSSProperties = {
     position: "relative",
     backgroundColor: "#343a40",
+    // As large as fits in the stage at the camera's aspect ratio
+    width: `min(100cqw, 100cqh * ${MEDIA_ASPECT_RATIO})`,
+    aspectRatio: `${MEDIA_ASPECT_RATIO}`
   }
 
   const onLoadedMetadata = () => {
@@ -226,8 +204,8 @@ const Video = ({ chessqueriesModelRef, videoRef, sidebarRef, playing,
   }
 
   return (
-    <div className="d-flex align-top justify-content-center">
-      <div ref={displayRef} style={liveStyle} >
+    <div className="d-flex align-items-start justify-content-center" style={stageStyle}>
+      <div style={liveStyle} >
         <div style={videoContainerStyle} >
           <div style={videoWrapperStyle}>
             <video ref={videoRef} autoPlay={mode !== "upload"} playsInline={true} muted={true}
@@ -236,6 +214,9 @@ const Video = ({ chessqueriesModelRef, videoRef, sidebarRef, playing,
             <RoiSelector videoRef={videoRef} roi={roi} setRoi={setRoi}
               selecting={selecting} setSelecting={setSelecting} />
             {!selecting && <OrientationMarkers videoRef={videoRef} roi={roi} orientation={orientation} />}
+            {/* Without a region, the markers sit in the video's corners */}
+            <FpsDisplay fps={fps}
+              offset={(!selecting && orientation !== null && roi === null) ? MARKER_DIAMETER : 0} />
           </div>
         </div>
       </div>

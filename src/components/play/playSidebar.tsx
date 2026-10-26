@@ -1,6 +1,6 @@
-import { Sidebar, RecordButton, DeviceButton, RoiButton } from "../common";
+import { Sidebar, SidebarSection, RecordButton, DeviceButton, RoiButton } from "../common";
 import type {
-  Game, Roi, SetBoolean, SetRoi, SetStringArray, SidebarRef, VideoRef
+  Game, Roi, SetBoolean, SetRoi, SetStringArray, VideoRef
 } from "../../types";
 import { useUser } from "../../slices/userSlice";
 import { useEffect, useRef, useState } from "react";
@@ -11,10 +11,9 @@ import { useDispatch } from "react-redux";
 import { gameUpdate, gameSetError, makeBoard, makeUpdatePayload, useGame, gameSetClock } from "../../slices/gameSlice";
 import GamesButton from "./gamesButton";
 
-const PlaySidebar = ({ videoRef, sidebarRef,
+const PlaySidebar = ({ videoRef,
   playing, setPlaying, text, setText, roi, setRoi, selecting, setSelecting, canPlay }: {
     videoRef: VideoRef,
-    sidebarRef: SidebarRef,
     playing: boolean, setPlaying: SetBoolean,
     text: string[], setText: SetStringArray,
     roi: Roi | null, setRoi: SetRoi,
@@ -27,10 +26,6 @@ const PlaySidebar = ({ videoRef, sidebarRef,
   const [gameId, setGameId] = useState<string>();
   const [color, setColor] = useState<Color>();
   const dispatch = useDispatch();
-  const inputStyle = {
-    display: playing ? "none" : "inline-block"
-  }
-
   useEffect(() => {
     gameRef.current = game;
   }, [game]);
@@ -69,28 +64,20 @@ const PlaySidebar = ({ videoRef, sidebarRef,
     }
 
     const streamGameCallback = async (response: BoardStreamEvent) => {
-      // gameFull nests clock data under `state`; gameState puts it at the top level.
-      const data = response.type === "gameFull" ? response.state : response;
+      // Chat and opponent-gone events don't change the board
+      if (response.type !== "gameFull" && response.type !== "gameState") return;
 
-      if (data === undefined) return;
+      // gameFull nests the game state under `state`; gameState is the state itself.
+      const { moves, wtime, btime, status } = response.type === "gameFull" ? response.state : response;
 
-      const moves = data.moves;
-      if (moves === undefined) return;
-
-      const wtime = data.wtime;
-      const btime = data.btime;
-      const status = data.status;
-
-      if (wtime !== undefined && btime !== undefined) {
-        const moveCount = moves.trim() === "" ? 0 : moves.trim().split(" ").length;
-        dispatch(gameSetClock({
-          wtime,
-          btime,
-          turn: moveCount % 2 === 0 ? "w" : "b",
-          updatedAt: Date.now(),
-          running: status === "started",
-        }));
-      }
+      const moveCount = moves.trim() === "" ? 0 : moves.trim().split(" ").length;
+      dispatch(gameSetClock({
+        wtime,
+        btime,
+        turn: moveCount % 2 === 0 ? "w" : "b",
+        updatedAt: Date.now(),
+        running: status === "started",
+      }));
 
       const splitMoves = moves.split(" ");
       const lastMove = splitMoves[splitMoves.length - 1];
@@ -107,22 +94,18 @@ const PlaySidebar = ({ videoRef, sidebarRef,
   }, [dispatch, gameId, token]);
 
   return (
-    <Sidebar sidebarRef={sidebarRef} playing={playing} text={text} setText={setText} >
-      <li className="my-1" style={inputStyle}>
+    <Sidebar playing={playing} text={text} setText={setText} >
+      <SidebarSection title="Setup" hidden={playing}>
         <DeviceButton videoRef={videoRef} />
-      </li>
-      <li className="my-1" style={inputStyle}>
         <RoiButton roi={roi} setRoi={setRoi} selecting={selecting} setSelecting={setSelecting}
           canPlay={canPlay} />
-      </li>
-      <li className="my-1" style={inputStyle}>
         <GamesButton setGameId={setGameId} setColor={setColor} setText={setText} />
-      </li>
-      <li className="my-1">
+      </SidebarSection>
+      <SidebarSection title="Detection">
         <div className="btn-group w-100" role="group" aria-label="Move detection controls">
           <RecordButton playing={playing} setPlaying={setPlaying} />
         </div>
-      </li>
+      </SidebarSection>
     </Sidebar>
   );
 };

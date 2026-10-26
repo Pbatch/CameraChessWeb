@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 const socials = [
   {
     name: "GitHub",
@@ -14,7 +16,8 @@ const socials = [
 ] as const;
 
 const Socials = () => {
-  return socials.map(({ name, network, url, path }) => (
+  return (<>
+    {socials.map(({ name, network, url, path }) => (
     <div key={network} className="col">
       <a
         className={`social-link social-link--${network}`}
@@ -30,7 +33,13 @@ const Socials = () => {
         </span>
       </a>
     </div>
-  ));
+    ))}
+    <div className="col">
+      <Link className="social-link social-link--faq" to="/faq">
+        FAQ
+      </Link>
+    </div>
+  </>);
 };
 
 export default Socials;
