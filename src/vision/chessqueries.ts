@@ -1,4 +1,4 @@
-import { type Accelerator, type CompiledModel, isWebGPUSupported, loadAndCompile, loadLiteRt, Tensor } from "@litertjs/core";
+import { type Accelerator, type CompiledModel, getGlobalLiteRt, isWebGPUSupported, loadAndCompile, loadLiteRt, Tensor } from "@litertjs/core";
 import { version as LITERT_VERSION } from "@litertjs/core/package.json";
 import { CHESSQUERIES_SIZE, LABEL_MAP, NUM_LABELS } from "../utils/constants";
 import { zeros } from "../utils/math";
@@ -175,6 +175,26 @@ const runNow = async (model: CompiledModel, video: HTMLVideoElement | null, roi:
 
 const warmUp = (model: CompiledModel) => run(model, null, null);
 
+// Firefox's shader-f16 overflows to NaN on some frames, though the same frames are fine without it.
+// Without the feature, LiteRT's fp16 precision still works, so only the feature is left out.
+const setDeviceWithoutF16 = async () => {
+  const adapter: GPUAdapter | null = await navigator.gpu.requestAdapter({ powerPreference: "high-performance" });
+  if (adapter === null) {
+    throw new Error("No GPU adapter found");
+  }
+  // The limits LiteRT asks for on its own device
+  const device: GPUDevice = await adapter.requestDevice({
+    requiredFeatures: adapter.features.has("subgroups") ? ["subgroups" as GPUFeatureName] : [],
+    requiredLimits: {
+      maxBufferSize: adapter.limits.maxBufferSize,
+      maxStorageBufferBindingSize: adapter.limits.maxStorageBufferBindingSize,
+      maxStorageBuffersPerShaderStage: adapter.limits.maxStorageBuffersPerShaderStage,
+      maxTextureDimension2D: adapter.limits.maxTextureDimension2D
+    }
+  });
+  getGlobalLiteRt().setWebGpuDevice(device);
+}
+
 const loadWebGpu = async (): Promise<CompiledModel> => {
   // fp16 is the fastest and does not need the shader-f16 WebGPU feature
   const model: CompiledModel = await loadAndCompile(MODEL_URL, {
@@ -185,6 +205,14 @@ const loadWebGpu = async (): Promise<CompiledModel> => {
   try {
     // Warm up so shader compilation happens while loading
     await warmUp(model);
+    // GPU errors (e.g. running out of memory) otherwise only show as wrong outputs
+    const device = gpuInput?.environment.webGpuDevice;
+    if (device) {
+      device.addEventListener("uncapturederror", (event) => {
+        console.error("WebGPU error", (event as GPUUncapturedErrorEvent).error.message);
+      });
+      void device.lost.then((info) => console.error("WebGPU device lost", info.reason, info.message));
+    }
   } catch (error) {
     deleteGpuInput();
     model.delete();
@@ -212,6 +240,9 @@ export const loadChessqueries = async (): Promise<CompiledModel> => {
 
   if (isWebGPUSupported()) {
     try {
+      if (navigator.userAgent.includes("Firefox/")) {
+        await setDeviceWithoutF16();
+      }
       return await loadWebGpu();
     } catch (error) {
       console.warn("WebGPU failed, falling back to the CPU", error);
