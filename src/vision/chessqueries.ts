@@ -1,4 +1,5 @@
 import { type Accelerator, type CompiledModel, isWebGPUSupported, loadAndCompile, loadLiteRt, Tensor } from "@litertjs/core";
+import { version as LITERT_VERSION } from "@litertjs/core/package.json";
 import { CHESSQUERIES_SIZE, LABEL_MAP, NUM_LABELS } from "../utils/constants";
 import { zeros } from "../utils/math";
 import type { CornerName, ModelRefs, Roi, VideoRef } from "../types";
@@ -197,8 +198,8 @@ const loadWasm = async (): Promise<CompiledModel> => {
 }
 
 export const loadChessqueries = async (): Promise<CompiledModel> => {
-  // Served from node_modules in dev, copied to litert/ by vite.config.ts in builds
-  const wasmPath: string = import.meta.env.DEV ? "/node_modules/@litertjs/core/wasm/" : "litert/";
+  // Served from node_modules in dev, copied to litert/<version>/ by vite.config.ts in builds
+  const wasmPath: string = import.meta.env.DEV ? "/node_modules/@litertjs/core/wasm/" : `litert/${LITERT_VERSION}/`;
   // Wasm threads need SharedArrayBuffer, which needs a cross-origin isolated page
   await loadLiteRt(wasmPath, { jspi: "Suspending" in WebAssembly, threads: crossOriginIsolated });
 

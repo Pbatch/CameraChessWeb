@@ -7,8 +7,11 @@ import { VitePWA } from "vite-plugin-pwa";
 import { playwright } from "@vitest/browser-playwright";
 
 const LITERT_WASM_DIR = "node_modules/@litertjs/core/wasm";
+const LITERT_VERSION: string = JSON.parse(readFileSync("node_modules/@litertjs/core/package.json", "utf8")).version;
 
-// LiteRT.js loads its wasm runtime from a directory at runtime, so copy it into builds
+// LiteRT.js loads its wasm runtime from a directory at runtime, so copy it into builds.
+// The directory is versioned, as the service worker caches it first and a newer LiteRT.js
+// breaks on an older runtime.
 const litertWasm = (): Plugin => ({
   name: "litert-wasm",
   apply: "build",
@@ -16,7 +19,7 @@ const litertWasm = (): Plugin => ({
     for (const fileName of readdirSync(LITERT_WASM_DIR)) {
       this.emitFile({
         type: "asset",
-        fileName: `litert/${fileName}`,
+        fileName: `litert/${LITERT_VERSION}/${fileName}`,
         source: readFileSync(join(LITERT_WASM_DIR, fileName))
       });
     }
