@@ -138,10 +138,16 @@ export const findPieces = ({ chessqueriesModelRef, videoRef, roiRef, playingRef,
         const startTime: number = performance.now();
 
         const { update, direction: newDirection } = await runChessqueries(chessqueriesModelRef, videoRef, roiRef.current);
+        // A NaN would stay in the smoothed state for good, and no move scores above 0 against it.
+        // The finally below still queues the next frame.
+        if (!update.every((square) => square.every(Number.isFinite))) {
+          console.warn("Skipped a frame with non-finite probabilities");
+          return;
+        }
         // The first frame starts the state, so detection does not wait for it to climb from zero
         state = (state === null) ? update : updateState(state, update);
 
-        // A NaN (e.g. from a blank frame) would stay in the smoothed direction for good
+        // Likewise for the smoothed direction
         if (newDirection?.every(Number.isFinite)) {
           // Smoothed like the state, so a board near 45 degrees does not flicker between orientations
           direction = (direction === null) ? newDirection
