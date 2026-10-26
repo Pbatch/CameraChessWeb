@@ -1,41 +1,33 @@
-import { CornersButton, Sidebar, RecordButton, StopButton, FenButton, DeviceButton } from "../common";
+import { Sidebar, SidebarSection, RecordButton, StopButton, FenButton, DeviceButton, RoiButton } from "../common";
 import type {
-  CanvasRef, CornersRef, ModelRefs, SetBoolean, SetStringArray, SidebarRef, VideoRef
+  ModelRefs, Roi, SetBoolean, SetRoi, SetStringArray, VideoRef
 } from "../../types";
 
-const RecordSidebar = ({ piecesModelRef, xcornersModelRef, videoRef, canvasRef, sidebarRef, 
-  playing, setPlaying, text, setText, cornersRef }: {
-  piecesModelRef: ModelRefs["piecesModelRef"],
-  xcornersModelRef: ModelRefs["xcornersModelRef"],
+const RecordSidebar = ({ chessqueriesModelRef, videoRef,
+  playing, setPlaying, text, setText, roi, setRoi, selecting, setSelecting, canPlay }: {
+  chessqueriesModelRef: ModelRefs["chessqueriesModelRef"],
   videoRef: VideoRef,
-  canvasRef: CanvasRef,
-  sidebarRef: SidebarRef,
   playing: boolean, setPlaying: SetBoolean, 
   text: string[], setText: SetStringArray,
-  cornersRef: CornersRef
+  roi: Roi | null, setRoi: SetRoi,
+  selecting: boolean, setSelecting: SetBoolean,
+  canPlay: boolean
 }) => {
-  const inputStyle = {
-    display: playing ? "none": "inline-block"
-  }
   return (
-    <Sidebar sidebarRef={sidebarRef} playing={playing} text={text} setText={setText} >
-      <li className="my-1" style={inputStyle}>
+    <Sidebar playing={playing} text={text} setText={setText} exportable={true} >
+      <SidebarSection title="Setup" hidden={playing}>
         <DeviceButton videoRef={videoRef} />
-      </li>
-      <li className="my-1" style={inputStyle}>
-        <CornersButton piecesModelRef={piecesModelRef} xcornersModelRef={xcornersModelRef} videoRef={videoRef} canvasRef={canvasRef} 
-        setText={setText} />
-      </li>
-      <li className="my-1" style={inputStyle}>
-        <FenButton piecesModelRef={piecesModelRef} videoRef={videoRef} 
-        canvasRef={canvasRef} setText={setText} cornersRef={cornersRef} />
-      </li>
-      <li className="my-1">
+        <RoiButton roi={roi} setRoi={setRoi} selecting={selecting} setSelecting={setSelecting}
+          canPlay={canPlay} />
+        <FenButton chessqueriesModelRef={chessqueriesModelRef} videoRef={videoRef} roi={roi} setText={setText}
+          canPlay={canPlay} />
+      </SidebarSection>
+      <SidebarSection title="Detection">
         <div className="btn-group w-100" role="group" aria-label="Move detection controls">
           <RecordButton playing={playing} setPlaying={setPlaying} />
           <StopButton setPlaying={setPlaying} setText={setText} />
         </div>
-      </li>
+      </SidebarSection>
     </Sidebar>
   );
 };

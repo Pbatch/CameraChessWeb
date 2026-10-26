@@ -2,76 +2,71 @@ import { useRef, useState, useEffect } from "react";
 import Video from "../common/video";
 import { useOutletContext } from "react-router-dom";
 import { useDispatch } from 'react-redux';
-import { cornersReset, useCorners } from '../../slices/cornersSlice';
 import { Container } from "../common";
-import type { CornersDict, Mode, ModelRefs, Study } from "../../types";
+import type { Mode, ModelRefs, Roi, Study } from "../../types";
 import RecordSidebar from "../record/recordSidebar";
 import UploadSidebar from "../upload/uploadSidebar";
 import BroadcastSidebar from "../broadcast/broadcastSidebar";
-import { gameResetFen, gameResetMoves, gameResetStart, useGame } from "../../slices/gameSlice";
-import { lichessPushRound } from "../../utils/lichess";
+import { gameResetFen, gameResetMoves, gameResetStart, makePgn, useGame } from "../../slices/gameSlice";
+import { lichessPushRound } from "../../api/lichess";
 import { useUser } from "../../slices/userSlice";
-import { START_FEN } from "../../utils/constants";
 import PlaySidebar from "../play/playSidebar";
-import { useMediaQuery } from 'react-responsive';
+import { useMediaQuery } from "../../utils/hooks";
 
 const PortraitWarning = () => {
   return (
-    <h1 className="text-white text-center w-100 p-3 h-2">
-      Please use your device in landscape mode
-    </h1>
+    <div className="d-flex flex-column align-items-center justify-content-center gap-3 w-100 p-3 text-white text-center">
+      <i className="bi bi-phone-landscape display-1" aria-hidden="true" />
+      <h1 className="h4 m-0">Rotate your device to landscape</h1>
+    </div>
   )
 }
 
 const VideoAndSidebar = ({ mode }: { mode: Mode }) => {
   const context = useOutletContext<ModelRefs>();
   const dispatch = useDispatch();
-  const corners: CornersDict = useCorners();
   const token: string = useUser().token;
-  const moves: string = useGame().moves;
-  const isPortrait = useMediaQuery({ orientation: 'portrait' });
+  const { moves, start } = useGame();
+  const isPortrait = useMediaQuery('(orientation: portrait)');
 
   const [text, setText] = useState<string[]>([]);
+  const [fps, setFps] = useState<number | null>(null);
   const [playing, setPlaying] = useState<boolean>(false);
   const [study, setStudy] = useState<Study | null>(null);
   const [boardNumber, setBoardNumber] = useState<number>(-1);
+  const [roi, setRoi] = useState<Roi | null>(null);
+  const [selecting, setSelecting] = useState<boolean>(false);
+  const [canPlay, setCanPlay] = useState<boolean>(false);
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const playingRef = useRef<boolean>(playing);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const sidebarRef = useRef<HTMLDivElement>(null);
-  const cornersRef = useRef<CornersDict>(corners);
+  const roiRef = useRef<Roi | null>(roi);
 
   useEffect(() => {
     if (mode !== "broadcast" || (study === null) || (boardNumber === -1)) {
       return;
     }
     
-    const broadcastPgn = [
-      `[Result "*"]`,
-      `[FEN "${START_FEN}"]`,
-      `[Board "${boardNumber}"]`,
-      `[Site "${boardNumber}"]`,
-      `[White "White ${boardNumber}"]`,
-      `[Black "Black ${boardNumber}"]`,
-      `[Annotator "ChessCam"]`,
-      "",
-      moves
-    ].join("\r");
+    const broadcastPgn = makePgn({ moves, start }, {
+      Site: `${boardNumber}`,
+      White: `White ${boardNumber}`,
+      Black: `Black ${boardNumber}`,
+      Board: `${boardNumber}`,
+      Annotator: "ChessCam"
+    });
     void lichessPushRound(token, broadcastPgn, study.id)
       .catch((error: unknown) => console.error('Unable to push Lichess broadcast round.', error));
-  }, [boardNumber, mode, moves, study, token])
+  }, [boardNumber, mode, moves, start, study, token])
 
   useEffect(() => {
     playingRef.current = playing;
   }, [playing]);
 
   useEffect(() => {
-    cornersRef.current = corners;
-  }, [corners])
+    roiRef.current = roi;
+  }, [roi]);
 
   useEffect(() => {
-    dispatch(cornersReset());
     dispatch(gameResetStart());
     dispatch(gameResetMoves());
     dispatch(gameResetFen());
@@ -83,18 +78,23 @@ const VideoAndSidebar = ({ mode }: { mode: Mode }) => {
     "study": study,
     "setPlaying": setPlaying,
     "setText": setText,
+    "fps": fps,
+    "setFps": setFps,
     "setBoardNumber": setBoardNumber,
     "setStudy": setStudy,
-    "piecesModelRef": context.piecesModelRef,
-    "xcornersModelRef": context.xcornersModelRef,
+    "roi": roi,
+    "setRoi": setRoi,
+    "selecting": selecting,
+    "setSelecting": setSelecting,
+    "canPlay": canPlay,
+    "setCanPlay": setCanPlay,
+    "roiRef": roiRef,
+    "chessqueriesModelRef": context.chessqueriesModelRef,
     "videoRef": videoRef,
-    "canvasRef": canvasRef,
-    "sidebarRef": sidebarRef,
-    "cornersRef": cornersRef,
     "playingRef": playingRef,
     "mode": mode
   }
-  const Sidebar = () => {
+  const renderSidebar = () => {
     switch(mode) {
       case "record": return <RecordSidebar {...props} />
       case "upload": return <UploadSidebar {...props} />
@@ -104,12 +104,13 @@ const VideoAndSidebar = ({ mode }: { mode: Mode }) => {
   }
 
   return (
-    <Container>
-      {isPortrait ? (
+    <Container className="video-and-sidebar">
+      {/* Uploads play a file, so only the camera modes need landscape */}
+      {(isPortrait && mode !== "upload") ? (
         <PortraitWarning />
       ) : (
         <>
-          {Sidebar()}
+          {renderSidebar()}
           <Video {...props} />
         </>
       )}

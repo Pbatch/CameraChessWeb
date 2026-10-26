@@ -1,7 +1,6 @@
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Home from "./components/home/home";
-import Export from "./components/export/export";
 import FAQ from "./components/faq/faq";
 import App from "./App";
 
@@ -9,9 +8,7 @@ import { createRoot } from 'react-dom/client';
 import "./style/index.css";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { Provider } from 'react-redux';
-import store from "./store.tsx";
-import { persistStore } from "redux-persist";
-import { PersistGate } from "redux-persist/integration/react";
+import store from "./store.ts";
 import { registerSW } from "virtual:pwa-register";
 import { VideoAndSidebar } from './components/common';
 
@@ -51,10 +48,6 @@ const router = createBrowserRouter([
         element: <VideoAndSidebar mode="play" />
       },
       {
-        path: "/export",
-        element: <Export />
-      },
-      {
         path: "/faq",
         element: <FAQ />
       }
@@ -67,12 +60,9 @@ if (rootElement === null) {
   throw new Error("Unable to find the application root element");
 }
 const root = createRoot(rootElement);
-const persistor = persistStore(store);
 
 root.render(
   <Provider store={store}>
-    <PersistGate persistor={persistor}>
-      <RouterProvider router={router} />
-    </PersistGate>
+    <RouterProvider router={router} />
   </Provider>
 );

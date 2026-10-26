@@ -15,12 +15,13 @@ const PlayButton = ({ videoRef, playing, setPlaying, videoSelected }: {
  return (
     <SidebarButton
       onClick={handleClick}
+      variant={playing ? "outline-warning" : "outline-success"}
       disabled={!videoSelected}
       aria-label="Video playback"
       aria-pressed={playing}
       title={playing ? "Pause video" : "Play video"}
     >
-      <Icon iconName={playing ? "bi-pause" : "bi-play"} />
+      <Icon iconName={playing ? "bi-pause-fill" : "bi-play-fill"} />
     </SidebarButton>
   );
 };

@@ -1,30 +1,31 @@
 import { useState } from "react";
-import { findFen } from "../../utils/findFen";
+import { findFen } from "../../vision/findFen";
 import { useDispatch } from 'react-redux';
 import { gameResetFen, gameResetMoves, gameResetStart } from "../../slices/gameSlice";
 import type { Color } from "chessops/types";
-import type { CanvasRef, CornersRef, ModelRefs, SetStringArray, VideoRef } from "../../types";
+import type { ModelRefs, Roi, SetStringArray, VideoRef } from "../../types";
+import Icon from "./icon";
 
-const FenButton = ({ piecesModelRef, videoRef, canvasRef, setText, cornersRef }:
-  Pick<ModelRefs, "piecesModelRef"> & {
+const FenButton = ({ chessqueriesModelRef, videoRef, roi, setText, canPlay }:
+  Pick<ModelRefs, "chessqueriesModelRef"> & {
     videoRef: VideoRef,
-    canvasRef: CanvasRef,
+    roi: Roi | null,
     setText: SetStringArray,
-    cornersRef: CornersRef
+    canPlay: boolean
   }) => {
-  const options = ["Normal", "Infer (White to move)", "Infer (Black to move)"];
+  const options = ["Standard", "Detect (White to move)", "Detect (Black to move)"];
 
   const dispatch = useDispatch();
   const [option, setOption] = useState<string>(options[0]);
 
   const handleClick = (option: string) => {
-    if (option === "Normal") {
+    if (option === "Standard") {
       dispatch(gameResetStart());
       dispatch(gameResetMoves());
       dispatch(gameResetFen());
     } else {
       const color: Color = option.includes("White to move") ? "white" : "black";
-      void findFen({ piecesModelRef, videoRef, cornersRef, canvasRef, dispatch, setText, color })
+      void findFen({ chessqueriesModelRef, videoRef, roi, dispatch, setText, color })
         .catch((error: unknown) => {
           console.error("Unable to infer the starting position", error);
           setText(["Unable to infer the starting position"]);
@@ -35,8 +36,10 @@ const FenButton = ({ piecesModelRef, videoRef, canvasRef, setText, cornersRef }:
 
   return (
     <div className="dropdown">
-      <button type="button" className="btn btn-dark btn-sm btn-outline-light dropdown-toggle w-100" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
-        Start: {option}
+      <button type="button" className="btn btn-dark btn-sm btn-outline-light dropdown-toggle w-100" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false"
+        disabled={!canPlay}>
+        <Icon iconName="bi-grid-3x3" className="me-2" />
+        Position: {option}
       </button>
       <ul className="dropdown-menu" aria-labelledby="dropdownMenuButton1">
         {options.map((option) =>

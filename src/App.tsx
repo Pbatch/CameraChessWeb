@@ -1,14 +1,13 @@
 import { type Dispatch, useEffect, useRef, useState } from "react";
 import { type NavigateFunction, Outlet, useNavigate } from "react-router-dom";
-import type { GraphModel } from "@tensorflow/tfjs-converter";
-import "@tensorflow/tfjs-backend-webgl";
+import type { CompiledModel } from "@litertjs/core";
 import type { ModelRefs } from "./types";
 import { useUser } from "./slices/userSlice";
 import { useDispatch } from "react-redux";
-import { lichessTrySetUser } from "./utils/lichess";
+import { lichessTrySetUser } from "./api/lichess";
 import type { UnknownAction } from "@reduxjs/toolkit";
 import { Toast } from "./components/common";
-import LoadModels from "./utils/loadModels";
+import { loadChessqueriesOnce } from "./vision/chessqueries";
 
 const App = () => {
   const dispatch: Dispatch<UnknownAction> = useDispatch();
@@ -17,11 +16,9 @@ const App = () => {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
 
-  const piecesModelRef = useRef<GraphModel | null>(null);
-  const xcornersModelRef = useRef<GraphModel | null>(null);
+  const chessqueriesModelRef = useRef<CompiledModel | null>(null);
   const modelRefs: ModelRefs = {
-    "piecesModelRef": piecesModelRef,
-    "xcornersModelRef": xcornersModelRef,
+    "chessqueriesModelRef": chessqueriesModelRef,
   }
 
   useEffect(() => {
@@ -32,17 +29,18 @@ const App = () => {
   }, [dispatch, navigate, token]);
 
   useEffect(() => {
-    LoadModels(piecesModelRef, xcornersModelRef)
+    loadChessqueriesOnce(chessqueriesModelRef)
       .then(() => setLoading(false))
       .catch((error: unknown) => {
-        console.error("Failed to load TensorFlow models", error);
-        setLoadError("ChessCam could not load its board-recognition models. Please reload and try again.");
+        console.error("Failed to load models", error);
+        const reason: string = (error instanceof Error) ? ` (${error.message})` : "";
+        setLoadError(`ChessCam could not load its board-recognition model${reason}. Please reload and try again.`);
       });
   }, []);
 
   if (loadError !== null) {
     return (
-      <main className="d-flex min-vh-100 align-items-center justify-content-center bg-dark text-white p-3">
+      <main className="d-flex h-100 align-items-center justify-content-center bg-dark text-white p-3">
         <p className="m-0 text-center" role="alert">{loadError}</p>
       </main>
     );
@@ -51,12 +49,12 @@ const App = () => {
   if (loading) {
     return (
       <main
-        className="d-flex min-vh-100 align-items-center justify-content-center bg-dark text-white p-3"
+        className="d-flex h-100 align-items-center justify-content-center bg-dark text-white p-3"
         aria-busy="true"
       >
         <div className="d-flex align-items-center gap-2" role="status" aria-live="polite">
           <span className="spinner-border" aria-hidden="true" />
-          <span>Loading board recognition…</span>
+          <span>Loading FEN model...</span>
         </div>
       </main>
     );

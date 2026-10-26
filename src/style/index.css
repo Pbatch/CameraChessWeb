@@ -6,22 +6,63 @@
 
 html, body {
   width: 100%;
-  height: 100%;
+  /* Follows the mobile address bar as it shows and hides */
+  height: 100dvh;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Oxygen", "Ubuntu",
     "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* Pull-to-refresh would reload the page and lose a game being recorded */
+  overscroll-behavior: none;
+}
+
+/* Stops quick repeated taps from zooming the page */
+a, button, input, label, select, summary, textarea {
+  touch-action: manipulation;
 }
 
 #root {
   width: 100%;
   height: 100%;
+  /* Keeps content clear of notches and the home indicator (needs viewport-fit=cover) */
+  padding: env(safe-area-inset-top) env(safe-area-inset-right)
+    env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+.sidebar {
+  /* Fixed so the column doesn't resize when a device or game label changes */
+  width: 220px;
+  flex: 0 0 auto;
+  gap: 1rem;
+  padding: 0.75rem;
+  background-color: #1e2125;
+  border-right: 1px solid rgb(255 255 255 / 10%);
+  /* Short landscape phones can't fit every control, so let it scroll */
+  max-height: 100%;
+  overflow-y: auto;
+}
+
+/* Portrait (upload only) puts the video above the sidebar */
+@media (orientation: portrait) {
+  .video-and-sidebar {
+    flex-direction: column-reverse;
+  }
+
+  .video-and-sidebar .sidebar {
+    width: auto;
+    border-right: none;
+    border-top: 1px solid rgb(255 255 255 / 10%);
+  }
 }
 
 .chessboard-preview {
   display: grid;
+  width: calc(var(--chess-square-size) * 8);
+  height: calc(var(--chess-square-size) * 8);
   grid-template-columns: repeat(8, var(--chess-square-size));
   overflow: hidden;
+  border-radius: 0.25rem;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 45%);
 }
 
 .chessboard-preview__square {
@@ -122,6 +163,10 @@ html, body {
   color: #6edff6;
 }
 
+.home-modes {
+  max-width: 400px;
+}
+
 .social-link {
   display: inline-grid;
   width: 3.125rem;
@@ -138,6 +183,12 @@ html, body {
 
 .social-link--youtube {
   background-color: #f00;
+}
+
+.social-link--faq {
+  background-color: #111;
+  font-weight: 700;
+  text-decoration: none;
 }
 
 .social-link:hover {
@@ -164,6 +215,8 @@ html, body {
 }
 
 .clock {
+  overflow: hidden;
+  border-radius: 0.25rem;
   font-variant-numeric: tabular-nums;
   color: #fff;
   background-color: #444;
@@ -174,6 +227,85 @@ html, body {
   width: 50%;
 }
 
+/* Dark text, as white on a light grey was too faint to read */
 .clock__time--active {
-  background-color: #aaa;
+  color: #212529;
+  background-color: #dee2e6;
+}
+
+.sidebar-section__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Labels can't shrink below their text, so "Copy PGN" stays on one line and the icon-only Home gives way */
+.sidebar-actions .btn {
+  white-space: nowrap;
+}
+
+/* One line, even when empty, so messages coming and going don't move the controls */
+.sidebar-status {
+  min-height: calc(1lh + 0.75rem);
+  padding: 0.375rem 0.5rem;
+  overflow: hidden;
+  border-radius: 0.375rem;
+  background-color: rgb(0 0 0 / 30%);
+  color: #dee2e6;
+  font-size: 0.875rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sidebar-section__title {
+  margin: 0 0 0.375rem;
+  color: #adb5bd;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-align: left;
+  text-transform: uppercase;
+}
+
+.video-fps {
+  position: absolute;
+  top: 0;
+  padding: 2px 6px;
+  border-bottom-left-radius: 0.25rem;
+  background-color: rgb(0 0 0 / 60%);
+  color: #fff;
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Landscape phones (e.g. a Pixel 7a in Chrome has ~330px): group by spacing alone */
+@media (max-height: 450px) {
+  .sidebar {
+    gap: 0.5rem;
+    padding: 0.5rem;
+  }
+
+  .sidebar-section__body {
+    gap: 0.25rem;
+  }
+
+  /* Still names each section for screen readers */
+  .sidebar-section__title {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .sidebar-status {
+    min-height: calc(1lh + 0.5rem);
+    padding: 0.25rem 0.5rem;
+    font-size: 0.8rem;
+    line-height: 1.3;
+  }
 }

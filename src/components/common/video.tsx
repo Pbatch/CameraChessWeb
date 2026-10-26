@@ -1,63 +1,40 @@
-import { findPieces } from "../../utils/findPieces";
-import { useEffect, useEffectEvent, useRef, useState } from "react";
-import { CORNER_KEYS, MARKER_DIAMETER, MARKER_RADIUS, MEDIA_ASPECT_RATIO, MEDIA_CONSTRAINTS } from "../../utils/constants";
-import { Corners } from ".";
-import { useWindowWidth, useWindowHeight } from '@react-hook/window-size';
+import { findPieces } from "../../vision/findPieces";
+import { useEffect, useRef, useState } from "react";
+import { MEDIA_ASPECT_RATIO, MEDIA_CONSTRAINTS } from "../../utils/constants";
 import { useDispatch } from 'react-redux';
-import { cornersSet } from "../../slices/cornersSlice";
-import { getMarkerXY, getXY } from "../../utils/detect";
 import type {
-  CanvasRef, CornersPayload, CornersRef, Game, Mode, ModelRefs, MovesPair,
-  SetBoolean, SetStringArray, SidebarRef, VideoRef
+  CornerName, Game, Mode, ModelRefs, MovesPair, Roi, RoiRef, SetRoi,
+  SetBoolean, SetFps, SetStringArray, VideoRef
 } from "../../types";
 import { makeBoard, useGame } from "../../slices/gameSlice";
 import type { CameraChessBoard } from "../../slices/gameSlice";
-import { getMovesPairs } from "../../utils/moves";
+import { getMovesPairs, getMoveText } from "../../chess/moves";
+import RoiSelector from "./roiSelector";
+import OrientationMarkers, { MARKER_DIAMETER } from "./orientationMarkers";
+import FpsDisplay from "./fpsDisplay";
 
-const getMoveText = (board: CameraChessBoard): string => {
-  const history = board.history;
-
-  if (history.length === 0) {
-    return "";
-  }
-
-  if (history.length === 1) {
-    return `1. ${history[history.length - 1].san}`
-  }
-
-  const firstMove: string = history[history.length - 2].san;
-  const secondMove: string = history[history.length - 1].san;
-  const nHalfMoves: number = Math.floor(history.length / 2);
-  if (history.length % 2 === 0) {
-    return `${nHalfMoves}.${firstMove} ${secondMove}`
-  }
-
-  return `${nHalfMoves}...${firstMove} ${nHalfMoves + 1}.${secondMove}`
-}
-
-const Video = ({ piecesModelRef, canvasRef, videoRef, sidebarRef, playing,
-  setPlaying, playingRef, setText, mode, cornersRef }: {
-    piecesModelRef: ModelRefs["piecesModelRef"],
-    canvasRef: CanvasRef,
+const Video = ({ chessqueriesModelRef, videoRef, playing,
+  setPlaying, playingRef, setText, setFps, mode, roi, setRoi, roiRef, selecting, setSelecting,
+  canPlay, setCanPlay, fps }: {
+    chessqueriesModelRef: ModelRefs["chessqueriesModelRef"],
     videoRef: VideoRef,
-    sidebarRef: SidebarRef,
     playing: boolean,
     setPlaying: SetBoolean,
     playingRef: React.RefObject<boolean>,
-    setText: SetStringArray, mode: Mode,
-    cornersRef: CornersRef
+    setText: SetStringArray, setFps: SetFps, mode: Mode,
+    roi: Roi | null, setRoi: SetRoi, roiRef: RoiRef,
+    selecting: boolean, setSelecting: SetBoolean,
+    canPlay: boolean, setCanPlay: SetBoolean,
+    fps: number | null
   }) => {
   const game: Game = useGame();
 
-  const displayRef = useRef<HTMLDivElement>(null);
   const boardRef = useRef<CameraChessBoard>(makeBoard(game));
   const movesPairsRef = useRef<MovesPair[]>(getMovesPairs(boardRef.current));
   const lastMoveRef = useRef<string>(game.lastMove);
   const moveTextRef = useRef<string>("");
-  const [canPlay, setCanPlay] = useState(false);
+  const [orientation, setOrientation] = useState<CornerName[] | null>(null);
 
-  const windowWidth = useWindowWidth();
-  const windowHeight = useWindowHeight();
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -72,47 +49,7 @@ const Video = ({ piecesModelRef, canvasRef, videoRef, sidebarRef, playing,
     lastMoveRef.current = game.lastMove;
   }, [game])
 
-  const updateWidthHeight = useEffectEvent(() => {
-    const sidebar = sidebarRef.current;
-    const canvas = canvasRef.current;
-    const display = displayRef.current;
-    const video = videoRef.current;
-    if (sidebar === null || canvas === null || display === null || video === null) {
-      return;
-    }
-
-    let height = ((windowWidth - sidebar.offsetWidth - MARKER_DIAMETER)
-      / MEDIA_ASPECT_RATIO) + MARKER_DIAMETER;
-    if (height > windowHeight) {
-      height = windowHeight;
-    }
-
-    if ((canvas.offsetHeight === 0) || (canvas.offsetWidth) === 0) {
-      return;
-    }
-    const width: number = ((height - MARKER_DIAMETER) * MEDIA_ASPECT_RATIO) + MARKER_DIAMETER;
-    const oldHeight: number = canvas.height;
-    const oldWidth: number = canvas.width;
-
-    display.style.width = `${width}px`;
-    display.style.height = `${height}px`;
-
-    canvas.width = video.offsetWidth;
-    canvas.height = video.offsetHeight;
-
-    CORNER_KEYS.forEach((key) => {
-      const xy = getXY(cornersRef.current[key], oldHeight, oldWidth);
-      const payload: CornersPayload = {
-        "xy": getMarkerXY(xy, canvas.height, canvas.width),
-        "key": key
-      }
-      dispatch(cornersSet(payload))
-    })
-  });
-
   useEffect(() => {
-    updateWidthHeight();
-
     let streamPromise: Promise<MediaStream> | null = null;
     if (mode !== "upload") {
       streamPromise = navigator.mediaDevices.getUserMedia(MEDIA_CONSTRAINTS)
@@ -124,8 +61,8 @@ const Video = ({ piecesModelRef, canvasRef, videoRef, sidebarRef, playing,
         });
     }
 
-    const stopDetection = findPieces(piecesModelRef, videoRef, canvasRef, playingRef, setText, dispatch,
-      cornersRef, boardRef, movesPairsRef, lastMoveRef, moveTextRef, mode);
+    const stopDetection = findPieces({ chessqueriesModelRef, videoRef, roiRef, playingRef, setText, setFps, setOrientation,
+      dispatch, boardRef, movesPairsRef, lastMoveRef, moveTextRef, mode });
 
     const stopWebcam = async () => {
       const stream = await streamPromise;
@@ -140,18 +77,7 @@ const Video = ({ piecesModelRef, canvasRef, videoRef, sidebarRef, playing,
       stopDetection();
       void stopWebcam();
     }
-  }, [canvasRef, cornersRef, dispatch, mode, piecesModelRef, playingRef, setText, videoRef]);
-
-  // biome-ignore lint/correctness/useExhaustiveDependencies: window size changes intentionally trigger this effect event.
-  useEffect(() => {
-    updateWidthHeight();
-  }, [windowWidth, windowHeight]);
-
-  useEffect(() => {
-    if (canPlay) {
-      updateWidthHeight();
-    }
-  }, [canPlay]);
+  }, [dispatch, mode, chessqueriesModelRef, playingRef, roiRef, setFps, setText, videoRef]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -170,16 +96,15 @@ const Video = ({ piecesModelRef, canvasRef, videoRef, sidebarRef, playing,
     });
   }, [canPlay, mode, playing, setPlaying, setText, videoRef])
 
-  const canvasStyle: React.CSSProperties = {
-    position: "absolute",
-    left: MARKER_RADIUS,
-    top: MARKER_RADIUS
-  }
-
   const videoContainerStyle: React.CSSProperties = {
     width: "100%",
-    height: "100%",
-    padding: MARKER_RADIUS
+    height: "100%"
+  }
+
+  const videoWrapperStyle: React.CSSProperties = {
+    position: "relative",
+    display: "inline-block",
+    height: "100%"
   }
 
   const videoStyle: React.CSSProperties = {
@@ -187,9 +112,20 @@ const Video = ({ piecesModelRef, canvasRef, videoRef, sidebarRef, playing,
     height: "100%"
   }
 
+  // Fills the space beside (or above) the sidebar, which the display is sized against
+  const stageStyle: React.CSSProperties = {
+    flex: 1,
+    minWidth: 0,
+    minHeight: 0,
+    containerType: "size"
+  }
+
   const liveStyle: React.CSSProperties = {
     position: "relative",
     backgroundColor: "#343a40",
+    // As large as fits in the stage at the camera's aspect ratio
+    width: `min(100cqw, 100cqh * ${MEDIA_ASPECT_RATIO})`,
+    aspectRatio: `${MEDIA_ASPECT_RATIO}`
   }
 
   const onLoadedMetadata = () => {
@@ -243,6 +179,10 @@ const Video = ({ piecesModelRef, canvasRef, videoRef, sidebarRef, playing,
 
   const onLoadStart = () => {
     setCanPlay(false);
+    // A new source may have a different resolution
+    setRoi(null);
+    setOrientation(null);
+    setSelecting(false);
   }
 
   const onError = () => {
@@ -264,15 +204,21 @@ const Video = ({ piecesModelRef, canvasRef, videoRef, sidebarRef, playing,
   }
 
   return (
-    <div className="d-flex align-top justify-content-center">
-      <div ref={displayRef} style={liveStyle} >
+    <div className="d-flex align-items-start justify-content-center" style={stageStyle}>
+      <div style={liveStyle} >
         <div style={videoContainerStyle} >
-          <video ref={videoRef} autoPlay={mode !== "upload"} playsInline={true} muted={true}
-            onLoadedMetadata={onLoadedMetadata} style={videoStyle}
-            onCanPlay={onCanPlay} onLoadStart={onLoadStart} onError={onError} onEnded={onEnded} />
-          <canvas ref={canvasRef} style={canvasStyle} />
+          <div style={videoWrapperStyle}>
+            <video ref={videoRef} autoPlay={mode !== "upload"} playsInline={true} muted={true}
+              onLoadedMetadata={onLoadedMetadata} style={videoStyle}
+              onCanPlay={onCanPlay} onLoadStart={onLoadStart} onError={onError} onEnded={onEnded} />
+            <RoiSelector videoRef={videoRef} roi={roi} setRoi={setRoi}
+              selecting={selecting} setSelecting={setSelecting} />
+            {!selecting && <OrientationMarkers videoRef={videoRef} roi={roi} orientation={orientation} />}
+            {/* Without a region, the markers sit in the video's corners */}
+            <FpsDisplay fps={fps}
+              offset={(!selecting && orientation !== null && roi === null) ? MARKER_DIAMETER : 0} />
+          </div>
         </div>
-        <Corners />
       </div>
     </div>
   );

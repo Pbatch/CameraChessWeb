@@ -1,6 +1,6 @@
-const Icon = ({ iconName }: { iconName: string }) => {
+const Icon = ({ iconName, className = "h4" }: { iconName: string, className?: string }) => {
   return (
-    <i className={`h4 bi ${iconName}`} aria-hidden="true" />
+    <i className={`${className} bi ${iconName}`.trim()} aria-hidden="true" />
   )
 }
 

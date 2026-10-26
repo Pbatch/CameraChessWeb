@@ -1,16 +1,15 @@
-import { useRef } from "react";
-import { clearCtx } from "../../../utils/render/common";
+import { useRef, useState } from "react";
 import { Icon, SidebarButton } from "../../common";
-import type { CanvasRef, SetBoolean, VideoRef } from "../../../types";
+import type { SetBoolean, VideoRef } from "../../../types";
 
-const VideoButton = ({ videoRef, canvasRef, setPlaying, videoSelected, setVideoSelected }: {
+const VideoButton = ({ videoRef, setPlaying, videoSelected, setVideoSelected }: {
   videoRef: VideoRef,
-  canvasRef: CanvasRef,
   setPlaying: SetBoolean,
   videoSelected: boolean,
   setVideoSelected: SetBoolean
 }) => {
   const inputVideoRef = useRef<HTMLInputElement>(null);
+  const [fileName, setFileName] = useState<string>("");
 
   const closeVideo = () => {
     if (videoRef.current === null) return;
@@ -23,12 +22,8 @@ const VideoButton = ({ videoRef, canvasRef, setPlaying, videoSelected, setVideoS
       URL.revokeObjectURL(url);
     }
 
-    const context = canvasRef.current?.getContext('2d');
-    if (context !== null && context !== undefined) {
-      clearCtx(context);
-    }
-
     setVideoSelected(false);
+    setFileName("");
     if (inputVideoRef.current !== null) {
       inputVideoRef.current.value = "";
     }
@@ -47,6 +42,7 @@ const VideoButton = ({ videoRef, canvasRef, setPlaying, videoSelected, setVideoS
     videoRef.current.load();
     videoRef.current.style.display = "block";
     setVideoSelected(true);
+    setFileName(file.name);
   }
 
   const handleOnClick = () => {
@@ -57,6 +53,9 @@ const VideoButton = ({ videoRef, canvasRef, setPlaying, videoSelected, setVideoS
     }
     setPlaying(false);
   }
+
+  const label = videoSelected ? `Video: ${fileName}` : "Choose Video";
+  const title = videoSelected ? `Remove video: ${fileName}` : "Choose video";
 
   return (
     <>
@@ -69,10 +68,12 @@ const VideoButton = ({ videoRef, canvasRef, setPlaying, videoSelected, setVideoS
       />
       <SidebarButton
         onClick={handleOnClick}
-        aria-label={videoSelected ? "Remove selected video" : "Choose a video"}
-        title={videoSelected ? "Remove selected video" : "Choose a video"}
+        className="d-flex align-items-center justify-content-center"
+        aria-label={title}
+        title={title}
       >
-        <Icon iconName={videoSelected ? "bi-folder-x" : "bi-folder"} />
+        <Icon iconName={videoSelected ? "bi-folder-x" : "bi-folder"} className="me-2" />
+        <span className="text-truncate">{label}</span>
       </SidebarButton>
     </>
   );

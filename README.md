@@ -31,36 +31,32 @@ Do you have ideas, bugs to report or training footage? Join our [Discord Server]
 * Develop a testing framework for different board + piece sets
 * ... Your next big idea?
 
-## Models, Data, Reports and Scripts
+## Model
 
-Please post in the Issues tab if you need any help with:
-* Running inference
-* Exporting models to different formats
-* Training on data of varying resolutions (I.e. 640x640)
-* etc. etc.
+ChessCam reads the board with [ChessQueries](https://github.com/JSeytre/chessqueries)
+([paper](https://arxiv.org/abs/2608.30762)). The model takes the whole camera frame,
+or a region drawn around the board, and predicts the piece on each of the 64 squares
+directly, so there are no board corners to set.
 
-### Pieces
+The app runs [ChessQ ChessCam](https://huggingface.co/PBatch23888/chessq-chesscam):
+[ChessQ Lite](https://huggingface.co/joelseytre/chessq-lite) fine-tuned on ChessCam footage
+and exported to LiteRT. The model is downloaded from Hugging Face on first use and then cached.
+It runs in the browser with [LiteRT.js](https://ai.google.dev/edge/litert/web) on WebGPU,
+and falls back to the CPU (WebAssembly) when WebGPU is not available. The CPU is much
+slower, and the FPS counter shows "(CPU)" when it is in use.
 
-| Name | Description | Link |
-| :---: | :---: | :---: |
-| 480M_leyolo_pieces.onnx | LeYOLO ONNX model| https://drive.google.com/file/d/1-80xp_nly9i6s3o0mF0mU9OZGEzUAlGj/view?usp=sharing |
-| 480M_leyolo_pieces.pt | LeYOLO pt model | https://drive.google.com/file/d/1L6PZbSdT-peCmiJGNwmgHJN5MTpfAM-0/view?usp=sharing |
-| pieces.tar.gz | Train/test data in YOLOv5 format | https://drive.google.com/file/d/12-Y3AJckAsFiDTlhQV8R50AK5ilM0s_Z/view?usp=sharing |
-| Report | Weights & Biases report from the LeYOLO training run | https://api.wandb.ai/links/pbatch/g2rcvycv |
+To re-export the model from a ChessQueries checkpoint, run this from the chessqueries repository,
+then upload the file to the Hugging Face repository and update `MODEL_URL` in `src/utils/chessqueries.tsx`:
 
-### Xcorners
+```bash
+uv run --no-project --python 3.12 --with litert-torch==0.9.4 --with timm==1.0.27 \
+    --with safetensors python scripts/export_litert.py \
+    <checkpoint>.safetensors chessq-chesscam-fp16.tflite
+```
 
-| Name | Description | Link |
-| :---: | :---: | :---: |
-| 480L_leyolo_xcorners.onnx | LeYOLO ONNX model | https://drive.google.com/file/d/1-2wodbiXag9UQ44e2AYAmoRN6jVpxy83/view?usp=sharing |
-| 480L_leyolo_xcorners.pt | LeYOLO pt model | https://drive.google.com/file/d/173orSe8eaytN8nin_HOvd2sEfP_wtOUW/view?usp=sharing |
-| xcorners.tar.gz | Train/test data in YOLOv5 format | https://drive.google.com/file/d/15Liy-vMcujSZak4YRPeC2TpVjIA3AwVM/view?usp=sharing |
-| Report | Weights & Biases report from the LeYOLO training run | https://api.wandb.ai/links/pbatch/ziwur3gr |
-
-### Google Colab scripts
-
-* LeYOLO Training + ONNX export - https://gist.github.com/Pbatch/dccc680ac2f852d4f258e4b6f1997a7b
-* TFJS export - https://gist.github.com/Pbatch/46d958df7e0363e42561bda50163a57a
+The model weights are licensed under
+[PolyForm Noncommercial 1.0.0](https://huggingface.co/PBatch23888/chessq-chesscam#license),
+not under this repository's license.
 
 ## Contributors ✨
 
