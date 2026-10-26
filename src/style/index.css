@@ -244,8 +244,10 @@ a, button, input, label, select, summary, textarea {
   white-space: nowrap;
 }
 
-/* One line, even when empty, so messages coming and going don't move the controls */
+/* At least one line, even when empty, so messages coming and going don't move the controls,
+   and at most two, cut off with an ellipsis */
 .sidebar-status {
+  display: -webkit-box;
   min-height: calc(1lh + 0.75rem);
   padding: 0.375rem 0.5rem;
   overflow: hidden;
@@ -253,8 +255,10 @@ a, button, input, label, select, summary, textarea {
   background-color: rgb(0 0 0 / 30%);
   color: #dee2e6;
   font-size: 0.875rem;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow-wrap: anywhere;
 }
 
 .sidebar-section__title {

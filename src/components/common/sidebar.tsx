@@ -25,7 +25,7 @@ const Sidebar = ({ playing, text, setText, exportable = false, children }: Sideb
     return (
       <>
         {/* Shrinks on short screens so the controls below it stay visible */}
-        <ChessboardPreview fen={game.fen} squareSize="clamp(12px, (100dvh - 220px) / 8, 20px)"
+        <ChessboardPreview fen={game.fen} squareSize="clamp(12px, (100dvh - 240px) / 8, 20px)"
           lastMove={game.lastMove} />
         <Clock />
       </>
@@ -33,10 +33,9 @@ const Sidebar = ({ playing, text, setText, exportable = false, children }: Sideb
   }
 
   const textDisplay = () => {
-    const status: string = text.join(" · ");
     return (
-      <div className="sidebar-status" role="status" aria-live="polite" aria-atomic="true" title={status}>
-        {status}
+      <div className="sidebar-status" role="status" aria-live="polite" aria-atomic="true" title={text.join("\n")}>
+        {text.map((t) => <div key={t}>{t}</div>)}
       </div>
     )
   }

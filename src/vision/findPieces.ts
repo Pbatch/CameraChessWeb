@@ -141,7 +141,8 @@ export const findPieces = ({ chessqueriesModelRef, videoRef, roiRef, playingRef,
         // The first frame starts the state, so detection does not wait for it to climb from zero
         state = (state === null) ? update : updateState(state, update);
 
-        if (newDirection !== null) {
+        // A NaN (e.g. from a blank frame) would stay in the smoothed direction for good
+        if (newDirection?.every(Number.isFinite)) {
           // Smoothed like the state, so a board near 45 degrees does not flicker between orientations
           direction = (direction === null) ? newDirection
             : direction.map((d, i) => 0.5 * d + 0.5 * newDirection[i]);

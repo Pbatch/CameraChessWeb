@@ -128,7 +128,14 @@ const toInput = async (video: HTMLVideoElement | null, roi: Roi | null): Promise
     gpuInput = await new Tensor(blankPixels(), INPUT_SHAPE).moveTo("webgpu");
   }
   if (video !== null) {
-    resizeOnGpu(gpuInput, video, roi);
+    const device = gpuInput.environment.webGpuDevice;
+    // Firefox can't import a video as a texture (or copy one into a texture),
+    // so it resizes on the canvas and uploads the small result instead
+    if (device !== null && typeof device.importExternalTexture !== "function") {
+      device.queue.writeBuffer(gpuInput.toGpuBuffer(), 0, getPixels(video, roi));
+    } else {
+      resizeOnGpu(gpuInput, video, roi);
+    }
   }
   return gpuInput;
 }
@@ -235,7 +242,7 @@ export const loadChessqueriesOnce = (modelRef: ModelRefs["chessqueriesModelRef"]
   });
 }
 
-// RGBA bytes as the model takes them, viewing the canvas data without a copy. Only used on the CPU.
+// RGBA bytes as the model takes them, viewing the canvas data without a copy. Used on the CPU, and on WebGPU without external textures.
 const getPixels = (video: HTMLVideoElement, roi: Roi | null): Uint8Array<ArrayBuffer> => {
   if (canvas === null) {
     canvas = new OffscreenCanvas(CHESSQUERIES_SIZE, CHESSQUERIES_SIZE);
