@@ -12,7 +12,7 @@ Please report any bugs on Discord, and we will fix them promptly.
 </table>
 
 [![Discord](https://img.shields.io/badge/Discord-00c8d6?logo=discord&logoColor=white&style=flat)](https://discord.gg/3yQth8YBp8)
-[![All Contributors](https://img.shields.io/badge/all_contributors-6-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-10-orange.svg?style=flat-square)](#contributors-)
 
 Replace Chess eBoards with your phone camera using ChessCam (https://www.chesscam.net).
 
@@ -23,40 +23,23 @@ Do you have ideas, bugs to report or training footage? Join our [Discord Server]
 ## Demo
 [<img src="https://raw.githubusercontent.com/wiki/Pbatch/CameraChessWeb/images/thumbnail.png" width="100%">](https://youtu.be/AAs4EX372bc)
 
+## Features
+
+* **Record**: point your camera at the board and the moves are recorded as you play
+* **Upload**: turn a video of a game into a PGN
+* **Play**: play your Lichess games on a real board
+* **Broadcast**: stream a game to Lichess as you play
+* Export your games to Lichess, or save them as a PGN
+
+The app runs in your browser and works offline after the first visit. It is fastest on a device with WebGPU.
+See the FAQ in the app for camera setup and other help.
+
 ## Roadmap
 
 * Raise an alert when an illegal move is played (currently they're just ignored)
 * Add sounds for the opponents moves in "/play"
 * Add support for variants
-* Develop a testing framework for different board + piece sets
 * ... Your next big idea?
-
-## Model
-
-ChessCam reads the board with [ChessQueries](https://github.com/JSeytre/chessqueries)
-([paper](https://arxiv.org/abs/2608.30762)). The model takes the whole camera frame,
-or a region drawn around the board, and predicts the piece on each of the 64 squares
-directly, so there are no board corners to set.
-
-The app runs [ChessQ ChessCam](https://huggingface.co/PBatch23888/chessq-chesscam):
-[ChessQ Lite](https://huggingface.co/joelseytre/chessq-lite) fine-tuned on ChessCam footage
-and exported to LiteRT. The model is downloaded from Hugging Face on first use and then cached.
-It runs in the browser with [LiteRT.js](https://ai.google.dev/edge/litert/web) on WebGPU,
-and falls back to the CPU (WebAssembly) when WebGPU is not available. The CPU is much
-slower, and the FPS counter shows "(CPU)" when it is in use.
-
-To re-export the model from a ChessQueries checkpoint, run this from the chessqueries repository,
-then upload the file to the Hugging Face repository and update `MODEL_URL` in `src/utils/chessqueries.tsx`:
-
-```bash
-uv run --no-project --python 3.12 --with litert-torch==0.9.4 --with timm==1.0.27 \
-    --with safetensors python scripts/export_litert.py \
-    <checkpoint>.safetensors chessq-chesscam-fp16.tflite
-```
-
-The model weights are licensed under
-[PolyForm Noncommercial 1.0.0](https://huggingface.co/PBatch23888/chessq-chesscam#license),
-not under this repository's license.
 
 ## Contributors ✨
 
