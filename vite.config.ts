@@ -67,8 +67,12 @@ export default defineConfig({
           "**/*",
       ],
       manifest: {
+        "id": "/",
         "name": "ChessCam",
         "short_name": "ChessCam",
+        "description": "Turn your phone camera into a chess eBoard. ChessCam recognises moves on a real board, entirely on your device, so you can record games, play and broadcast on Lichess, or digitise videos.",
+        "categories": ["games", "sports"],
+        "orientation": "landscape",
         "start_url": ".",
         "icons": [
           {
