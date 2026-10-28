@@ -95,6 +95,14 @@ export default defineConfig({
   server: {
     watch: { ignored: ["**/.venv/**"] },
   },
+  preview: {
+    // Cross-origin isolation enables SharedArrayBuffer, so the CPU fallback can use wasm threads.
+    // credentialless still allows CORS requests, such as the model from Hugging Face.
+    headers: {
+      "Cross-Origin-Opener-Policy": "same-origin",
+      "Cross-Origin-Embedder-Policy": "credentialless"
+    }
+  },
   build: {
     chunkSizeWarningLimit: 2000, // handle warning on vendor.js bundle size
   },
