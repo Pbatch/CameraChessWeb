@@ -11,7 +11,7 @@ import { gameResetFen, gameResetMoves, gameResetStart, makePgn, useGame } from "
 import { lichessPushRound } from "../../api/lichess";
 import { useUser } from "../../slices/userSlice";
 import PlaySidebar from "../play/playSidebar";
-import { useMediaQuery } from "../../utils/hooks";
+import { useCamera, useMediaQuery } from "../../utils/hooks";
 
 const PortraitWarning = () => {
   return (
@@ -41,6 +41,10 @@ const VideoAndSidebar = ({ mode }: { mode: Mode }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const playingRef = useRef<boolean>(playing);
   const roiRef = useRef<Roi | null>(roi);
+
+  // Uploads play a file, and in portrait no video is shown
+  const showCamera = (mode !== "upload") && !isPortrait;
+  const camera = useCamera({ enabled: showCamera, videoRef, setText });
 
   useEffect(() => {
     if (mode !== "broadcast" || (study === null) || (boardNumber === -1)) {
@@ -91,6 +95,7 @@ const VideoAndSidebar = ({ mode }: { mode: Mode }) => {
     "roiRef": roiRef,
     "chessqueriesModelRef": context.chessqueriesModelRef,
     "videoRef": videoRef,
+    "camera": camera,
     "playingRef": playingRef,
     "mode": mode
   }

@@ -50,6 +50,7 @@ const renderSidebar = async (Sidebar: SidebarComponent, playing: boolean): Promi
   const noop = () => {};
   const props = {
     videoRef: createRef<HTMLVideoElement>(),
+    camera: { devices: [], deviceId: null, selectDevice: noop },
     chessqueriesModelRef: { current: null },
     playing, setPlaying: noop,
     text: ["Starting game", "White vs DrNykterstein"], setText: noop,

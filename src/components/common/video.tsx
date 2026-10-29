@@ -1,6 +1,6 @@
 import { findPieces } from "../../vision/findPieces";
 import { useEffect, useRef, useState } from "react";
-import { MEDIA_ASPECT_RATIO, MEDIA_CONSTRAINTS } from "../../utils/constants";
+import { MEDIA_ASPECT_RATIO } from "../../utils/constants";
 import { useDispatch } from 'react-redux';
 import type {
   CornerName, Game, Mode, ModelRefs, MovesPair, Roi, RoiRef, SetRoi,
@@ -34,6 +34,8 @@ const Video = ({ chessqueriesModelRef, videoRef, playing,
   const lastMoveRef = useRef<string>(game.lastMove);
   const moveTextRef = useRef<string>("");
   const [orientation, setOrientation] = useState<CornerName[] | null>(null);
+  // Cameras return whichever native mode is closest to the request, so the real shape is only known once frames arrive
+  const [aspectRatio, setAspectRatio] = useState<number>(MEDIA_ASPECT_RATIO);
 
   const dispatch = useDispatch();
 
@@ -50,33 +52,8 @@ const Video = ({ chessqueriesModelRef, videoRef, playing,
   }, [game])
 
   useEffect(() => {
-    let streamPromise: Promise<MediaStream> | null = null;
-    if (mode !== "upload") {
-      streamPromise = navigator.mediaDevices.getUserMedia(MEDIA_CONSTRAINTS)
-        .then((stream) => {
-          if (videoRef.current !== null) {
-            videoRef.current.srcObject = stream;
-          }
-          return stream;
-        });
-    }
-
-    const stopDetection = findPieces({ chessqueriesModelRef, videoRef, roiRef, playingRef, setText, setFps, setOrientation,
+    return findPieces({ chessqueriesModelRef, videoRef, roiRef, playingRef, setText, setFps, setOrientation,
       dispatch, boardRef, movesPairsRef, lastMoveRef, moveTextRef, mode });
-
-    const stopWebcam = async () => {
-      const stream = await streamPromise;
-      if (stream !== null) {
-        stream.getTracks().forEach((track) => {
-          track.stop();
-        });
-      }
-    }
-
-    return () => {
-      stopDetection();
-      void stopWebcam();
-    }
   }, [dispatch, mode, chessqueriesModelRef, playingRef, roiRef, setFps, setText, videoRef]);
 
   useEffect(() => {
@@ -123,55 +100,23 @@ const Video = ({ chessqueriesModelRef, videoRef, playing,
   const liveStyle: React.CSSProperties = {
     position: "relative",
     backgroundColor: "#343a40",
-    // As large as fits in the stage at the camera's aspect ratio
-    width: `min(100cqw, 100cqh * ${MEDIA_ASPECT_RATIO})`,
-    aspectRatio: `${MEDIA_ASPECT_RATIO}`
+    // As large as fits in the stage at the video's aspect ratio
+    width: `min(100cqw, 100cqh * ${aspectRatio})`,
+    aspectRatio: `${aspectRatio}`
   }
 
-  const onLoadedMetadata = () => {
-    if (mode === "upload") {
+  // Fires when the first frame arrives and whenever the size changes, e.g. when a phone rotates
+  const onResize = () => {
+    const video = videoRef.current;
+    if (video === null || video.videoWidth === 0 || video.videoHeight === 0) {
       return;
     }
-    window.setTimeout(() => {
-      if (!(videoRef.current)) {
-        return;
-      }
-
-      const source = videoRef.current.srcObject;
-      if (!(source instanceof MediaStream)) {
-        return;
-      }
-      const tracks = source.getVideoTracks();
-      if (tracks.length === 0) {
-        return;
-      }
-
-      try {
-        const capabilities = tracks[0].getCapabilities() as MediaTrackCapabilities & {
-          zoom?: { min: number };
-        };
-        console.log("Capabilties", capabilities);
-
-        if (capabilities.zoom) {
-          const constraints: MediaTrackConstraints & { zoom: number } = {
-            zoom: capabilities.zoom.min,
-          };
-          void tracks[0].applyConstraints(constraints).catch((error: unknown) => {
-            console.warn("Cannot update camera zoom", error);
-          });
-        }
-      } catch (_) {
-        console.log("Cannot update track capabilities")
-      }
-
-      try {
-        const settings = tracks[0].getSettings();
-        console.log("Settings", settings);
-      } catch (_) {
-        console.log("Cannot log track settings")
-      }
-    }, 2000);
-  };
+    setAspectRatio(video.videoWidth / video.videoHeight);
+    // A region drawn at the old size no longer lines up
+    setRoi(null);
+    setOrientation(null);
+    setSelecting(false);
+  }
 
   const onCanPlay = () => {
     setCanPlay(true);
@@ -209,7 +154,7 @@ const Video = ({ chessqueriesModelRef, videoRef, playing,
         <div style={videoContainerStyle} >
           <div style={videoWrapperStyle}>
             <video ref={videoRef} autoPlay={mode !== "upload"} playsInline={true} muted={true}
-              onLoadedMetadata={onLoadedMetadata} style={videoStyle}
+              style={videoStyle} onResize={onResize}
               onCanPlay={onCanPlay} onLoadStart={onLoadStart} onError={onError} onEnded={onEnded} />
             <RoiSelector videoRef={videoRef} roi={roi} setRoi={setRoi}
               selecting={selecting} setSelecting={setSelecting} />

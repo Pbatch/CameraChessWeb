@@ -74,9 +74,15 @@ type SetStudy = React.Dispatch<React.SetStateAction<Study | null>>
 type SetRoi = React.Dispatch<React.SetStateAction<Roi | null>>
 type SetOrientation = React.Dispatch<React.SetStateAction<CornerName[] | null>>
 
+interface Camera {
+  devices: MediaDeviceInfo[],
+  deviceId: string | null,
+  selectDevice: (deviceId: string) => void
+}
+
 export type { 
   RootState, Study, ModelRefs, MovesData, MovesPair, 
   Game,
   SetBoolean, SetStringArray, SetNumber, SetFps, Mode,
-  SetStudy, VideoRef, Roi, RoiRef, SetRoi, CornerName, SetOrientation
+  SetStudy, VideoRef, Roi, RoiRef, SetRoi, CornerName, SetOrientation, Camera
 }

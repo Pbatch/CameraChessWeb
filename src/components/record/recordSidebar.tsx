@@ -1,12 +1,13 @@
 import { Sidebar, SidebarSection, RecordButton, StopButton, FenButton, DeviceButton, RoiButton } from "../common";
 import type {
-  ModelRefs, Roi, SetBoolean, SetRoi, SetStringArray, VideoRef
+  Camera, ModelRefs, Roi, SetBoolean, SetRoi, SetStringArray, VideoRef
 } from "../../types";
 
-const RecordSidebar = ({ chessqueriesModelRef, videoRef,
+const RecordSidebar = ({ chessqueriesModelRef, videoRef, camera,
   playing, setPlaying, text, setText, roi, setRoi, selecting, setSelecting, canPlay }: {
   chessqueriesModelRef: ModelRefs["chessqueriesModelRef"],
   videoRef: VideoRef,
+  camera: Camera,
   playing: boolean, setPlaying: SetBoolean, 
   text: string[], setText: SetStringArray,
   roi: Roi | null, setRoi: SetRoi,
@@ -16,7 +17,7 @@ const RecordSidebar = ({ chessqueriesModelRef, videoRef,
   return (
     <Sidebar playing={playing} text={text} setText={setText} exportable={true} >
       <SidebarSection title="Setup" hidden={playing}>
-        <DeviceButton videoRef={videoRef} />
+        <DeviceButton camera={camera} />
         <RoiButton roi={roi} setRoi={setRoi} selecting={selecting} setSelecting={setSelecting}
           canPlay={canPlay} />
         <FenButton chessqueriesModelRef={chessqueriesModelRef} videoRef={videoRef} roi={roi} setText={setText}

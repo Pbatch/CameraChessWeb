@@ -1,6 +1,6 @@
 import { Sidebar, SidebarSection, RecordButton, DeviceButton, RoiButton } from "../common";
 import type {
-  Game, Roi, SetBoolean, SetRoi, SetStringArray, VideoRef
+  Camera, Game, Roi, SetBoolean, SetRoi, SetStringArray
 } from "../../types";
 import { useUser } from "../../slices/userSlice";
 import { useEffect, useRef, useState } from "react";
@@ -11,9 +11,9 @@ import { useDispatch } from "react-redux";
 import { gameUpdate, gameSetError, makeBoard, makeUpdatePayload, useGame, gameSetClock } from "../../slices/gameSlice";
 import GamesButton from "./gamesButton";
 
-const PlaySidebar = ({ videoRef,
+const PlaySidebar = ({ camera,
   playing, setPlaying, text, setText, roi, setRoi, selecting, setSelecting, canPlay }: {
-    videoRef: VideoRef,
+    camera: Camera,
     playing: boolean, setPlaying: SetBoolean,
     text: string[], setText: SetStringArray,
     roi: Roi | null, setRoi: SetRoi,
@@ -96,7 +96,7 @@ const PlaySidebar = ({ videoRef,
   return (
     <Sidebar playing={playing} text={text} setText={setText} >
       <SidebarSection title="Setup" hidden={playing}>
-        <DeviceButton videoRef={videoRef} />
+        <DeviceButton camera={camera} />
         <RoiButton roi={roi} setRoi={setRoi} selecting={selecting} setSelecting={setSelecting}
           canPlay={canPlay} />
         <GamesButton setGameId={setGameId} setColor={setColor} setText={setText} />
