@@ -1,7 +1,7 @@
 import type { Piece, Role, SquareName } from "chessops/types";
 
 export const START_FEN: string = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-export const CHESSQUERIES_SIZE: number = 644;
+export const CHESSQUERIES_SIZE: number = 448;
 // Black pieces, white pieces, then the empty square
 const LABELS: string[] = ["b", "k", "n", "p", "q", "r", "B", "K", "N", "P", "Q", "R", "."];
 export const NUM_LABELS: number = LABELS.length;

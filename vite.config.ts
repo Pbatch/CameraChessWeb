@@ -67,8 +67,12 @@ export default defineConfig({
           "**/*",
       ],
       manifest: {
+        "id": "/",
         "name": "ChessCam",
         "short_name": "ChessCam",
+        "description": "Turn your phone camera into a chess eBoard. ChessCam recognises moves on a real board, entirely on your device, so you can record games, play and broadcast on Lichess, or digitise videos.",
+        "categories": ["games", "sports"],
+        "orientation": "landscape",
         "start_url": ".",
         "icons": [
           {
@@ -90,6 +94,14 @@ export default defineConfig({
   ],
   server: {
     watch: { ignored: ["**/.venv/**"] },
+  },
+  preview: {
+    // Cross-origin isolation enables SharedArrayBuffer, so the CPU fallback can use wasm threads.
+    // credentialless still allows CORS requests, such as the model from Hugging Face.
+    headers: {
+      "Cross-Origin-Opener-Policy": "same-origin",
+      "Cross-Origin-Embedder-Policy": "credentialless"
+    }
   },
   build: {
     chunkSizeWarningLimit: 2000, // handle warning on vendor.js bundle size

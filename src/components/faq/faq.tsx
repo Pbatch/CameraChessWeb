@@ -253,6 +253,25 @@ const data = {
         </p>
       },
       {
+        title: "What licences cover the board recognition model?",
+        content:
+        <div>
+          <p>
+            The model is a ChessQueries model with a DINOv3 encoder from Meta, downloaded from&nbsp;
+            <a target="_blank" href="https://huggingface.co/PBatch23888/chessq-chesscam" rel="noreferrer">Hugging Face</a>.
+            Its weights are available under both the&nbsp;
+            <a target="_blank" href="https://huggingface.co/PBatch23888/chessq-chesscam/blob/main/LICENSE" rel="noreferrer">PolyForm Noncommercial License 1.0.0</a>
+            &nbsp;and the&nbsp;
+            <a target="_blank" href="https://huggingface.co/PBatch23888/chessq-chesscam/blob/main/LICENSE-DINOv3" rel="noreferrer">DINOv3 License</a>.
+            See the&nbsp;
+            <a target="_blank" href="https://huggingface.co/PBatch23888/chessq-chesscam/blob/main/NOTICE" rel="noreferrer">NOTICE</a> for details.
+          </p>
+          <p>
+            Required Notice: Copyright (c) 2026 Joël Seytre.
+          </p>
+        </div>
+      },
+      {
         title: "How can I get in touch?",
         content:
         <div>

@@ -1,4 +1,4 @@
-import { type Accelerator, type CompiledModel, getGlobalLiteRt, isWebGPUSupported, loadAndCompile, loadLiteRt, Tensor } from "@litertjs/core";
+import { type Accelerator, type CompiledModel, getGlobalLiteRt, isWebGPUSupported, loadAndCompile, loadLiteRt, supportsFeature, Tensor } from "@litertjs/core";
 import { version as LITERT_VERSION } from "@litertjs/core/package.json";
 import { CHESSQUERIES_SIZE, LABEL_MAP, NUM_LABELS } from "../utils/constants";
 import { zeros } from "../utils/math";
@@ -11,7 +11,7 @@ const NUM_PROBS: number = 64 * CLASS_SYMBOLS.length;
 // Region corners clockwise from the top left when rank 8 is at the top
 const CORNERS: CornerName[] = ["a8", "h8", "h1", "a1"];
 // Pinned to a commit so a new upload cannot change the model under a deployed app
-const MODEL_URL: string = "https://huggingface.co/PBatch23888/chessq-chesscam/resolve/4a7a26acf23b5b9ae8ebef5d62530390d0d196a3/chessq-chesscam-fp16.tflite";
+const MODEL_URL: string = "https://huggingface.co/PBatch23888/chessq-chesscam/resolve/1407e49c17299f53c1197155e08c9a1106298e05/chessq-chesscam-dinov3-448-fp16.tflite";
 
 // Resizes the frame straight into the input buffer, one packed RGBA u32 per pixel.
 // Each output pixel averages a grid of bilinear taps over its footprint, like the canvas's high quality downscale.
@@ -222,23 +222,35 @@ const loadWebGpu = async (): Promise<CompiledModel> => {
   return model;
 }
 
-const loadWasm = async (): Promise<CompiledModel> => {
+const loadWasm = async (threaded: boolean): Promise<CompiledModel> => {
   const model: CompiledModel = await loadAndCompile(MODEL_URL, {
     accelerator: "wasm",
-    cpuOptions: { numThreads: crossOriginIsolated ? navigator.hardwareConcurrency : 1 }
+    cpuOptions: { numThreads: threaded ? navigator.hardwareConcurrency : 1 }
   });
   accelerator = "wasm";
   await warmUp(model);
   return model;
 }
 
+// navigator.gpu can exist without a usable adapter, e.g. on Linux Chrome
+const hasGpuAdapter = async (): Promise<boolean> => {
+  try {
+    return isWebGPUSupported() && await navigator.gpu.requestAdapter() !== null;
+  } catch {
+    return false;
+  }
+}
+
 export const loadChessqueries = async (): Promise<CompiledModel> => {
   // Served from node_modules in dev, copied to litert/<version>/ by vite.config.ts in builds
   const wasmPath: string = import.meta.env.DEV ? "/node_modules/@litertjs/core/wasm/" : `litert/${LITERT_VERSION}/`;
-  // Wasm threads need SharedArrayBuffer, which needs a cross-origin isolated page
-  await loadLiteRt(wasmPath, { jspi: "Suspending" in WebAssembly, threads: crossOriginIsolated });
+  const gpu: boolean = await hasGpuAdapter();
+  // LiteRT.js loads either JSPI, which lets WebGPU hand unsupported ops to the CPU, or threads, which
+  // speed up the CPU. Threads need SharedArrayBuffer (a cross-origin isolated page) and relaxed SIMD.
+  const threaded: boolean = !gpu && crossOriginIsolated && await supportsFeature("relaxedSimd");
+  await loadLiteRt(wasmPath, { jspi: !threaded && "Suspending" in WebAssembly, threads: threaded });
 
-  if (isWebGPUSupported()) {
+  if (gpu) {
     try {
       if (navigator.userAgent.includes("Firefox/")) {
         await setDeviceWithoutF16();
@@ -250,7 +262,7 @@ export const loadChessqueries = async (): Promise<CompiledModel> => {
   } else {
     console.warn("WebGPU is not available, falling back to the CPU");
   }
-  return await loadWasm();
+  return await loadWasm(threaded);
 }
 
 let loading: Promise<CompiledModel> | null = null;

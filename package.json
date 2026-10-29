@@ -9,7 +9,6 @@
     "lint": "biome lint src --error-on-warnings",
     "tsc": "tsc && tsc -p tsconfig.node.json",
     "preview": "vite preview",
-    "deploy": "gh-pages -d dist",
     "test": "vitest run --project unit",
     "test:layout": "vitest run --project layout",
     "test:watch": "vitest"
@@ -33,7 +32,6 @@
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.3",
     "@vitest/browser-playwright": "^5.0.5",
-    "gh-pages": "^6.1.1",
     "npm-check-updates": "^23.1.1",
     "playwright": "^1.64.1",
     "typescript": "^7.0.2",
