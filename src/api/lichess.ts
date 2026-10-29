@@ -23,19 +23,33 @@ const codeChallenge = async (verifier: string) => {
   return base64Url(new Uint8Array(digest));
 }
 
-// A failed request, keeping its HTTP status so callers can tell what went wrong
+// A failed request, keeping its HTTP status and Lichess's reason so callers can tell what went wrong
 export class LichessError extends Error {
   readonly status: number;
+  readonly reason: string;
 
-  constructor(status: number, message: string) {
+  constructor(status: number, message: string, reason: string = "") {
     super(message);
     this.status = status;
+    this.reason = reason;
   }
+}
+
+// Lichess explains most refusals as {"error": "..."}
+const parseReason = (details: string): string => {
+  try {
+    const { error } = JSON.parse(details) as { error?: unknown };
+    if (typeof error === 'string') return error;
+  } catch {
+    // Not JSON, so the text is the reason
+  }
+  return details.trim();
 }
 
 const lichessError = async (response: Response): Promise<LichessError> => {
   const details = await response.text();
-  return new LichessError(response.status, `${response.status} ${response.statusText}${details ? `: ${details}` : ''}`);
+  const message = `${response.status} ${response.statusText}${details ? `: ${details}` : ''}`;
+  return new LichessError(response.status, message, parseReason(details));
 }
 
 // Why a Lichess request failed, as a sentence for the user
@@ -46,7 +60,7 @@ export const describeLichessError = (error: unknown): string => {
     if (error.status === 404) return "Lichess could not find it.";
     if (error.status === 429) return "Lichess is limiting requests. Try again in a minute.";
     if (error.status >= 500) return "Lichess is having problems. Try again shortly.";
-    return `Lichess refused the request (${error.status}).`;
+    return error.reason ? `Lichess refused the request: ${error.reason}` : `Lichess refused the request (${error.status}).`;
   }
   // fetch rejects with a TypeError when the network fails
   if (error instanceof TypeError) return "Lichess could not be reached. Check your connection.";

@@ -242,6 +242,21 @@ describe("describeLichessError", () => {
     expect(describeLichessError(new LichessError(status, ""))).toContain(text);
   });
 
+  it("gives Lichess's reason for a refusal", async () => {
+    const { describeLichessError, LichessError } = await loadLichess();
+    expect(describeLichessError(new LichessError(400, "", "Not your turn"))).toBe("Lichess refused the request: Not your turn");
+  });
+
+  it.each([
+    ['{"error":"Piece on e2 cannot move to e5"}', "Piece on e2 cannot move to e5"],
+    ["Bad request ", "Bad request"]
+  ])("reads the reason from %s", async (body, reason) => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(body, { status: 400 })));
+    const { lichessPlayMove } = await loadLichess();
+    await expect(lichessPlayMove("lio_token", "game1", "e2e5")).rejects.toMatchObject({ status: 400, reason });
+    vi.unstubAllGlobals();
+  });
+
   it("explains a network failure", async () => {
     const { describeLichessError } = await loadLichess();
     expect(describeLichessError(new TypeError("Failed to fetch"))).toContain("could not be reached");

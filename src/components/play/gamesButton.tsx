@@ -32,7 +32,8 @@ const GamesButton = ({ setGameId, setColor, setText }:
     const opponent = newGame.opponent.username;
     setText(["Starting game", `${colorText} vs ${opponent}`]);
 
-    gameReset(newGame.fen);
+    // Lichess's list only has the current board, so the game's start and moves come from its stream
+    gameReset();
   }
 
   const getGames = async () => {
