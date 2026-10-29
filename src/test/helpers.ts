@@ -10,7 +10,8 @@ export const makeGame = (moves: string = "", start: string = START_FEN): Game =>
   lastMove: "",
   greedy: false,
   fromOpponent: false,
-  clock: null
+  clock: null,
+  times: []
 });
 
 // A 64x13 state in square order (a1..h8) that is certain of every square in the FEN
