@@ -4,7 +4,7 @@ import { makeBoard } from "../slices/gameSlice";
 import { LABEL_MAP, SQUARE_MAP } from "../utils/constants";
 import { makeGame } from "../test/helpers";
 
-const pairsFor = (fen: string) => getMovesPairs(makeBoard(makeGame("", fen)));
+const pairsFor = (fen: string) => getMovesPairs(makeBoard(makeGame("", fen)).position);
 
 const firstMove = (fen: string, san: string) => {
   const pair = pairsFor(fen).find(({ move1 }) => move1.sans[0] === san);

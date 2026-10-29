@@ -1,64 +1,28 @@
-import { type Dispatch, useEffect, useRef, useState } from "react";
-import { type NavigateFunction, Outlet, useNavigate } from "react-router-dom";
-import type { CompiledModel } from "@litertjs/core";
-import type { ModelRefs } from "./types";
+import { useEffect, useRef } from "react";
+import { type NavigateFunction, Outlet, useNavigate } from "react-router";
+import type { Chessqueries, ModelRefs } from "./types";
 import { useUser } from "./slices/userSlice";
-import { useDispatch } from "react-redux";
-import { lichessTrySetUser } from "./api/lichess";
-import type { UnknownAction } from "@reduxjs/toolkit";
+import { describeLichessError, lichessTrySetUser } from "./api/lichess";
 import { Toast } from "./components/common";
-import { loadChessqueriesOnce } from "./vision/chessqueries";
+import { errorShow } from "./slices/errorSlice";
 
 const App = () => {
-  const dispatch: Dispatch<UnknownAction> = useDispatch();
   const navigate: NavigateFunction = useNavigate();
   const token = useUser().token;
-  const [loading, setLoading] = useState(true);
-  const [loadError, setLoadError] = useState<string | null>(null);
-
-  const chessqueriesModelRef = useRef<CompiledModel | null>(null);
+  const chessqueriesModelRef = useRef<Chessqueries | null>(null);
   const modelRefs: ModelRefs = {
-    "chessqueriesModelRef": chessqueriesModelRef,
+    chessqueriesModelRef,
   }
 
   useEffect(() => {
     if (token === "") {
-      void lichessTrySetUser(navigate, dispatch)
-        .catch((error: unknown) => console.error("Failed to restore Lichess session", error));
+      void lichessTrySetUser(navigate)
+        .catch((error: unknown) => {
+          console.error("Failed to log in to Lichess", error);
+          errorShow({ source: "login", message: `Unable to log in to Lichess. ${describeLichessError(error)}` });
+        });
     }
-  }, [dispatch, navigate, token]);
-
-  useEffect(() => {
-    loadChessqueriesOnce(chessqueriesModelRef)
-      .then(() => setLoading(false))
-      .catch((error: unknown) => {
-        console.error("Failed to load models", error);
-        const reason: string = (error instanceof Error) ? ` (${error.message})` : "";
-        setLoadError(`ChessCam could not load its board-recognition model${reason}. Please reload and try again.`);
-      });
-  }, []);
-
-  if (loadError !== null) {
-    return (
-      <main className="d-flex h-100 align-items-center justify-content-center bg-dark text-white p-3">
-        <p className="m-0 text-center" role="alert">{loadError}</p>
-      </main>
-    );
-  }
-
-  if (loading) {
-    return (
-      <main
-        className="d-flex h-100 align-items-center justify-content-center bg-dark text-white p-3"
-        aria-busy="true"
-      >
-        <div className="d-flex align-items-center gap-2" role="status" aria-live="polite">
-          <span className="spinner-border" aria-hidden="true" />
-          <span>Loading FEN model...</span>
-        </div>
-      </main>
-    );
-  }
+  }, [navigate, token]);
 
   return (
     <>

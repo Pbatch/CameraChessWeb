@@ -1,7 +1,30 @@
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+@import "tailwindcss";
+
+/* Bootstrap's colours, which the app was designed with */
+@theme {
+  --color-dark: #212529;
+  --color-light: #f8f9fa;
+  --color-success: #198754;
+  --color-warning: #ffc107;
+  --color-danger: #dc3545;
+}
+
+@layer base {
+  :root {
+    /* Dark scrollbars and form controls */
+    color-scheme: dark;
+  }
+
+  body {
+    background-color: var(--color-dark);
+    color: #dee2e6;
+  }
+
+  /* Tailwind leaves buttons with the default cursor */
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
 }
 
 html, body {
@@ -154,13 +177,29 @@ a, button, input, label, select, summary, textarea {
   margin-bottom: 0;
 }
 
+/* Tailwind's reset removes the spacing and markers the answers need */
+.faq-answer p,
+.faq-answer ul,
+.faq-answer ol {
+  margin-bottom: 1rem;
+}
+
 .faq-answer ul,
 .faq-answer ol {
   padding-left: 1.5rem;
 }
 
+.faq-answer ul {
+  list-style: disc;
+}
+
+.faq-answer ol {
+  list-style: decimal;
+}
+
 .faq-answer a {
   color: #6edff6;
+  text-decoration: underline;
 }
 
 .home-modes {
@@ -240,7 +279,7 @@ a, button, input, label, select, summary, textarea {
 }
 
 /* Labels can't shrink below their text, so "Copy PGN" stays on one line and the icon-only Home gives way */
-.sidebar-actions .btn {
+.sidebar-actions button {
   white-space: nowrap;
 }
 
@@ -280,6 +319,68 @@ a, button, input, label, select, summary, textarea {
   color: #fff;
   font-size: 0.75rem;
   font-variant-numeric: tabular-nums;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Fills the space beside (or above) the sidebar, which the display is sized against */
+.video-stage {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  container-type: size;
+}
+
+.video-live {
+  position: relative;
+  background-color: #343a40;
+}
+
+.video-live__container {
+  width: 100%;
+  height: 100%;
+}
+
+.video-live__wrapper {
+  position: relative;
+  display: inline-block;
+  height: 100%;
+}
+
+.video-live__video {
+  width: auto;
+  height: 100%;
+}
+
+.roi-overlay {
+  position: absolute;
+  inset: 0;
+  /* Keeps the region's shadow on the video */
+  overflow: hidden;
+  pointer-events: none;
+  touch-action: none;
+}
+
+.roi-overlay--selecting {
+  cursor: crosshair;
+  pointer-events: auto;
+  background-color: rgb(0 0 0 / 20%);
+}
+
+.roi-overlay__region {
+  position: absolute;
+  border: 2px solid white;
+  box-shadow: 0 0 0 9999px rgb(0 0 0 / 40%);
+}
+
+.orientation-marker {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: white;
+  /* Set explicitly, as the dark theme's inherited text colour is light */
+  color: #212529;
   pointer-events: none;
   user-select: none;
 }

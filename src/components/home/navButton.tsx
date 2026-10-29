@@ -1,5 +1,6 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import { useUser } from "../../slices/userSlice";
+import buttonClass from "../common/buttonClass";
 
 const NavButton = ({ text, description, tokenRequired }:
   { text: string, description: string, tokenRequired: boolean }) => {
@@ -18,13 +19,13 @@ const NavButton = ({ text, description, tokenRequired }:
   return (
     <button 
       type="button"
-      className="btn btn-dark btn-lg btn-outline-light w-100" 
+      className={`${buttonClass("outline-light", "lg")} w-full`}
       onClick={handleClick}
       disabled={noNavigate}
     > 
-      <span className="d-block">{text}</span>
+      <span className="block">{text}</span>
       {/* opacity rather than a fixed grey, so it follows the text colour on hover */}
-      <small className="d-block fs-6 opacity-75">
+      <small className="block text-base opacity-75">
         {noNavigate ? "Log in with Lichess to use" : description}
       </small>
     </button>

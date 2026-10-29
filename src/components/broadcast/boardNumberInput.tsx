@@ -7,10 +7,10 @@ const BoardNumberInput = ({ setBoardNumber }: {setBoardNumber: SetNumber }) => {
   
   return (
     <div className="text-white">
-      <label className="form-check-label" htmlFor="board">
+      <label htmlFor="board">
         Board:&nbsp;
       </label>
-      <input type="number" id="board" onChange={handleChange} min={1} max={64} />
+      <input type="number" id="board" className="inline-block w-auto rounded border border-[#495057] bg-dark px-2 py-1 text-sm leading-normal text-[#dee2e6] focus:border-[#86b7fe] focus:ring-4 focus:ring-[#0d6efd]/25 focus:outline-none" onChange={handleChange} min={1} max={64} />
     </div>
   )
 }

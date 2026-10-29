@@ -4,11 +4,11 @@ import NavButton from "./navButton";
 
 const Home = () => {
   return (
-    <div className="d-flex overflow-auto h-100 flex-column p-0 m-0 text-center text-white bg-dark">
+    <div className="flex h-full flex-col overflow-auto bg-dark text-center text-white">
       <Header />
       {/* my-auto centres the modes and pushes the socials to the bottom */}
-      <div className="home-modes d-grid gap-3 w-100 p-3 mx-auto my-auto">
-        <h1 className="display-4 fw-medium d-flex align-items-center justify-content-center gap-2 mb-3">
+      <div className="home-modes mx-auto my-auto grid w-full gap-4 p-4">
+        <h1 className="mb-4 flex items-center justify-center gap-2 text-[min(1.475rem+2.7vw,3.5rem)]/[1.2] font-medium">
           <img src="favicon.ico" alt="" />
           <span>ChessCam</span>
         </h1>
@@ -21,7 +21,7 @@ const Home = () => {
         <NavButton text="Broadcast" description="Stream a game to Lichess live"
           tokenRequired={true} />
       </div>
-      <div className="row my-2 mx-0">
+      <div className="my-2 flex">
         <Socials />
       </div>
     </div>

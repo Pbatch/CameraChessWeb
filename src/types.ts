@@ -1,12 +1,22 @@
-import type { CompiledModel } from "@litertjs/core";
-
 interface Study {
   id: string,
   name: string
 }
 
+// Square probabilities, and where each square query looked (null for models without that output)
+interface ChessqueriesOutputs {
+  probs: Float32Array,
+  centroids: Float32Array | null
+}
+
+// The piece model, on the GPU or in a CPU worker. A null video gives blank pixels, for the warm-up.
+interface Chessqueries {
+  run: (video: HTMLVideoElement | null, roi: Roi | null) => Promise<ChessqueriesOutputs>,
+  delete: () => void
+}
+
 interface ModelRefs {
-  chessqueriesModelRef: React.RefObject<CompiledModel | null>
+  chessqueriesModelRef: React.RefObject<Chessqueries | null>
 }
 
 type VideoRef = React.RefObject<HTMLVideoElement | null>;
@@ -29,9 +39,9 @@ interface MovesData {
   targets: number[]
 }
 interface MovesPair {
-  "move1": MovesData,
-  "move2": MovesData | null,
-  "moves": MovesData | null
+  move1: MovesData,
+  move2: MovesData | null,
+  moves: MovesData | null
 }
 
 type Clock = {
@@ -40,7 +50,6 @@ type Clock = {
   turn: "w" | "b";    // whose turn it is right now
   updatedAt: number;  // Date.now() at the moment these values arrived
   running: boolean;   // false when the game is paused or finished
-  clock: Clock | null;
 };
 
 interface Game {
@@ -50,7 +59,6 @@ interface Game {
   lastMove: string,
   greedy: boolean,
   fromOpponent: boolean,
-  error: string | null,
   clock: Clock | null
 }
 
@@ -59,9 +67,18 @@ interface User {
   username: string
 }
 
+// Where a toast error came from, so only that source clears it
+type ErrorSource = "login" | "broadcast" | "stream" | "move";
+
+interface AppError {
+  source: ErrorSource,
+  message: string
+}
+
 interface RootState {
   game: Game,
-  user: User
+  user: User,
+  errors: AppError[]
 }
 
 type Mode = "record" | "upload" | "broadcast" | "play";
@@ -74,9 +91,15 @@ type SetStudy = React.Dispatch<React.SetStateAction<Study | null>>
 type SetRoi = React.Dispatch<React.SetStateAction<Roi | null>>
 type SetOrientation = React.Dispatch<React.SetStateAction<CornerName[] | null>>
 
+interface Camera {
+  devices: MediaDeviceInfo[],
+  deviceId: string | null,
+  selectDevice: (deviceId: string) => void
+}
+
 export type { 
-  RootState, Study, ModelRefs, MovesData, MovesPair, 
-  Game,
+  RootState, Study, Clock, User, Chessqueries, ChessqueriesOutputs, ModelRefs, MovesData, MovesPair, 
+  Game, ErrorSource, AppError,
   SetBoolean, SetStringArray, SetNumber, SetFps, Mode,
-  SetStudy, VideoRef, Roi, RoiRef, SetRoi, CornerName, SetOrientation
+  SetStudy, VideoRef, Roi, RoiRef, SetRoi, CornerName, SetOrientation, Camera
 }

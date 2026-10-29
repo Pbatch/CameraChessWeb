@@ -1,11 +1,10 @@
-import { userReset, userSetToken, userSetUsername } from '../slices/userSlice';
-import type { Dispatch } from 'react';
-import type { UnknownAction } from '@reduxjs/toolkit';
-import type { NavigateFunction } from 'react-router-dom';
+import { userReset, userSet } from '../slices/userSlice';
+import type { NavigateFunction } from 'react-router';
 import type { Study } from '../types';
 import type { components, operations } from '@lichess-org/types';
 
 const lichessHost = 'https://lichess.org';
+const STREAM_RETRY_DELAY = 5000;
 const scopes = ["study:write", "study:read", "board:play"];
 const clientId = 'camera-chess-web';
 const clientUrl = `${location.protocol}//${location.host}/`;
@@ -23,6 +22,40 @@ const codeChallenge = async (verifier: string) => {
   const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(verifier));
   return base64Url(new Uint8Array(digest));
 }
+
+// A failed request, keeping its HTTP status so callers can tell what went wrong
+export class LichessError extends Error {
+  readonly status: number;
+
+  constructor(status: number, message: string) {
+    super(message);
+    this.status = status;
+  }
+}
+
+const lichessError = async (response: Response): Promise<LichessError> => {
+  const details = await response.text();
+  return new LichessError(response.status, `${response.status} ${response.statusText}${details ? `: ${details}` : ''}`);
+}
+
+// Why a Lichess request failed, as a sentence for the user
+export const describeLichessError = (error: unknown): string => {
+  if (error instanceof LichessError) {
+    if (error.status === 401) return "Your Lichess login has expired. Please log in again.";
+    if (error.status === 403) return "Lichess did not allow this. Logging in again may help.";
+    if (error.status === 404) return "Lichess could not find it.";
+    if (error.status === 429) return "Lichess is limiting requests. Try again in a minute.";
+    if (error.status >= 500) return "Lichess is having problems. Try again shortly.";
+    return `Lichess refused the request (${error.status}).`;
+  }
+  // fetch rejects with a TypeError when the network fails
+  if (error instanceof TypeError) return "Lichess could not be reached. Check your connection.";
+  return (error instanceof Error) ? error.message : String(error);
+}
+
+// Worth retrying, rather than a request Lichess will keep refusing
+export const isTransientError = (error: unknown): boolean =>
+  !(error instanceof LichessError) || error.status === 429 || error.status >= 500;
 
 const takePkceState = (): PkceState | null => {
   const stored = sessionStorage.getItem(pkceStorageKey);
@@ -43,8 +76,7 @@ const exchangeCode = async (code: string, verifier: string): Promise<string> => 
     }),
   });
   if (!response.ok) {
-    const details = await response.text();
-    throw new Error(`${response.status} ${response.statusText}${details ? `: ${details}` : ''}`);
+    throw await lichessError(response);
   }
   const { access_token } = await response.json() as TokenResult;
   return access_token;
@@ -101,8 +133,7 @@ const fetchResponse = async (token: string, path: string, options: RequestInit =
   }
   const response = await fetch(`${lichessHost}${path}`, config);
   if (!response.ok) {
-    const details = await response.text();
-    throw new Error(`${response.status} ${response.statusText}${details ? `: ${details}` : ''}`);
+    throw await lichessError(response);
   }
   return response;
 };
@@ -151,14 +182,14 @@ export const lichessLogin = async () => {
   location.assign(`${lichessHost}/oauth?${params}`);
 }
 
-export const lichessLogout = async (dispatch: Dispatch<UnknownAction>, token: string) => {
+export const lichessLogout = async (token: string) => {
   try {
     await fetchResponse(token, '/api/token', { method: 'DELETE' });
   } catch (error) {
     console.warn('Unable to revoke Lichess token.', error);
   }
   sessionStorage.removeItem(pkceStorageKey);
-  dispatch(userReset());
+  userReset();
 }
 
 const lichessGetAccount = (token: string): Promise<Account> => {
@@ -208,19 +239,54 @@ export const lichessPushRound = async (token: string, pgn: string, roundId: stri
   return result;
 }
 
-export const lichessStreamGame = (token: string, callback: (event: BoardStreamEvent) => void | Promise<void>, gameId: string) => {
+export interface GameStreamHandlers {
+  onEvent: (event: BoardStreamEvent) => void | Promise<void>,
+  // The stream opened, at first or after a reconnect
+  onConnect: () => void,
+  // The connection failed, and another attempt follows if reconnecting
+  onDisconnect: (error: unknown, reconnecting: boolean) => void,
+  // An event could not be handled. The stream carries on, as a reconnect would only resend it.
+  onEventError: (error: unknown) => void
+}
+
+// Reconnects after a transient failure; Lichess resends the whole game when a stream opens
+export const lichessStreamGame = (token: string, gameId: string, handlers: GameStreamHandlers) => {
   const path = `/api/board/game/stream/${gameId}`;
   const controller = new AbortController();
-  void fetchResponse(token, path, {
-    signal: controller.signal,
-    headers: { Accept: 'application/x-ndjson' }
-  })
-    .then(readStream(callback))
-    .catch((error: unknown) => {
-      if (!controller.signal.aborted) {
+  let retryTimeout: ReturnType<typeof setTimeout> | undefined;
+  controller.signal.addEventListener('abort', () => clearTimeout(retryTimeout));
+
+  const onEvent = async (event: BoardStreamEvent) => {
+    try {
+      await handlers.onEvent(event);
+    } catch (error) {
+      console.error('Unable to handle a Lichess game event.', event, error);
+      handlers.onEventError(error);
+    }
+  };
+
+  const connect = () => {
+    void fetchResponse(token, path, {
+      signal: controller.signal,
+      headers: { Accept: 'application/x-ndjson' }
+    })
+      .then((response) => {
+        handlers.onConnect();
+        return readStream(onEvent)(response);
+      })
+      .catch((error: unknown) => {
+        if (controller.signal.aborted) {
+          return;
+        }
         console.error('Lichess game stream failed.', error);
-      }
-    });
+        const reconnecting: boolean = isTransientError(error);
+        handlers.onDisconnect(error, reconnecting);
+        if (reconnecting) {
+          retryTimeout = setTimeout(connect, STREAM_RETRY_DELAY);
+        }
+      });
+  }
+  connect();
   return controller;
 }
 
@@ -237,7 +303,7 @@ export const lichessPlayMove = (token: string, gameId: string, move: string) => 
   return fetchResponse(token, path, options);
 }
 
-export const lichessTrySetUser = async (navigate: NavigateFunction, dispatch: Dispatch<UnknownAction>) => {
+export const lichessTrySetUser = async (navigate: NavigateFunction) => {
   const params = new URLSearchParams(location.search);
   const code = params.get('code');
   const error = params.get('error');
@@ -251,18 +317,20 @@ export const lichessTrySetUser = async (navigate: NavigateFunction, dispatch: Di
     return;
   }
 
-  if (error !== null || code === null || params.get('state') !== pkce.state) {
-    console.warn('Lichess authorization failed.', error ?? 'state mismatch', params.get('error_description') ?? '');
+  try {
+    if (error === 'access_denied') {
+      console.warn('Lichess authorization was cancelled.');
+      return;
+    }
+    if (error !== null || code === null || params.get('state') !== pkce.state) {
+      throw new Error(`Lichess authorization failed: ${error ?? 'state mismatch'} ${params.get('error_description') ?? ''}`);
+    }
+
+    const newToken = await exchangeCode(code, pkce.verifier);
+    // Both together, so a failed account lookup does not leave a token without a username
+    const account = await lichessGetAccount(newToken);
+    userSet({ token: newToken, username: account.username });
+  } finally {
     void navigate("/");
-    return;
   }
-
-  const newToken = await exchangeCode(code, pkce.verifier);
-  dispatch(userSetToken(newToken));
-
-  const account = await lichessGetAccount(newToken);
-  const username: string = account.username;
-  dispatch(userSetUsername(username))
-
-  void navigate("/");
 }

@@ -1,18 +1,16 @@
 import type { ButtonHTMLAttributes } from "react";
+import buttonClass from "./buttonClass";
+import type { ButtonVariant } from "./buttonClass";
 
 type SidebarButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
-  // Bootstrap button variant, e.g. "success" or "outline-danger"
-  variant?: string;
+  variant?: ButtonVariant;
 };
 
 const SidebarButton = ({ children, className = "", variant = "outline-light", ...buttonProps }:
   SidebarButtonProps) => {
-  // Outline variants keep the dark fill so they match the rest of the sidebar
-  const variantClass = variant.startsWith("outline-") ? `btn-dark btn-${variant}` : `btn-${variant}`;
-
   return (
     <button {...buttonProps} type={buttonProps.type ?? "button"}
-      className={`btn btn-sm ${variantClass} w-100 ${className}`.trim()}>
+      className={`${buttonClass(variant, "sm")} w-full ${className}`.trim()}>
       {children}
     </button>
   )

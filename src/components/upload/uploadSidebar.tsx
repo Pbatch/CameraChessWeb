@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { VideoButton, PlayButton, RestartButton, PlaybackButtons } from "./buttons";
-import { Sidebar, SidebarSection, FenButton, RoiButton, StopButton } from "../common";
+import { Sidebar, SidebarSection, FenButton, RoiButton, StopButton, ButtonGroup } from "../common";
 import type {
   ModelRefs, Roi, SetBoolean, SetRoi, SetStringArray, VideoRef
 } from "../../types";
@@ -33,11 +33,11 @@ const UploadSidebar = ({ videoRef, chessqueriesModelRef,
         <PlaybackButtons videoRef={videoRef} videoSelected={videoSelected} />
       </SidebarSection>
       <SidebarSection title="Playback">
-        <div className="btn-group w-100" role="group" aria-label="Video controls">
+        <ButtonGroup label="Video controls">
           <PlayButton videoRef={videoRef} playing={playing} setPlaying={setPlaying} videoSelected={videoSelected} />
           <StopButton videoRef={videoRef} setPlaying={setPlaying} setText={setText} disabled={!videoSelected} />
           <RestartButton videoRef={videoRef} setText={setText} videoSelected={videoSelected} />
-        </div>
+        </ButtonGroup>
       </SidebarSection>
     </Sidebar>
   );

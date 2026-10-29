@@ -7,15 +7,13 @@ import { Board } from "chessops/board";
 import type { Color } from "chessops/types";
 import { EMPTY, LABEL_MAP, NUM_LABELS, PIECE_SYMBOLS, labelToPiece } from "../utils/constants";
 import { zeros } from "../utils/math";
-import { gameResetMoves, gameSetFen, gameSetStart } from "../slices/gameSlice";
+import { gameReset } from "../slices/gameSlice";
 import type { ModelRefs, Roi, SetStringArray, VideoRef } from "../types";
-import type { Dispatch, UnknownAction } from "@reduxjs/toolkit";
 
 interface FindFenInput {
   chessqueriesModelRef: ModelRefs["chessqueriesModelRef"],
   videoRef: VideoRef,
   roi: Roi | null,
-  dispatch: Dispatch<UnknownAction>,
   setText: SetStringArray,
   color: Color
 }
@@ -51,7 +49,7 @@ const topTwoSquares = (state: number[][], label: number): [number, number] => {
 
 // King squares with the highest combined score. Only a shared best square needs
 // a runner-up, so the best pair always uses each king's best or second best square.
-const kingSquares = (state: number[][]): [number, number] => {
+export const kingSquares = (state: number[][]): [number, number] => {
   const [black1, black2] = topTwoSquares(state, BLACK_KING);
   const [white1, white2] = topTwoSquares(state, WHITE_KING);
   if (black1 !== white1) {
@@ -103,7 +101,7 @@ export const stateToBoard = (state: number[][]): Board => {
 }
 
 export const findFen = async ({ chessqueriesModelRef, videoRef, roi,
-  dispatch, setText, color }: FindFenInput) => {
+  setText, color }: FindFenInput) => {
   if (invalidVideo(videoRef)) {
     return;
   }
@@ -132,8 +130,6 @@ export const findFen = async ({ chessqueriesModelRef, videoRef, roi,
   }
 
   const fen = makeFen(setup);
-  dispatch(gameSetStart(fen));
-  dispatch(gameSetFen(fen));
-  dispatch(gameResetMoves());
+  gameReset(fen);
   setText(["Set starting FEN"]);
 }

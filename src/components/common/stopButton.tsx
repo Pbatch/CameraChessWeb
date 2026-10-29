@@ -1,13 +1,12 @@
-import { useDispatch } from "react-redux";
 import type { SetBoolean, SetStringArray, VideoRef } from "../../types";
-import { gameResetFen, gameResetMoves } from "../../slices/gameSlice";
+import { gameRestart } from "../../slices/gameSlice";
 import SidebarButton from "./sidebarButton";
+import { Square } from "lucide-react";
 import Icon from "./icon";
 
 const StopButton = ({ setPlaying, setText, videoRef, disabled = false }: {
   setPlaying: SetBoolean, setText: SetStringArray, videoRef?: VideoRef, disabled?: boolean
 }) => {
-  const dispatch = useDispatch();
   const label = videoRef ? "Stop and reset video" : "Stop and reset game";
 
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -19,14 +18,13 @@ const StopButton = ({ setPlaying, setText, videoRef, disabled = false }: {
     }
 
     setPlaying(false);
-    dispatch(gameResetMoves());
-    dispatch(gameResetFen());
+    gameRestart();
     setText(["Reset to start position"])
   }
 
  return (
     <SidebarButton onClick={handleClick} variant="outline-danger" disabled={disabled} aria-label={label} title={label}>
-      <Icon iconName="bi-stop-fill" />
+      <Icon icon={Square} filled={true} />
     </SidebarButton>
   );
 };

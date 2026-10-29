@@ -3,6 +3,7 @@ import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { defineConfig, type Plugin } from "vite";
 import react from "@vitejs/plugin-react";
+import tailwindcss from "@tailwindcss/vite";
 import { VitePWA } from "vite-plugin-pwa";
 import { playwright } from "@vitest/browser-playwright";
 
@@ -28,11 +29,9 @@ const litertWasm = (): Plugin => ({
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  define: {
-    "process.env": {},
-  },
   plugins: [
     react(),
+    tailwindcss(),
     litertWasm(),
     VitePWA({
       workbox: {
@@ -63,9 +62,6 @@ export default defineConfig({
           }
         ]
       },
-      includeAssets: [
-          "**/*",
-      ],
       manifest: {
         "id": "/",
         "name": "ChessCam",
@@ -110,7 +106,7 @@ export default defineConfig({
     projects: [
       {
         extends: true,
-        test: { name: "unit", include: ["src/**/*.test.ts"] }
+        test: { name: "unit", include: ["src/**/*.test.ts"], setupFiles: ["src/test/setup.ts"] }
       },
       {
         // Measures real layout, so it needs a browser; jsdom has no layout engine
@@ -121,8 +117,7 @@ export default defineConfig({
           browser: {
             enabled: true,
             provider: playwright(),
-            // Headed, as headless Chrome isn't representative of the real app
-            headless: false,
+            headless: true,
             instances: [{ browser: "chromium" }]
           }
         }

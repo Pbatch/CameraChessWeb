@@ -77,32 +77,18 @@ const RoiSelector = ({ videoRef, roi, setRoi, selecting, setSelecting }: {
   const video = videoRef.current;
   const shown: Roi | null = draft ?? (selecting ? null : roi);
 
-  const overlayStyle: React.CSSProperties = {
-    position: "absolute",
-    inset: 0,
-    // Keeps the region's shadow on the video
-    overflow: "hidden",
-    cursor: selecting ? "crosshair" : "default",
-    pointerEvents: selecting ? "auto" : "none",
-    touchAction: "none",
-    backgroundColor: selecting ? "rgba(0, 0, 0, 0.2)" : "transparent"
-  }
-
   const rectStyle = (rect: Roi, width: number, height: number): React.CSSProperties => ({
-    position: "absolute",
     left: `${100 * rect.x / width}%`,
     top: `${100 * rect.y / height}%`,
     width: `${100 * rect.width / width}%`,
-    height: `${100 * rect.height / height}%`,
-    border: "2px solid white",
-    boxShadow: "0 0 0 9999px rgba(0, 0, 0, 0.4)"
+    height: `${100 * rect.height / height}%`
   })
 
   return (
-    <div style={overlayStyle} onPointerDown={onPointerDown} onPointerMove={onPointerMove}
+    <div className={selecting ? "roi-overlay roi-overlay--selecting" : "roi-overlay"} onPointerDown={onPointerDown} onPointerMove={onPointerMove}
       onPointerUp={onPointerUp} onPointerCancel={onPointerUp}>
       {(shown !== null && video !== null && video.videoWidth > 0) &&
-        <div style={rectStyle(shown, video.videoWidth, video.videoHeight)} />
+        <div className="roi-overlay__region" style={rectStyle(shown, video.videoWidth, video.videoHeight)} />
       }
     </div>
   );

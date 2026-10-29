@@ -32,15 +32,15 @@ const data = {
               Make sure that the tallest piece (the king or queen) is still in shot when placed on the furthest square from the camera.
             </li>
             <li>
-              <figure className="figure">
-                <img src="halfZoom.webp" className="figure-img img-fluid rounded" alt="0.5x zoom setup" />
-                <figcaption className="figure-caption text-white">My setup with 0.5x zoom</figcaption>
+              <figure className="mb-4 inline-block">
+                <img src="halfZoom.webp" className="mb-2 h-auto max-w-full rounded-md" alt="0.5x zoom setup" />
+                <figcaption className="text-sm text-white">My setup with 0.5x zoom</figcaption>
               </figure>
             </li>
             <li>
-              <figure className="figure">
-                <img src="fullZoom.webp" className="figure-img img-fluid rounded" alt="1x zoom setup" />
-                <figcaption className="figure-caption text-white">My setup with 1x zoom</figcaption>
+              <figure className="mb-4 inline-block">
+                <img src="fullZoom.webp" className="mb-2 h-auto max-w-full rounded-md" alt="1x zoom setup" />
+                <figcaption className="text-sm text-white">My setup with 1x zoom</figcaption>
               </figure>
             </li>
           </ul>
@@ -289,9 +289,9 @@ const data = {
 
 const FAQ = () => {
   return (
-    <div className="faq-page-wrapper bg-dark h-100 overflow-auto text-white">
-      <main className="faq-page container py-4">
-        <h1 className="h2 mb-4">{data.title}</h1>
+    <div className="faq-page-wrapper h-full overflow-auto bg-dark text-white">
+      <main className="faq-page mx-auto w-full px-3 py-6">
+        <h1 className="mb-6 text-[min(1.325rem+0.9vw,2rem)]/[1.2] font-medium">{data.title}</h1>
         <section className="faq-list" aria-label={data.title}>
           {data.rows.map(({ title, content }) => (
             <details className="faq-item" key={title}>
@@ -300,7 +300,7 @@ const FAQ = () => {
             </details>
           ))}
         </section>
-        <div className="mt-4">
+        <div className="mt-6">
           <HomeButton />
         </div>
       </main>

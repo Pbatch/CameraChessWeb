@@ -1,17 +1,14 @@
-import "bootstrap/dist/css/bootstrap.min.css";
 import "../../style/index.css";
 import { act, createRef } from "react";
 import type { ComponentProps, ComponentType } from "react";
 import { createRoot } from "react-dom/client";
 import type { Root } from "react-dom/client";
-import { Provider } from "react-redux";
-import { MemoryRouter } from "react-router-dom";
-import { combineReducers, configureStore } from "@reduxjs/toolkit";
+import { MemoryRouter } from "react-router";
 import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { page } from "vitest/browser";
-import { gameReducer, userReducer } from "../../slices";
+import { useStore } from "../../store";
 import { gameSetClock } from "../../slices/gameSlice";
-import { userSetToken } from "../../slices/userSlice";
+import { userSet } from "../../slices/userSlice";
 import Container from "./container";
 import RecordSidebar from "../record/recordSidebar";
 import UploadSidebar from "../upload/uploadSidebar";
@@ -21,8 +18,6 @@ import PlaySidebar from "../play/playSidebar";
 // A Pixel 7a in landscape: 915 x 412 CSS px, less Chrome's status bar and toolbar
 const PHONE_WIDTH = 915;
 const PHONE_HEIGHT = 330;
-
-const ICONS_CSS = "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css";
 
 declare global {
   var IS_REACT_ACT_ENVIRONMENT: boolean;
@@ -43,13 +38,13 @@ let host: HTMLDivElement | null = null;
 
 const renderSidebar = async (Sidebar: SidebarComponent, playing: boolean): Promise<HTMLElement> => {
   // Signed in, so Export shows, and with a clock, so the preview is as tall as it gets
-  const store = configureStore({ reducer: combineReducers({ game: gameReducer, user: userReducer }) });
-  store.dispatch(userSetToken("token"));
-  store.dispatch(gameSetClock({ wtime: 600000, btime: 600000, turn: "w", updatedAt: Date.now(), running: false }));
+  userSet({ token: "token", username: "" });
+  gameSetClock({ wtime: 600000, btime: 600000, turn: "w", updatedAt: Date.now(), running: false });
 
   const noop = () => {};
   const props = {
     videoRef: createRef<HTMLVideoElement>(),
+    camera: { devices: [], deviceId: null, selectDevice: noop },
     chessqueriesModelRef: { current: null },
     playing, setPlaying: noop,
     text: ["Starting game", "White vs DrNykterstein"], setText: noop,
@@ -66,13 +61,11 @@ const renderSidebar = async (Sidebar: SidebarComponent, playing: boolean): Promi
   root = createRoot(host);
   await act(async () => {
     root?.render(
-      <Provider store={store}>
-        <MemoryRouter>
-          <Container className="video-and-sidebar">
-            <Sidebar {...props} />
-          </Container>
-        </MemoryRouter>
-      </Provider>
+      <MemoryRouter>
+        <Container className="video-and-sidebar">
+          <Sidebar {...props} />
+        </Container>
+      </MemoryRouter>
     );
   });
 
@@ -90,16 +83,6 @@ describe("sidebar on a landscape phone", () => {
     vi.stubGlobal("fetch", async () => new Response("", { status: 200 }));
     document.body.style.margin = "0";
 
-    // Icons set the height of icon-only buttons, so measure with the real font
-    const link = document.createElement("link");
-    link.rel = "stylesheet";
-    link.href = ICONS_CSS;
-    await new Promise((resolve) => {
-      link.onload = resolve;
-      link.onerror = resolve;
-      document.head.appendChild(link);
-    });
-
     await page.viewport(PHONE_WIDTH, PHONE_HEIGHT);
   });
 
@@ -108,6 +91,7 @@ describe("sidebar on a landscape phone", () => {
     host?.remove();
     root = null;
     host = null;
+    useStore.setState(useStore.getInitialState(), true);
   });
 
   for (const [mode, Sidebar] of SIDEBARS) {

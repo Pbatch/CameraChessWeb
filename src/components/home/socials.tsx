@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 
 const socials = [
   {
@@ -18,7 +18,7 @@ const socials = [
 const Socials = () => {
   return (<>
     {socials.map(({ name, network, url, path }) => (
-    <div key={network} className="col">
+    <div key={network} className="flex-1 px-3">
       <a
         className={`social-link social-link--${network}`}
         href={url}
@@ -28,13 +28,13 @@ const Socials = () => {
         <svg className="social-link__icon" viewBox="0 0 16 16" aria-hidden="true">
           <path d={path} />
         </svg>
-        <span className="visually-hidden">
+        <span className="sr-only">
           Visit ChessCam on {name} (opens in a new tab)
         </span>
       </a>
     </div>
     ))}
-    <div className="col">
+    <div className="flex-1 px-3">
       <Link className="social-link social-link--faq" to="/faq">
         FAQ
       </Link>

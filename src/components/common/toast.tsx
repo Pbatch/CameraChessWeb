@@ -1,54 +1,38 @@
-import { useEffect, useState } from "react";
-import { useGame } from "../../slices/gameSlice";
-import type { Game } from "../../types";
+import { useState } from "react";
+import { errorClear, useLatestError } from "../../slices/errorSlice";
+import type { AppError } from "../../types";
+import { X } from "lucide-react";
+import Icon from "./icon";
 
 const Toast = () => {
-  const game: Game = useGame();
-  const [visible, setVisible] = useState(false);
-  const [show, setShow] = useState(false);
+  const error: AppError | null = useLatestError();
+  // The error fading out, which is cleared once the fade ends
+  const [hiding, setHiding] = useState<AppError | null>(null);
+
+  if (error === null) return null;
 
   const dismiss = () => {
-    setVisible(false);
+    setHiding(error);
     setTimeout(() => {
-      setShow(false);
+      errorClear(error.source);
+      setHiding(null);
     }, 300);
   };
 
-  useEffect(() => {
-    if (game.error) {
-      setShow(true);
-      setVisible(true);
-    }
-  }, [game.error]);
-
-  if (!show || !game.error) return null;
-
   return (
-    <div
-      className="position-fixed top-0 end-0 m-3"
-      style={{ zIndex: 9999 }}
-    >
-      <div
-        className="toast show"
-        role="alert"
-        style={{
-          backgroundColor: "#dc3545",
-          color: "white",
-          opacity: visible ? 1 : 0,
-          transition: "opacity 0.3s ease-in-out",
-        }}
-      >
-        <div className="toast-body d-flex justify-content-between align-items-center">
-          {game.error}
-          <button
-            type="button"
-            className="btn-close btn-close-white"
-            onClick={dismiss}
-            aria-label="Dismiss error"
-            title="Dismiss error"
-            style={{ filter: "invert(1)" }}
-          />
-        </div>
+    <div className={`error-toast fixed end-0 top-0 z-9999 m-4 transition-opacity duration-300${(hiding === error) ? " opacity-0" : ""}`}>
+      <div className="flex w-[350px] max-w-[calc(100vw-2rem)] items-center justify-between gap-2 rounded-md bg-danger p-3 text-sm text-white shadow-lg"
+        role="alert">
+        {error.message}
+        <button
+          type="button"
+          className="shrink-0 rounded p-1 leading-none opacity-50 hover:opacity-75 focus-visible:opacity-100 focus-visible:ring-4 focus-visible:ring-white/25 focus-visible:outline-none"
+          onClick={dismiss}
+          aria-label="Dismiss error"
+          title="Dismiss error"
+        >
+          <Icon icon={X} className="" />
+        </button>
       </div>
     </div>
   );

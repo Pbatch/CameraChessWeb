@@ -1,10 +1,22 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { MemoryStorage, makeGame } from "./test/helpers";
+import { MemoryStorage } from "./test/helpers";
 
 const user = { token: "lip_abc", username: "magnus" };
-const game = makeGame("1. e4");
 
-const loadStore = async () => (await import("./store")).default;
+const loadStore = async () => (await import("./store")).useStore;
+// The slices from the same module registry as the last loaded store
+const loadSlices = async () => ({
+  ...await import("./slices/gameSlice"),
+  ...await import("./slices/userSlice"),
+  ...await import("./slices/errorSlice")
+});
+const saved = (storage: Storage) => JSON.parse(storage.getItem("chesscam") ?? "null");
+
+class FullStorage extends MemoryStorage {
+  setItem() {
+    throw new DOMException("Quota exceeded", "QuotaExceededError");
+  }
+}
 
 describe("store", () => {
   let storage: MemoryStorage;
@@ -19,34 +31,53 @@ describe("store", () => {
     vi.unstubAllGlobals();
   });
 
-  it("restores saved state", async () => {
-    storage.setItem("state", JSON.stringify({ game, user }));
+  it("restores the saved user", async () => {
+    storage.setItem("chesscam", JSON.stringify({ state: { user }, version: 0 }));
     const store = await loadStore();
-    expect(store.getState()).toEqual({ game, user });
+    expect(store.getState().user).toEqual(user);
   });
 
-  it("migrates redux-persist state and removes the old key", async () => {
-    storage.setItem("persist:root", JSON.stringify({
-      game: JSON.stringify(game),
-      user: JSON.stringify(user),
-      _persist: JSON.stringify({ version: 1, rehydrated: true })
-    }));
+  it("fills fields missing from the saved user", async () => {
+    storage.setItem("chesscam", JSON.stringify({ state: { user: { token: "lip_abc" } }, version: 0 }));
     const store = await loadStore();
-    expect(store.getState()).toEqual({ game, user });
-    expect(JSON.parse(storage.getItem("state") ?? "")).toEqual({ game, user });
-    expect(storage.getItem("persist:root")).toBeNull();
+    expect(store.getState().user).toEqual({ token: "lip_abc", username: "" });
+  });
+
+  it("deletes Redux's saved state", async () => {
+    storage.setItem("state", JSON.stringify({ user }));
+    storage.setItem("persist:root", "{}");
+    const store = await loadStore();
+    expect(store.getState().user.token).toBe("");
+    expect(storage.length).toBe(0);
   });
 
   it("falls back to initial state when saved state is corrupt", async () => {
-    storage.setItem("state", "{not json");
+    storage.setItem("chesscam", "{not json");
     vi.spyOn(console, "warn").mockImplementation(() => {});
     const store = await loadStore();
     expect(store.getState().user.token).toBe("");
   });
 
-  it("saves state when it changes", async () => {
+  it("saves only the user", async () => {
+    await loadStore();
+    const { errorShow, gameReset, userSet } = await loadSlices();
+    userSet(user);
+    gameReset("8/8/8/8/8/8/8/K6k w - - 0 1");
+    errorShow({ source: "login", message: "Something failed" });
+    expect(saved(storage)).toEqual({ state: { user }, version: 0 });
+  });
+
+  it("keeps working when localStorage is full", async () => {
+    vi.stubGlobal("localStorage", new FullStorage());
+    vi.spyOn(console, "warn").mockImplementation(() => {});
     const store = await loadStore();
-    store.dispatch({ type: "game/gameSetFen", payload: "8/8/8/8/8/8/8/K6k w - - 0 1" });
-    expect(JSON.parse(storage.getItem("state") ?? "").game.fen).toBe("8/8/8/8/8/8/8/K6k w - - 0 1");
+    (await loadSlices()).userSet(user);
+    expect(store.getState().user).toEqual(user);
+  });
+
+  it("clears saved state", async () => {
+    storage.setItem("chesscam", "{}");
+    (await import("./store")).clearSavedState();
+    expect(storage.length).toBe(0);
   });
 });
