@@ -10,7 +10,7 @@ const BoardNumberInput = ({ setBoardNumber }: {setBoardNumber: SetNumber }) => {
       <label className="form-check-label" htmlFor="board">
         Board:&nbsp;
       </label>
-      <input type="number" id="board" onChange={handleChange} min={1} max={64} />
+      <input type="number" id="board" className="form-control form-control-sm d-inline-block w-auto" onChange={handleChange} min={1} max={64} />
     </div>
   )
 }

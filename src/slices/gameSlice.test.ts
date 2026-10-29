@@ -1,6 +1,15 @@
-import { describe, expect, it } from "vitest";
-import gameReducer, { gameSetClock, gameUpdate, makeBoard, makePgn, makeUpdatePayload } from "./gameSlice";
+import { beforeEach, describe, expect, it } from "vitest";
+import { gameReset, gameRestart, gameSetClock, gameUpdate, makeBoard, makePgn, makeUpdatePayload } from "./gameSlice";
+import { useStore } from "../store";
 import { makeGame } from "../test/helpers";
+import type { Game } from "../types";
+
+const setGame = (game: Game) => useStore.setState({ game });
+const getGame = () => useStore.getState().game;
+
+beforeEach(() => {
+  useStore.setState(useStore.getInitialState(), true);
+});
 
 describe("makeBoard", () => {
   it("replays the stored moves", () => {
@@ -22,6 +31,7 @@ describe("makeBoard", () => {
     const board = makeBoard(makeGame());
     expect(board.playUci("zz")).toBeNull();
     expect(board.playSan("Qxh7")).toBeNull();
+    expect(board.playUci("e2e5")).toBeNull();
     expect(board.history).toHaveLength(0);
   });
 
@@ -85,9 +95,35 @@ describe("makePgn", () => {
 describe("gameUpdate", () => {
   it("keeps the start position and clock", () => {
     const clock = { wtime: 1000, btime: 2000, turn: "w" as const, updatedAt: 0, running: true };
-    const state = gameReducer(makeGame(), gameSetClock(clock));
-    const payload = makeUpdatePayload(makeBoard(makeGame("1. e4")));
-    const updated = gameReducer(state, gameUpdate(payload));
-    expect(updated).toMatchObject({ moves: "1. e4", start: state.start, clock });
+    gameSetClock(clock);
+    gameUpdate(makeUpdatePayload(makeBoard(makeGame("1. e4"))));
+    expect(getGame()).toMatchObject({ moves: "1. e4", start: makeGame().start, clock });
+  });
+});
+
+describe("gameReset", () => {
+  const start = "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1";
+  const clock = { wtime: 1000, btime: 2000, turn: "w" as const, updatedAt: 0, running: true };
+
+  it("starts a new game from the given position, keeping the clock", () => {
+    setGame({ ...makeGame("1. e4 e5"), greedy: true, fromOpponent: true, clock });
+    gameReset(start);
+    expect(getGame()).toEqual({ ...makeGame("", start), clock });
+  });
+
+  it("defaults to the standard start position", () => {
+    setGame(makeGame("1... e5", start));
+    gameReset();
+    expect(getGame()).toEqual(makeGame());
+  });
+});
+
+describe("gameRestart", () => {
+  it("takes back every move, keeping the start position", () => {
+    const start = "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1";
+    setGame(makeGame("", start));
+    gameUpdate(makeUpdatePayload(makeBoard(makeGame("1... e5 2. Nf3", start)), true));
+    gameRestart();
+    expect(getGame()).toEqual(makeGame("", start));
   });
 });

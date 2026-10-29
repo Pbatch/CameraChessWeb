@@ -4,14 +4,12 @@ import { act, createRef } from "react";
 import type { ComponentProps, ComponentType } from "react";
 import { createRoot } from "react-dom/client";
 import type { Root } from "react-dom/client";
-import { Provider } from "react-redux";
-import { MemoryRouter } from "react-router-dom";
-import { combineReducers, configureStore } from "@reduxjs/toolkit";
+import { MemoryRouter } from "react-router";
 import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { page } from "vitest/browser";
-import { gameReducer, userReducer } from "../../slices";
+import { useStore } from "../../store";
 import { gameSetClock } from "../../slices/gameSlice";
-import { userSetToken } from "../../slices/userSlice";
+import { userSet } from "../../slices/userSlice";
 import Container from "./container";
 import RecordSidebar from "../record/recordSidebar";
 import UploadSidebar from "../upload/uploadSidebar";
@@ -43,9 +41,8 @@ let host: HTMLDivElement | null = null;
 
 const renderSidebar = async (Sidebar: SidebarComponent, playing: boolean): Promise<HTMLElement> => {
   // Signed in, so Export shows, and with a clock, so the preview is as tall as it gets
-  const store = configureStore({ reducer: combineReducers({ game: gameReducer, user: userReducer }) });
-  store.dispatch(userSetToken("token"));
-  store.dispatch(gameSetClock({ wtime: 600000, btime: 600000, turn: "w", updatedAt: Date.now(), running: false }));
+  userSet({ token: "token", username: "" });
+  gameSetClock({ wtime: 600000, btime: 600000, turn: "w", updatedAt: Date.now(), running: false });
 
   const noop = () => {};
   const props = {
@@ -67,13 +64,11 @@ const renderSidebar = async (Sidebar: SidebarComponent, playing: boolean): Promi
   root = createRoot(host);
   await act(async () => {
     root?.render(
-      <Provider store={store}>
-        <MemoryRouter>
-          <Container className="video-and-sidebar">
-            <Sidebar {...props} />
-          </Container>
-        </MemoryRouter>
-      </Provider>
+      <MemoryRouter>
+        <Container className="video-and-sidebar">
+          <Sidebar {...props} />
+        </Container>
+      </MemoryRouter>
     );
   });
 
@@ -109,6 +104,7 @@ describe("sidebar on a landscape phone", () => {
     host?.remove();
     root = null;
     host = null;
+    useStore.setState(useStore.getInitialState(), true);
   });
 
   for (const [mode, Sidebar] of SIDEBARS) {

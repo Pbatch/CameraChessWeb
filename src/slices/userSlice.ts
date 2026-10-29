@@ -1,32 +1,14 @@
-import { createSlice } from '@reduxjs/toolkit'
-import { useSelector } from 'react-redux';
-import type { RootState } from '../types';
+import { useStore, initialUser } from '../store';
+import type { User } from '../types';
 
-const initialState = {
-  "token": "",
-  "username": ""
-};
-
-const userSlice = createSlice({
-  name: 'user',
-  initialState,
-  reducers: {
-    userSetToken(state, action) {
-      state.token = action.payload
-    },
-    userSetUsername(state, action) {
-      state.username = action.payload
-    },
-    userReset() {
-      return initialState
-    }
-  }
-})
-
-export const useUser = () => {
-  return useSelector((state: RootState) => state.user)
+export const userSet = (user: User) => {
+  useStore.setState({ user });
 }
 
+export const userReset = () => {
+  useStore.setState({ user: initialUser });
+}
 
-export const { userSetToken, userSetUsername, userReset } = userSlice.actions
-export default userSlice.reducer
+export const useUser = () => {
+  return useStore((state) => state.user)
+}

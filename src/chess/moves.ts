@@ -5,7 +5,7 @@ import { makeSan } from "chessops/san";
 import { kingCastlesTo } from "chessops/util";
 import { SQUARE_MAP, LABEL_MAP, SQUARE_NAMES, pieceToLabel } from "../utils/constants";
 import type { MovesData, MovesPair } from "../types";
-import type { CameraChessBoard } from "../slices/gameSlice";
+import type { GameBoard } from "./board";
 
 function* legalMoves(pos: Position): Generator<Move> {
   const ctx = pos.ctx();
@@ -60,10 +60,10 @@ const getData = (pos: Position, move: Move) => {
   }
 
   const moveData: MovesData = {
-    "sans": [makeSan(pos, move)],
-    "from": fromSquares,
-    "to": toSquares,
-    "targets": targets
+    sans: [makeSan(pos, move)],
+    from: fromSquares,
+    to: toSquares,
+    targets
   }
   return moveData;
 }
@@ -87,10 +87,10 @@ const combineData = (move1Data: MovesData, move2Data: MovesData) => {
   const targets = targets1.concat(move2Data.targets);
 
   const data: MovesData = {
-    "sans": [move1Data.sans[0], move2Data.sans[0]],
-    "from": from,
-    "to": to,
-    "targets": targets
+    sans: [move1Data.sans[0], move2Data.sans[0]],
+    from,
+    to,
+    targets
   }
   return data;
 }
@@ -116,9 +116,9 @@ export const getMovesPairs = (board: Position) => {
 
       const movesData = combineData(move1Data, move2Data);
       const movesPair: MovesPair = {
-        "move1": move1Data,
-        "move2": move2Data,
-        "moves": movesData
+        move1: move1Data,
+        move2: move2Data,
+        moves: movesData
       }
       movesPairs.push(movesPair);
       done = false;
@@ -126,9 +126,9 @@ export const getMovesPairs = (board: Position) => {
 
     if (done) {
       const movesPair: MovesPair = {
-        "move1": move1Data,
-        "move2": null,
-        "moves": null
+        move1: move1Data,
+        move2: null,
+        moves: null
       }
       movesPairs.push(movesPair);
     }
@@ -138,8 +138,8 @@ export const getMovesPairs = (board: Position) => {
 }
 
 // The last one or two moves, numbered from the board's start position, e.g. "3...Nc6 4.Bb5"
-export const getMoveText = (board: CameraChessBoard): string => {
-  const setup = parseFen(board.startFen).unwrap();
+export const getMoveText = (board: GameBoard): string => {
+  const setup = parseFen(board.start).unwrap();
   const initialPly = (setup.fullmoves - 1) * 2 + (setup.turn === 'white' ? 0 : 1);
   const firstIndex = Math.max(0, board.history.length - 2);
 

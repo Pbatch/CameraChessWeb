@@ -1,5 +1,5 @@
 import { gameUpdate, makeUpdatePayload } from "../slices/gameSlice";
-import type { CameraChessBoard } from "../slices/gameSlice";
+import type { GameBoard } from "../chess/board";
 import { invalidVideo } from "./detect";
 import { getOrientation, runChessqueries } from "./chessqueries";
 import type {
@@ -8,12 +8,11 @@ import type {
 import { EMPTY, NUM_LABELS } from "../utils/constants";
 import { parseSan } from "chessops/san";
 import { makeUci } from "chessops/util";
-import type { Dispatch, UnknownAction } from "@reduxjs/toolkit";
 import type { RefObject } from "react";
 import type { Position } from "chessops/chess";
 
 // Above 0.5, a class must be the most likely for its square, as the probabilities sum to 1
-const calculateScore = (state: number[][], move: MovesData, from_thr = 0.5, to_thr = 0.5) => {
+export const calculateScore = (state: number[][], move: MovesData, from_thr = 0.5, to_thr = 0.5) => {
   let score = 0;
   move.from.forEach(square => {
     score += state[square][EMPTY] - from_thr;
@@ -26,7 +25,7 @@ const calculateScore = (state: number[][], move: MovesData, from_thr = 0.5, to_t
   return score
 }
 
-const processState = (state: number[][], movesPairs: MovesPair[], possibleMoves: Set<string>): {
+export const processState = (state: number[][], movesPairs: MovesPair[], possibleMoves: Set<string>): {
   bestScore1: number, bestScore2: number, bestJointScore: number,
   bestMove: MovesData | null, bestMoves: MovesData | null
 } => {
@@ -82,6 +81,41 @@ const updateState = (state: number[][], update: number[][], decay: number = 0.5)
 
 // How often the FPS shown updates, in ms
 const FPS_INTERVAL = 1000;
+// Detections per second of video, to spare the GPU and battery.
+// Faster playback scales it, e.g. 16 FPS at 4x; the live camera plays at 1x.
+const MAX_FPS = 4;
+
+// Keeps the same array when the text is unchanged, so React skips re-rendering the page every frame
+const setTextIfChanged = (setText: SetStringArray, text: string[]) => {
+  setText((prev) => ((prev.length === text.length) && prev.every((t, i) => t === text[i])) ? prev : text);
+}
+
+// How long a single move must stay the best, without a break, before it is played, in ms
+const GREEDY_TIME = 1000;
+
+// The best single move, and since when it has been the best without a break
+export class GreedyTimer {
+  #move: string | null = null;
+  #since: number = 0;
+
+  reset() {
+    this.#move = null;
+  }
+
+  // Whether the move has been the best for long enough. A null move (no good move this frame) is a break.
+  update(move: string | null, now: number): boolean {
+    if (move === null) {
+      this.#move = null;
+      return false;
+    }
+    // A different best move restarts the timer
+    if (move !== this.#move) {
+      this.#move = move;
+      this.#since = now;
+    }
+    return (now - this.#since) > GREEDY_TIME;
+  }
+}
 
 const sanToLan = (board: Position, san: string): string => {
   const move = parseSan(board, san);
@@ -97,8 +131,7 @@ interface FindPiecesInput {
   setText: SetStringArray,
   setFps: SetFps,
   setOrientation: SetOrientation,
-  dispatch: Dispatch<UnknownAction>,
-  boardRef: RefObject<CameraChessBoard>,
+  boardRef: RefObject<GameBoard>,
   movesPairsRef: RefObject<MovesPair[]>,
   lastMoveRef: RefObject<string>,
   moveTextRef: RefObject<string>,
@@ -106,36 +139,75 @@ interface FindPiecesInput {
 }
 
 export const findPieces = ({ chessqueriesModelRef, videoRef, roiRef, playingRef, setText, setFps, setOrientation,
-  dispatch, boardRef, movesPairsRef, lastMoveRef, moveTextRef, mode }: FindPiecesInput) => {
+  boardRef, movesPairsRef, lastMoveRef, moveTextRef, mode }: FindPiecesInput) => {
   let state: number[][] | null = null;
   let direction: number[] | null = null;
   let orientationKey: string = "";
   let possibleMoves: Set<string>;
   let requestId: number;
-  // The best single move, and since when it has been the best without a break
-  let greedyMove: string | null = null;
-  let greedySince: number = 0;
-  // Frame times since the FPS was last shown, which is about once a second so it's readable
+  const greedy = new GreedyTimer();
+  // Detections started since the FPS was last shown, which is about once a second so it's readable
   let fpsSince: number = 0;
   let fpsFrames: number = 0;
-  let fpsTime: number = 0;
   let active = true;
+  // When the next detection may start
+  let nextRunTime: number = 0;
+  // Whether the video has shown a frame that has not been detected yet. Browsers without
+  // requestVideoFrameCallback cannot tell, so every frame counts as new.
+  let frameVideo: HTMLVideoElement | null = null;
+  let frameCallbackId: number | undefined;
+  let newFrame: boolean = true;
+
+  const watchFrames = (video: HTMLVideoElement | null) => {
+    if (video === frameVideo) {
+      return;
+    }
+    if (frameVideo !== null && frameCallbackId !== undefined) {
+      frameVideo.cancelVideoFrameCallback(frameCallbackId);
+    }
+    frameVideo = video;
+    frameCallbackId = undefined;
+    newFrame = true;
+    if (video === null || typeof video.requestVideoFrameCallback !== "function") {
+      return;
+    }
+    const onFrame = () => {
+      newFrame = true;
+      frameCallbackId = video.requestVideoFrameCallback(onFrame);
+    }
+    frameCallbackId = video.requestVideoFrameCallback(onFrame);
+  }
 
   const loop = async () => {
     try {
+      watchFrames(videoRef.current);
+      const now: number = performance.now();
       if (playingRef.current === false || invalidVideo(videoRef)) {
         if (state !== null) {
           setFps(null);
           fpsFrames = 0;
-          fpsTime = 0;
         }
         state = null
-      } else {
+      } else if (newFrame && now >= nextRunTime) {
+        newFrame = (frameCallbackId === undefined);
+        const minFrameTime: number = 1000 / (MAX_FPS * (videoRef.current?.playbackRate || 1));
+        // Steps by the interval, so the frames a display ticks on do not round the rate down,
+        // but catches up by at most half an interval after a slow frame
+        nextRunTime = Math.max(nextRunTime + minFrameTime, now + minFrameTime / 2);
         if (state === null) {
           possibleMoves = new Set<string>;
-          greedyMove = null;
+          greedy.reset();
         }
         const startTime: number = performance.now();
+        // The real rate, from start to start, so it shows the cap and any time between detections
+        if (fpsFrames === 0) {
+          fpsSince = startTime;
+        } else if ((startTime - fpsSince) >= FPS_INTERVAL) {
+          setFps(1000 * fpsFrames / (startTime - fpsSince));
+          fpsSince = startTime;
+          fpsFrames = 0;
+        }
+        fpsFrames += 1;
 
         const { update, direction: newDirection } = await runChessqueries(chessqueriesModelRef, videoRef, roiRef.current);
         // A NaN would stay in the smoothed state for good, and no move scores above 0 against it.
@@ -169,27 +241,17 @@ export const findPieces = ({ chessqueriesModelRef, videoRef, roiRef, playingRef,
           if (hasMove) {
             boardRef.current.playSan(move);
             possibleMoves.clear();
-            greedyMove = null;
+            greedy.reset();
           }
         }
 
         let hasGreedyMove: boolean = false;
-        if (bestMove === null || hasMove || (bestScore1 <= 0)) {
-          greedyMove = null;
-        } else {
-          const move: string = bestMove.sans[0];
-          // A different best move, or a frame without one, restarts the second
-          if (move !== greedyMove) {
-            greedyMove = move;
-            greedySince = endTime;
-          }
-
-          const secondElapsed = (endTime - greedySince) > 1000;
-          const newMove = sanToLan(boardRef.current, move) !== lastMoveRef.current;
-          hasGreedyMove = secondElapsed && newMove;
+        const greedyMove: string | null = (bestMove === null || hasMove || (bestScore1 <= 0)) ? null : bestMove.sans[0];
+        if (greedy.update(greedyMove, endTime) && greedyMove !== null) {
+          hasGreedyMove = sanToLan(boardRef.current.position, greedyMove) !== lastMoveRef.current;
           if (hasGreedyMove) {
-            boardRef.current.playSan(move);
-            greedyMove = null;
+            boardRef.current.playSan(greedyMove);
+            greedy.reset();
           }
         }
 
@@ -197,23 +259,13 @@ export const findPieces = ({ chessqueriesModelRef, videoRef, roiRef, playingRef,
           // No takebacks in "play" mode
           const greedy = (mode === "play") ? false : hasGreedyMove;
           const payload = makeUpdatePayload(boardRef.current, greedy);
-          dispatch(gameUpdate(payload));
+          gameUpdate(payload);
         }
-        if (fpsFrames === 0) {
-          fpsSince = startTime;
-        }
-        fpsFrames += 1;
-        fpsTime += endTime - startTime;
-        if ((endTime - fpsSince) >= FPS_INTERVAL) {
-          setFps(1000 * fpsFrames / fpsTime);
-          fpsFrames = 0;
-          fpsTime = 0;
-        }
-        setText([moveTextRef.current]);
+        setTextIfChanged(setText, [moveTextRef.current]);
       }
     } catch (error) {
       console.error("Piece detection failed", error);
-      setText(["Piece detection failed", (error instanceof Error) ? error.message : String(error)]);
+      setTextIfChanged(setText, ["Piece detection failed", (error instanceof Error) ? error.message : String(error)]);
     } finally {
       if (active) {
         requestId = requestAnimationFrame(() => {
@@ -231,5 +283,6 @@ export const findPieces = ({ chessqueriesModelRef, videoRef, roiRef, playingRef,
     if (requestId) {
       window.cancelAnimationFrame(requestId);
     }
+    watchFrames(null);
   };
 };

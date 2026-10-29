@@ -1,9 +1,3 @@
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
 html, body {
   width: 100%;
   /* Follows the mobile address bar as it shows and hides */
@@ -282,6 +276,80 @@ a, button, input, label, select, summary, textarea {
   font-variant-numeric: tabular-nums;
   pointer-events: none;
   user-select: none;
+}
+
+/* Fills the space beside (or above) the sidebar, which the display is sized against */
+.video-stage {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  container-type: size;
+}
+
+.video-live {
+  position: relative;
+  background-color: #343a40;
+}
+
+.video-live__container {
+  width: 100%;
+  height: 100%;
+}
+
+.video-live__wrapper {
+  position: relative;
+  display: inline-block;
+  height: 100%;
+}
+
+.video-live__video {
+  width: auto;
+  height: 100%;
+}
+
+.roi-overlay {
+  position: absolute;
+  inset: 0;
+  /* Keeps the region's shadow on the video */
+  overflow: hidden;
+  pointer-events: none;
+  touch-action: none;
+}
+
+.roi-overlay--selecting {
+  cursor: crosshair;
+  pointer-events: auto;
+  background-color: rgb(0 0 0 / 20%);
+}
+
+.roi-overlay__region {
+  position: absolute;
+  border: 2px solid white;
+  box-shadow: 0 0 0 9999px rgb(0 0 0 / 40%);
+}
+
+.orientation-marker {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: white;
+  /* Set explicitly, as the dark theme's inherited text colour is light */
+  color: #212529;
+  pointer-events: none;
+  user-select: none;
+}
+
+.error-toast {
+  z-index: 9999;
+}
+
+.error-toast .toast {
+  transition: opacity 0.3s ease-in-out;
+}
+
+.error-toast--hidden .toast {
+  opacity: 0;
 }
 
 /* Landscape phones (e.g. a Pixel 7a in Chrome has ~330px): group by spacing alone */

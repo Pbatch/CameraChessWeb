@@ -1,13 +1,12 @@
 import { findPieces } from "../../vision/findPieces";
 import { useEffect, useRef, useState } from "react";
 import { MEDIA_ASPECT_RATIO } from "../../utils/constants";
-import { useDispatch } from 'react-redux';
 import type {
   CornerName, Game, Mode, ModelRefs, MovesPair, Roi, RoiRef, SetRoi,
   SetBoolean, SetFps, SetStringArray, VideoRef
 } from "../../types";
 import { makeBoard, useGame } from "../../slices/gameSlice";
-import type { CameraChessBoard } from "../../slices/gameSlice";
+import type { GameBoard } from "../../chess/board";
 import { getMovesPairs, getMoveText } from "../../chess/moves";
 import RoiSelector from "./roiSelector";
 import OrientationMarkers, { MARKER_DIAMETER } from "./orientationMarkers";
@@ -29,15 +28,13 @@ const Video = ({ chessqueriesModelRef, videoRef, playing,
   }) => {
   const game: Game = useGame();
 
-  const boardRef = useRef<CameraChessBoard>(makeBoard(game));
-  const movesPairsRef = useRef<MovesPair[]>(getMovesPairs(boardRef.current));
+  const boardRef = useRef<GameBoard>(makeBoard(game));
+  const movesPairsRef = useRef<MovesPair[]>(getMovesPairs(boardRef.current.position));
   const lastMoveRef = useRef<string>(game.lastMove);
   const moveTextRef = useRef<string>("");
   const [orientation, setOrientation] = useState<CornerName[] | null>(null);
   // Cameras return whichever native mode is closest to the request, so the real shape is only known once frames arrive
   const [aspectRatio, setAspectRatio] = useState<number>(MEDIA_ASPECT_RATIO);
-
-  const dispatch = useDispatch();
 
   useEffect(() => {
     const board = makeBoard(game);
@@ -45,7 +42,7 @@ const Video = ({ chessqueriesModelRef, videoRef, playing,
     if (game.greedy === true) {
       board.undo();
     } else {
-      movesPairsRef.current = getMovesPairs(board);
+      movesPairsRef.current = getMovesPairs(board.position);
     }
     boardRef.current = board;
     lastMoveRef.current = game.lastMove;
@@ -53,8 +50,8 @@ const Video = ({ chessqueriesModelRef, videoRef, playing,
 
   useEffect(() => {
     return findPieces({ chessqueriesModelRef, videoRef, roiRef, playingRef, setText, setFps, setOrientation,
-      dispatch, boardRef, movesPairsRef, lastMoveRef, moveTextRef, mode });
-  }, [dispatch, mode, chessqueriesModelRef, playingRef, roiRef, setFps, setText, videoRef]);
+      boardRef, movesPairsRef, lastMoveRef, moveTextRef, mode });
+  }, [mode, chessqueriesModelRef, playingRef, roiRef, setFps, setText, videoRef]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -73,33 +70,7 @@ const Video = ({ chessqueriesModelRef, videoRef, playing,
     });
   }, [canPlay, mode, playing, setPlaying, setText, videoRef])
 
-  const videoContainerStyle: React.CSSProperties = {
-    width: "100%",
-    height: "100%"
-  }
-
-  const videoWrapperStyle: React.CSSProperties = {
-    position: "relative",
-    display: "inline-block",
-    height: "100%"
-  }
-
-  const videoStyle: React.CSSProperties = {
-    width: "auto",
-    height: "100%"
-  }
-
-  // Fills the space beside (or above) the sidebar, which the display is sized against
-  const stageStyle: React.CSSProperties = {
-    flex: 1,
-    minWidth: 0,
-    minHeight: 0,
-    containerType: "size"
-  }
-
   const liveStyle: React.CSSProperties = {
-    position: "relative",
-    backgroundColor: "#343a40",
     // As large as fits in the stage at the video's aspect ratio
     width: `min(100cqw, 100cqh * ${aspectRatio})`,
     aspectRatio: `${aspectRatio}`
@@ -149,12 +120,12 @@ const Video = ({ chessqueriesModelRef, videoRef, playing,
   }
 
   return (
-    <div className="d-flex align-items-start justify-content-center" style={stageStyle}>
-      <div style={liveStyle} >
-        <div style={videoContainerStyle} >
-          <div style={videoWrapperStyle}>
+    <div className="video-stage d-flex align-items-start justify-content-center">
+      <div className="video-live" style={liveStyle}>
+        <div className="video-live__container">
+          <div className="video-live__wrapper">
             <video ref={videoRef} autoPlay={mode !== "upload"} playsInline={true} muted={true}
-              style={videoStyle} onResize={onResize}
+              className="video-live__video" onResize={onResize}
               onCanPlay={onCanPlay} onLoadStart={onLoadStart} onError={onError} onEnded={onEnded} />
             <RoiSelector videoRef={videoRef} roi={roi} setRoi={setRoi}
               selecting={selecting} setSelecting={setSelecting} />

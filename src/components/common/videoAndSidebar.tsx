@@ -1,17 +1,18 @@
 import { useRef, useState, useEffect } from "react";
 import Video from "../common/video";
-import { useOutletContext } from "react-router-dom";
-import { useDispatch } from 'react-redux';
+import { useOutletContext } from "react-router";
 import { Container } from "../common";
 import type { Mode, ModelRefs, Roi, Study } from "../../types";
 import RecordSidebar from "../record/recordSidebar";
 import UploadSidebar from "../upload/uploadSidebar";
 import BroadcastSidebar from "../broadcast/broadcastSidebar";
-import { gameResetFen, gameResetMoves, gameResetStart, makePgn, useGame } from "../../slices/gameSlice";
-import { lichessPushRound } from "../../api/lichess";
+import { gameReset, makePgn, useGame } from "../../slices/gameSlice";
+import { describeLichessError, isTransientError, lichessPushRound } from "../../api/lichess";
+import { errorClear, errorShow } from "../../slices/errorSlice";
 import { useUser } from "../../slices/userSlice";
 import PlaySidebar from "../play/playSidebar";
-import { useCamera, useMediaQuery } from "../../utils/hooks";
+import { useMediaQuery } from "../../utils/hooks";
+import { useCamera } from "../../utils/useCamera";
 
 const PortraitWarning = () => {
   return (
@@ -24,7 +25,6 @@ const PortraitWarning = () => {
 
 const VideoAndSidebar = ({ mode }: { mode: Mode }) => {
   const context = useOutletContext<ModelRefs>();
-  const dispatch = useDispatch();
   const token: string = useUser().token;
   const { moves, start } = useGame();
   const isPortrait = useMediaQuery('(orientation: portrait)');
@@ -59,8 +59,21 @@ const VideoAndSidebar = ({ mode }: { mode: Mode }) => {
       Annotator: "ChessCam"
     });
     void lichessPushRound(token, broadcastPgn, study.id)
-      .catch((error: unknown) => console.error('Unable to push Lichess broadcast round.', error));
+      .then(() => errorClear("broadcast"))
+      .catch((error: unknown) => {
+        console.error('Unable to push Lichess broadcast round.', error);
+        // Each push sends the whole game, so the next move catches the broadcast up
+        const retry: string = isTransientError(error) ? " It will retry on the next move." : "";
+        errorShow({ source: "broadcast", message: `Unable to update the Lichess broadcast. ${describeLichessError(error)}${retry}` });
+      });
   }, [boardNumber, mode, moves, start, study, token])
+
+  // A broadcast error no longer applies once the broadcast is left
+  useEffect(() => {
+    return () => {
+      errorClear("broadcast");
+    };
+  }, []);
 
   useEffect(() => {
     playingRef.current = playing;
@@ -71,33 +84,31 @@ const VideoAndSidebar = ({ mode }: { mode: Mode }) => {
   }, [roi]);
 
   useEffect(() => {
-    dispatch(gameResetStart());
-    dispatch(gameResetMoves());
-    dispatch(gameResetFen());
-  }, [dispatch]);
+    gameReset();
+  }, []);
 
   const props = {
-    "playing": playing,
-    "text": text,
-    "study": study,
-    "setPlaying": setPlaying,
-    "setText": setText,
-    "fps": fps,
-    "setFps": setFps,
-    "setBoardNumber": setBoardNumber,
-    "setStudy": setStudy,
-    "roi": roi,
-    "setRoi": setRoi,
-    "selecting": selecting,
-    "setSelecting": setSelecting,
-    "canPlay": canPlay,
-    "setCanPlay": setCanPlay,
-    "roiRef": roiRef,
-    "chessqueriesModelRef": context.chessqueriesModelRef,
-    "videoRef": videoRef,
-    "camera": camera,
-    "playingRef": playingRef,
-    "mode": mode
+    playing,
+    text,
+    study,
+    setPlaying,
+    setText,
+    fps,
+    setFps,
+    setBoardNumber,
+    setStudy,
+    roi,
+    setRoi,
+    selecting,
+    setSelecting,
+    canPlay,
+    setCanPlay,
+    roiRef,
+    chessqueriesModelRef: context.chessqueriesModelRef,
+    videoRef,
+    camera,
+    playingRef,
+    mode
   }
   const renderSidebar = () => {
     switch(mode) {

@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import { useUser } from "../../slices/userSlice";
 
 const NavButton = ({ text, description, tokenRequired }:

@@ -28,9 +28,6 @@ const litertWasm = (): Plugin => ({
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  define: {
-    "process.env": {},
-  },
   plugins: [
     react(),
     litertWasm(),
@@ -63,9 +60,6 @@ export default defineConfig({
           }
         ]
       },
-      includeAssets: [
-          "**/*",
-      ],
       manifest: {
         "id": "/",
         "name": "ChessCam",
@@ -110,7 +104,7 @@ export default defineConfig({
     projects: [
       {
         extends: true,
-        test: { name: "unit", include: ["src/**/*.test.ts"] }
+        test: { name: "unit", include: ["src/**/*.test.ts"], setupFiles: ["src/test/setup.ts"] }
       },
       {
         // Measures real layout, so it needs a browser; jsdom has no layout engine
@@ -121,8 +115,7 @@ export default defineConfig({
           browser: {
             enabled: true,
             provider: playwright(),
-            // Headed, as headless Chrome isn't representative of the real app
-            headless: false,
+            headless: true,
             instances: [{ browser: "chromium" }]
           }
         }

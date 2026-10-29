@@ -1,18 +1,16 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import { useUser } from "../../slices/userSlice";
 import { lichessLogin, lichessLogout } from "../../api/lichess";
-import { useDispatch } from "react-redux";
 
 const Header = () => {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
   const { username, token } = useUser();
 
   const handleClick = () => {
     if (username === "") {
       void lichessLogin();
     } else {
-      void lichessLogout(dispatch, token)
+      void lichessLogout(token)
         .then(() => void navigate("/"));
     }
   }

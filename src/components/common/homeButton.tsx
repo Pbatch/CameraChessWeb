@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import SidebarButton from "./sidebarButton";
 import Icon from "./icon";
 

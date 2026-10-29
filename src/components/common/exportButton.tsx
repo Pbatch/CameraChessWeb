@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import type { SetStringArray, Study } from "../../types";
 import { useUser } from "../../slices/userSlice";
 import { makePgn, useGame } from "../../slices/gameSlice";
-import { lichessImportPgnToStudy, lichessSetStudies } from "../../api/lichess";
+import { describeLichessError, lichessImportPgnToStudy, lichessSetStudies } from "../../api/lichess";
 
 const createName = () => {
   const now = new Date();
@@ -17,12 +17,20 @@ const createName = () => {
 
 const ExportButton = ({ setText }: { setText: SetStringArray }) => {
   const [studies, setStudies] = useState<Study[]>([]);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const { token, username } = useUser();
   const pgn: string = makePgn(useGame());
 
   useEffect(() => {
-    void lichessSetStudies(token, setStudies, username, false)
-      .catch((error: unknown) => console.error("Unable to load Lichess studies", error));
+    const onStudies = (studies: Study[]) => {
+      setStudies(studies);
+      setLoadError(null);
+    }
+    void lichessSetStudies(token, onStudies, username, false)
+      .catch((error: unknown) => {
+        console.error("Unable to load Lichess studies", error);
+        setLoadError(describeLichessError(error));
+      });
   }, [token, username]);
 
   const handleClick = async (study: Study) => {
@@ -32,7 +40,7 @@ const ExportButton = ({ setText }: { setText: SetStringArray }) => {
       setText(["Exported game to", `"${study.name}/${name}"`]);
     } catch (error) {
       console.error("Unable to export game to Lichess study", error);
-      setText(["Unable to export game to Lichess study"]);
+      setText(["Unable to export game to Lichess study", describeLichessError(error)]);
     }
   }
 
@@ -43,7 +51,9 @@ const ExportButton = ({ setText }: { setText: SetStringArray }) => {
         Export
       </button>
       <ul className="dropdown-menu" aria-labelledby="exportButton">
-        {(studies.length === 0) ?
+        {(loadError !== null) ?
+          <li><span className="dropdown-item-text">{loadError}</span></li> :
+          (studies.length === 0) ?
           <li><span className="dropdown-item-text">No studies found</span></li> :
           studies.map(study =>
             <li key={study.id}>

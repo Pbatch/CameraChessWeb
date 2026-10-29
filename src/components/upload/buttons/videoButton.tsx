@@ -62,7 +62,7 @@ const VideoButton = ({ videoRef, setPlaying, videoSelected, setVideoSelected }: 
       <input
         type="file"
         accept="video/*"
-        style={{ display: "none" }}
+        hidden
         onChange={handleOnChange}
         ref={inputVideoRef}
       />

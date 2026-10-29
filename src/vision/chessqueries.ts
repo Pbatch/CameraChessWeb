@@ -53,6 +53,11 @@ let gpuInput: Tensor | null = null;
 let gpuResize: GpuResize | null = null;
 // Runs share gpuInput, so each waits for the one before it to finish reading it
 let lastRun: Promise<unknown> = Promise.resolve();
+// Set when the browser takes the GPU away (e.g. a backgrounded phone tab), so the model is reloaded
+let deviceLost: boolean = false;
+let recovering: Promise<void> | null = null;
+let recoveryError: Error | null = null;
+const RECOVERY_RUN_TIMEOUT = 2000;
 
 // The accelerator the model was compiled for, once it has loaded
 export const getAccelerator = (): Accelerator | null => accelerator;
@@ -177,14 +182,16 @@ const warmUp = (model: CompiledModel) => run(model, null, null);
 
 // Firefox's shader-f16 overflows to NaN on some frames, though the same frames are fine without it.
 // Without the feature, LiteRT's fp16 precision still works, so only the feature is left out.
-const setDeviceWithoutF16 = async () => {
+// Otherwise the same device LiteRT makes for itself, which is also how a lost device is replaced.
+const setWebGpuDevice = async () => {
   const adapter: GPUAdapter | null = await navigator.gpu.requestAdapter({ powerPreference: "high-performance" });
   if (adapter === null) {
     throw new Error("No GPU adapter found");
   }
+  const features: string[] = navigator.userAgent.includes("Firefox/") ? ["subgroups"] : ["shader-f16", "subgroups"];
   // The limits LiteRT asks for on its own device
   const device: GPUDevice = await adapter.requestDevice({
-    requiredFeatures: adapter.features.has("subgroups") ? ["subgroups" as GPUFeatureName] : [],
+    requiredFeatures: features.filter((feature) => adapter.features.has(feature)) as GPUFeatureName[],
     requiredLimits: {
       maxBufferSize: adapter.limits.maxBufferSize,
       maxStorageBufferBindingSize: adapter.limits.maxStorageBufferBindingSize,
@@ -211,7 +218,11 @@ const loadWebGpu = async (): Promise<CompiledModel> => {
       device.addEventListener("uncapturederror", (event) => {
         console.error("WebGPU error", (event as GPUUncapturedErrorEvent).error.message);
       });
-      void device.lost.then((info) => console.error("WebGPU device lost", info.reason, info.message));
+      // The app never destroys its device, so any loss is the browser's
+      void device.lost.then((info) => {
+        console.error("WebGPU device lost", info.reason, info.message);
+        deviceLost = true;
+      });
     }
   } catch (error) {
     deleteGpuInput();
@@ -253,7 +264,7 @@ export const loadChessqueries = async (): Promise<CompiledModel> => {
   if (gpu) {
     try {
       if (navigator.userAgent.includes("Firefox/")) {
-        await setDeviceWithoutF16();
+        await setWebGpuDevice();
       }
       return await loadWebGpu();
     } catch (error) {
@@ -285,6 +296,57 @@ export const loadChessqueriesOnce = (modelRef: ModelRefs["chessqueriesModelRef"]
   });
 }
 
+// Swaps in a model on a new device, or on the CPU if the GPU will not come back
+const recover = async (modelRef: ModelRefs["chessqueriesModelRef"], oldModel: CompiledModel) => {
+  // A run on the lost device may never settle
+  await Promise.race([lastRun, new Promise((resolve) => setTimeout(resolve, RECOVERY_RUN_TIMEOUT))]);
+  lastRun = Promise.resolve();
+  modelRef.current = null;
+  try {
+    deleteGpuInput();
+    oldModel.delete();
+  } catch (error) {
+    console.warn("Unable to free the model on the lost device", error);
+  }
+  accelerator = null;
+  // Cleared first, so a loss of the new device is noticed too
+  deviceLost = false;
+
+  let model: CompiledModel;
+  try {
+    await setWebGpuDevice();
+    model = await loadWebGpu();
+  } catch (error) {
+    console.warn("WebGPU did not come back, falling back to the CPU", error);
+    // LiteRT loaded without threads, as WebGPU was in use
+    model = await loadWasm(false);
+  }
+  modelRef.current = model;
+  // So a remounted App gets the new model rather than the deleted one
+  loading = Promise.resolve(model);
+}
+
+// Starts a reload after the GPU is lost, and says why detection is paused meanwhile
+const checkDevice = (modelRef: ModelRefs["chessqueriesModelRef"]) => {
+  if (recoveryError !== null) {
+    throw recoveryError;
+  }
+  const model = modelRef.current;
+  if (deviceLost && recovering === null && model !== null) {
+    recovering = recover(modelRef, model)
+      .catch((error: unknown) => {
+        console.error("Unable to reload the model", error);
+        recoveryError = new Error("Unable to reload the model. Please reload the page.");
+      })
+      .finally(() => {
+        recovering = null;
+      });
+  }
+  if (recovering !== null) {
+    throw new Error("The GPU was reset. Reloading the model...");
+  }
+}
+
 // RGBA bytes as the model takes them, viewing the canvas data without a copy. Used on the CPU, and on WebGPU without external textures.
 const getPixels = (video: HTMLVideoElement, roi: Roi | null): Uint8Array<ArrayBuffer> => {
   if (canvas === null) {
@@ -307,7 +369,7 @@ const getPixels = (video: HTMLVideoElement, roi: Roi | null): Uint8Array<ArrayBu
 
 // Direction of rank 8 in video pixels, from the attention centroids in FEN order (a8..h1).
 // The centroids are pulled towards the board centre, so only the rank and file directions are used.
-const toDirection = (centroids: Float32Array, width: number, height: number): number[] => {
+export const toDirection = (centroids: Float32Array, width: number, height: number): number[] => {
   const up: number[] = [0, 0];
   const right: number[] = [0, 0];
   for (let i = 0; i < 64; i++) {
@@ -334,7 +396,7 @@ export const getOrientation = (direction: number[]): CornerName[] => {
 }
 
 // Probabilities in FEN order (a8..h1) -> 64x13 state in square order (a1..h8)
-const toUpdate = (probs: Float32Array): number[][] => {
+export const toUpdate = (probs: Float32Array): number[][] => {
   const update: number[][] = zeros(64, NUM_LABELS);
   for (let i = 0; i < 64; i++) {
     const rank: number = 7 - Math.floor(i / 8);
@@ -352,6 +414,7 @@ export const runChessqueries = async (
   videoRef: VideoRef,
   roi: Roi | null
 ): Promise<{ update: number[][], direction: number[] | null }> => {
+  checkDevice(modelRef);
   const model = modelRef.current;
   const video = videoRef.current;
   if (model === null || video === null) {

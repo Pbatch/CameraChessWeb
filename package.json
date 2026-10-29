@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "start": "vite",
-    "build": "npm run tsc && biome lint src --error-on-warnings && vite build",
+    "build": "npm test && npm run tsc && biome lint src --error-on-warnings && vite build",
     "lint": "biome lint src --error-on-warnings",
     "tsc": "tsc && tsc -p tsconfig.node.json",
     "preview": "vite preview",
@@ -16,13 +16,13 @@
   "license": "AGPL-3.0-only",
   "dependencies": {
     "@litertjs/core": "2.6.0",
-    "@reduxjs/toolkit": "^2.12.0",
     "bootstrap": "^5.3.8",
+    "bootstrap-icons": "^1.13.2",
     "chessops": "^0.15.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
-    "react-redux": "^9.3.0",
-    "react-router-dom": "^7.18.1"
+    "react-router": "^7.18.5",
+    "zustand": "^5.0.16"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.9",
