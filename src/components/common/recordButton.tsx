@@ -1,4 +1,5 @@
 import type { SetBoolean } from "../../types";
+import { Pause, Play } from "lucide-react";
 import Icon from "./icon";
 import SidebarButton from "./sidebarButton";
 
@@ -18,7 +19,7 @@ const RecordButton = ({ playing, setPlaying }:
       aria-pressed={playing}
       title={playing ? "Pause" : "Play"}
     >
-      <Icon iconName={playing ? "bi-pause-fill" : "bi-play-fill"} />
+      <Icon icon={playing ? Pause : Play} filled={true} />
     </SidebarButton>
   );
 };

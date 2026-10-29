@@ -3,6 +3,7 @@ import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { defineConfig, type Plugin } from "vite";
 import react from "@vitejs/plugin-react";
+import tailwindcss from "@tailwindcss/vite";
 import { VitePWA } from "vite-plugin-pwa";
 import { playwright } from "@vitest/browser-playwright";
 
@@ -30,6 +31,7 @@ const litertWasm = (): Plugin => ({
 export default defineConfig({
   plugins: [
     react(),
+    tailwindcss(),
     litertWasm(),
     VitePWA({
       workbox: {

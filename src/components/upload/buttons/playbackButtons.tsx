@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import type { VideoRef } from "../../../types";
+import { ButtonGroup } from "../../common";
+import buttonClass from "../../common/buttonClass";
 
 const PlaybackButton = ({ playbackRate, videoRef, videoSelected, selectedRate, setSelectedRate }: {
   playbackRate: number,
@@ -19,7 +21,7 @@ const PlaybackButton = ({ playbackRate, videoRef, videoSelected, selectedRate, s
   return (
     <button 
       type="button" 
-      className="btn btn-secondary btn-dark btn-outline-light w-100"
+      className={`${buttonClass()} w-full`}
       onClick={handleClick}
       disabled={!videoSelected}
       aria-label={`Set playback speed to ${playbackRate} times`}
@@ -42,11 +44,11 @@ const PlayButton = ({ videoRef, videoSelected }: { videoRef: VideoRef, videoSele
   const props = { videoRef, videoSelected, selectedRate, setSelectedRate };
 
   return (
-    <div className="btn-group w-100" role="group" aria-label="Playback speed">
+    <ButtonGroup label="Playback speed">
       <PlaybackButton playbackRate={1} {...props} />
       <PlaybackButton playbackRate={2} {...props} />
       <PlaybackButton playbackRate={4} {...props} />
-    </div>
+    </ButtonGroup>
   );
 };
 

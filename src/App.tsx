@@ -1,7 +1,6 @@
 import { useEffect, useRef } from "react";
 import { type NavigateFunction, Outlet, useNavigate } from "react-router";
-import type { CompiledModel } from "@litertjs/core";
-import type { ModelRefs } from "./types";
+import type { Chessqueries, ModelRefs } from "./types";
 import { useUser } from "./slices/userSlice";
 import { describeLichessError, lichessTrySetUser } from "./api/lichess";
 import { Toast } from "./components/common";
@@ -10,7 +9,7 @@ import { errorShow } from "./slices/errorSlice";
 const App = () => {
   const navigate: NavigateFunction = useNavigate();
   const token = useUser().token;
-  const chessqueriesModelRef = useRef<CompiledModel | null>(null);
+  const chessqueriesModelRef = useRef<Chessqueries | null>(null);
   const modelRefs: ModelRefs = {
     chessqueriesModelRef,
   }

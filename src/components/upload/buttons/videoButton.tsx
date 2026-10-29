@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { Folder, FolderX } from "lucide-react";
 import { Icon, SidebarButton } from "../../common";
 import type { SetBoolean, VideoRef } from "../../../types";
 
@@ -68,12 +69,12 @@ const VideoButton = ({ videoRef, setPlaying, videoSelected, setVideoSelected }: 
       />
       <SidebarButton
         onClick={handleOnClick}
-        className="d-flex align-items-center justify-content-center"
+        className="flex items-center justify-center"
         aria-label={title}
         title={title}
       >
-        <Icon iconName={videoSelected ? "bi-folder-x" : "bi-folder"} className="me-2" />
-        <span className="text-truncate">{label}</span>
+        <Icon icon={videoSelected ? FolderX : Folder} className="me-2" />
+        <span className="truncate">{label}</span>
       </SidebarButton>
     </>
   );

@@ -1,4 +1,5 @@
 import { gameRestart } from "../../../slices/gameSlice";
+import { SkipBack } from "lucide-react";
 import { SidebarButton, Icon } from "../../common";
 import type { SetStringArray, VideoRef } from "../../../types";
 
@@ -23,7 +24,7 @@ const RestartButton = ({ videoRef, setText, videoSelected }: {
       aria-label="Restart video"
       title="Restart video"
     >
-      <Icon iconName="bi-skip-start-fill" />
+      <Icon icon={SkipBack} filled={true} />
     </SidebarButton>
   );
 };

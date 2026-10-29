@@ -1,7 +1,8 @@
 import { useRef, useState, useEffect } from "react";
 import Video from "../common/video";
 import { useOutletContext } from "react-router";
-import { Container } from "../common";
+import { Smartphone } from "lucide-react";
+import { Container, Icon } from "../common";
 import type { Mode, ModelRefs, Roi, Study } from "../../types";
 import RecordSidebar from "../record/recordSidebar";
 import UploadSidebar from "../upload/uploadSidebar";
@@ -16,9 +17,10 @@ import { useCamera } from "../../utils/useCamera";
 
 const PortraitWarning = () => {
   return (
-    <div className="d-flex flex-column align-items-center justify-content-center gap-3 w-100 p-3 text-white text-center">
-      <i className="bi bi-phone-landscape display-1" aria-hidden="true" />
-      <h1 className="h4 m-0">Rotate your device to landscape</h1>
+    <div className="flex w-full flex-1 flex-col items-center justify-center gap-4 p-4 text-center text-white">
+      {/* A phone on its side */}
+      <Icon icon={Smartphone} className="rotate-90 text-[5rem]" />
+      <h1 className="text-2xl/[1.2] font-medium">Rotate your device to landscape</h1>
     </div>
   )
 }

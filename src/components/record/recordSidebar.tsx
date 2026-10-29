@@ -1,4 +1,6 @@
-import { Sidebar, SidebarSection, RecordButton, StopButton, FenButton, DeviceButton, RoiButton } from "../common";
+import {
+  Sidebar, SidebarSection, RecordButton, StopButton, FenButton, DeviceButton, RoiButton, ButtonGroup
+} from "../common";
 import type {
   Camera, ModelRefs, Roi, SetBoolean, SetRoi, SetStringArray, VideoRef
 } from "../../types";
@@ -24,10 +26,10 @@ const RecordSidebar = ({ chessqueriesModelRef, videoRef, camera,
           canPlay={canPlay} />
       </SidebarSection>
       <SidebarSection title="Detection">
-        <div className="btn-group w-100" role="group" aria-label="Move detection controls">
+        <ButtonGroup label="Move detection controls">
           <RecordButton playing={playing} setPlaying={setPlaying} />
           <StopButton setPlaying={setPlaying} setText={setText} />
-        </div>
+        </ButtonGroup>
       </SidebarSection>
     </Sidebar>
   );

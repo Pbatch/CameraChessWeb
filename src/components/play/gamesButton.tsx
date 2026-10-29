@@ -6,7 +6,8 @@ import type { Dispatch, SetStateAction } from "react";
 import type { Color } from "chessops/types";
 import type { SetStringArray } from "../../types";
 import type { NowPlayingGame } from "../../api/lichess";
-import { Icon } from "../common";
+import { Gamepad2 } from "lucide-react";
+import { Dropdown, DropdownItem } from "../common";
 
 const GamesButton = ({ setGameId, setColor, setText }:
   {
@@ -42,25 +43,16 @@ const GamesButton = ({ setGameId, setColor, setText }:
   const label = (game === null) ? "Select a Game" : `Game: ${game.opponent.username}`;
 
   return (
-    <div className="dropdown">
-      <button type="button" className="btn btn-dark btn-sm btn-outline-light dropdown-toggle w-100 d-flex align-items-center justify-content-center" id="gamesButton" data-bs-toggle="dropdown" aria-expanded="false"
-        title={label} onClick={() => { void getGames().catch((error: unknown) => {
-          console.error("Unable to load Lichess games", error);
-          setText(["Unable to load Lichess games", describeLichessError(error)]);
-        }); }}>
-        <Icon iconName="bi-controller" className="me-2" />
-        <span className="text-truncate">{label}</span>
-      </button>
-      <ul className="dropdown-menu" aria-labelledby="gamesButton">
-        {games.map((game) =>
-          <li key={game.fullId}>
-            <button type="button" onClick={() => handleClick(game)} className="dropdown-item">
-              {game.opponent.username} ({game.gameId})
-            </button>
-          </li>
-        )}
-      </ul>
-    </div>
+    <Dropdown icon={Gamepad2} label={label} onClick={() => { void getGames().catch((error: unknown) => {
+      console.error("Unable to load Lichess games", error);
+      setText(["Unable to load Lichess games", describeLichessError(error)]);
+    }); }}>
+      {games.map((game) =>
+        <DropdownItem key={game.fullId} onClick={() => handleClick(game)}>
+          {game.opponent.username} ({game.gameId})
+        </DropdownItem>
+      )}
+    </Dropdown>
   );
 };
 

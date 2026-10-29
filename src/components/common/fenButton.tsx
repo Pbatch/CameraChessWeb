@@ -3,7 +3,8 @@ import { findFen } from "../../vision/findFen";
 import { gameReset } from "../../slices/gameSlice";
 import type { Color } from "chessops/types";
 import type { ModelRefs, Roi, SetStringArray, VideoRef } from "../../types";
-import Icon from "./icon";
+import { Grid3x3 } from "lucide-react";
+import Dropdown, { DropdownItem } from "./dropdown";
 
 const FenButton = ({ chessqueriesModelRef, videoRef, roi, setText, canPlay }:
   Pick<ModelRefs, "chessqueriesModelRef"> & {
@@ -30,20 +31,11 @@ const FenButton = ({ chessqueriesModelRef, videoRef, roi, setText, canPlay }:
   }
 
   return (
-    <div className="dropdown">
-      <button type="button" className="btn btn-dark btn-sm btn-outline-light dropdown-toggle w-100" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false"
-        disabled={!canPlay}>
-        <Icon iconName="bi-grid-3x3" className="me-2" />
-        Position: {option}
-      </button>
-      <ul className="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-        {options.map((option) =>
-          <li key={option}>
-            <button type="button" onClick={() => handleClick(option)} className="dropdown-item">{option}</button>
-          </li>
-        )}
-      </ul>
-    </div>
+    <Dropdown icon={Grid3x3} label={`Position: ${option}`} disabled={!canPlay}>
+      {options.map((option) =>
+        <DropdownItem key={option} onClick={() => handleClick(option)}>{option}</DropdownItem>
+      )}
+    </Dropdown>
   );
 };
 

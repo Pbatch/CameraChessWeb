@@ -27,7 +27,7 @@ const Clock = () => {
   const btime = clock.turn === "b" ? clock.btime - elapsed : clock.btime;
 
   return (
-    <div className="clock d-flex justify-content-between mt-2">
+    <div className="clock mt-2 flex justify-between">
       <span className={clock.turn === "w" ? "clock__time--active" : undefined}>
         {format(wtime)}
       </span>

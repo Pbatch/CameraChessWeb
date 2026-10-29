@@ -1,4 +1,3 @@
-import "bootstrap/dist/css/bootstrap.min.css";
 import "../../style/index.css";
 import { act, createRef } from "react";
 import type { ComponentProps, ComponentType } from "react";
@@ -19,8 +18,6 @@ import PlaySidebar from "../play/playSidebar";
 // A Pixel 7a in landscape: 915 x 412 CSS px, less Chrome's status bar and toolbar
 const PHONE_WIDTH = 915;
 const PHONE_HEIGHT = 330;
-
-const ICONS_CSS = "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css";
 
 declare global {
   var IS_REACT_ACT_ENVIRONMENT: boolean;
@@ -85,16 +82,6 @@ describe("sidebar on a landscape phone", () => {
     // Lichess calls (studies, games) get an empty reply
     vi.stubGlobal("fetch", async () => new Response("", { status: 200 }));
     document.body.style.margin = "0";
-
-    // Icons set the height of icon-only buttons, so measure with the real font
-    const link = document.createElement("link");
-    link.rel = "stylesheet";
-    link.href = ICONS_CSS;
-    await new Promise((resolve) => {
-      link.onload = resolve;
-      link.onerror = resolve;
-      document.head.appendChild(link);
-    });
 
     await page.viewport(PHONE_WIDTH, PHONE_HEIGHT);
   });

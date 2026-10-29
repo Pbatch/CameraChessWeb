@@ -1,3 +1,32 @@
+@import "tailwindcss";
+
+/* Bootstrap's colours, which the app was designed with */
+@theme {
+  --color-dark: #212529;
+  --color-light: #f8f9fa;
+  --color-success: #198754;
+  --color-warning: #ffc107;
+  --color-danger: #dc3545;
+}
+
+@layer base {
+  :root {
+    /* Dark scrollbars and form controls */
+    color-scheme: dark;
+  }
+
+  body {
+    background-color: var(--color-dark);
+    color: #dee2e6;
+  }
+
+  /* Tailwind leaves buttons with the default cursor */
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+}
+
 html, body {
   width: 100%;
   /* Follows the mobile address bar as it shows and hides */
@@ -148,13 +177,29 @@ a, button, input, label, select, summary, textarea {
   margin-bottom: 0;
 }
 
+/* Tailwind's reset removes the spacing and markers the answers need */
+.faq-answer p,
+.faq-answer ul,
+.faq-answer ol {
+  margin-bottom: 1rem;
+}
+
 .faq-answer ul,
 .faq-answer ol {
   padding-left: 1.5rem;
 }
 
+.faq-answer ul {
+  list-style: disc;
+}
+
+.faq-answer ol {
+  list-style: decimal;
+}
+
 .faq-answer a {
   color: #6edff6;
+  text-decoration: underline;
 }
 
 .home-modes {
@@ -234,7 +279,7 @@ a, button, input, label, select, summary, textarea {
 }
 
 /* Labels can't shrink below their text, so "Copy PGN" stays on one line and the icon-only Home gives way */
-.sidebar-actions .btn {
+.sidebar-actions button {
   white-space: nowrap;
 }
 
@@ -338,18 +383,6 @@ a, button, input, label, select, summary, textarea {
   color: #212529;
   pointer-events: none;
   user-select: none;
-}
-
-.error-toast {
-  z-index: 9999;
-}
-
-.error-toast .toast {
-  transition: opacity 0.3s ease-in-out;
-}
-
-.error-toast--hidden .toast {
-  opacity: 0;
 }
 
 /* Landscape phones (e.g. a Pixel 7a in Chrome has ~330px): group by spacing alone */

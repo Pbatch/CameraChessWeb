@@ -120,7 +120,7 @@ const Video = ({ chessqueriesModelRef, videoRef, playing,
   }
 
   return (
-    <div className="video-stage d-flex align-items-start justify-content-center">
+    <div className="video-stage flex items-start justify-center">
       <div className="video-live" style={liveStyle}>
         <div className="video-live__container">
           <div className="video-live__wrapper">

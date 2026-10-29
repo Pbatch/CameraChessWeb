@@ -3,6 +3,7 @@ import type { SetStringArray, Study } from "../../types";
 import { useUser } from "../../slices/userSlice";
 import { makePgn, useGame } from "../../slices/gameSlice";
 import { describeLichessError, lichessImportPgnToStudy, lichessSetStudies } from "../../api/lichess";
+import Dropdown, { DropdownItem, DropdownText } from "./dropdown";
 
 const createName = () => {
   const now = new Date();
@@ -45,25 +46,17 @@ const ExportButton = ({ setText }: { setText: SetStringArray }) => {
   }
 
   return (
-    <div className="btn-group w-100" role="group">
-      <button type="button" className="btn btn-dark btn-sm btn-outline-light dropdown-toggle w-100"
-        id="exportButton" data-bs-toggle="dropdown" aria-expanded="false" title="Export to a Lichess study">
-        Export
-      </button>
-      <ul className="dropdown-menu" aria-labelledby="exportButton">
-        {(loadError !== null) ?
-          <li><span className="dropdown-item-text">{loadError}</span></li> :
-          (studies.length === 0) ?
-          <li><span className="dropdown-item-text">No studies found</span></li> :
-          studies.map(study =>
-            <li key={study.id}>
-              <button type="button" onClick={() => { void handleClick(study); }} className="dropdown-item">
-                {study.name}
-              </button>
-            </li>
-          )}
-      </ul>
-    </div>
+    <Dropdown label="Export" title="Export to a Lichess study">
+      {(loadError !== null) ?
+        <DropdownText>{loadError}</DropdownText> :
+        (studies.length === 0) ?
+        <DropdownText>No studies found</DropdownText> :
+        studies.map(study =>
+          <DropdownItem key={study.id} onClick={() => { void handleClick(study); }}>
+            {study.name}
+          </DropdownItem>
+        )}
+    </Dropdown>
   );
 };
 

@@ -1,4 +1,5 @@
 import type { SetBoolean, VideoRef } from "../../../types";
+import { Pause, Play } from "lucide-react";
 import { SidebarButton, Icon } from "../../common";
 
 const PlayButton = ({ videoRef, playing, setPlaying, videoSelected }: {
@@ -21,7 +22,7 @@ const PlayButton = ({ videoRef, playing, setPlaying, videoSelected }: {
       aria-pressed={playing}
       title={playing ? "Pause video" : "Play video"}
     >
-      <Icon iconName={playing ? "bi-pause-fill" : "bi-play-fill"} />
+      <Icon icon={playing ? Pause : Play} filled={true} />
     </SidebarButton>
   );
 };

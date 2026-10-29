@@ -16,9 +16,8 @@
   "license": "AGPL-3.0-only",
   "dependencies": {
     "@litertjs/core": "2.6.0",
-    "bootstrap": "^5.3.8",
-    "bootstrap-icons": "^1.13.2",
     "chessops": "^0.15.0",
+    "lucide-react": "^1.63.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "react-router": "^7.18.5",
@@ -27,6 +26,7 @@
   "devDependencies": {
     "@biomejs/biome": "^2.5.9",
     "@lichess-org/types": "^2.0.176",
+    "@tailwindcss/vite": "^4.3.3",
     "@types/node": "^22.20.5",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
@@ -34,6 +34,7 @@
     "@vitest/browser-playwright": "^5.0.5",
     "npm-check-updates": "^23.1.1",
     "playwright": "^1.64.1",
+    "tailwindcss": "^4.3.3",
     "typescript": "^7.0.2",
     "vite": "^8.1.4",
     "vite-bundle-visualizer": "^1.2.1",

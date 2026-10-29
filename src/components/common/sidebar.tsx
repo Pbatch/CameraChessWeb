@@ -7,6 +7,7 @@ import Clock from "../play/clock.tsx";
 import ExportButton from "./exportButton.tsx";
 import { useUser } from "../../slices/userSlice.ts";
 import SidebarSection from "./sidebarSection.tsx";
+import ButtonGroup from "./buttonGroup.tsx";
 
 type SidebarProps = {
   playing: boolean;
@@ -43,10 +44,10 @@ const Sidebar = ({ playing, text, setText, exportable = false, children }: Sideb
   const buttons = () => {
     return (
       <>
-        <div className="sidebar-actions btn-group w-100" role="group" aria-label="Game actions">
+        <ButtonGroup label="Game actions" className="sidebar-actions">
           <PgnButton setText={setText} playing={playing} />
           {exportable && (token !== "") && <ExportButton setText={setText} />}
-        </div>
+        </ButtonGroup>
         {/* A line of its own, apart from the game actions, as it leaves the page */}
         <HomeButton labelled={true} />
       </>
@@ -54,10 +55,10 @@ const Sidebar = ({ playing, text, setText, exportable = false, children }: Sideb
   }
 
   return (
-    <div className="sidebar d-flex flex-column text-center">
+    <div className="sidebar flex flex-col text-center">
       <div hidden={!playing}>
         {/* Inline-block so the clock matches the board's width */}
-        <div className="d-inline-block">
+        <div className="inline-block">
           {boardDisplay()}
         </div>
       </div>

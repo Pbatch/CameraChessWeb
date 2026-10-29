@@ -1,12 +1,22 @@
-import type { CompiledModel } from "@litertjs/core";
-
 interface Study {
   id: string,
   name: string
 }
 
+// Square probabilities, and where each square query looked (null for models without that output)
+interface ChessqueriesOutputs {
+  probs: Float32Array,
+  centroids: Float32Array | null
+}
+
+// The piece model, on the GPU or in a CPU worker. A null video gives blank pixels, for the warm-up.
+interface Chessqueries {
+  run: (video: HTMLVideoElement | null, roi: Roi | null) => Promise<ChessqueriesOutputs>,
+  delete: () => void
+}
+
 interface ModelRefs {
-  chessqueriesModelRef: React.RefObject<CompiledModel | null>
+  chessqueriesModelRef: React.RefObject<Chessqueries | null>
 }
 
 type VideoRef = React.RefObject<HTMLVideoElement | null>;
@@ -88,7 +98,7 @@ interface Camera {
 }
 
 export type { 
-  RootState, Study, Clock, User, ModelRefs, MovesData, MovesPair, 
+  RootState, Study, Clock, User, Chessqueries, ChessqueriesOutputs, ModelRefs, MovesData, MovesPair, 
   Game, ErrorSource, AppError,
   SetBoolean, SetStringArray, SetNumber, SetFps, Mode,
   SetStudy, VideoRef, Roi, RoiRef, SetRoi, CornerName, SetOrientation, Camera

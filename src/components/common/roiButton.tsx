@@ -1,4 +1,5 @@
 import SidebarButton from "./sidebarButton";
+import { SquareDashed } from "lucide-react";
 import Icon from "./icon";
 import type { Roi, SetBoolean, SetRoi } from "../../types";
 
@@ -31,7 +32,7 @@ const RoiButton = ({ roi, setRoi, selecting, setSelecting, canPlay }: {
 
   return (
     <SidebarButton onClick={handleClick} disabled={!canPlay} aria-label={title} title={title}>
-      <Icon iconName="bi-bounding-box" className="me-2" />
+      <Icon icon={SquareDashed} className="me-2" />
       {label}
     </SidebarButton>
   );

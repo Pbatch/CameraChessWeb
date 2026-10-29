@@ -1,4 +1,4 @@
-import { Sidebar, SidebarSection, RecordButton, DeviceButton, RoiButton } from "../common";
+import { Sidebar, SidebarSection, RecordButton, DeviceButton, RoiButton, ButtonGroup } from "../common";
 import type {
   Camera, Game, Roi, SetBoolean, SetRoi, SetStringArray
 } from "../../types";
@@ -154,9 +154,9 @@ const PlaySidebar = ({ camera,
         <GamesButton setGameId={setGameId} setColor={setColor} setText={setText} />
       </SidebarSection>
       <SidebarSection title="Detection">
-        <div className="btn-group w-100" role="group" aria-label="Move detection controls">
+        <ButtonGroup label="Move detection controls">
           <RecordButton playing={playing} setPlaying={setPlaying} />
-        </div>
+        </ButtonGroup>
       </SidebarSection>
     </Sidebar>
   );

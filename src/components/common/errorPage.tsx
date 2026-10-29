@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useRouteError } from "react-router";
 import { clearSavedState } from "../../store";
+import buttonClass from "./buttonClass";
 
 // Shown instead of the app when rendering throws
 const ErrorPage = () => {
@@ -16,15 +17,15 @@ const ErrorPage = () => {
   }
 
   return (
-    <main className="d-flex flex-column h-100 align-items-center justify-content-center gap-3 bg-dark text-white p-3 text-center">
-      <h1 className="h4 m-0">Something went wrong</h1>
-      <p className="m-0" role="alert">
+    <main className="flex h-full flex-col items-center justify-center gap-4 bg-dark p-4 text-center text-white">
+      <h1 className="text-2xl/[1.2] font-medium">Something went wrong</h1>
+      <p role="alert">
         {(error instanceof Error) ? error.message : "ChessCam hit an unexpected error."}
       </p>
-      <p className="m-0">If reloading does not help, clearing the saved data should. This also logs you out of Lichess.</p>
-      <div className="d-flex gap-2">
-        <button type="button" className="btn btn-light" onClick={() => location.reload()}>Reload</button>
-        <button type="button" className="btn btn-outline-light" onClick={reset}>Clear saved data</button>
+      <p>If reloading does not help, clearing the saved data should. This also logs you out of Lichess.</p>
+      <div className="flex gap-2">
+        <button type="button" className={buttonClass("light")} onClick={() => location.reload()}>Reload</button>
+        <button type="button" className={buttonClass()} onClick={reset}>Clear saved data</button>
       </div>
     </main>
   );

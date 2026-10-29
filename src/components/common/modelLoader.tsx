@@ -22,8 +22,8 @@ const ModelLoader = () => {
 
   if (loadError !== null) {
     return (
-      <main className="d-flex h-100 align-items-center justify-content-center bg-dark text-white p-3">
-        <p className="m-0 text-center" role="alert">{loadError}</p>
+      <main className="flex h-full items-center justify-center bg-dark p-4 text-white">
+        <p className="text-center" role="alert">{loadError}</p>
       </main>
     );
   }
@@ -31,11 +31,12 @@ const ModelLoader = () => {
   if (loading) {
     return (
       <main
-        className="d-flex h-100 align-items-center justify-content-center bg-dark text-white p-3"
+        className="flex h-full items-center justify-center bg-dark p-4 text-white"
         aria-busy="true"
       >
-        <div className="d-flex align-items-center gap-2" role="status" aria-live="polite">
-          <span className="spinner-border" aria-hidden="true" />
+        <div className="flex items-center gap-2" role="status" aria-live="polite">
+          <span className="inline-block size-8 animate-spin rounded-full border-4 border-current border-e-transparent"
+            aria-hidden="true" />
           <span>Loading FEN model...</span>
         </div>
       </main>

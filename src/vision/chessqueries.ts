@@ -1,8 +1,9 @@
-import { type Accelerator, type CompiledModel, getGlobalLiteRt, isWebGPUSupported, loadAndCompile, loadLiteRt, supportsFeature, Tensor } from "@litertjs/core";
+import { type Accelerator, type CompiledModel, getGlobalLiteRt, isWebGPUSupported, loadAndCompile, loadLiteRt, Tensor } from "@litertjs/core";
 import { version as LITERT_VERSION } from "@litertjs/core/package.json";
 import { CHESSQUERIES_SIZE, LABEL_MAP, NUM_LABELS } from "../utils/constants";
 import { zeros } from "../utils/math";
-import type { CornerName, ModelRefs, Roi, VideoRef } from "../types";
+import type { Chessqueries, ChessqueriesOutputs, CornerName, ModelRefs, Roi, VideoRef } from "../types";
+import type { WorkerCall, WorkerRequest, WorkerResponse } from "./chessqueriesWorker";
 
 // Model classes, in output order
 const CLASS_SYMBOLS: string[] = [".", "P", "N", "B", "R", "Q", "K", "p", "n", "b", "r", "q", "k"];
@@ -126,9 +127,6 @@ const resizeOnGpu = (input: Tensor, video: HTMLVideoElement, roi: Roi | null) =>
 
 // A null video gives blank pixels, for the warm-up
 const toInput = async (video: HTMLVideoElement | null, roi: Roi | null): Promise<Tensor> => {
-  if (accelerator !== "webgpu") {
-    return new Tensor((video === null) ? blankPixels() : getPixels(video, roi), INPUT_SHAPE);
-  }
   if (gpuInput === null) {
     gpuInput = await new Tensor(blankPixels(), INPUT_SHAPE).moveTo("webgpu");
   }
@@ -152,25 +150,8 @@ const deleteGpuInput = () => {
   gpuResize = null;
 }
 
-// Square probabilities, and where each square query looked (null for models without that output)
-const run = (model: CompiledModel, video: HTMLVideoElement | null, roi: Roi | null): Promise<{
-  probs: Float32Array, centroids: Float32Array | null
-}> => {
-  const result = lastRun.then(() => runNow(model, video, roi));
-  lastRun = result.catch(() => undefined);
-  return result;
-}
-
-const runNow = async (model: CompiledModel, video: HTMLVideoElement | null, roi: Roi | null): Promise<{
-  probs: Float32Array, centroids: Float32Array | null
-}> => {
-  const input: Tensor = await toInput(video, roi);
-  const outputs: Tensor[] = await model.run(input);
-  if (input !== gpuInput) {
-    input.delete();
-  }
-  const arrays: Float32Array[] = await Promise.all(outputs.map(toArray));
-  // Output order is up to the converter, so they are told apart by size
+// Output order is up to the converter, so they are told apart by size
+const toOutputs = (arrays: Float32Array[]): ChessqueriesOutputs => {
   const probs = arrays.find((array) => array.length === NUM_PROBS);
   if (probs === undefined) {
     throw new Error("Model has no square probabilities");
@@ -178,7 +159,16 @@ const runNow = async (model: CompiledModel, video: HTMLVideoElement | null, roi:
   return { probs, centroids: arrays.find((array) => array.length === 64 * 2) ?? null };
 }
 
-const warmUp = (model: CompiledModel) => run(model, null, null);
+const run = (model: CompiledModel, video: HTMLVideoElement | null, roi: Roi | null): Promise<ChessqueriesOutputs> => {
+  const result = lastRun.then(() => runNow(model, video, roi));
+  lastRun = result.catch(() => undefined);
+  return result;
+}
+
+const runNow = async (model: CompiledModel, video: HTMLVideoElement | null, roi: Roi | null): Promise<ChessqueriesOutputs> => {
+  const outputs: Tensor[] = await model.run(await toInput(video, roi));
+  return toOutputs(await Promise.all(outputs.map(toArray)));
+}
 
 // Firefox's shader-f16 overflows to NaN on some frames, though the same frames are fine without it.
 // Without the feature, LiteRT's fp16 precision still works, so only the feature is left out.
@@ -202,7 +192,7 @@ const setWebGpuDevice = async () => {
   getGlobalLiteRt().setWebGpuDevice(device);
 }
 
-const loadWebGpu = async (): Promise<CompiledModel> => {
+const loadWebGpu = async (): Promise<Chessqueries> => {
   // fp16 is the fastest and does not need the shader-f16 WebGPU feature
   const model: CompiledModel = await loadAndCompile(MODEL_URL, {
     accelerator: "webgpu",
@@ -211,7 +201,7 @@ const loadWebGpu = async (): Promise<CompiledModel> => {
   accelerator = "webgpu";
   try {
     // Warm up so shader compilation happens while loading
-    await warmUp(model);
+    await run(model, null, null);
     // GPU errors (e.g. running out of memory) otherwise only show as wrong outputs
     const device = gpuInput?.environment.webGpuDevice;
     if (device) {
@@ -230,17 +220,74 @@ const loadWebGpu = async (): Promise<CompiledModel> => {
     accelerator = null;
     throw error;
   }
-  return model;
+  return {
+    run: (video, roi) => run(model, video, roi),
+    delete: () => model.delete()
+  };
 }
 
-const loadWasm = async (threaded: boolean): Promise<CompiledModel> => {
-  const model: CompiledModel = await loadAndCompile(MODEL_URL, {
-    accelerator: "wasm",
-    cpuOptions: { numThreads: threaded ? navigator.hardwareConcurrency : 1 }
-  });
+// Served from node_modules in dev, copied to litert/<version>/ by vite.config.ts in builds
+const wasmPath: string = import.meta.env.DEV ? "/node_modules/@litertjs/core/wasm/" : `litert/${LITERT_VERSION}/`;
+
+// The CPU model runs in a worker, as each run blocks its thread for the whole inference
+const loadWorker = async (): Promise<Chessqueries> => {
+  const worker = new Worker(new URL("./chessqueriesWorker.ts", import.meta.url), { type: "module" });
+  const pending = new Map<number, { resolve: (arrays: Float32Array[]) => void, reject: (error: Error) => void }>();
+  let nextId: number = 0;
+  // Set once the worker has stopped, so later runs fail rather than wait forever
+  let stopped: Error | null = null;
+  const stop = (error: Error) => {
+    stopped = error;
+    worker.terminate();
+    pending.forEach(({ reject }) => {
+      reject(error);
+    });
+    pending.clear();
+  }
+
+  worker.onmessage = (event: MessageEvent<WorkerResponse>) => {
+    const response = event.data;
+    const request = pending.get(response.id);
+    pending.delete(response.id);
+    if ("error" in response) {
+      request?.reject(new Error(response.error));
+    } else {
+      request?.resolve(response.arrays);
+    }
+  }
+  // e.g. the worker failed to start, or ran out of memory
+  worker.onerror = (event: ErrorEvent) => {
+    console.error("Piece detection worker failed", event.message);
+    stop(new Error("Piece detection stopped. Please reload the page."));
+  }
+
+  const send = (call: WorkerCall, transfer: Transferable[] = []): Promise<Float32Array[]> => {
+    if (stopped !== null) {
+      return Promise.reject(stopped);
+    }
+    const id: number = nextId++;
+    return new Promise((resolve, reject) => {
+      pending.set(id, { resolve, reject });
+      const request: WorkerRequest = { ...call, id };
+      worker.postMessage(request, transfer);
+    });
+  }
+
+  try {
+    // The worker's URL is not the page's, so the runtime's path is made absolute
+    await send({ type: "load", wasmUrl: new URL(wasmPath, document.baseURI).href, modelUrl: MODEL_URL });
+  } catch (error) {
+    stop(error as Error);
+    throw error;
+  }
   accelerator = "wasm";
-  await warmUp(model);
-  return model;
+  return {
+    run: async (video, roi) => {
+      const pixels = (video === null) ? blankPixels() : getPixels(video, roi);
+      return toOutputs(await send({ type: "run", pixels }, [pixels.buffer]));
+    },
+    delete: () => stop(new Error("The model was unloaded"))
+  };
 }
 
 // navigator.gpu can exist without a usable adapter, e.g. on Linux Chrome
@@ -252,17 +299,11 @@ const hasGpuAdapter = async (): Promise<boolean> => {
   }
 }
 
-export const loadChessqueries = async (): Promise<CompiledModel> => {
-  // Served from node_modules in dev, copied to litert/<version>/ by vite.config.ts in builds
-  const wasmPath: string = import.meta.env.DEV ? "/node_modules/@litertjs/core/wasm/" : `litert/${LITERT_VERSION}/`;
-  const gpu: boolean = await hasGpuAdapter();
-  // LiteRT.js loads either JSPI, which lets WebGPU hand unsupported ops to the CPU, or threads, which
-  // speed up the CPU. Threads need SharedArrayBuffer (a cross-origin isolated page) and relaxed SIMD.
-  const threaded: boolean = !gpu && crossOriginIsolated && await supportsFeature("relaxedSimd");
-  await loadLiteRt(wasmPath, { jspi: !threaded && "Suspending" in WebAssembly, threads: threaded });
-
-  if (gpu) {
+export const loadChessqueries = async (): Promise<Chessqueries> => {
+  if (await hasGpuAdapter()) {
     try {
+      // JSPI lets WebGPU hand unsupported ops to the CPU
+      await loadLiteRt(wasmPath, { jspi: "Suspending" in WebAssembly });
       if (navigator.userAgent.includes("Firefox/")) {
         await setWebGpuDevice();
       }
@@ -273,10 +314,10 @@ export const loadChessqueries = async (): Promise<CompiledModel> => {
   } else {
     console.warn("WebGPU is not available, falling back to the CPU");
   }
-  return await loadWasm(threaded);
+  return await loadWorker();
 }
 
-let loading: Promise<CompiledModel> | null = null;
+let loading: Promise<Chessqueries> | null = null;
 
 // Loads the model once, however often it is called. Every caller's ref gets it, as a
 // remounted App (e.g. after a hot reload) asks again with a fresh, empty ref.
@@ -297,7 +338,7 @@ export const loadChessqueriesOnce = (modelRef: ModelRefs["chessqueriesModelRef"]
 }
 
 // Swaps in a model on a new device, or on the CPU if the GPU will not come back
-const recover = async (modelRef: ModelRefs["chessqueriesModelRef"], oldModel: CompiledModel) => {
+const recover = async (modelRef: ModelRefs["chessqueriesModelRef"], oldModel: Chessqueries) => {
   // A run on the lost device may never settle
   await Promise.race([lastRun, new Promise((resolve) => setTimeout(resolve, RECOVERY_RUN_TIMEOUT))]);
   lastRun = Promise.resolve();
@@ -312,14 +353,13 @@ const recover = async (modelRef: ModelRefs["chessqueriesModelRef"], oldModel: Co
   // Cleared first, so a loss of the new device is noticed too
   deviceLost = false;
 
-  let model: CompiledModel;
+  let model: Chessqueries;
   try {
     await setWebGpuDevice();
     model = await loadWebGpu();
   } catch (error) {
     console.warn("WebGPU did not come back, falling back to the CPU", error);
-    // LiteRT loaded without threads, as WebGPU was in use
-    model = await loadWasm(false);
+    model = await loadWorker();
   }
   modelRef.current = model;
   // So a remounted App gets the new model rather than the deleted one
@@ -420,7 +460,7 @@ export const runChessqueries = async (
   if (model === null || video === null) {
     throw new Error("Piece detection is not ready");
   }
-  const { probs, centroids } = await run(model, video, roi);
+  const { probs, centroids } = await model.run(video, roi);
   const width: number = (roi === null) ? video.videoWidth : roi.width;
   const height: number = (roi === null) ? video.videoHeight : roi.height;
   return {
