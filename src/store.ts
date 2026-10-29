@@ -13,7 +13,8 @@ export const initialGame: Game = {
   lastMove: "",
   greedy: false,
   fromOpponent: false,
-  clock: null
+  clock: null,
+  times: []
 };
 
 export const initialUser: User = {

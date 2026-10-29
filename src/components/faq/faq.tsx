@@ -200,6 +200,8 @@ const data = {
         <p>
           After you have finished uploading or recording your game,
           copy it to the clipboard by clicking <b>Copy PGN</b>.
+          Recorded games include the time each move took, from when it was seen, to about a second.
+          Time spent paused is not counted.
         </p>
       },
       {

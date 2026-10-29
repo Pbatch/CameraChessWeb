@@ -157,6 +157,11 @@ export const findPieces = ({ chessqueriesModelRef, videoRef, roiRef, playingRef,
   let frameVideo: HTMLVideoElement | null = null;
   let frameCallbackId: number | undefined;
   let newFrame: boolean = true;
+  // Record mode times moves on a clock that stops while detection is paused, from where it was when
+  // detection last started on a game without moves
+  let recordClock: number = 0;
+  let lastTick: number | null = null;
+  let recordStart: number = 0;
 
   const watchFrames = (video: HTMLVideoElement | null) => {
     if (video === frameVideo) {
@@ -182,6 +187,15 @@ export const findPieces = ({ chessqueriesModelRef, videoRef, roiRef, playingRef,
     try {
       watchFrames(videoRef.current);
       const now: number = performance.now();
+      if (playingRef.current === false) {
+        lastTick = null;
+        if (lastMoveRef.current === "") {
+          recordStart = recordClock;
+        }
+      } else {
+        recordClock += now - (lastTick ?? now);
+        lastTick = now;
+      }
       if (playingRef.current === false || invalidVideo(videoRef)) {
         if (state !== null) {
           setFps(null);
@@ -259,7 +273,7 @@ export const findPieces = ({ chessqueriesModelRef, videoRef, roiRef, playingRef,
           // No takebacks in "play" mode
           const greedy = (mode === "play") ? false : hasGreedyMove;
           const payload = makeUpdatePayload(boardRef.current, greedy);
-          gameUpdate(payload);
+          gameUpdate(payload, (mode === "record") ? (recordClock - recordStart) : undefined);
         }
         setTextIfChanged(setText, [moveTextRef.current]);
       }

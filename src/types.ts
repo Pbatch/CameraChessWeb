@@ -59,7 +59,8 @@ interface Game {
   lastMove: string,
   greedy: boolean,
   fromOpponent: boolean,
-  clock: Clock | null
+  clock: Clock | null,
+  times: number[]     // record mode only: ms since recording started at each move, otherwise empty
 }
 
 interface User {

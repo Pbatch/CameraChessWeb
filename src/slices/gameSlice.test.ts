@@ -90,6 +90,12 @@ describe("makePgn", () => {
   it("handles a game with no moves", () => {
     expect(makePgn(makeGame())).toBe(`${roster("*")}\n\n*\n`);
   });
+
+  it("writes the time each move took, in whole seconds", () => {
+    const pgn = makePgn({ ...makeGame("1. e4 e5 2. Nf3"), times: [4400, 65600, 3725000] });
+    expect(pgn).toBe(`${roster("*")}\n\n1. e4 { [%emt 0:00:04] } e5 { [%emt 0:01:01] } ` +
+      "2. Nf3 { [%emt 1:00:59] } *\n");
+  });
 });
 
 describe("gameUpdate", () => {
@@ -98,6 +104,27 @@ describe("gameUpdate", () => {
     gameSetClock(clock);
     gameUpdate(makeUpdatePayload(makeBoard(makeGame("1. e4"))));
     expect(getGame()).toMatchObject({ moves: "1. e4", start: makeGame().start, clock });
+  });
+
+  it("times only the new moves", () => {
+    gameUpdate(makeUpdatePayload(makeBoard(makeGame("1. e4"))), 1000);
+    gameUpdate(makeUpdatePayload(makeBoard(makeGame("1. e4 e5"))), 3000);
+    expect(getGame().times).toEqual([1000, 3000]);
+  });
+
+  it("retimes a greedy move that is replaced, but not one that is confirmed", () => {
+    gameUpdate(makeUpdatePayload(makeBoard(makeGame("1. e4")), true), 1000);
+    gameUpdate(makeUpdatePayload(makeBoard(makeGame("1. e4"))), 2000);
+    expect(getGame().times).toEqual([1000]);
+    gameUpdate(makeUpdatePayload(makeBoard(makeGame("1. e4 e6")), true), 3000);
+    gameUpdate(makeUpdatePayload(makeBoard(makeGame("1. e4 e5"))), 4000);
+    expect(getGame().times).toEqual([1000, 4000]);
+  });
+
+  it("leaves the game untimed without an elapsed time", () => {
+    setGame({ ...makeGame("1. e4"), times: [1000] });
+    gameUpdate(makeUpdatePayload(makeBoard(makeGame("1. e4 e5"))));
+    expect(getGame().times).toEqual([]);
   });
 });
 
