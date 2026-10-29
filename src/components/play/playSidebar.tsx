@@ -8,9 +8,9 @@ import { describeLichessError, isTransientError, LichessError, lichessPlayMove, 
 import { errorClear, errorShow } from "../../slices/errorSlice";
 import type { BoardStreamEvent } from "../../api/lichess";
 import type { Color } from "chessops/types";
-import { gameUpdate, makeBoard, makeUpdatePayload, useGame, gameSetClock } from "../../slices/gameSlice";
+import { gameSync, useGame, gameSetClock } from "../../slices/gameSlice";
 import GamesButton from "./gamesButton";
-import { GameBoard } from "../../chess/board";
+import { START_FEN } from "../../utils/constants";
 
 const MOVE_RETRY_DELAY = 2000;
 
@@ -25,21 +25,20 @@ const PlaySidebar = ({ camera,
   }) => {
   const token: string = useUser().token;
   const game: Game = useGame();
-  const gameRef = useRef<Game>(game);
   const [gameId, setGameId] = useState<string>();
   const [color, setColor] = useState<Color>();
   // Bumped when the game is left, so a move being retried for it is dropped
   const sendGeneration = useRef<number>(0);
   const sentMove = useRef<string>("");
-  useEffect(() => {
-    gameRef.current = game;
-  }, [game]);
 
   useEffect(() => {
-    const colorToMove = game.fen.split(" ")[1];
     const lastMove = game.lastMove;
-    const fromOpponent = game.fromOpponent;
-    if ((colorToMove === color) || (lastMove === "") || (gameId === undefined) || (color === undefined) || fromOpponent) {
+    if ((lastMove === "") || (gameId === undefined) || (color === undefined) || game.fromOpponent) {
+      return;
+    }
+    // Only our own moves are sent, so the last one is ours when it is the opponent's turn
+    const colorToMove = game.fen.split(" ")[1];
+    if (colorToMove === color.charAt(0)) {
       return;
     }
     // The game also changes with the clock, which must not send the move again
@@ -49,9 +48,10 @@ const PlaySidebar = ({ camera,
     }
     sentMove.current = moveKey;
 
+    // Lichess refuses a move with a 400, which most often means the board does not match its game
     const describeMoveError = (error: unknown): string =>
       (error instanceof LichessError && error.status === 400)
-        ? "This mode can't be played through the API. Try a Rapid or Classical."
+        ? `Lichess refused ${lastMove}${error.reason ? ` (${error.reason})` : ""}. Check the board matches the game on Lichess.`
         : `Unable to send your move to Lichess. ${describeLichessError(error)}`;
 
     // Retries until Lichess has the move, as the opponent cannot reply without it
@@ -94,10 +94,16 @@ const PlaySidebar = ({ camera,
       return;
     }
 
+    // From the gameFull that opens every stream, which gameState events follow
+    let start: string | undefined;
+
     const onEvent = (response: BoardStreamEvent) => {
       // Chat and opponent-gone events don't change the board
       if (response.type !== "gameFull" && response.type !== "gameState") return;
 
+      if (response.type === "gameFull") {
+        start = (response.initialFen === "startpos") ? START_FEN : response.initialFen;
+      }
       // gameFull nests the game state under `state`; gameState is the state itself.
       const { moves, wtime, btime, status } = response.type === "gameFull" ? response.state : response;
 
@@ -110,19 +116,11 @@ const PlaySidebar = ({ camera,
         running: status === "started",
       });
 
-      // Moves Lichess has not seen yet are ours, still being sent
-      if (lichessMoves.length <= makeBoard(gameRef.current).history.length) return;
-
-      // Otherwise Lichess is the truth, so the whole game is replayed rather than just its last move,
-      // which also catches up after a reconnect
-      const board = new GameBoard(gameRef.current.start);
-      for (const move of lichessMoves) {
-        if (board.playUci(move) === null) {
-          throw new Error(`Lichess sent ${move}, which is illegal here`);
-        }
+      if (start === undefined) {
+        throw new Error("Lichess sent a move before the game");
       }
-      const payload = makeUpdatePayload(board, false, true);
-      gameUpdate(payload);
+      // The whole game is replayed rather than just its last move, which also catches up after a reconnect
+      gameSync(start, lichessMoves);
       // Back in step with Lichess
       errorClear("stream");
     };

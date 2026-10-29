@@ -25,7 +25,29 @@ export const gameUpdate = (update: GameUpdate) => {
   setGame((game) => ({ ...update, start: game.start, clock: game.clock }));
 }
 
-export const gameSetClock = (clock: Clock | null) => {
+// Brings the game in line with Lichess's, from its start position and UCI moves. Lichess is the truth,
+// except for moves it has not seen yet, which are ours still being sent.
+export const gameSync = (start: string, uciMoves: string[]) => {
+  const board = new GameBoard(start);
+  for (const move of uciMoves) {
+    if (board.playUci(move) === null) {
+      throw new Error(`Lichess sent ${move}, which is illegal here`);
+    }
+  }
+
+  const game: Game = useStore.getState().game;
+  if (game.start === start) {
+    const local = makeBoard(game).history;
+    const ahead: boolean = (local.length >= board.history.length) &&
+      board.history.every(({ san }, index) => local[index].san === san);
+    if (ahead) {
+      return;
+    }
+  }
+  setGame((game) => ({ ...makeUpdatePayload(board, false, true), start, clock: game.clock }));
+}
+
+export const gameSetClock =(clock: Clock | null) => {
   setGame((game) => ({ ...game, clock }));
 }
 
