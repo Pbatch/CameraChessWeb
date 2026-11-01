@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useGame } from "../../slices/gameSlice";
+import { useClock } from "../../slices/clockSlice";
 
 const format = (ms: number): string => {
   if (ms <= 0) return "0:00";
@@ -10,8 +10,7 @@ const format = (ms: number): string => {
 };
 
 const Clock = () => {
-  const game = useGame();
-  const clock = game.clock;
+  const clock = useClock();
   const [, tick] = useState(0);
 
   useEffect(() => {

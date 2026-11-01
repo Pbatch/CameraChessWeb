@@ -13,7 +13,6 @@ export const initialGame: Game = {
   lastMove: "",
   greedy: false,
   fromOpponent: false,
-  clock: null,
   times: []
 };
 
@@ -53,7 +52,7 @@ const storage: PersistStorage<SavedState> = {
 };
 
 export const useStore = create<RootState>()(persist(
-  (): RootState => ({ game: initialGame, user: initialUser, errors: [] }),
+  (): RootState => ({ game: initialGame, clock: null, user: initialUser, errors: [] }),
   {
     name: storageKey,
     storage,

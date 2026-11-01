@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { MEDIA_ASPECT_RATIO } from "../../utils/constants";
 import type {
   CornerName, Game, Mode, ModelRefs, MovesPair, Roi, RoiRef, SetRoi,
-  SetBoolean, SetFps, SetStringArray, VideoRef
+  SetBoolean, SetStringArray, VideoRef
 } from "../../types";
 import { makeBoard, useGame } from "../../slices/gameSlice";
 import type { GameBoard } from "../../chess/board";
@@ -13,18 +13,17 @@ import OrientationMarkers, { MARKER_DIAMETER } from "./orientationMarkers";
 import FpsDisplay from "./fpsDisplay";
 
 const Video = ({ chessqueriesModelRef, videoRef, playing,
-  setPlaying, playingRef, setText, setFps, mode, roi, setRoi, roiRef, selecting, setSelecting,
-  canPlay, setCanPlay, fps }: {
+  setPlaying, playingRef, setText, mode, roi, setRoi, roiRef, selecting, setSelecting,
+  canPlay, setCanPlay }: {
     chessqueriesModelRef: ModelRefs["chessqueriesModelRef"],
     videoRef: VideoRef,
     playing: boolean,
     setPlaying: SetBoolean,
     playingRef: React.RefObject<boolean>,
-    setText: SetStringArray, setFps: SetFps, mode: Mode,
+    setText: SetStringArray, mode: Mode,
     roi: Roi | null, setRoi: SetRoi, roiRef: RoiRef,
     selecting: boolean, setSelecting: SetBoolean,
-    canPlay: boolean, setCanPlay: SetBoolean,
-    fps: number | null
+    canPlay: boolean, setCanPlay: SetBoolean
   }) => {
   const game: Game = useGame();
 
@@ -35,6 +34,8 @@ const Video = ({ chessqueriesModelRef, videoRef, playing,
   const [orientation, setOrientation] = useState<CornerName[] | null>(null);
   // Cameras return whichever native mode is closest to the request, so the real shape is only known once frames arrive
   const [aspectRatio, setAspectRatio] = useState<number>(MEDIA_ASPECT_RATIO);
+  // Kept here rather than in VideoAndSidebar, so its updates re-render only the video and not the sidebar
+  const [fps, setFps] = useState<number | null>(null);
 
   useEffect(() => {
     const board = makeBoard(game);
@@ -51,7 +52,7 @@ const Video = ({ chessqueriesModelRef, videoRef, playing,
   useEffect(() => {
     return findPieces({ chessqueriesModelRef, videoRef, roiRef, playingRef, setText, setFps, setOrientation,
       boardRef, movesPairsRef, lastMoveRef, moveTextRef, mode });
-  }, [mode, chessqueriesModelRef, playingRef, roiRef, setFps, setText, videoRef]);
+  }, [mode, chessqueriesModelRef, playingRef, roiRef, setText, videoRef]);
 
   useEffect(() => {
     const video = videoRef.current;

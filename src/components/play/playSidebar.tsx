@@ -8,7 +8,8 @@ import { describeLichessError, isTransientError, LichessError, lichessPlayMove, 
 import { errorClear, errorShow } from "../../slices/errorSlice";
 import type { BoardStreamEvent } from "../../api/lichess";
 import type { Color } from "chessops/types";
-import { gameSync, useGame, gameSetClock } from "../../slices/gameSlice";
+import { gameSync, useGame } from "../../slices/gameSlice";
+import { clockSet } from "../../slices/clockSlice";
 import GamesButton from "./gamesButton";
 import { START_FEN } from "../../utils/constants";
 
@@ -41,7 +42,7 @@ const PlaySidebar = ({ camera,
     if (colorToMove === color.charAt(0)) {
       return;
     }
-    // The game also changes with the clock, which must not send the move again
+    // The effect can run again for the same move, which must not send it twice
     const moveKey = `${gameId} ${game.moves}`;
     if (moveKey === sentMove.current) {
       return;
@@ -108,7 +109,7 @@ const PlaySidebar = ({ camera,
       const { moves, wtime, btime, status } = response.type === "gameFull" ? response.state : response;
 
       const lichessMoves: string[] = (moves.trim() === "") ? [] : moves.trim().split(" ");
-      gameSetClock({
+      clockSet({
         wtime,
         btime,
         turn: lichessMoves.length % 2 === 0 ? "w" : "b",
@@ -136,8 +137,9 @@ const PlaySidebar = ({ camera,
     });
     return () => {
       controller.abort();
-      // Also stops retrying a move for the game being left, and drops its errors, which no longer apply
+      // Also stops retrying a move for the game being left, and drops its clock and errors, which no longer apply
       sendGeneration.current += 1;
+      clockSet(null);
       errorClear("stream");
       errorClear("move");
     };

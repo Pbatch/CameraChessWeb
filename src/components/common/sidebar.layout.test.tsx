@@ -7,7 +7,7 @@ import { MemoryRouter } from "react-router";
 import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { page } from "vitest/browser";
 import { useStore } from "../../store";
-import { gameSetClock } from "../../slices/gameSlice";
+import { clockSet } from "../../slices/clockSlice";
 import { userSet } from "../../slices/userSlice";
 import Container from "./container";
 import RecordSidebar from "../record/recordSidebar";
@@ -39,7 +39,7 @@ let host: HTMLDivElement | null = null;
 const renderSidebar = async (Sidebar: SidebarComponent, playing: boolean): Promise<HTMLElement> => {
   // Signed in, so Export shows, and with a clock, so the preview is as tall as it gets
   userSet({ token: "token", username: "" });
-  gameSetClock({ wtime: 600000, btime: 600000, turn: "w", updatedAt: Date.now(), running: false });
+  clockSet({ wtime: 600000, btime: 600000, turn: "w", updatedAt: Date.now(), running: false });
 
   const noop = () => {};
   const props = {
