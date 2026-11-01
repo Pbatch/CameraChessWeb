@@ -27,8 +27,13 @@ const Video = ({ chessqueriesModelRef, videoRef, playing,
   }) => {
   const game: Game = useGame();
 
-  const boardRef = useRef<GameBoard>(makeBoard(game));
-  const movesPairsRef = useRef<MovesPair[]>(getMovesPairs(boardRef.current.position));
+  // Worked out once, as useRef would evaluate them on every render, and the move pairs are slow to make
+  const [initial] = useState(() => {
+    const board = makeBoard(game);
+    return { board, movesPairs: getMovesPairs(board.position) };
+  });
+  const boardRef = useRef<GameBoard>(initial.board);
+  const movesPairsRef = useRef<MovesPair[]>(initial.movesPairs);
   const lastMoveRef = useRef<string>(game.lastMove);
   const moveTextRef = useRef<string>("");
   const [orientation, setOrientation] = useState<CornerName[] | null>(null);
