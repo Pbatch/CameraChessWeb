@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { calculateScore, GreedyTimer, processState } from "./findPieces";
+import { calculateScore, GreedyTimer, MoveTracker, processState } from "./moveTracker";
 import { getMovesPairs } from "../chess/moves";
 import { makeBoard } from "../slices/gameSlice";
 import { EMPTY, LABEL_MAP, SQUARE_MAP } from "../utils/constants";
@@ -123,5 +123,52 @@ describe("GreedyTimer", () => {
     timer.update("e4", 0);
     timer.reset();
     expect(timer.update("e4", 1001)).toBe(false);
+  });
+});
+
+describe("MoveTracker", () => {
+  const start = makeBoard(makeGame()).position;
+  const game = (lastMove: string = "") => ({ movesPairs: pairsFor(), position: start, lastMove });
+
+  it("plays a pair at once", () => {
+    const tracker = new MoveTracker();
+    expect(tracker.update(oneHotState(AFTER_E4_E5), 0, game())).toEqual({ san: "e4", greedy: false });
+  });
+
+  it("plays a single move greedily once it has been the best for over a second", () => {
+    const tracker = new MoveTracker();
+    expect(tracker.update(oneHotState(AFTER_E4), 0, game())).toBeNull();
+    expect(tracker.update(oneHotState(AFTER_E4), 1001, game())).toEqual({ san: "e4", greedy: true });
+  });
+
+  it("does not play the greedy move again while it is the last move", () => {
+    const tracker = new MoveTracker();
+    tracker.update(oneHotState(AFTER_E4), 0, game());
+    expect(tracker.update(oneHotState(AFTER_E4), 1001, game("e2e4"))).toBeNull();
+  });
+
+  it("replaces a greedy move with the pair once the reply is seen", () => {
+    const tracker = new MoveTracker();
+    tracker.update(oneHotState(AFTER_E4), 0, game());
+    tracker.update(oneHotState(AFTER_E4), 1001, game());
+    // The board stays at the start, with e4 shown as the last move. The smoothed state needs a second
+    // frame of e5 for its squares to go above 0.5.
+    expect(tracker.update(oneHotState(AFTER_E4_E5), 1250, game("e2e4"))).toBeNull();
+    expect(tracker.update(oneHotState(AFTER_E4_E5), 1500, game("e2e4"))).toEqual({ san: "e4", greedy: false });
+  });
+
+  it("plays only single moves, none greedy, without pairs", () => {
+    const tracker = new MoveTracker(false);
+    expect(tracker.update(oneHotState(AFTER_E4_E5), 0, game())).toBeNull();
+    expect(tracker.update(oneHotState(AFTER_E4_E5), 1001, game())).toEqual({ san: "e4", greedy: false });
+  });
+
+  it("starts again when reset", () => {
+    const tracker = new MoveTracker();
+    tracker.update(oneHotState(AFTER_E4), 0, game());
+    expect(tracker.started).toBe(true);
+    tracker.reset();
+    expect(tracker.started).toBe(false);
+    expect(tracker.update(oneHotState(AFTER_E4), 1001, game())).toBeNull();
   });
 });
