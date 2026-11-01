@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { gameReset, gameRestart, gameSetClock, gameSync, gameUpdate, makeBoard, makePgn, makeUpdatePayload } from "./gameSlice";
+import { gameReset, gameRestart, gameSync, gameUpdate, makeBoard, makePgn, makeUpdatePayload } from "./gameSlice";
 import { useStore } from "../store";
 import { makeGame } from "../test/helpers";
 import type { Game } from "../types";
@@ -99,11 +99,9 @@ describe("makePgn", () => {
 });
 
 describe("gameUpdate", () => {
-  it("keeps the start position and clock", () => {
-    const clock = { wtime: 1000, btime: 2000, turn: "w" as const, updatedAt: 0, running: true };
-    gameSetClock(clock);
+  it("keeps the start position", () => {
     gameUpdate(makeUpdatePayload(makeBoard(makeGame("1. e4"))));
-    expect(getGame()).toMatchObject({ moves: "1. e4", start: makeGame().start, clock });
+    expect(getGame()).toMatchObject({ moves: "1. e4", start: makeGame().start });
   });
 
   it("times only the new moves", () => {
@@ -130,12 +128,11 @@ describe("gameUpdate", () => {
 
 describe("gameReset", () => {
   const start = "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1";
-  const clock = { wtime: 1000, btime: 2000, turn: "w" as const, updatedAt: 0, running: true };
 
-  it("starts a new game from the given position, keeping the clock", () => {
-    setGame({ ...makeGame("1. e4 e5"), greedy: true, fromOpponent: true, clock });
+  it("starts a new game from the given position", () => {
+    setGame({ ...makeGame("1. e4 e5"), greedy: true, fromOpponent: true });
     gameReset(start);
-    expect(getGame()).toEqual({ ...makeGame("", start), clock });
+    expect(getGame()).toEqual(makeGame("", start));
   });
 
   it("defaults to the standard start position", () => {

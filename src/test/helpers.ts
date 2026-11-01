@@ -10,7 +10,6 @@ export const makeGame = (moves: string = "", start: string = START_FEN): Game =>
   lastMove: "",
   greedy: false,
   fromOpponent: false,
-  clock: null,
   times: []
 });
 

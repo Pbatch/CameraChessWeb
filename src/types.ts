@@ -59,7 +59,6 @@ interface Game {
   lastMove: string,
   greedy: boolean,
   fromOpponent: boolean,
-  clock: Clock | null,
   times: number[]     // record mode only: ms since recording started at each move, otherwise empty
 }
 
@@ -78,6 +77,8 @@ interface AppError {
 
 interface RootState {
   game: Game,
+  // Apart from the game, as it updates far more often and only the clock shows it
+  clock: Clock | null,
   user: User,
   errors: AppError[]
 }

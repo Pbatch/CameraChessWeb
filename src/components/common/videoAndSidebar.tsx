@@ -32,7 +32,6 @@ const VideoAndSidebar = ({ mode }: { mode: Mode }) => {
   const isPortrait = useMediaQuery('(orientation: portrait)');
 
   const [text, setText] = useState<string[]>([]);
-  const [fps, setFps] = useState<number | null>(null);
   const [playing, setPlaying] = useState<boolean>(false);
   const [study, setStudy] = useState<Study | null>(null);
   const [boardNumber, setBoardNumber] = useState<number>(-1);
@@ -95,8 +94,6 @@ const VideoAndSidebar = ({ mode }: { mode: Mode }) => {
     study,
     setPlaying,
     setText,
-    fps,
-    setFps,
     setBoardNumber,
     setStudy,
     roi,

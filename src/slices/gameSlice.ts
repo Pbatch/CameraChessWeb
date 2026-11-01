@@ -1,11 +1,11 @@
 import { useStore, initialGame } from '../store';
-import type { Clock, Game } from '../types';
+import type { Game } from '../types';
 import { START_FEN } from '../utils/constants';
 import { defaultGame, defaultHeaders, makeComment, makeOutcome, makePgn as writePgn, parsePgn } from 'chessops/pgn';
 import { GameBoard } from '../chess/board';
 
-// Everything a move changes; the start position and clock are kept, and the times worked out
-export type GameUpdate = Omit<Game, 'start' | 'clock' | 'times'>;
+// Everything a move changes; the start position is kept, and the times worked out
+export type GameUpdate = Omit<Game, 'start' | 'times'>;
 
 const setGame = (update: (game: Game) => Game) => {
   useStore.setState((state) => ({ game: update(state.game) }));
@@ -13,12 +13,12 @@ const setGame = (update: (game: Game) => Game) => {
 
 // Starts a new game from the given position, or the standard one
 export const gameReset = (start: string = initialGame.start) => {
-  setGame((game) => ({ ...initialGame, start, fen: start, clock: game.clock }));
+  setGame(() => ({ ...initialGame, start, fen: start }));
 }
 
 // Takes back every move, keeping the start position
 export const gameRestart = () => {
-  setGame((game) => ({ ...initialGame, start: game.start, fen: game.start, clock: game.clock }));
+  setGame((game) => ({ ...initialGame, start: game.start, fen: game.start }));
 }
 
 // Moves kept from before keep their times, so a greedy move confirmed later is timed from when it was
@@ -39,7 +39,7 @@ const updateTimes = (game: Game, moves: string, elapsed?: number): number[] => {
 // `elapsed` is the ms since recording started, to time the new moves
 export const gameUpdate = (update: GameUpdate, elapsed?: number) => {
   setGame((game) => ({
-    ...update, start: game.start, clock: game.clock, times: updateTimes(game, update.moves, elapsed)
+    ...update, start: game.start, times: updateTimes(game, update.moves, elapsed)
   }));
 }
 
@@ -62,11 +62,7 @@ export const gameSync = (start: string, uciMoves: string[]) => {
       return;
     }
   }
-  setGame((game) => ({ ...makeUpdatePayload(board, false, true), start, clock: game.clock, times: [] }));
-}
-
-export const gameSetClock =(clock: Clock | null) => {
-  setGame((game) => ({ ...game, clock }));
+  setGame(() => ({ ...makeUpdatePayload(board, false, true), start, times: [] }));
 }
 
 export const useGame = () => {
