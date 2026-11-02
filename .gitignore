@@ -5,3 +5,5 @@ node_modules
 dist
 pwa
 .claude
+dev/
+src/dev/

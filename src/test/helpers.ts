@@ -24,6 +24,19 @@ export const oneHotState = (fen: string): number[][] => {
   return state;
 }
 
+// The model's classes, in output order
+export const MODEL_CLASSES = ".PNBRQKpnbrqk";
+
+// The model's output for a FEN it is certain of: one row per square in FEN order (a8..h1)
+export const modelProbs = (fen: string): Float32Array => {
+  const symbols: string = fen.split(" ")[0].replace(/\d/g, (n) => ".".repeat(Number(n))).replace(/\//g, "");
+  const probs = new Float32Array(64 * MODEL_CLASSES.length);
+  [...symbols].forEach((symbol, i) => {
+    probs[i * MODEL_CLASSES.length + MODEL_CLASSES.indexOf(symbol)] = 1;
+  });
+  return probs;
+}
+
 // Node has no Web Storage, so tests stub localStorage/sessionStorage with this
 export class MemoryStorage implements Storage {
   private items = new Map<string, string>();
