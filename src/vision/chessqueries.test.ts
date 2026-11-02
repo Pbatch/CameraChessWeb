@@ -1,22 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { getOrientation, toDirection, toUpdate } from "./chessqueries";
 import { LABEL_MAP, NUM_LABELS, SQUARE_MAP } from "../utils/constants";
-import { oneHotState } from "../test/helpers";
+import { MODEL_CLASSES, modelProbs, oneHotState } from "../test/helpers";
 
-// The model's classes, in output order
-const MODEL_CLASSES = ".PNBRQKpnbrqk";
 // Asymmetric in both ranks and files, so a flip or transpose would show
 const ITALIAN = "r1bqk1nr/pppp1ppp/2n5/2b1p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4";
-
-// The model's output for a FEN it is certain of: one row per square in FEN order (a8..h1)
-const modelProbs = (fen: string): Float32Array => {
-  const symbols: string = fen.split(" ")[0].replace(/\d/g, (n) => ".".repeat(Number(n))).replace(/\//g, "");
-  const probs = new Float32Array(64 * MODEL_CLASSES.length);
-  [...symbols].forEach((symbol, i) => {
-    probs[i * MODEL_CLASSES.length + MODEL_CLASSES.indexOf(symbol)] = 1;
-  });
-  return probs;
-}
 
 // Square centroids in FEN order, in pixels, for a board of 50px squares centred on (cx, cy)
 // and turned clockwise by quarter turns on screen. Pulled towards the centre by `pull`, like the model's.

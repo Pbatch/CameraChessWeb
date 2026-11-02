@@ -2,7 +2,7 @@ import { gameUpdate, makeUpdatePayload } from "../slices/gameSlice";
 import type { GameBoard } from "../chess/board";
 import { invalidVideo } from "./detect";
 import { getOrientation, runChessqueries } from "./chessqueries";
-import { MoveTracker } from "./moveTracker";
+import { BayesianTracker } from "./bayesianTracker";
 import type {
   Mode, ModelRefs, MovesPair, RoiRef, SetFps, SetOrientation, SetStringArray, VideoRef
 } from "../types";
@@ -36,7 +36,8 @@ interface FindPiecesInput {
 
 export const findPieces = ({ chessqueriesModelRef, videoRef, roiRef, playingRef, setText, setFps, setOrientation,
   boardRef, movesPairsRef, lastMoveRef, moveTextRef, mode }: FindPiecesInput) => {
-  const tracker = new MoveTracker(mode !== "play");
+  // Moves are sent to Lichess as they are played, so play mode has no provisional moves
+  const tracker = new BayesianTracker({ provisional: mode !== "play" });
   let direction: number[] | null = null;
   let orientationKey: string = "";
   let requestId: number;
@@ -121,12 +122,12 @@ export const findPieces = ({ chessqueriesModelRef, videoRef, roiRef, playingRef,
           return;
         }
         const move = tracker.update(update, performance.now(), {
-          movesPairs: movesPairsRef.current, position: boardRef.current.position, lastMove: lastMoveRef.current
+          movesPairs: movesPairsRef.current, position: boardRef.current.position
         });
 
         // The first frame starts the smoothed direction, so it does not wait to climb from zero
         if (newDirection?.every(Number.isFinite)) {
-          // Smoothed like the state, so a board near 45 degrees does not flicker between orientations
+          // Smoothed, so a board near 45 degrees does not flicker between orientations
           direction = (direction === null) ? newDirection
             : direction.map((d, i) => 0.5 * d + 0.5 * newDirection[i]);
           const orientation = getOrientation(direction);
