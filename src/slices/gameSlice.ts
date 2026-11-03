@@ -21,8 +21,8 @@ export const gameRestart = () => {
   setGame((game) => ({ ...initialGame, start: game.start, fen: game.start }));
 }
 
-// Moves kept from before keep their times, so a greedy move confirmed later is timed from when it was
-// first seen. New moves are timed at `elapsed`, less how long ago each was seen (`ago`, ms, by index in the game),
+// Moves kept from before keep their times, so a move shown before it was confirmed is timed from when it was first
+// seen. New moves are timed at `elapsed`, less how long ago each was seen (`ago`, ms, by index in the game),
 // as a move the tracker corrects may have been played a few seconds before it was shown, and without `elapsed` the
 // game is untimed.
 const updateTimes = (game: Game, moves: string, elapsed?: number, ago: (number | null)[] = []): number[] => {
@@ -70,7 +70,7 @@ export const gameSync = (start: string, uciMoves: string[]) => {
       return;
     }
   }
-  setGame(() => ({ ...makeUpdatePayload(board, false, true), start, times: [] }));
+  setGame(() => ({ ...makeUpdatePayload(board, true), start, times: [] }));
 }
 
 export const useGame = () => {
@@ -104,12 +104,11 @@ export const makePgn = (game: Pick<Game, 'moves' | 'start'> & Partial<Pick<Game,
   return writePgn(pgnGame);
 }
 
-export const makeUpdatePayload = (board: GameBoard, greedy: boolean = false, fromOpponent: boolean = false): GameUpdate => {
+export const makeUpdatePayload = (board: GameBoard, fromOpponent: boolean = false): GameUpdate => {
   return {
     moves: board.moves,
     fen: board.fen,
     lastMove: board.lastMove,
-    greedy,
     fromOpponent
   }
 }

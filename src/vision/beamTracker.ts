@@ -22,7 +22,8 @@ import { BayesianTracker, DEFAULT_BAYESIAN_OPTIONS, type BayesianOptions } from 
 // keeping the better. Moves all the histories share are final.
 //
 // The game shown is the best history's, with its provisional move. When the app's game changes other than by this
-// tracker (a move taken back, a new game), it starts again from there.
+// tracker (a move taken back, a new game), it starts again from there, with every move in it final, as the user has
+// just set them. Pausing detection doesn't start it again, so a move from just before a pause can still be corrected.
 
 export interface BeamOptions {
   // How many histories to keep
@@ -57,11 +58,10 @@ export const DEFAULT_BEAM_OPTIONS: BeamOptions = { width: 4, margin: 30 / 0.8, h
 export const PLAY_TRACKER_OPTIONS: Partial<BayesianOptions> = { provisional: false };
 export const PLAY_BEAM_OPTIONS: Partial<BeamOptions> = { horizon: 1, finalOnly: true };
 
-// What the tracker shows: the whole game, whether its last move is provisional, and when each move was played (the
-// `now` of the frame its tracker played it on, or null for a provisional move or one from before the tracker started)
+// What the tracker shows: the whole game, and when each move was played (the `now` of the frame its tracker played
+// it on, or null for a provisional move or one from before the tracker started)
 export interface BeamMove {
   board: GameBoard,
-  greedy: boolean,
   times: (number | null)[]
 }
 
@@ -87,12 +87,8 @@ export class BeamTracker {
   #histories: History[] | null = null;
   // The moves the app's game had when this tracker last checked or changed it, to see if anything else changed it
   #known: string | null = null;
-  // The game last shown, as SAN with the provisional move and whether it is one, to show a change only once
+  // The game last shown, as SAN with the provisional move, to show a change only once
   #shown: string = "";
-  // Whether the app's game had a provisional move when this tracker started, which stays until there is something
-  // else to show, rather than going as soon as detection starts again
-  #holding = false;
-  #restartLength = 0;
   // Moves and replies from each position, by FEN, shared between histories
   #pairs = new Map<string, MovesPair[]>();
 
@@ -101,16 +97,8 @@ export class BeamTracker {
     this.#trackerOptions = { ...DEFAULT_BAYESIAN_OPTIONS, ...trackerOptions };
   }
 
-  get started(): boolean {
-    return this.#histories !== null;
-  }
-
   get histories(): readonly History[] {
     return this.#histories ?? [];
-  }
-
-  reset() {
-    this.#histories = null;
   }
 
   // `update` is a 64x13 state in square order for one frame, `now` its time in ms, and `game` the app's game as it is
@@ -150,12 +138,8 @@ export class BeamTracker {
     this.#finalise();
 
     const best = this.#options.finalOnly ? { sans: [], times: [], greedy: null } : this.#histories[0];
-    if (this.#holding && best.greedy === null && best.sans.length === 0 && this.#final.length === this.#restartLength) {
-      return null;
-    }
-    this.#holding = false;
     const sans = [...this.#final, ...best.sans, ...((best.greedy === null) ? [] : [best.greedy])];
-    const shown = `${sans.join(" ")} ${best.greedy !== null}`;
+    const shown = sans.join(" ");
     if (shown === this.#shown) {
       return null;
     }
@@ -166,23 +150,17 @@ export class BeamTracker {
     }
     this.#known = board.moves;
     const times = [...this.#finalTimes, ...best.times, ...((best.greedy === null) ? [] : [null])];
-    return { board, greedy: best.greedy !== null, times };
+    return { board, times };
   }
 
-  // One history from the app's game, without its provisional move, as the moves before it are taken as final
+  // One history from the app's game, all of whose moves are final
   #restart(game: Game) {
     const board = makeBoard(game);
-    if (game.greedy) {
-      board.undo();
-    }
     this.#start = game.start;
     this.#final = board.history.map(({ san }) => san);
     this.#finalTimes = this.#final.map(() => null);
     this.#known = game.moves;
-    this.#holding = game.greedy;
-    this.#restartLength = this.#final.length;
-    const sans = makeBoard(game).history.map(({ san }) => san);
-    this.#shown = `${sans.join(" ")} ${game.greedy}`;
+    this.#shown = this.#final.join(" ");
     const position = board.position.clone();
     this.#histories = [{
       sans: [], times: [], position, movesPairs: this.#movesPairs(position),

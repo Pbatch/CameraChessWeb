@@ -8,7 +8,6 @@ export const makeGame = (moves: string = "", start: string = START_FEN): Game =>
   fen: start,
   start,
   lastMove: "",
-  greedy: false,
   fromOpponent: false,
   times: []
 });

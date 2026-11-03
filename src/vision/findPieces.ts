@@ -51,9 +51,12 @@ export const findPieces = ({ chessqueriesModelRef, videoRef, roiRef, playingRef,
   let frameVideo: HTMLVideoElement | null = null;
   let frameCallbackId: number | undefined;
   let newFrame: boolean = true;
-  // Record mode times moves on a clock that stops while detection is paused, from where it was when
-  // detection last started on a game without moves
-  let recordClock: number = 0;
+  // A clock that stops while detection is paused, in ms. The tracker runs on it, so a pause neither counts as time
+  // for its settings nor uses up the time a move can still be corrected in, and record mode times moves on it, from
+  // where it was when detection last started on a game without moves.
+  let playClock: number = 0;
+  // Whether detection was running at the last frame, to clear the FPS shown when it stops
+  let running: boolean = false;
   let lastTick: number | null = null;
   let recordStart: number = 0;
 
@@ -84,18 +87,20 @@ export const findPieces = ({ chessqueriesModelRef, videoRef, roiRef, playingRef,
       if (playingRef.current === false) {
         lastTick = null;
         if (lastMoveRef.current === "") {
-          recordStart = recordClock;
+          recordStart = playClock;
         }
       } else {
-        recordClock += now - (lastTick ?? now);
+        playClock += now - (lastTick ?? now);
         lastTick = now;
       }
       if (playingRef.current === false || invalidVideo(videoRef)) {
-        if (tracker.started) {
+        // The tracker keeps its ways the game may have gone over a pause. It starts again only when the game is
+        // changed other than by it.
+        if (running) {
           setFps(null);
           fpsFrames = 0;
+          running = false;
         }
-        tracker.reset();
       } else if (newFrame && now >= nextRunTime) {
         newFrame = (frameCallbackId === undefined);
         const minFrameTime: number = 1000 / (MAX_FPS * (videoRef.current?.playbackRate || 1));
@@ -120,13 +125,13 @@ export const findPieces = ({ chessqueriesModelRef, videoRef, roiRef, playingRef,
           console.warn("Skipped a frame with non-finite probabilities");
           return;
         }
-        const elapsed = (mode === "record") ? (recordClock - recordStart) : undefined;
-        const frameTime = performance.now();
-        const shown = tracker.update(update, frameTime, useStore.getState().game);
+        running = true;
+        const elapsed = (mode === "record") ? (playClock - recordStart) : undefined;
+        const shown = tracker.update(update, playClock, useStore.getState().game);
         if (shown !== null) {
           // A corrected move is timed from when it was played, which may be a few seconds back
-          const ago = shown.times.map((time) => (time === null) ? null : frameTime - time);
-          gameUpdate(makeUpdatePayload(shown.board, shown.greedy), elapsed, ago);
+          const ago = shown.times.map((time) => (time === null) ? null : playClock - time);
+          gameUpdate(makeUpdatePayload(shown.board), elapsed, ago);
         }
 
         // The first frame starts the smoothed direction, so it does not wait to climb from zero

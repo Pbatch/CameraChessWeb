@@ -43,7 +43,9 @@ interface GpuResize {
   device: GPUDevice,
   pipeline: GPUComputePipeline,
   sampler: GPUSampler,
-  params: GPUBuffer
+  params: GPUBuffer,
+  // The video frame is copied here, at the video's size, before it is resized
+  frame: GPUTexture | null
 }
 
 let canvas: OffscreenCanvas | null = null;
@@ -84,7 +86,8 @@ const getGpuResize = (device: GPUDevice): GpuResize => {
       }),
       sampler: device.createSampler({ magFilter: "linear", minFilter: "linear" }),
       // GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST, whose constants TypeScript does not declare
-      params: device.createBuffer({ size: 6 * 4, usage: 0x40 | 0x08 })
+      params: device.createBuffer({ size: 6 * 4, usage: 0x40 | 0x08 }),
+      frame: null
     };
   }
   return gpuResize;
@@ -96,7 +99,8 @@ const resizeOnGpu = (input: Tensor, video: HTMLVideoElement, roi: Roi | null) =>
   if (device === null) {
     throw new Error("WebGPU device is gone");
   }
-  const { pipeline, sampler, params } = getGpuResize(device);
+  const resize: GpuResize = getGpuResize(device);
+  const { pipeline, sampler, params } = resize;
   const width: number = video.videoWidth;
   const height: number = video.videoHeight;
   const region: Roi = roi ?? { x: 0, y: 0, width, height };
@@ -105,58 +109,32 @@ const resizeOnGpu = (input: Tensor, video: HTMLVideoElement, roi: Roi | null) =>
     region.x / width, region.y / height, region.width / width, region.height / height,
     Math.max(1, Math.ceil(region.width / CHESSQUERIES_SIZE)), Math.max(1, Math.ceil(region.height / CHESSQUERIES_SIZE))
   ]));
-  // Imported from a VideoFrame of the frame on show rather than from the video element: the element sometimes gives a
-  // frame whose colour isn't ready, which comes out green (a quarter of frames in desktop Chrome on Linux)
-  const frame: VideoFrame | null = (typeof VideoFrame === "function" && !(globalThis as any).__noVideoFrame) ? new VideoFrame(video) : null; // TEMP switch
-  // TEMP: copy the frame into an ordinary texture instead of importing it
-  if ((globalThis as any).__copy) {
-    const g = globalThis as any;
-    if (g.__copyTexture?.width !== width || g.__copyTexture?.height !== height || g.__copyDevice !== device) {
-      g.__copyDevice = device;
-      g.__copyTexture = device.createTexture({ size: [width, height], format: "rgba8unorm", usage: 0x02 | 0x04 | 0x10 });
-      g.__copyPipeline = device.createComputePipeline({ layout: "auto", compute: { entryPoint: "main", module: device.createShaderModule({
-        code: RESIZE_SHADER.replace("texture_external", "texture_2d<f32>").replace("textureSampleBaseClampToEdge(frame, smp, params.origin + p * params.size)", "textureSampleLevel(frame, smp, params.origin + p * params.size, 0.0)")
-      }) } });
-    }
-    device.queue.copyExternalImageToTexture({ source: video }, { texture: g.__copyTexture }, [width, height]);
-    const bindGroup = device.createBindGroup({ layout: g.__copyPipeline.getBindGroupLayout(0), entries: [
-      { binding: 0, resource: g.__copyTexture.createView() },
+  if (resize.frame?.width !== width || resize.frame?.height !== height) {
+    resize.frame?.destroy();
+    // GPUTextureUsage.COPY_DST | TEXTURE_BINDING | RENDER_ATTACHMENT (copyExternalImageToTexture needs the last)
+    resize.frame = device.createTexture({ size: [width, height], format: "rgba8unorm", usage: 0x02 | 0x04 | 0x10 });
+  }
+  // Copied rather than imported as an external texture: in desktop Chrome on Linux, a quarter of imported frames came
+  // out green, as if their colour wasn't ready yet, and the model read them as pieces moving. Copies were never green,
+  // for about 3 to 5 ms more a frame.
+  device.queue.copyExternalImageToTexture({ source: video }, { texture: resize.frame }, [width, height]);
+  const bindGroup: GPUBindGroup = device.createBindGroup({
+    layout: pipeline.getBindGroupLayout(0),
+    entries: [
+      { binding: 0, resource: resize.frame.createView() },
       { binding: 1, resource: sampler },
       { binding: 2, resource: { buffer: input.toGpuBuffer() } },
       { binding: 3, resource: { buffer: params } }
-    ] });
-    const encoder = device.createCommandEncoder();
-    const pass = encoder.beginComputePass();
-    pass.setPipeline(g.__copyPipeline);
-    pass.setBindGroup(0, bindGroup);
-    pass.dispatchWorkgroups(Math.ceil(CHESSQUERIES_SIZE / 8), Math.ceil(CHESSQUERIES_SIZE / 8));
-    pass.end();
-    device.queue.submit([encoder.finish()]);
-    return;
-  }
-  try {
-    // An external texture is only valid in the task that imports it, so it is used straight away
-    const bindGroup: GPUBindGroup = device.createBindGroup({
-      layout: pipeline.getBindGroupLayout(0),
-      entries: [
-        { binding: 0, resource: device.importExternalTexture({ source: frame ?? video }) },
-        { binding: 1, resource: sampler },
-        { binding: 2, resource: { buffer: input.toGpuBuffer() } },
-        { binding: 3, resource: { buffer: params } }
-      ]
-    });
-    const encoder: GPUCommandEncoder = device.createCommandEncoder();
-    const pass: GPUComputePassEncoder = encoder.beginComputePass();
-    pass.setPipeline(pipeline);
-    pass.setBindGroup(0, bindGroup);
-    const groups: number = Math.ceil(CHESSQUERIES_SIZE / 8);
-    pass.dispatchWorkgroups(groups, groups);
-    pass.end();
-    device.queue.submit([encoder.finish()]);
-  } finally {
-    // Work already submitted keeps its frame
-    frame?.close();
-  }
+    ]
+  });
+  const encoder: GPUCommandEncoder = device.createCommandEncoder();
+  const pass: GPUComputePassEncoder = encoder.beginComputePass();
+  pass.setPipeline(pipeline);
+  pass.setBindGroup(0, bindGroup);
+  const groups: number = Math.ceil(CHESSQUERIES_SIZE / 8);
+  pass.dispatchWorkgroups(groups, groups);
+  pass.end();
+  device.queue.submit([encoder.finish()]);
 }
 
 // A null video gives blank pixels, for the warm-up
@@ -166,9 +144,9 @@ const toInput = async (video: HTMLVideoElement | null, roi: Roi | null): Promise
   }
   if (video !== null) {
     const device = gpuInput.environment.webGpuDevice;
-    // Firefox can't import a video as a texture (or copy one into a texture),
-    // so it resizes on the canvas and uploads the small result instead
-    if (device !== null && (typeof device.importExternalTexture !== "function" || (globalThis as any).__canvas)) { // TEMP switch
+    // Firefox can't import a video as a texture or copy one into a texture, so it resizes on the canvas and uploads the
+    // small result instead. It is told apart by having no importExternalTexture.
+    if (device !== null && typeof device.importExternalTexture !== "function") {
       device.queue.writeBuffer(gpuInput.toGpuBuffer(), 0, getPixels(video, roi));
     } else {
       resizeOnGpu(gpuInput, video, roi);
@@ -181,6 +159,7 @@ const deleteGpuInput = () => {
   gpuInput?.delete();
   gpuInput = null;
   gpuResize?.params.destroy();
+  gpuResize?.frame?.destroy();
   gpuResize = null;
 }
 
@@ -200,29 +179,8 @@ const run = (model: CompiledModel, video: HTMLVideoElement | null, roi: Roi | nu
 }
 
 const runNow = async (model: CompiledModel, video: HTMLVideoElement | null, roi: Roi | null): Promise<ChessqueriesOutputs> => {
-  const start = performance.now(); // TEMP
-  const input = await toInput(video, roi);
-  // TEMP: capture the input pixels, or time each run
-  const cap = (globalThis as any).__capture;
-  let pixels: Promise<Uint8Array> | null = null;
-  if (cap && video && input.environment.webGpuDevice) {
-    const device = input.environment.webGpuDevice;
-    const size = CHESSQUERIES_SIZE * CHESSQUERIES_SIZE * 4;
-    const read = device.createBuffer({ size, usage: GPUBufferUsage.MAP_READ | GPUBufferUsage.COPY_DST });
-    const encoder = device.createCommandEncoder();
-    encoder.copyBufferToBuffer(input.toGpuBuffer(), 0, read, 0, size);
-    device.queue.submit([encoder.finish()]);
-    pixels = read.mapAsync(GPUMapMode.READ).then(() => new Uint8Array(read.getMappedRange().slice(0)));
-  }
-  const outputs: Tensor[] = await model.run(input);
-  const result = toOutputs(await Promise.all(outputs.map(toArray)));
-  if (pixels) {
-    const p = await pixels;
-    const mean = [0, 1, 2].map((c) => { let s = 0; for (let i = c; i < p.length; i += 16) s += p[i]; return s / (p.length / 16); });
-    cap.push(mean);
-  }
-  if (video && (globalThis as any).__runTimes) (globalThis as any).__runTimes.push(performance.now() - start);
-  return result;
+  const outputs: Tensor[] = await model.run(await toInput(video, roi));
+  return toOutputs(await Promise.all(outputs.map(toArray)));
 }
 
 // Firefox's shader-f16 overflows to NaN on some frames, though the same frames are fine without it.
