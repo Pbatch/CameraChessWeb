@@ -2,12 +2,11 @@ import { findPieces } from "../../vision/findPieces";
 import { useEffect, useRef, useState } from "react";
 import { MEDIA_ASPECT_RATIO } from "../../utils/constants";
 import type {
-  CornerName, Game, Mode, ModelRefs, MovesPair, Roi, RoiRef, SetRoi,
+  CornerName, Game, Mode, ModelRefs, Roi, RoiRef, SetRoi,
   SetBoolean, SetStringArray, VideoRef
 } from "../../types";
 import { makeBoard, useGame } from "../../slices/gameSlice";
-import type { GameBoard } from "../../chess/board";
-import { getMovesPairs, getMoveText } from "../../chess/moves";
+import { getMoveText } from "../../chess/moves";
 import RoiSelector from "./roiSelector";
 import OrientationMarkers, { MARKER_DIAMETER } from "./orientationMarkers";
 import FpsDisplay from "./fpsDisplay";
@@ -27,13 +26,6 @@ const Video = ({ chessqueriesModelRef, videoRef, playing,
   }) => {
   const game: Game = useGame();
 
-  // Worked out once, as useRef would evaluate them on every render, and the move pairs are slow to make
-  const [initial] = useState(() => {
-    const board = makeBoard(game);
-    return { board, movesPairs: getMovesPairs(board.position) };
-  });
-  const boardRef = useRef<GameBoard>(initial.board);
-  const movesPairsRef = useRef<MovesPair[]>(initial.movesPairs);
   const lastMoveRef = useRef<string>(game.lastMove);
   const moveTextRef = useRef<string>("");
   const [orientation, setOrientation] = useState<CornerName[] | null>(null);
@@ -43,20 +35,13 @@ const Video = ({ chessqueriesModelRef, videoRef, playing,
   const [fps, setFps] = useState<number | null>(null);
 
   useEffect(() => {
-    const board = makeBoard(game);
-    moveTextRef.current = getMoveText(board);
-    if (game.greedy === true) {
-      board.undo();
-    } else {
-      movesPairsRef.current = getMovesPairs(board.position);
-    }
-    boardRef.current = board;
+    moveTextRef.current = getMoveText(makeBoard(game));
     lastMoveRef.current = game.lastMove;
   }, [game])
 
   useEffect(() => {
     return findPieces({ chessqueriesModelRef, videoRef, roiRef, playingRef, setText, setFps, setOrientation,
-      boardRef, movesPairsRef, lastMoveRef, moveTextRef, mode });
+      lastMoveRef, moveTextRef, mode });
   }, [mode, chessqueriesModelRef, playingRef, roiRef, setText, videoRef]);
 
   useEffect(() => {

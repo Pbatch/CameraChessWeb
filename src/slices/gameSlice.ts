@@ -2,7 +2,7 @@ import { useStore, initialGame } from '../store';
 import type { Game } from '../types';
 import { START_FEN } from '../utils/constants';
 import { defaultGame, defaultHeaders, makeComment, makeOutcome, makePgn as writePgn, parsePgn } from 'chessops/pgn';
-import { GameBoard } from '../chess/board';
+import { GameBoard, makeBoard } from '../chess/board';
 
 // Everything a move changes; the start position is kept, and the times worked out
 export type GameUpdate = Omit<Game, 'start' | 'times'>;
@@ -22,8 +22,10 @@ export const gameRestart = () => {
 }
 
 // Moves kept from before keep their times, so a greedy move confirmed later is timed from when it was
-// first seen. New moves are timed at `elapsed`, and without it the game is untimed.
-const updateTimes = (game: Game, moves: string, elapsed?: number): number[] => {
+// first seen. New moves are timed at `elapsed`, less how long ago each was seen (`ago`, ms, by index in the game),
+// as a move the tracker corrects may have been played a few seconds before it was shown, and without `elapsed` the
+// game is untimed.
+const updateTimes = (game: Game, moves: string, elapsed?: number, ago: (number | null)[] = []): number[] => {
   if (elapsed === undefined) {
     return [];
   }
@@ -33,13 +35,19 @@ const updateTimes = (game: Game, moves: string, elapsed?: number): number[] => {
   while ((kept < Math.min(before.length, game.times.length)) && (before[kept].san === after[kept]?.san)) {
     kept += 1;
   }
-  return [...game.times.slice(0, kept), ...after.slice(kept).map(() => elapsed)];
+  const times = game.times.slice(0, kept);
+  for (let i = kept; i < after.length; i++) {
+    // Never before the move before it
+    times.push(Math.max(elapsed - (ago[i] ?? 0), times[i - 1] ?? 0));
+  }
+  return times;
 }
 
-// `elapsed` is the ms since recording started, to time the new moves
-export const gameUpdate = (update: GameUpdate, elapsed?: number) => {
+// `elapsed` is the ms since recording started, to time the new moves, and `ago` how long before now each move was
+// seen, if known
+export const gameUpdate = (update: GameUpdate, elapsed?: number, ago?: (number | null)[]) => {
   setGame((game) => ({
-    ...update, start: game.start, times: updateTimes(game, update.moves, elapsed)
+    ...update, start: game.start, times: updateTimes(game, update.moves, elapsed, ago)
   }));
 }
 
@@ -106,13 +114,5 @@ export const makeUpdatePayload = (board: GameBoard, greedy: boolean = false, fro
   }
 }
 
-export const makeBoard = (game: Pick<Game, 'moves' | 'start'>): GameBoard => {
-  const board = new GameBoard(game.start);
-  const games = parsePgn(game.moves);
-  if (games.length > 0) {
-    for (const node of games[0].moves.mainline()) {
-      board.playSan(node.san);
-    }
-  }
-  return board;
-}
+// Kept with GameBoard, so code outside the store can make boards without loading it
+export { makeBoard };

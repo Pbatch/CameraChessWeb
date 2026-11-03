@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { BayesianTracker } from "./bayesianTracker";
+import { BayesianTracker, type TrackerMove } from "./bayesianTracker";
 import { getMovesPairs } from "../chess/moves";
 import { replay } from "../dev/replay";
 import { makeBoard } from "../slices/gameSlice";
@@ -95,6 +95,79 @@ describe("BayesianTracker", () => {
     for (let i = 0; i < 40; i++) {
       expect(tracker.update(frame, 250 * i, g)).toBeNull();
     }
+  });
+
+  // A frame as the model gives it when it reads the board turned half way round
+  const turned = (fen: string) => oneHotState(fen).reverse();
+
+  it("ignores frames read turned round", () => {
+    // Turned round, the king on d4 shows on e5, as if it had moved there
+    const fen = "7k/8/8/8/3K4/8/8/8 w - - 0 1";
+    const board = makeBoard(makeGame("", fen));
+    const g = { movesPairs: getMovesPairs(board.position), position: board.position };
+    const tracker = new BayesianTracker();
+    for (let i = 0; i < 40; i++) {
+      expect(tracker.update(turned(fen), 250 * i, g)).toBeNull();
+    }
+  });
+
+  it("plays a move among frames read turned round", () => {
+    const tracker = new BayesianTracker();
+    const g = game();
+    const moves = Array.from({ length: 40 }, (_, i) =>
+      tracker.update((i % 3 === 0) ? oneHotState(AFTER_E4) : turned(AFTER_E4), 250 * i, g)).filter((move) => move !== null);
+    expect(moves).toEqual([{ san: "e4", greedy: true }]);
+  });
+
+  it("plays a promotion as a queen when the frames can't tell which piece, though its reply takes it", () => {
+    // Once the rook takes on e8, no square shows which piece the pawn became
+    const before = "r5k1/4P3/8/8/8/8/8/7K w - - 0 1";
+    const after = "4r1k1/8/8/8/8/8/8/7K w - - 0 2";
+    // The new piece read as any of the four, as when the model can't tell an upside-down rook from a queen
+    const promoted = oneHotState("r3Q1k1/8/8/8/8/8/8/7K b - - 0 1");
+    promoted[SQUARE_MAP.e8] = Array(NUM_LABELS).fill(0);
+    for (const label of ["Q", "R", "B", "N"]) promoted[SQUARE_MAP.e8][LABEL_MAP[label]] = 0.25;
+    const frame = (i: number) => (i < 8) ? oneHotState(before) : (i < 16) ? promoted : oneHotState(after);
+    const board = makeBoard(makeGame("", before));
+    const tracker = new BayesianTracker();
+    const played: string[] = [];
+    let shown = null;
+    let g = { movesPairs: getMovesPairs(board.position), position: board.position };
+    for (let i = 0; i < 48; i++) {
+      const move = tracker.update(frame(i), 250 * i, g);
+      if (move?.greedy) {
+        shown = move.san;
+      } else if (move !== null) {
+        played.push(move.san);
+        board.playSan(move.san);
+        g = { movesPairs: getMovesPairs(board.position), position: board.position };
+      }
+    }
+    // The reply is shown, but only played for good once White's next move is seen
+    expect(played).toEqual(["e8=Q+"]);
+    expect(shown).toBe("Rxe8");
+  });
+
+  it("plays checkmate for good without waiting for a reply", () => {
+    // Fool's mate, then the queen moved on to g5 as the board is cleared, which was a legal move instead of the mate
+    const before = "rnbqkbnr/pppp1ppp/8/4p3/6P1/5P2/PPPPP2P/RNBQKBNR b KQkq - 0 2";
+    const mate = "rnb1kbnr/pppp1ppp/8/4p3/6Pq/5P2/PPPPP2P/RNBQKBNR w KQkq - 1 3";
+    const cleared = "rnb1kbnr/pppp1ppp/8/4p1q1/6P1/5P2/PPPPP2P/RNBQKBNR w KQkq - 1 3";
+    let board = makeBoard(makeGame("", before));
+    const tracker = new BayesianTracker();
+    const moves: TrackerMove[] = [];
+    let g = { movesPairs: getMovesPairs(board.position), position: board.position };
+    for (let i = 0; i < 48; i++) {
+      const fen = (i < 8) ? before : (i < 24) ? mate : cleared;
+      const move = tracker.update(oneHotState(fen), 250 * i, g);
+      if (move === null) continue;
+      moves.push(move);
+      if (!move.greedy) {
+        board = makeBoard(makeGame(move.san, before));
+        g = { movesPairs: getMovesPairs(board.position), position: board.position };
+      }
+    }
+    expect(moves).toEqual([{ san: "Qh4#", greedy: false }]);
   });
 
   it("takes uncertain frames as no evidence", () => {

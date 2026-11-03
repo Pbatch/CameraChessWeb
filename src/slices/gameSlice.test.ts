@@ -119,6 +119,15 @@ describe("gameUpdate", () => {
     expect(getGame().times).toEqual([1000, 4000]);
   });
 
+  it("times a corrected move from when it was seen, never before the move before it", () => {
+    gameUpdate(makeUpdatePayload(makeBoard(makeGame("1. e4 e6"))), 3000);
+    // At 9s the tracker finds e5 was played instead of e6, seen 7s ago, and Nf3 8s ago: both before e4's 3s, so 3s
+    gameUpdate(makeUpdatePayload(makeBoard(makeGame("1. e4 e5 2. Nf3"))), 9000, [null, 7000, 8000]);
+    expect(getGame().times).toEqual([3000, 3000, 3000]);
+    gameUpdate(makeUpdatePayload(makeBoard(makeGame("1. e4 e5 2. Nf3 Nc6"))), 12000, [null, null, null, 1500]);
+    expect(getGame().times).toEqual([3000, 3000, 3000, 10500]);
+  });
+
   it("leaves the game untimed without an elapsed time", () => {
     setGame({ ...makeGame("1. e4"), times: [1000] });
     gameUpdate(makeUpdatePayload(makeBoard(makeGame("1. e4 e5"))));

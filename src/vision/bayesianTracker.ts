@@ -34,7 +34,12 @@ export interface BayesianOptions {
   evidenceWeight: number,
   // How sure the tracker must be of a move before showing it, and of a move with a reply before playing it for good.
   // Above 0.5, so only one move can pass it at a time.
-  threshold: number
+  threshold: number,
+  // Chance that the model read a frame with the board turned half way round, as it sometimes does in endgames, when
+  // where the pieces stand no longer shows which side is White. Each way is weighed by how well it explains the frame
+  // either way round, so a frame read turned round counts for the right squares instead of looking like every piece
+  // moved. 0 reads every frame as it comes.
+  flipChance: number
 }
 
 // From a sweep over 44 recorded blitz games (dev/replay.mjs), on the 43 without takebacks: 210 edits to fix, 88.5% of
@@ -47,8 +52,17 @@ export interface BayesianOptions {
 // little share back to no move each frame (1e-8) fixed that, but cost more edits.
 // Scaled to the time between frames, at 2 frames a second 24 of the games needed 174 edits and at 1, 408 (at
 // evidenceWeight 0.6); with the same values per frame instead, 525 and 1354.
+// flipChance took the 210 edits to 184 (89.2% right before the first mistake), changing only the four games whose
+// endgames had frames read turned round: 0.001 needed 186 edits, 0.01 190, 0.05 and 0.2 184.
+// The numbers above are for the earlier model. The current one (chessq-chesscam-dinov3-448-v2) needs 158 edits (90.7%)
+// at temperature 3.5 and evidenceWeight 1.4, against 166 at the earlier 1.78 and 0.8. It does about as well wherever
+// evidenceWeight is 0.35 to 0.4 times the temperature, from 2.5 up; 5 and 2 needed 171.
+// Playing a move that ends the game for good once shown, as nothing can reply to it, took 146 games (at the earlier
+// model's 1.78 and 0.8) from 540 edits to 519: 21 games had lost their last move, a checkmate, to the board being
+// cleared. One game that was already out of step got a wrong mate.
 export const DEFAULT_BAYESIAN_OPTIONS: BayesianOptions = {
-  provisional: true, moveChance: 0.01, temperature: 1.78, floor: 0.05, evidenceWeight: 0.8, threshold: 0.95
+  provisional: true, moveChance: 0.01, temperature: 3.5, floor: 0.05, evidenceWeight: 1.4, threshold: 0.95,
+  flipChance: 0.05
 };
 
 // The time between frames, in ms, that moveChance and evidenceWeight are given for: the app's 4 frames a second
@@ -76,6 +90,10 @@ interface Hypothesis {
 // it is played for good and the tracker looks on from there. Until then a different move can replace it, such as when
 // a piece is put down and picked up again. A move whose destination the frames don't show stays split with the other
 // moves of the same piece, so it is not shown on a guess.
+//
+// The app doesn't use it on its own: BeamTracker runs one for each way the game may have gone, splitting where one
+// plays a move for good (see beamTracker.ts), so a move can still be taken back. Run on its own, as dev/replay.mjs
+// --single does, it is the app's tracker before the beam, to compare against.
 export class BayesianTracker {
   readonly #options: BayesianOptions;
   #movesPairs: MovesPair[] | null = null;
@@ -84,7 +102,14 @@ export class BayesianTracker {
   #root: number[] = [];
   // Each first move, and how many single moves and replies there are, worked out once per position
   #firsts: string[] = [];
+  // Each first move's group: the same move, but for the piece a pawn promotes to. A pair can't tell a group's moves
+  // apart when the reply takes the new piece, and the model often can't either, so the threshold is on a group's
+  // share, and the move picked from it is the one with the largest share (the queen, on a tie).
+  #groups = new Int32Array(0);
+  #groupCount = 0;
   #replies = new Int32Array(0);
+  // Whether each first move ends the game (checkmate or stalemate), so no reply can ever confirm it
+  #ends = new Uint8Array(0);
   // The share of no move, and of each way. Each frame's shares are worked out in #next, then the two are swapped.
   #none = 1;
   #belief = new Float64Array(0);
@@ -98,20 +123,61 @@ export class BayesianTracker {
   #shown: string | null = null;
   // When the last frame came, in ms
   #lastTime: number | null = null;
+  // How well the last frame fitted the game so far: its log-probability given the position, with every way the game
+  // may have gone on weighed by its share, scaled by evidenceWeight. Unlike the evidence, which is against the
+  // position not changing, it can be compared between trackers following different games (beamTracker.ts).
+  #frameLogLikelihood = 0;
 
   constructor(options: Partial<BayesianOptions> = {}) {
     this.#options = { ...DEFAULT_BAYESIAN_OPTIONS, ...options };
   }
 
-  get started(): boolean {
-    return this.#movesPairs !== null;
+  get frameLogLikelihood(): number {
+    return this.#frameLogLikelihood;
   }
 
-  reset() {
-    this.#lastTime = null;
-    this.#movesPairs = null;
+  // A copy that goes on from here independently
+  clone(): BayesianTracker {
+    const copy = new BayesianTracker(this.#options);
+    copy.#movesPairs = this.#movesPairs;
+    copy.#hypotheses = this.#hypotheses;
+    copy.#root = this.#root;
+    copy.#firsts = this.#firsts;
+    copy.#groups = this.#groups;
+    copy.#groupCount = this.#groupCount;
+    copy.#replies = this.#replies;
+    copy.#ends = this.#ends;
+    copy.#none = this.#none;
+    copy.#belief = this.#belief.slice();
+    copy.#next = new Float64Array(this.#next.length);
+    copy.#evidence = new Float64Array(this.#evidence.length);
+    copy.#played = this.#played;
+    copy.#shown = this.#shown;
+    copy.#lastTime = this.#lastTime;
+    copy.#frameLogLikelihood = this.#frameLogLikelihood;
+    return copy;
+  }
+
+  // Goes on as if `san` had not been played: drops every way through it, shares the rest out again, and returns the
+  // share it had, which a tracker that played it (a clone from before) takes instead
+  exclude(san: string): number {
+    let dropped = 0;
+    for (let i = 0; i < this.#hypotheses.length; i++) {
+      if (this.#firsts[this.#hypotheses[i].first] === san) {
+        dropped += this.#belief[i];
+        this.#belief[i] = 0;
+      }
+    }
+    const kept = 1 - dropped;
+    if (kept > 0) {
+      this.#none /= kept;
+      for (let i = 0; i < this.#belief.length; i++) {
+        this.#belief[i] /= kept;
+      }
+    }
     this.#played = null;
     this.#shown = null;
+    return dropped;
   }
 
   // `update` is a 64x13 state in square order for one frame, unsmoothed, and `now` the frame's time in ms
@@ -123,15 +189,12 @@ export class BayesianTracker {
     if (game.movesPairs !== this.#movesPairs) {
       this.#start(game);
     } else if (this.#played !== null) {
-      // The app has not moved on from the move just played yet
+      // The game has not moved on from the move just played yet
       return null;
     }
     const hypotheses = this.#hypotheses;
     const n = hypotheses.length;
-    if (n === 0) {
-      return null;
-    }
-    const { provisional, temperature, floor, threshold } = this.#options;
+    const { provisional, temperature, floor, threshold, flipChance } = this.#options;
     // The settings for the time since the last frame
     const steps = interval / REFERENCE_INTERVAL;
     const moveChance = (steps === 1) ? this.#options.moveChance : 1 - (1 - this.#options.moveChance) ** steps;
@@ -165,14 +228,35 @@ export class BayesianTracker {
         logs[row + label] = Math.log((1 - floor) * logs[row + label] / sum + floor / NUM_LABELS);
       }
     }
+    // How well the position not changing explains the frame as read, and turned round (square s read as 63 - s)
+    const root = this.#root;
+    let upright = 0;
+    let turned = 0;
+    for (let square = 0; square < 64; square++) {
+      upright += logs[square * NUM_LABELS + root[square]];
+      if (flipChance > 0) turned += logs[(63 - square) * NUM_LABELS + root[square]];
+    }
+    const uprightPrior = Math.log(1 - flipChance);
+    const turnedPrior = Math.log(flipChance);
+    const unchanged = (flipChance > 0) ? mix(uprightPrior + upright, turnedPrior + turned) : upright;
+    this.#frameLogLikelihood = evidenceWeight * unchanged;
+    if (n === 0) {
+      // No legal moves: the game is over
+      return null;
+    }
     const evidence = this.#evidence;
     let top = 0;
     for (let i = 0; i < n; i++) {
       const { squares, labels } = hypotheses[i];
       let sum = 0;
+      let turnedSum = 0;
       for (let k = 0; k < squares.length; k++) {
         const square = squares[k];
-        sum += logs[square * NUM_LABELS + labels[k]] - logs[square * NUM_LABELS + this.#root[square]];
+        sum += logs[square * NUM_LABELS + labels[k]] - logs[square * NUM_LABELS + root[square]];
+        turnedSum += logs[(63 - square) * NUM_LABELS + labels[k]] - logs[(63 - square) * NUM_LABELS + root[square]];
+      }
+      if (flipChance > 0) {
+        sum = mix(uprightPrior + upright + sum, turnedPrior + turned + turnedSum) - unchanged;
       }
       evidence[i] = evidenceWeight * sum;
       if (evidence[i] > top) top = evidence[i];
@@ -182,6 +266,7 @@ export class BayesianTracker {
       next[i] *= Math.exp(evidence[i] - top);
       total += next[i];
     }
+    this.#frameLogLikelihood += top + Math.log(total);
     none = none * Math.exp(-top) / total;
     for (let i = 0; i < n; i++) {
       next[i] /= total;
@@ -190,28 +275,52 @@ export class BayesianTracker {
     this.#belief = next;
     this.#next = belief;
 
-    // Each first move's share in all, and with a reply. The threshold is above 0.5, so only the largest can pass it.
+    // Each first move's share in all, and each group's share in all and with a reply. The threshold is above 0.5,
+    // so only the largest group can pass it.
+    const groups = this.#groups;
     const shares = new Float64Array(this.#firsts.length);
-    const replied = new Float64Array(this.#firsts.length);
+    const groupShares = new Float64Array(this.#groupCount);
+    const replied = new Float64Array(this.#groupCount);
     for (let i = 0; i < n; i++) {
-      shares[hypotheses[i].first] += next[i];
+      const first = hypotheses[i].first;
+      shares[first] += next[i];
+      groupShares[groups[first]] += next[i];
       if (hypotheses[i].second !== null) {
-        replied[hypotheses[i].first] += next[i];
+        replied[groups[first]] += next[i];
       }
     }
-    const confirmed = provisional ? replied : shares;
+    const confirmed = provisional ? replied : groupShares;
     const best = largest(confirmed);
     if (confirmed[best] > threshold) {
-      this.#played = this.#firsts[best];
+      this.#played = this.#firsts[this.#pick(best, shares)];
       this.#shown = null;
       return { san: this.#played, greedy: false };
     }
-    const shown = largest(shares);
-    if (provisional && shares[shown] > threshold && this.#firsts[shown] !== this.#shown) {
-      this.#shown = this.#firsts[shown];
-      return { san: this.#shown, greedy: true };
+    const shownGroup = largest(groupShares);
+    if (provisional && groupShares[shownGroup] > threshold) {
+      const first = this.#pick(shownGroup, shares);
+      const shown = this.#firsts[first];
+      if (this.#ends[first]) {
+        // Nothing can reply to it, and the pieces moved as the board is cleared afterwards would replace it
+        this.#played = shown;
+        this.#shown = null;
+        return { san: shown, greedy: false };
+      }
+      if (shown !== this.#shown) {
+        this.#shown = shown;
+        return { san: shown, greedy: true };
+      }
     }
     return null;
+  }
+
+  // The first move in a group with the largest share, the earliest on a tie
+  #pick(group: number, shares: Float64Array): number {
+    let best = -1;
+    for (let first = 0; first < shares.length; first++) {
+      if (this.#groups[first] === group && (best === -1 || shares[first] > shares[best])) best = first;
+    }
+    return best;
   }
 
   // The hypotheses from a new position. After a move this tracker played, its pairs carry their share over as the
@@ -249,10 +358,19 @@ export class BayesianTracker {
     }
     this.#hypotheses = hypotheses;
     this.#firsts = firsts;
+    // Promotions to each piece are generated queen first, so the queen comes first in its group
+    const groupOf = new Map<string, number>();
+    this.#groups = Int32Array.from(firsts, (san) => {
+      const key = san.replace(/=[QRBN]/, "").replace(/[+#]$/, "");
+      if (!groupOf.has(key)) groupOf.set(key, groupOf.size);
+      return groupOf.get(key)!;
+    });
+    this.#groupCount = groupOf.size;
     this.#replies = new Int32Array(hypotheses.length);
     for (const h of hypotheses) {
       if (h.second !== null) this.#replies[h.parent] += 1;
     }
+    this.#ends = Uint8Array.from(firsts, (san) => (this.#replies[singles.get(san)!] === 0) ? 1 : 0);
     this.#belief = new Float64Array(hypotheses.length);
     this.#next = new Float64Array(hypotheses.length);
     this.#evidence = new Float64Array(hypotheses.length);
@@ -278,6 +396,12 @@ export class BayesianTracker {
       }
     }
   }
+}
+
+// log(e^a + e^b), without overflow
+const mix = (a: number, b: number): number => {
+  const top = Math.max(a, b);
+  return (top === -Infinity) ? top : top + Math.log(Math.exp(a - top) + Math.exp(b - top));
 }
 
 // The index of the largest value

@@ -12,13 +12,13 @@ const NUM_PROBS: number = 64 * CLASS_SYMBOLS.length;
 // Region corners clockwise from the top left when rank 8 is at the top
 const CORNERS: CornerName[] = ["a8", "h8", "h1", "a1"];
 // Pinned to a commit so a new upload cannot change the model under a deployed app
-const MODEL_URL: string = "https://huggingface.co/PBatch23888/chessq-chesscam/resolve/1407e49c17299f53c1197155e08c9a1106298e05/chessq-chesscam-dinov3-448-fp16.tflite";
+const MODEL_URL: string = "https://huggingface.co/PBatch23888/chessq-chesscam/resolve/d2aad00300dfef654718b85bdefc835d710858fe/chessq-chesscam-dinov3-448-v2-fp16.tflite";
 
 // Resizes the frame straight into the input buffer, one packed RGBA u32 per pixel.
 // Each output pixel averages a grid of bilinear taps over its footprint, like the canvas's high quality downscale.
 const RESIZE_SHADER: string = `
 struct Params { origin: vec2f, size: vec2f, taps: vec2f }
-@group(0) @binding(0) var frame: texture_external;
+@group(0) @binding(0) var frame: texture_2d<f32>;
 @group(0) @binding(1) var smp: sampler;
 @group(0) @binding(2) var<storage, read_write> pixels: array<u32>;
 @group(0) @binding(3) var<uniform> params: Params;
@@ -33,7 +33,7 @@ fn main(@builtin(global_invocation_id) id: vec3u) {
   for (var j = 0u; j < taps.y; j++) {
     for (var i = 0u; i < taps.x; i++) {
       let p = (vec2f(id.xy) + (vec2f(f32(i), f32(j)) + 0.5) / params.taps) / ${CHESSQUERIES_SIZE}.0;
-      sum += textureSampleBaseClampToEdge(frame, smp, params.origin + p * params.size).rgb;
+      sum += textureSampleLevel(frame, smp, params.origin + p * params.size, 0.0).rgb;
     }
   }
   pixels[id.y * ${CHESSQUERIES_SIZE}u + id.x] = pack4x8unorm(vec4f(sum / f32(taps.x * taps.y), 1.0));
@@ -105,24 +105,58 @@ const resizeOnGpu = (input: Tensor, video: HTMLVideoElement, roi: Roi | null) =>
     region.x / width, region.y / height, region.width / width, region.height / height,
     Math.max(1, Math.ceil(region.width / CHESSQUERIES_SIZE)), Math.max(1, Math.ceil(region.height / CHESSQUERIES_SIZE))
   ]));
-  // An external texture is only valid in the task that imports it, so it is used straight away
-  const bindGroup: GPUBindGroup = device.createBindGroup({
-    layout: pipeline.getBindGroupLayout(0),
-    entries: [
-      { binding: 0, resource: device.importExternalTexture({ source: video }) },
+  // Imported from a VideoFrame of the frame on show rather than from the video element: the element sometimes gives a
+  // frame whose colour isn't ready, which comes out green (a quarter of frames in desktop Chrome on Linux)
+  const frame: VideoFrame | null = (typeof VideoFrame === "function" && !(globalThis as any).__noVideoFrame) ? new VideoFrame(video) : null; // TEMP switch
+  // TEMP: copy the frame into an ordinary texture instead of importing it
+  if ((globalThis as any).__copy) {
+    const g = globalThis as any;
+    if (g.__copyTexture?.width !== width || g.__copyTexture?.height !== height || g.__copyDevice !== device) {
+      g.__copyDevice = device;
+      g.__copyTexture = device.createTexture({ size: [width, height], format: "rgba8unorm", usage: 0x02 | 0x04 | 0x10 });
+      g.__copyPipeline = device.createComputePipeline({ layout: "auto", compute: { entryPoint: "main", module: device.createShaderModule({
+        code: RESIZE_SHADER.replace("texture_external", "texture_2d<f32>").replace("textureSampleBaseClampToEdge(frame, smp, params.origin + p * params.size)", "textureSampleLevel(frame, smp, params.origin + p * params.size, 0.0)")
+      }) } });
+    }
+    device.queue.copyExternalImageToTexture({ source: video }, { texture: g.__copyTexture }, [width, height]);
+    const bindGroup = device.createBindGroup({ layout: g.__copyPipeline.getBindGroupLayout(0), entries: [
+      { binding: 0, resource: g.__copyTexture.createView() },
       { binding: 1, resource: sampler },
       { binding: 2, resource: { buffer: input.toGpuBuffer() } },
       { binding: 3, resource: { buffer: params } }
-    ]
-  });
-  const encoder: GPUCommandEncoder = device.createCommandEncoder();
-  const pass: GPUComputePassEncoder = encoder.beginComputePass();
-  pass.setPipeline(pipeline);
-  pass.setBindGroup(0, bindGroup);
-  const groups: number = Math.ceil(CHESSQUERIES_SIZE / 8);
-  pass.dispatchWorkgroups(groups, groups);
-  pass.end();
-  device.queue.submit([encoder.finish()]);
+    ] });
+    const encoder = device.createCommandEncoder();
+    const pass = encoder.beginComputePass();
+    pass.setPipeline(g.__copyPipeline);
+    pass.setBindGroup(0, bindGroup);
+    pass.dispatchWorkgroups(Math.ceil(CHESSQUERIES_SIZE / 8), Math.ceil(CHESSQUERIES_SIZE / 8));
+    pass.end();
+    device.queue.submit([encoder.finish()]);
+    return;
+  }
+  try {
+    // An external texture is only valid in the task that imports it, so it is used straight away
+    const bindGroup: GPUBindGroup = device.createBindGroup({
+      layout: pipeline.getBindGroupLayout(0),
+      entries: [
+        { binding: 0, resource: device.importExternalTexture({ source: frame ?? video }) },
+        { binding: 1, resource: sampler },
+        { binding: 2, resource: { buffer: input.toGpuBuffer() } },
+        { binding: 3, resource: { buffer: params } }
+      ]
+    });
+    const encoder: GPUCommandEncoder = device.createCommandEncoder();
+    const pass: GPUComputePassEncoder = encoder.beginComputePass();
+    pass.setPipeline(pipeline);
+    pass.setBindGroup(0, bindGroup);
+    const groups: number = Math.ceil(CHESSQUERIES_SIZE / 8);
+    pass.dispatchWorkgroups(groups, groups);
+    pass.end();
+    device.queue.submit([encoder.finish()]);
+  } finally {
+    // Work already submitted keeps its frame
+    frame?.close();
+  }
 }
 
 // A null video gives blank pixels, for the warm-up
@@ -134,7 +168,7 @@ const toInput = async (video: HTMLVideoElement | null, roi: Roi | null): Promise
     const device = gpuInput.environment.webGpuDevice;
     // Firefox can't import a video as a texture (or copy one into a texture),
     // so it resizes on the canvas and uploads the small result instead
-    if (device !== null && typeof device.importExternalTexture !== "function") {
+    if (device !== null && (typeof device.importExternalTexture !== "function" || (globalThis as any).__canvas)) { // TEMP switch
       device.queue.writeBuffer(gpuInput.toGpuBuffer(), 0, getPixels(video, roi));
     } else {
       resizeOnGpu(gpuInput, video, roi);
@@ -166,8 +200,29 @@ const run = (model: CompiledModel, video: HTMLVideoElement | null, roi: Roi | nu
 }
 
 const runNow = async (model: CompiledModel, video: HTMLVideoElement | null, roi: Roi | null): Promise<ChessqueriesOutputs> => {
-  const outputs: Tensor[] = await model.run(await toInput(video, roi));
-  return toOutputs(await Promise.all(outputs.map(toArray)));
+  const start = performance.now(); // TEMP
+  const input = await toInput(video, roi);
+  // TEMP: capture the input pixels, or time each run
+  const cap = (globalThis as any).__capture;
+  let pixels: Promise<Uint8Array> | null = null;
+  if (cap && video && input.environment.webGpuDevice) {
+    const device = input.environment.webGpuDevice;
+    const size = CHESSQUERIES_SIZE * CHESSQUERIES_SIZE * 4;
+    const read = device.createBuffer({ size, usage: GPUBufferUsage.MAP_READ | GPUBufferUsage.COPY_DST });
+    const encoder = device.createCommandEncoder();
+    encoder.copyBufferToBuffer(input.toGpuBuffer(), 0, read, 0, size);
+    device.queue.submit([encoder.finish()]);
+    pixels = read.mapAsync(GPUMapMode.READ).then(() => new Uint8Array(read.getMappedRange().slice(0)));
+  }
+  const outputs: Tensor[] = await model.run(input);
+  const result = toOutputs(await Promise.all(outputs.map(toArray)));
+  if (pixels) {
+    const p = await pixels;
+    const mean = [0, 1, 2].map((c) => { let s = 0; for (let i = c; i < p.length; i += 16) s += p[i]; return s / (p.length / 16); });
+    cap.push(mean);
+  }
+  if (video && (globalThis as any).__runTimes) (globalThis as any).__runTimes.push(performance.now() - start);
+  return result;
 }
 
 // Firefox's shader-f16 overflows to NaN on some frames, though the same frames are fine without it.

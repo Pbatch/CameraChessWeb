@@ -3,6 +3,7 @@ import { parseFen, makeFen } from "chessops/fen";
 import type { Move } from "chessops/types";
 import { parseSan, makeSan } from "chessops/san";
 import { makeUci, parseUci } from "chessops/util";
+import { parsePgn } from "chessops/pgn";
 
 export type HistoryEntry = { move: Move; san: string };
 
@@ -77,4 +78,16 @@ export class GameBoard {
     this.#position.play(move);
     return move;
   }
+}
+
+// The board for a game's start position and moves (numbered SAN, as the store keeps them)
+export const makeBoard = (game: { moves: string, start: string }): GameBoard => {
+  const board = new GameBoard(game.start);
+  const games = parsePgn(game.moves);
+  if (games.length > 0) {
+    for (const node of games[0].moves.mainline()) {
+      board.playSan(node.san);
+    }
+  }
+  return board;
 }

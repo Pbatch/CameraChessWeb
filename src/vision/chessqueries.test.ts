@@ -24,7 +24,8 @@ const centroidsFor = (turns: number, width: number, height: number, pull: number
 
 describe("toUpdate", () => {
   it("turns FEN order into square order", () => {
-    expect(toUpdate(modelProbs(ITALIAN))).toEqual(oneHotState(ITALIAN));
+    // The model's outputs are float32
+    expect(toUpdate(modelProbs(ITALIAN))).toEqual(oneHotState(ITALIAN).map((row) => row.map(Math.fround)));
   });
 
   it("maps each model class to its label", () => {
