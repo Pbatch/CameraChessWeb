@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { BayesianTracker, type TrackerMove } from "./bayesianTracker";
 import { getMovesPairs } from "../chess/moves";
-import { replay } from "../dev/replay";
+import { replay } from "./replay";
 import { makeBoard } from "../slices/gameSlice";
 import { EMPTY, LABEL_MAP, NUM_LABELS, SQUARE_MAP, START_FEN } from "../utils/constants";
 import { makeGame, modelProbs, oneHotState } from "../test/helpers";

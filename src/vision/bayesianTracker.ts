@@ -362,15 +362,20 @@ export class BayesianTracker {
     const groupOf = new Map<string, number>();
     this.#groups = Int32Array.from(firsts, (san) => {
       const key = san.replace(/=[QRBN]/, "").replace(/[+#]$/, "");
-      if (!groupOf.has(key)) groupOf.set(key, groupOf.size);
-      return groupOf.get(key)!;
+      let group = groupOf.get(key);
+      if (group === undefined) {
+        group = groupOf.size;
+        groupOf.set(key, group);
+      }
+      return group;
     });
     this.#groupCount = groupOf.size;
     this.#replies = new Int32Array(hypotheses.length);
     for (const h of hypotheses) {
       if (h.second !== null) this.#replies[h.parent] += 1;
     }
-    this.#ends = Uint8Array.from(firsts, (san) => (this.#replies[singles.get(san)!] === 0) ? 1 : 0);
+    // Every first move has a hypothesis of its own, from the loop above
+    this.#ends = Uint8Array.from(firsts, (san) => (this.#replies[singles.get(san) ?? -1] === 0) ? 1 : 0);
     this.#belief = new Float64Array(hypotheses.length);
     this.#next = new Float64Array(hypotheses.length);
     this.#evidence = new Float64Array(hypotheses.length);

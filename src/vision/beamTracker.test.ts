@@ -2,8 +2,8 @@ import { describe, expect, it } from "vitest";
 import { BeamTracker, PLAY_BEAM_OPTIONS, PLAY_TRACKER_OPTIONS } from "./beamTracker";
 import { BayesianTracker } from "./bayesianTracker";
 import { makeUpdatePayload } from "../slices/gameSlice";
-import { replay, replayBeam } from "../dev/replay";
-import { makeGame, modelProbs, oneHotState } from "../test/helpers";
+import { replay, replayBeam } from "./replay";
+import { makeGame, oneHotState, videoProbs } from "../test/helpers";
 import { START_FEN } from "../utils/constants";
 import type { Game } from "../types";
 
@@ -13,15 +13,7 @@ const AFTER_D4 = "rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq - 0 1";
 const AFTER_E4_E5_NF3 = "rnbqkbnr/pppp1ppp/8/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2";
 const FPS = 4;
 
-// A video's model outputs: each FEN held for the given seconds
-const video = (...scenes: [string, number][]): Float32Array => {
-  const frames = scenes.flatMap(([fen, seconds]) => Array(seconds * FPS).fill(modelProbs(fen)));
-  const probs = new Float32Array(frames.length * frames[0].length);
-  frames.forEach((frame, i) => {
-    probs.set(frame, i * frame.length);
-  });
-  return probs;
-}
+const video = (...scenes: [string, number][]) => videoProbs(FPS, ...scenes);
 
 const sans = (moves: { san: string }[]) => moves.map(({ san }) => san);
 

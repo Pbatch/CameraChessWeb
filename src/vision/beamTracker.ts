@@ -104,10 +104,10 @@ export class BeamTracker {
   // `update` is a 64x13 state in square order for one frame, `now` its time in ms, and `game` the app's game as it is
   // now. Returns the game to show, if it changed.
   update(update: number[][], now: number, game: Game): BeamMove | null {
-    if (this.#histories === null || game.start !== this.#start || game.moves !== this.#known) {
-      this.#restart(game);
+    let histories = this.#histories;
+    if (histories === null || game.start !== this.#start || game.moves !== this.#known) {
+      histories = this.#restart(game);
     }
-    const histories = this.#histories!;
     const next: History[] = [];
     for (const history of histories) {
       const move = history.tracker.update(update, now, { movesPairs: history.movesPairs, position: history.position });
@@ -122,7 +122,11 @@ export class BeamTracker {
         const played = history.tracker.clone();
         const share = history.tracker.exclude(move.san);
         const position = history.position.clone();
-        position.play(parseSan(position, move.san)!);
+        const chessMove = parseSan(position, move.san);
+        if (chessMove === undefined) {
+          throw new Error(`The tracker played ${move.san}, which is illegal here`);
+        }
+        position.play(chessMove);
         next.push({
           sans: [...history.sans, move.san], times: [...history.times, now], position,
           movesPairs: this.#movesPairs(position), tracker: played, score: history.score + Math.log(share), greedy: null
@@ -134,10 +138,11 @@ export class BeamTracker {
         }
       }
     }
-    this.#histories = this.#prune(next, now);
-    this.#finalise();
+    const kept = this.#prune(next, now);
+    this.#finalise(kept);
+    this.#histories = kept;
 
-    const best = this.#options.finalOnly ? { sans: [], times: [], greedy: null } : this.#histories[0];
+    const best = this.#options.finalOnly ? { sans: [], times: [], greedy: null } : kept[0];
     const sans = [...this.#final, ...best.sans, ...((best.greedy === null) ? [] : [best.greedy])];
     const shown = sans.join(" ");
     if (shown === this.#shown) {
@@ -154,7 +159,7 @@ export class BeamTracker {
   }
 
   // One history from the app's game, all of whose moves are final
-  #restart(game: Game) {
+  #restart(game: Game): History[] {
     const board = makeBoard(game);
     this.#start = game.start;
     this.#final = board.history.map(({ san }) => san);
@@ -162,7 +167,7 @@ export class BeamTracker {
     this.#known = game.moves;
     this.#shown = this.#final.join(" ");
     const position = board.position.clone();
-    this.#histories = [{
+    return [{
       sans: [], times: [], position, movesPairs: this.#movesPairs(position),
       tracker: new BayesianTracker(this.#trackerOptions), score: 0, greedy: null
     }];
@@ -190,8 +195,7 @@ export class BeamTracker {
   }
 
   // Moves every history has are final
-  #finalise() {
-    const histories = this.#histories!;
+  #finalise(histories: History[]) {
     let shared = 0;
     while (histories.every((h) => shared < h.sans.length && h.sans[shared] === histories[0].sans[shared])) {
       shared += 1;

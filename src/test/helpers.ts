@@ -69,3 +69,13 @@ export class MemoryStorage implements Storage {
     this.items.set(key, value);
   }
 }
+
+// A video's model outputs at `fps` frames a second: each FEN held for the given seconds
+export const videoProbs = (fps: number, ...scenes: [string, number][]): Float32Array => {
+  const frames = scenes.flatMap(([fen, seconds]) => Array(seconds * fps).fill(modelProbs(fen)));
+  const probs = new Float32Array(frames.length * frames[0].length);
+  frames.forEach((frame, i) => {
+    probs.set(frame, i * frame.length);
+  });
+  return probs;
+}
