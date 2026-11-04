@@ -12,7 +12,7 @@ const NUM_PROBS: number = 64 * CLASS_SYMBOLS.length;
 // Region corners clockwise from the top left when rank 8 is at the top
 const CORNERS: CornerName[] = ["a8", "h8", "h1", "a1"];
 // Pinned to a commit so a new upload cannot change the model under a deployed app
-const MODEL_URL: string = "https://huggingface.co/PBatch23888/chessq-chesscam/resolve/d2aad00300dfef654718b85bdefc835d710858fe/chessq-chesscam-dinov3-448-v2-fp16.tflite";
+const MODEL_URL: string = "https://huggingface.co/PBatch23888/chessq-chesscam/resolve/ae007639f25ea58ace397be896501b1e6b4b8e9d/chessq-chesscam-dinov3-448-v3-fp16.tflite";
 
 // Resizes the frame straight into the input buffer, one packed RGBA u32 per pixel.
 // Each output pixel averages a grid of bilinear taps over its footprint, like the canvas's high quality downscale.

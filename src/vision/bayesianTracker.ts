@@ -57,11 +57,16 @@ export interface BayesianOptions {
 // The numbers above are for the earlier model. The current one (chessq-chesscam-dinov3-448-v2) needs 158 edits (90.7%)
 // at temperature 3.5 and evidenceWeight 1.4, against 166 at the earlier 1.78 and 0.8. It does about as well wherever
 // evidenceWeight is 0.35 to 0.4 times the temperature, from 2.5 up; 5 and 2 needed 171.
+// The current model (chessq-chesscam-dinov3-448-v3) fits temperature 1.8 by NLL on the benchmark frames (v2: 1.9). On
+// 48 benchmark games with the beam (edits capped at 10 a game, KxBH left out, in two alternating halves), 1.8 and 1.08
+// need 29 (14 + 15; 102 uncapped, 92.0% right before the first mistake), against v2's best of 32 (16 + 16; 113) at 3.5
+// and 1.4. It does about as well wherever evidenceWeight is 0.5 to 0.6 times the temperature, from 1.8 up (27 to 30);
+// at 0.4 times it needs 33 to 35, at 0.3 times 36 to 51, and temperature 1.5 needs 40 or more.
 // Playing a move that ends the game for good once shown, as nothing can reply to it, took 146 games (at the earlier
 // model's 1.78 and 0.8) from 540 edits to 519: 21 games had lost their last move, a checkmate, to the board being
 // cleared. One game that was already out of step got a wrong mate.
 export const DEFAULT_BAYESIAN_OPTIONS: BayesianOptions = {
-  provisional: true, moveChance: 0.01, temperature: 3.5, floor: 0.05, evidenceWeight: 1.4, threshold: 0.95,
+  provisional: true, moveChance: 0.01, temperature: 1.8, floor: 0.05, evidenceWeight: 1.08, threshold: 0.95,
   flipChance: 0.05
 };
 

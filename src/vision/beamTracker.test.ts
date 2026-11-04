@@ -82,7 +82,8 @@ describe("BeamTracker", () => {
   });
 
   it("in play mode, never sends a move shown for less than a second", () => {
-    const probs = video([START_FEN, 3], [AFTER_E4, 1], [START_FEN, 4]);
+    // Three frames: at 4 a second, a move held for a whole second (4 frames) is sent
+    const probs = video([START_FEN, 3], [AFTER_E4, 0.75], [START_FEN, 4]);
     expect(sans(replay(probs, FPS, 0, new BayesianTracker(PLAY_TRACKER_OPTIONS)))).toEqual(["e4"]);
     expect(sans(replayBeam(probs, FPS, 0, new BeamTracker(PLAY_TRACKER_OPTIONS, PLAY_BEAM_OPTIONS)))).toEqual([]);
   });
