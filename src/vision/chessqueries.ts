@@ -12,13 +12,13 @@ const NUM_PROBS: number = 64 * CLASS_SYMBOLS.length;
 // Region corners clockwise from the top left when rank 8 is at the top
 const CORNERS: CornerName[] = ["a8", "h8", "h1", "a1"];
 // Pinned to a commit so a new upload cannot change the model under a deployed app
-const MODEL_URL: string = "https://huggingface.co/PBatch23888/chessq-chesscam/resolve/1407e49c17299f53c1197155e08c9a1106298e05/chessq-chesscam-dinov3-448-fp16.tflite";
+const MODEL_URL: string = "https://huggingface.co/PBatch23888/chessq-chesscam/resolve/ae007639f25ea58ace397be896501b1e6b4b8e9d/chessq-chesscam-dinov3-448-v3-fp16.tflite";
 
 // Resizes the frame straight into the input buffer, one packed RGBA u32 per pixel.
 // Each output pixel averages a grid of bilinear taps over its footprint, like the canvas's high quality downscale.
 const RESIZE_SHADER: string = `
 struct Params { origin: vec2f, size: vec2f, taps: vec2f }
-@group(0) @binding(0) var frame: texture_external;
+@group(0) @binding(0) var frame: texture_2d<f32>;
 @group(0) @binding(1) var smp: sampler;
 @group(0) @binding(2) var<storage, read_write> pixels: array<u32>;
 @group(0) @binding(3) var<uniform> params: Params;
@@ -33,7 +33,7 @@ fn main(@builtin(global_invocation_id) id: vec3u) {
   for (var j = 0u; j < taps.y; j++) {
     for (var i = 0u; i < taps.x; i++) {
       let p = (vec2f(id.xy) + (vec2f(f32(i), f32(j)) + 0.5) / params.taps) / ${CHESSQUERIES_SIZE}.0;
-      sum += textureSampleBaseClampToEdge(frame, smp, params.origin + p * params.size).rgb;
+      sum += textureSampleLevel(frame, smp, params.origin + p * params.size, 0.0).rgb;
     }
   }
   pixels[id.y * ${CHESSQUERIES_SIZE}u + id.x] = pack4x8unorm(vec4f(sum / f32(taps.x * taps.y), 1.0));
@@ -43,7 +43,9 @@ interface GpuResize {
   device: GPUDevice,
   pipeline: GPUComputePipeline,
   sampler: GPUSampler,
-  params: GPUBuffer
+  params: GPUBuffer,
+  // The video frame is copied here, at the video's size, before it is resized
+  frame: GPUTexture | null
 }
 
 let canvas: OffscreenCanvas | null = null;
@@ -84,7 +86,8 @@ const getGpuResize = (device: GPUDevice): GpuResize => {
       }),
       sampler: device.createSampler({ magFilter: "linear", minFilter: "linear" }),
       // GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST, whose constants TypeScript does not declare
-      params: device.createBuffer({ size: 6 * 4, usage: 0x40 | 0x08 })
+      params: device.createBuffer({ size: 6 * 4, usage: 0x40 | 0x08 }),
+      frame: null
     };
   }
   return gpuResize;
@@ -96,7 +99,8 @@ const resizeOnGpu = (input: Tensor, video: HTMLVideoElement, roi: Roi | null) =>
   if (device === null) {
     throw new Error("WebGPU device is gone");
   }
-  const { pipeline, sampler, params } = getGpuResize(device);
+  const resize: GpuResize = getGpuResize(device);
+  const { pipeline, sampler, params } = resize;
   const width: number = video.videoWidth;
   const height: number = video.videoHeight;
   const region: Roi = roi ?? { x: 0, y: 0, width, height };
@@ -105,11 +109,19 @@ const resizeOnGpu = (input: Tensor, video: HTMLVideoElement, roi: Roi | null) =>
     region.x / width, region.y / height, region.width / width, region.height / height,
     Math.max(1, Math.ceil(region.width / CHESSQUERIES_SIZE)), Math.max(1, Math.ceil(region.height / CHESSQUERIES_SIZE))
   ]));
-  // An external texture is only valid in the task that imports it, so it is used straight away
+  if (resize.frame?.width !== width || resize.frame?.height !== height) {
+    resize.frame?.destroy();
+    // GPUTextureUsage.COPY_DST | TEXTURE_BINDING | RENDER_ATTACHMENT (copyExternalImageToTexture needs the last)
+    resize.frame = device.createTexture({ size: [width, height], format: "rgba8unorm", usage: 0x02 | 0x04 | 0x10 });
+  }
+  // Copied rather than imported as an external texture: in desktop Chrome on Linux, a quarter of imported frames came
+  // out green, as if their colour wasn't ready yet, and the model read them as pieces moving. Copies were never green,
+  // for about 3 to 5 ms more a frame.
+  device.queue.copyExternalImageToTexture({ source: video }, { texture: resize.frame }, [width, height]);
   const bindGroup: GPUBindGroup = device.createBindGroup({
     layout: pipeline.getBindGroupLayout(0),
     entries: [
-      { binding: 0, resource: device.importExternalTexture({ source: video }) },
+      { binding: 0, resource: resize.frame.createView() },
       { binding: 1, resource: sampler },
       { binding: 2, resource: { buffer: input.toGpuBuffer() } },
       { binding: 3, resource: { buffer: params } }
@@ -132,8 +144,8 @@ const toInput = async (video: HTMLVideoElement | null, roi: Roi | null): Promise
   }
   if (video !== null) {
     const device = gpuInput.environment.webGpuDevice;
-    // Firefox can't import a video as a texture (or copy one into a texture),
-    // so it resizes on the canvas and uploads the small result instead
+    // Firefox can't import a video as a texture or copy one into a texture, so it resizes on the canvas and uploads the
+    // small result instead. It is told apart by having no importExternalTexture.
     if (device !== null && typeof device.importExternalTexture !== "function") {
       device.queue.writeBuffer(gpuInput.toGpuBuffer(), 0, getPixels(video, roi));
     } else {
@@ -147,6 +159,7 @@ const deleteGpuInput = () => {
   gpuInput?.delete();
   gpuInput = null;
   gpuResize?.params.destroy();
+  gpuResize?.frame?.destroy();
   gpuResize = null;
 }
 

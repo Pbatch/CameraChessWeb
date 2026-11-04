@@ -8,18 +8,22 @@ export const makeGame = (moves: string = "", start: string = START_FEN): Game =>
   fen: start,
   start,
   lastMove: "",
-  greedy: false,
   fromOpponent: false,
   times: []
 });
 
-// A 64x13 state in square order (a1..h8) that is certain of every square in the FEN
+// How sure the fake model is of each square. Like the real model, never certain: a certain frame is only held back by
+// the tracker's floor, so at a high temperature it would count for far more than any real frame.
+const SURE = 0.999;
+const UNSURE = (1 - SURE) / (NUM_LABELS - 1);
+
+// A 64x13 state in square order (a1..h8) that is sure of every square in the FEN
 export const oneHotState = (fen: string): number[][] => {
   const board = parseFen(fen).unwrap().board;
-  const state: number[][] = zeros(64, NUM_LABELS);
+  const state: number[][] = zeros(64, NUM_LABELS).map((row) => row.fill(UNSURE));
   for (let i = 0; i < 64; i++) {
     const piece = board.get(i);
-    state[i][(piece === undefined) ? EMPTY : pieceToLabel(piece)] = 1;
+    state[i][(piece === undefined) ? EMPTY : pieceToLabel(piece)] = SURE;
   }
   return state;
 }
@@ -27,12 +31,12 @@ export const oneHotState = (fen: string): number[][] => {
 // The model's classes, in output order
 export const MODEL_CLASSES = ".PNBRQKpnbrqk";
 
-// The model's output for a FEN it is certain of: one row per square in FEN order (a8..h1)
+// The model's output for a FEN it is sure of: one row per square in FEN order (a8..h1)
 export const modelProbs = (fen: string): Float32Array => {
   const symbols: string = fen.split(" ")[0].replace(/\d/g, (n) => ".".repeat(Number(n))).replace(/\//g, "");
-  const probs = new Float32Array(64 * MODEL_CLASSES.length);
+  const probs = new Float32Array(64 * MODEL_CLASSES.length).fill(UNSURE);
   [...symbols].forEach((symbol, i) => {
-    probs[i * MODEL_CLASSES.length + MODEL_CLASSES.indexOf(symbol)] = 1;
+    probs[i * MODEL_CLASSES.length + MODEL_CLASSES.indexOf(symbol)] = SURE;
   });
   return probs;
 }
@@ -64,4 +68,14 @@ export class MemoryStorage implements Storage {
   setItem(key: string, value: string) {
     this.items.set(key, value);
   }
+}
+
+// A video's model outputs at `fps` frames a second: each FEN held for the given seconds
+export const videoProbs = (fps: number, ...scenes: [string, number][]): Float32Array => {
+  const frames = scenes.flatMap(([fen, seconds]) => Array(seconds * fps).fill(modelProbs(fen)));
+  const probs = new Float32Array(frames.length * frames[0].length);
+  frames.forEach((frame, i) => {
+    probs.set(frame, i * frame.length);
+  });
+  return probs;
 }

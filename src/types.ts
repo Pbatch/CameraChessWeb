@@ -57,7 +57,6 @@ interface Game {
   moves: string,
   start: string,
   lastMove: string,
-  greedy: boolean,
   fromOpponent: boolean,
   times: number[]     // record mode only: ms since recording started at each move, otherwise empty
 }

@@ -110,13 +110,22 @@ describe("gameUpdate", () => {
     expect(getGame().times).toEqual([1000, 3000]);
   });
 
-  it("retimes a greedy move that is replaced, but not one that is confirmed", () => {
-    gameUpdate(makeUpdatePayload(makeBoard(makeGame("1. e4")), true), 1000);
+  it("retimes a move that is replaced, but not one that is kept", () => {
+    gameUpdate(makeUpdatePayload(makeBoard(makeGame("1. e4"))), 1000);
     gameUpdate(makeUpdatePayload(makeBoard(makeGame("1. e4"))), 2000);
     expect(getGame().times).toEqual([1000]);
-    gameUpdate(makeUpdatePayload(makeBoard(makeGame("1. e4 e6")), true), 3000);
+    gameUpdate(makeUpdatePayload(makeBoard(makeGame("1. e4 e6"))), 3000);
     gameUpdate(makeUpdatePayload(makeBoard(makeGame("1. e4 e5"))), 4000);
     expect(getGame().times).toEqual([1000, 4000]);
+  });
+
+  it("times a corrected move from when it was seen, never before the move before it", () => {
+    gameUpdate(makeUpdatePayload(makeBoard(makeGame("1. e4 e6"))), 3000);
+    // At 9s the tracker finds e5 was played instead of e6, seen 7s ago, and Nf3 8s ago: both before e4's 3s, so 3s
+    gameUpdate(makeUpdatePayload(makeBoard(makeGame("1. e4 e5 2. Nf3"))), 9000, [null, 7000, 8000]);
+    expect(getGame().times).toEqual([3000, 3000, 3000]);
+    gameUpdate(makeUpdatePayload(makeBoard(makeGame("1. e4 e5 2. Nf3 Nc6"))), 12000, [null, null, null, 1500]);
+    expect(getGame().times).toEqual([3000, 3000, 3000, 10500]);
   });
 
   it("leaves the game untimed without an elapsed time", () => {
@@ -130,7 +139,7 @@ describe("gameReset", () => {
   const start = "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1";
 
   it("starts a new game from the given position", () => {
-    setGame({ ...makeGame("1. e4 e5"), greedy: true, fromOpponent: true });
+    setGame({ ...makeGame("1. e4 e5"), fromOpponent: true });
     gameReset(start);
     expect(getGame()).toEqual(makeGame("", start));
   });
@@ -146,7 +155,7 @@ describe("gameRestart", () => {
   it("takes back every move, keeping the start position", () => {
     const start = "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1";
     setGame(makeGame("", start));
-    gameUpdate(makeUpdatePayload(makeBoard(makeGame("1... e5 2. Nf3", start)), true));
+    gameUpdate(makeUpdatePayload(makeBoard(makeGame("1... e5 2. Nf3", start))));
     gameRestart();
     expect(getGame()).toEqual(makeGame("", start));
   });

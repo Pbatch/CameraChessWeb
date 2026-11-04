@@ -11,7 +11,6 @@ export const initialGame: Game = {
   fen: START_FEN,
   start: START_FEN,
   lastMove: "",
-  greedy: false,
   fromOpponent: false,
   times: []
 };

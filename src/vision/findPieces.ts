@@ -1,10 +1,10 @@
 import { gameUpdate, makeUpdatePayload } from "../slices/gameSlice";
-import type { GameBoard } from "../chess/board";
 import { invalidVideo } from "./detect";
 import { getOrientation, runChessqueries } from "./chessqueries";
-import { BayesianTracker } from "./bayesianTracker";
+import { BeamTracker, PLAY_BEAM_OPTIONS, PLAY_TRACKER_OPTIONS } from "./beamTracker";
+import { useStore } from "../store";
 import type {
-  Mode, ModelRefs, MovesPair, RoiRef, SetFps, SetOrientation, SetStringArray, VideoRef
+  Mode, ModelRefs, RoiRef, SetFps, SetOrientation, SetStringArray, VideoRef
 } from "../types";
 import type { RefObject } from "react";
 
@@ -27,17 +27,16 @@ interface FindPiecesInput {
   setText: SetStringArray,
   setFps: SetFps,
   setOrientation: SetOrientation,
-  boardRef: RefObject<GameBoard>,
-  movesPairsRef: RefObject<MovesPair[]>,
   lastMoveRef: RefObject<string>,
   moveTextRef: RefObject<string>,
   mode: Mode
 }
 
 export const findPieces = ({ chessqueriesModelRef, videoRef, roiRef, playingRef, setText, setFps, setOrientation,
-  boardRef, movesPairsRef, lastMoveRef, moveTextRef, mode }: FindPiecesInput) => {
-  // Moves are sent to Lichess as they are played, so play mode has no provisional moves
-  const tracker = new BayesianTracker({ provisional: mode !== "play" });
+  lastMoveRef, moveTextRef, mode }: FindPiecesInput) => {
+  // Follows several ways the game may have gone, so a move can still be corrected a few seconds on. Play mode sends
+  // moves to Lichess as they are shown and can't take any back, so it shows only final moves.
+  const tracker = (mode === "play") ? new BeamTracker(PLAY_TRACKER_OPTIONS, PLAY_BEAM_OPTIONS) : new BeamTracker();
   let direction: number[] | null = null;
   let orientationKey: string = "";
   let requestId: number;
@@ -52,9 +51,12 @@ export const findPieces = ({ chessqueriesModelRef, videoRef, roiRef, playingRef,
   let frameVideo: HTMLVideoElement | null = null;
   let frameCallbackId: number | undefined;
   let newFrame: boolean = true;
-  // Record mode times moves on a clock that stops while detection is paused, from where it was when
-  // detection last started on a game without moves
-  let recordClock: number = 0;
+  // A clock that stops while detection is paused, in ms. The tracker runs on it, so a pause neither counts as time
+  // for its settings nor uses up the time a move can still be corrected in, and record mode times moves on it, from
+  // where it was when detection last started on a game without moves.
+  let playClock: number = 0;
+  // Whether detection was running at the last frame, to clear the FPS shown when it stops
+  let running: boolean = false;
   let lastTick: number | null = null;
   let recordStart: number = 0;
 
@@ -85,18 +87,20 @@ export const findPieces = ({ chessqueriesModelRef, videoRef, roiRef, playingRef,
       if (playingRef.current === false) {
         lastTick = null;
         if (lastMoveRef.current === "") {
-          recordStart = recordClock;
+          recordStart = playClock;
         }
       } else {
-        recordClock += now - (lastTick ?? now);
+        playClock += now - (lastTick ?? now);
         lastTick = now;
       }
       if (playingRef.current === false || invalidVideo(videoRef)) {
-        if (tracker.started) {
+        // The tracker keeps its ways the game may have gone over a pause. It starts again only when the game is
+        // changed other than by it.
+        if (running) {
           setFps(null);
           fpsFrames = 0;
+          running = false;
         }
-        tracker.reset();
       } else if (newFrame && now >= nextRunTime) {
         newFrame = (frameCallbackId === undefined);
         const minFrameTime: number = 1000 / (MAX_FPS * (videoRef.current?.playbackRate || 1));
@@ -121,9 +125,14 @@ export const findPieces = ({ chessqueriesModelRef, videoRef, roiRef, playingRef,
           console.warn("Skipped a frame with non-finite probabilities");
           return;
         }
-        const move = tracker.update(update, performance.now(), {
-          movesPairs: movesPairsRef.current, position: boardRef.current.position
-        });
+        running = true;
+        const elapsed = (mode === "record") ? (playClock - recordStart) : undefined;
+        const shown = tracker.update(update, playClock, useStore.getState().game);
+        if (shown !== null) {
+          // A corrected move is timed from when it was played, which may be a few seconds back
+          const ago = shown.times.map((time) => (time === null) ? null : playClock - time);
+          gameUpdate(makeUpdatePayload(shown.board), elapsed, ago);
+        }
 
         // The first frame starts the smoothed direction, so it does not wait to climb from zero
         if (newDirection?.every(Number.isFinite)) {
@@ -135,11 +144,6 @@ export const findPieces = ({ chessqueriesModelRef, videoRef, roiRef, playingRef,
             orientationKey = orientation.join();
             setOrientation(orientation);
           }
-        }
-        if (move !== null) {
-          boardRef.current.playSan(move.san);
-          const payload = makeUpdatePayload(boardRef.current, move.greedy);
-          gameUpdate(payload, (mode === "record") ? (recordClock - recordStart) : undefined);
         }
         setTextIfChanged(setText, [moveTextRef.current]);
       }
