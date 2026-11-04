@@ -7,7 +7,7 @@ import { makeGame } from "../test/helpers";
 const pairsFor = (fen: string) => getMovesPairs(makeBoard(makeGame("", fen)).position);
 
 const firstMove = (fen: string, san: string) => {
-  const pair = pairsFor(fen).find(({ move1 }) => move1.sans[0] === san);
+  const pair = pairsFor(fen).find(({ move1 }) => move1.san === san);
   if (pair === undefined) {
     throw new Error(`No move ${san} from ${fen}`);
   }
@@ -23,9 +23,8 @@ describe("getMovesPairs", () => {
 
   it("combines both moves, dropping squares the reply reuses", () => {
     const pair = pairsFor("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
-      .find(({ moves }) => moves?.sans.join(" ") === "e4 d5");
+      .find(({ move1, move2 }) => move1.san === "e4" && move2?.uci === "d7d5");
     expect(pair?.moves).toEqual({
-      sans: ["e4", "d5"],
       from: [SQUARE_MAP.e2, SQUARE_MAP.d7],
       to: [SQUARE_MAP.e4, SQUARE_MAP.d5],
       targets: [LABEL_MAP.P, LABEL_MAP.p]
@@ -34,7 +33,8 @@ describe("getMovesPairs", () => {
 
   it("includes the rook squares when castling", () => {
     expect(firstMove("r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1", "O-O")).toEqual({
-      sans: ["O-O"],
+      uci: "e1g1",
+      san: "O-O",
       from: [SQUARE_MAP.e1, SQUARE_MAP.h1],
       to: [SQUARE_MAP.g1, SQUARE_MAP.f1],
       targets: [LABEL_MAP.K, LABEL_MAP.R]
@@ -48,13 +48,26 @@ describe("getMovesPairs", () => {
 
   it("targets the promoted piece", () => {
     const fen = "4k3/P7/8/8/8/8/8/4K3 w - - 0 1";
-    expect(firstMove(fen, "a8=Q+").targets).toEqual([LABEL_MAP.Q]);
-    expect(firstMove(fen, "a8=N").targets).toEqual([LABEL_MAP.N]);
+    expect(firstMove(fen, "a8=Q+")).toMatchObject({ uci: "a7a8q", targets: [LABEL_MAP.Q] });
+    expect(firstMove(fen, "a8=N")).toMatchObject({ uci: "a7a8n", targets: [LABEL_MAP.N] });
+  });
+
+  it("names each reply as the next position names that move", () => {
+    // The tracker hands a reply's share on to the same move from the position after the first, by its UCI
+    const fen = "r3k2r/1P6/8/8/8/8/8/R3K2R b KQkq - 0 1";
+    const board = makeBoard(makeGame("", fen));
+    const replies = new Set(getMovesPairs(board.position).filter(({ move1 }) => move1.san === "Kd8")
+      .map(({ move2 }) => move2?.uci));
+    board.playSan("Kd8");
+    const firsts = new Set(getMovesPairs(board.position).map(({ move1 }) => move1.uci));
+    expect(replies).toEqual(firsts);
+    expect(firsts).toContain("e1g1");
+    expect(firsts).toContain("b7b8q");
   });
 
   it("leaves move2 empty when the first move ends the game", () => {
     const mate = pairsFor("6k1/5ppp/8/8/8/8/8/R5K1 w - - 0 1")
-      .find(({ move1 }) => move1.sans[0] === "Ra8#");
+      .find(({ move1 }) => move1.san === "Ra8#");
     expect(mate).toMatchObject({ move2: null, moves: null });
   });
 });
