@@ -5,10 +5,12 @@ export const MARKER_DIAMETER: number = 30;
 const CORNER_XY: number[][] = [[0, 0], [1, 0], [1, 1], [0, 1]];
 
 // The square names the model assumed at the corners of the region (the whole video without one)
-const OrientationMarkers = ({ videoRef, roi, orientation }: {
+const OrientationMarkers = ({ videoRef, roi, orientation, bottomInset = 0 }: {
   videoRef: VideoRef,
   roi: Roi | null,
-  orientation: CornerName[] | null
+  orientation: CornerName[] | null,
+  // Pixels at the bottom of the video to keep clear, for the upload controls
+  bottomInset?: number
 }) => {
   const video = videoRef.current;
   if (orientation === null || video === null || video.videoWidth === 0 || video.videoHeight === 0) {
@@ -18,7 +20,9 @@ const OrientationMarkers = ({ videoRef, roi, orientation }: {
 
   const markerStyle = (xy: number[]): React.CSSProperties => ({
     left: `${100 * (rect.x + xy[0] * rect.width) / video.videoWidth}%`,
-    top: `${100 * (rect.y + xy[1] * rect.height) / video.videoHeight}%`,
+    // Above the inset, allowing for the marker's height where it hangs down from the point
+    top: `min(${100 * (rect.y + xy[1] * rect.height) / video.videoHeight}%, `
+      + `calc(100% - ${bottomInset + (1 - xy[1]) * MARKER_DIAMETER}px))`,
     width: MARKER_DIAMETER,
     height: MARKER_DIAMETER,
     // Inside the region, against its corner

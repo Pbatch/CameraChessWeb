@@ -60,9 +60,17 @@ a, button, input, label, select, summary, textarea {
   padding: 0.75rem;
   background-color: #1e2125;
   border-right: 1px solid rgb(255 255 255 / 10%);
-  /* Short landscape phones can't fit every control, so let it scroll */
+  /* A safety net: every control should fit, but a long status or a big font may still need to scroll */
   max-height: 100%;
   overflow-y: auto;
+  /* The board's squares: shrinking on short screens so the controls around it stay visible, and at most as wide
+     as the buttons (the 220px less the padding and border) */
+  --sidebar-square: clamp(12px, (100dvh - 240px) / 8, (220px - 1.5rem - 1px) / 8);
+}
+
+/* With the setup above the board (upload and record), which stays while detecting, there's less room for it */
+.sidebar--setup-first {
+  --sidebar-square: clamp(12px, (100dvh - 380px) / 8, (220px - 1.5rem - 1px) / 8);
 }
 
 /* Portrait (upload only) puts the video above the sidebar */
@@ -272,6 +280,13 @@ a, button, input, label, select, summary, textarea {
   background-color: #dee2e6;
 }
 
+/* Spaced as the sidebar's own sections are */
+.sidebar-middle {
+  display: flex;
+  flex-direction: column;
+  gap: inherit;
+}
+
 .sidebar-section__body {
   display: flex;
   flex-direction: column;
@@ -300,14 +315,15 @@ a, button, input, label, select, summary, textarea {
   overflow-wrap: anywhere;
 }
 
+/* Sections are grouped by spacing alone; the title still names each one for screen readers */
 .sidebar-section__title {
-  margin: 0 0 0.375rem;
-  color: #adb5bd;
-  font-size: 0.7rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-align: left;
-  text-transform: uppercase;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 .video-fps {
@@ -345,9 +361,13 @@ a, button, input, label, select, summary, textarea {
   position: relative;
   display: inline-block;
   height: 100%;
+  /* Inline, it would sit on a line of text and leave room below for descenders, overflowing the stage */
+  vertical-align: top;
 }
 
 .video-live__video {
+  /* Likewise, as a video is inline by default */
+  display: block;
   width: auto;
   height: 100%;
 }
@@ -385,26 +405,24 @@ a, button, input, label, select, summary, textarea {
   user-select: none;
 }
 
-/* Landscape phones (e.g. a Pixel 7a in Chrome has ~330px): group by spacing alone */
+/* Landscape phones (e.g. a Pixel 7a in Chrome has ~330px): tighter spacing */
 @media (max-height: 450px) {
   .sidebar {
-    gap: 0.5rem;
-    padding: 0.5rem;
+    gap: 0.375rem;
+    padding: 0.375rem;
+  }
+
+  /* Paused, the setup shows on top of the board, so it goes smaller still to fit; detecting, the setup hides */
+  .sidebar--setup-first:not(.sidebar--playing) {
+    --sidebar-square: 10px;
   }
 
   .sidebar-section__body {
     gap: 0.25rem;
   }
 
-  /* Still names each section for screen readers */
-  .sidebar-section__title {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    margin: -1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-    white-space: nowrap;
+  .sidebar-section--hidden-short {
+    display: none;
   }
 
   .sidebar-status {
@@ -413,4 +431,277 @@ a, button, input, label, select, summary, textarea {
     font-size: 0.8rem;
     line-height: 1.3;
   }
+}
+
+/* Stockfish's eval bar, on the video's right */
+:root {
+  --eval-gauge-width: clamp(18px, 1.8vw, 26px);
+  --eval-gauge-gap: 8px;
+  /* What the video gives up for the gauge */
+  --eval-gauge-space: calc(var(--eval-gauge-width) + var(--eval-gauge-gap) * 2);
+}
+
+/* Room on the right for the gauge, which hangs off the video's edge */
+.video-stage--gauge {
+  padding-right: var(--eval-gauge-space);
+}
+
+.eval-gauge {
+  position: absolute;
+  top: 0;
+  left: calc(100% + var(--eval-gauge-gap));
+  width: var(--eval-gauge-width);
+  height: 100%;
+  overflow: hidden;
+  border-radius: 4px;
+  background-color: #1b1b1b;
+  /* Keeps the black side's edge visible against the dark page */
+  box-shadow: 0 0 0 1px rgb(255 255 255 / 18%), 0 2px 8px rgb(0 0 0 / 45%);
+}
+
+.eval-gauge--empty {
+  opacity: 0.5;
+}
+
+.eval-gauge__white {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: #f2f2f2;
+  transition: height 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.eval-gauge__midline {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background-color: rgb(128 128 128 / 60%);
+}
+
+.eval-gauge__score {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  font-size: 10px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  text-align: center;
+}
+
+.eval-gauge__score--white {
+  bottom: 5px;
+  color: #1b1b1b;
+}
+
+.eval-gauge__score--black {
+  top: 5px;
+  color: #f2f2f2;
+}
+
+/* YouTube-style controls over the bottom of an uploaded video. 52px tall, as CONTROLS_HEIGHT in video.tsx. */
+.video-controls {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 52px;
+  /* Its own stacking context, so the shading below sits behind the controls but over the video */
+  z-index: 1;
+  padding: 0 12px;
+  color: #fff;
+  transition: opacity 0.25s ease;
+}
+
+/* Shading that fades in from well above the controls, as on YouTube, so they read over a bright video */
+.video-controls::before {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: -1;
+  height: min(120px, 60cqh);
+  background: linear-gradient(to bottom, transparent, rgb(0 0 0 / 35%) 45%, rgb(0 0 0 / 75%));
+  pointer-events: none;
+}
+
+/* A live camera has no seek bar. 40px tall, as in video.tsx. */
+.video-controls--live {
+  height: 40px;
+}
+
+.video-controls--hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.video-controls__seek {
+  position: relative;
+  height: 12px;
+}
+
+.video-controls__hover-time {
+  position: absolute;
+  bottom: 14px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  background-color: rgb(0 0 0 / 80%);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+  transform: translateX(-50%);
+}
+
+.video-controls__range {
+  --track: 3px;
+  display: block;
+  width: 100%;
+  height: 12px;
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+  appearance: none;
+  touch-action: none;
+}
+
+.video-controls__range:hover,
+.video-controls__range:focus-visible {
+  --track: 5px;
+}
+
+.video-controls__range:focus-visible {
+  outline: none;
+}
+
+.video-controls__range::-webkit-slider-runnable-track {
+  height: var(--track);
+  background: linear-gradient(to right, #f00 var(--progress), rgb(255 255 255 / 30%) var(--progress));
+  transition: height 0.1s ease;
+}
+
+.video-controls__range::-moz-range-track {
+  height: var(--track);
+  background: linear-gradient(to right, #f00 var(--progress), rgb(255 255 255 / 30%) var(--progress));
+}
+
+/* The thumb only shows on hover and focus, as on YouTube */
+.video-controls__range::-webkit-slider-thumb {
+  width: 13px;
+  height: 13px;
+  margin-top: calc((var(--track) - 13px) / 2);
+  border: none;
+  border-radius: 50%;
+  background-color: #f00;
+  appearance: none;
+  transform: scale(0);
+  transition: transform 0.1s ease;
+}
+
+.video-controls__range::-moz-range-thumb {
+  width: 13px;
+  height: 13px;
+  border: none;
+  border-radius: 50%;
+  background-color: #f00;
+  transform: scale(0);
+  transition: transform 0.1s ease;
+}
+
+.video-controls__range:hover::-webkit-slider-thumb,
+.video-controls__range:focus-visible::-webkit-slider-thumb,
+.video-controls__range:active::-webkit-slider-thumb {
+  transform: scale(1);
+}
+
+.video-controls__range:hover::-moz-range-thumb,
+.video-controls__range:focus-visible::-moz-range-thumb,
+.video-controls__range:active::-moz-range-thumb {
+  transform: scale(1);
+}
+
+.video-controls__row {
+  display: flex;
+  height: 40px;
+  align-items: center;
+  gap: 4px;
+}
+
+.video-controls__button {
+  display: flex;
+  height: 36px;
+  min-width: 36px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 6px;
+  border-radius: 4px;
+  color: #fff;
+  opacity: 0.9;
+  filter: drop-shadow(0 0 2px rgb(0 0 0 / 60%));
+  transition: opacity 0.1s ease, background-color 0.1s ease;
+}
+
+.video-controls__button:hover {
+  opacity: 1;
+  background-color: rgb(255 255 255 / 12%);
+}
+
+.video-controls__button:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: -2px;
+}
+
+.video-controls__button--confirm {
+  opacity: 1;
+  background-color: rgb(220 53 69 / 85%);
+}
+
+.video-controls__button--confirm:hover {
+  background-color: #dc3545;
+}
+
+/* Blinks while recording, as a camera's does */
+.video-controls__rec {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background-color: #f00;
+  vertical-align: 1px;
+  animation: rec-blink 1.2s steps(1) infinite;
+}
+
+@keyframes rec-blink {
+  50% {
+    opacity: 0.25;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .video-controls__rec {
+    animation: none;
+  }
+}
+
+.video-controls__speed {
+  font-size: 0.875rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.video-controls__time {
+  padding: 0 6px;
+  text-shadow: 0 0 2px rgb(0 0 0 / 80%);
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.orientation-marker {
+  transition: top 0.25s ease;
 }

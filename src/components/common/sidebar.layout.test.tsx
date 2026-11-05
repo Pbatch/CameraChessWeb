@@ -37,9 +37,11 @@ let root: Root | null = null;
 let host: HTMLDivElement | null = null;
 
 const renderSidebar = async (Sidebar: SidebarComponent, playing: boolean): Promise<HTMLElement> => {
-  // Signed in, so Export shows, and with a clock, so the preview is as tall as it gets
+  // Signed in, so Export shows, and in play mode, the only one with a clock, a clock
   userSet({ token: "token", username: "" });
-  clockSet({ wtime: 600000, btime: 600000, turn: "w", updatedAt: Date.now(), running: false });
+  if (Sidebar === (PlaySidebar as SidebarComponent)) {
+    clockSet({ wtime: 600000, btime: 600000, turn: "w", updatedAt: Date.now(), running: false });
+  }
 
   const noop = () => {};
   const props = {
@@ -52,7 +54,7 @@ const renderSidebar = async (Sidebar: SidebarComponent, playing: boolean): Promi
     selecting: false, setSelecting: noop,
     canPlay: true,
     study: null, setStudy: noop,
-    setBoardNumber: noop,
+    boardNumber: -1, setBoardNumber: noop,
   };
 
   host = document.createElement("div");
@@ -96,6 +98,8 @@ describe("sidebar on a landscape phone", () => {
 
   for (const [mode, Sidebar] of SIDEBARS) {
     for (const playing of [false, true]) {
+      // Paused, broadcast and play show the board beside setup too long to fit with it, so their sidebars scroll
+      if ((mode === "broadcast" || mode === "play") && !playing) continue;
       it(`fits without scrolling in ${mode} mode while ${playing ? "detecting" : "setting up"}`, async () => {
         const sidebar = await renderSidebar(Sidebar, playing);
         await document.fonts.ready;

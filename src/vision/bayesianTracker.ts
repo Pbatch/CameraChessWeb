@@ -79,7 +79,7 @@ const MAX_INTERVAL = 1000;
 interface Hypothesis {
   // Its first move, as an index into the tracker's firsts
   first: number,
-  // The reply, for a pair
+  // The reply's UCI, for a pair
   second: string | null,
   // For a pair, the index of the hypothesis of its first move alone
   parent: number,
@@ -345,28 +345,31 @@ export class BayesianTracker {
 
     const hypotheses: Hypothesis[] = [];
     const firsts: string[] = [];
-    // The hypothesis of each first move alone
+    // The hypothesis of each first move alone, by its UCI
     const singles = new Map<string, number>();
+    const ucis: string[] = [];
     for (const pair of game.movesPairs) {
-      const san = pair.move1.sans[0];
-      if (!singles.has(san)) {
-        singles.set(san, hypotheses.length);
+      const { san, uci } = pair.move1;
+      if (!singles.has(uci)) {
+        singles.set(uci, hypotheses.length);
         hypotheses.push({ first: firsts.length, second: null, parent: -1, squares: [...pair.move1.from, ...pair.move1.to],
           labels: [...pair.move1.from.map(() => EMPTY), ...pair.move1.targets] });
         firsts.push(san);
+        ucis.push(uci);
       }
       if (pair.move2 !== null && pair.moves !== null) {
-        const parent = singles.get(san) ?? -1;
-        hypotheses.push({ first: hypotheses[parent].first, second: pair.move2.sans[0], parent,
+        const parent = singles.get(uci) ?? -1;
+        hypotheses.push({ first: hypotheses[parent].first, second: pair.move2.uci, parent,
           squares: [...pair.moves.from, ...pair.moves.to], labels: [...pair.moves.from.map(() => EMPTY), ...pair.moves.targets] });
       }
     }
     this.#hypotheses = hypotheses;
     this.#firsts = firsts;
-    // Promotions to each piece are generated queen first, so the queen comes first in its group
+    // Promotions to each piece are generated queen first, so the queen comes first in its group. A group is the UCI
+    // without the piece promoted to.
     const groupOf = new Map<string, number>();
-    this.#groups = Int32Array.from(firsts, (san) => {
-      const key = san.replace(/=[QRBN]/, "").replace(/[+#]$/, "");
+    this.#groups = Int32Array.from(ucis, (uci) => {
+      const key = uci.slice(0, 4);
       let group = groupOf.get(key);
       if (group === undefined) {
         group = groupOf.size;
@@ -380,7 +383,7 @@ export class BayesianTracker {
       if (h.second !== null) this.#replies[h.parent] += 1;
     }
     // Every first move has a hypothesis of its own, from the loop above
-    this.#ends = Uint8Array.from(firsts, (san) => (this.#replies[singles.get(san) ?? -1] === 0) ? 1 : 0);
+    this.#ends = Uint8Array.from(ucis, (uci) => (this.#replies[singles.get(uci) ?? -1] === 0) ? 1 : 0);
     this.#belief = new Float64Array(hypotheses.length);
     this.#next = new Float64Array(hypotheses.length);
     this.#evidence = new Float64Array(hypotheses.length);

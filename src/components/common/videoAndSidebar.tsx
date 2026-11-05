@@ -14,6 +14,7 @@ import { useUser } from "../../slices/userSlice";
 import PlaySidebar from "../play/playSidebar";
 import { useMediaQuery } from "../../utils/hooks";
 import { useCamera } from "../../utils/useCamera";
+import { useStockfish } from "../../engine/useStockfish";
 
 const PortraitWarning = () => {
   return (
@@ -28,7 +29,7 @@ const PortraitWarning = () => {
 const VideoAndSidebar = ({ mode }: { mode: Mode }) => {
   const context = useOutletContext<ModelRefs>();
   const token: string = useUser().token;
-  const { moves, start } = useGame();
+  const { moves, start, fen } = useGame();
   const isPortrait = useMediaQuery('(orientation: portrait)');
 
   const [text, setText] = useState<string[]>([]);
@@ -46,6 +47,10 @@ const VideoAndSidebar = ({ mode }: { mode: Mode }) => {
   // Uploads play a file, and in portrait no video is shown
   const showCamera = (mode !== "upload") && !isPortrait;
   const camera = useCamera({ enabled: showCamera, videoRef, setText });
+
+  // Stockfish always runs for uploads, and keeps analysing while paused, as the eval bar still shows
+  const engineEnabled: boolean = (mode === "upload");
+  useStockfish(fen, engineEnabled);
 
   useEffect(() => {
     if (mode !== "broadcast" || (study === null) || (boardNumber === -1)) {
@@ -69,10 +74,11 @@ const VideoAndSidebar = ({ mode }: { mode: Mode }) => {
       });
   }, [boardNumber, mode, moves, start, study, token])
 
-  // A broadcast error no longer applies once the broadcast is left
+  // A broadcast or engine error no longer applies once the page is left
   useEffect(() => {
     return () => {
       errorClear("broadcast");
+      errorClear("engine");
     };
   }, []);
 
@@ -94,6 +100,7 @@ const VideoAndSidebar = ({ mode }: { mode: Mode }) => {
     study,
     setPlaying,
     setText,
+    boardNumber,
     setBoardNumber,
     setStudy,
     roi,
@@ -107,7 +114,8 @@ const VideoAndSidebar = ({ mode }: { mode: Mode }) => {
     videoRef,
     camera,
     playingRef,
-    mode
+    mode,
+    engineEnabled
   }
   const renderSidebar = () => {
     switch(mode) {

@@ -2,9 +2,9 @@ import { parseFen, makeFen } from "chessops/fen";
 import { Chess, type Position } from "chessops/chess";
 import { type Move, type Role, isNormal } from "chessops/types";
 import { makeSan } from "chessops/san";
-import { kingCastlesTo } from "chessops/util";
+import { kingCastlesTo, makeUci } from "chessops/util";
 import { SQUARE_MAP, LABEL_MAP, SQUARE_NAMES, pieceToLabel } from "../utils/constants";
-import type { MovesData, MovesPair } from "../types";
+import type { MovesData, MovesPair, SquaresData } from "../types";
 import type { GameBoard } from "./board";
 
 function* legalMoves(pos: Position): Generator<Move> {
@@ -60,7 +60,7 @@ const getData = (pos: Position, move: Move) => {
   }
 
   const moveData: MovesData = {
-    sans: [makeSan(pos, move)],
+    uci: makeUci(move),
     from: fromSquares,
     to: toSquares,
     targets
@@ -86,8 +86,7 @@ const combineData = (move1Data: MovesData, move2Data: MovesData) => {
   const to = to1.concat(move2Data.to);
   const targets = targets1.concat(move2Data.targets);
 
-  const data: MovesData = {
-    sans: [move1Data.sans[0], move2Data.sans[0]],
+  const data: SquaresData = {
     from,
     to,
     targets
@@ -103,8 +102,10 @@ export const getMovesPairs = (board: Position) => {
   const movesPairs: MovesPair[] = [];
 
   for (const move1 of legalMoves(pos)) {
-    const move1Data = getData(pos, move1);
-    if (!move1Data) continue;
+    const data = getData(pos, move1);
+    if (!data) continue;
+    // Only first moves are shown, so only they need SAN
+    const move1Data = { ...data, san: makeSan(pos, move1) };
 
     const pos2 = pos.clone();
     pos2.play(move1);

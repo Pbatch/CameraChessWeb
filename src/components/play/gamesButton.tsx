@@ -9,11 +9,12 @@ import type { NowPlayingGame } from "../../api/lichess";
 import { Gamepad2 } from "lucide-react";
 import { Dropdown, DropdownItem } from "../common";
 
-const GamesButton = ({ setGameId, setColor, setText }:
+const GamesButton = ({ setGameId, setColor, setText, disabled = false }:
   {
     setGameId: Dispatch<SetStateAction<string | undefined>>,
     setColor: Dispatch<SetStateAction<Color | undefined>>,
-    setText: SetStringArray
+    setText: SetStringArray,
+    disabled?: boolean
   }) => {
   const token: string = useUser().token;
   const [games, setGames] = useState<NowPlayingGame[]>([]);
@@ -44,7 +45,7 @@ const GamesButton = ({ setGameId, setColor, setText }:
   const label = (game === null) ? "Select a Game" : `Game: ${game.opponent.username}`;
 
   return (
-    <Dropdown icon={Gamepad2} label={label} onClick={() => { void getGames().catch((error: unknown) => {
+    <Dropdown icon={Gamepad2} label={label} disabled={disabled} onClick={() => { void getGames().catch((error: unknown) => {
       console.error("Unable to load Lichess games", error);
       setText(["Unable to load Lichess games", describeLichessError(error)]);
     }); }}>

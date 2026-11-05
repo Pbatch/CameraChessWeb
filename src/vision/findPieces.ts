@@ -36,7 +36,11 @@ export const findPieces = ({ chessqueriesModelRef, videoRef, roiRef, playingRef,
   lastMoveRef, moveTextRef, mode }: FindPiecesInput) => {
   // Follows several ways the game may have gone, so a move can still be corrected a few seconds on. Play mode sends
   // moves to Lichess as they are shown and can't take any back, so it shows only final moves.
-  const tracker = (mode === "play") ? new BeamTracker(PLAY_TRACKER_OPTIONS, PLAY_BEAM_OPTIONS) : new BeamTracker();
+  const makeTracker = () => (mode === "play") ? new BeamTracker(PLAY_TRACKER_OPTIONS, PLAY_BEAM_OPTIONS)
+    : new BeamTracker();
+  let tracker = makeTracker();
+  // A reset (upload mode) replaces the tracker, as its beliefs about the board no longer hold
+  let trackerResets: number = useStore.getState().trackerResets;
   let direction: number[] | null = null;
   let orientationKey: string = "";
   let requestId: number;
@@ -126,8 +130,13 @@ export const findPieces = ({ chessqueriesModelRef, videoRef, roiRef, playingRef,
           return;
         }
         running = true;
+        const state = useStore.getState();
+        if (state.trackerResets !== trackerResets) {
+          trackerResets = state.trackerResets;
+          tracker = makeTracker();
+        }
         const elapsed = (mode === "record") ? (playClock - recordStart) : undefined;
-        const shown = tracker.update(update, playClock, useStore.getState().game);
+        const shown = tracker.update(update, playClock, state.game);
         if (shown !== null) {
           // A corrected move is timed from when it was played, which may be a few seconds back
           const ago = shown.times.map((time) => (time === null) ? null : playClock - time);

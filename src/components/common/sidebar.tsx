@@ -15,19 +15,24 @@ type SidebarProps = {
   setText: SetStringArray;
   // Only for games that aren't already on Lichess
   exportable?: boolean;
+  // Defaults to while detecting
+  showBoard?: boolean;
+  // Puts the mode's own sections (its setup) above the board rather than below it, for modes whose setup stays
+  // while detecting, so the board doesn't move when detection starts
+  setupFirst?: boolean;
   children: ReactNode;
 };
 
-const Sidebar = ({ playing, text, setText, exportable = false, children }: SidebarProps) => {
+const Sidebar = ({ playing, text, setText, exportable = false, showBoard = playing, setupFirst = false, children }:
+  SidebarProps) => {
   const game: Game = useGame();
   const token: string = useUser().token;
 
   const boardDisplay = () => {
     return (
       <>
-        {/* Shrinks on short screens so the controls below it stay visible */}
-        <ChessboardPreview fen={game.fen} squareSize="clamp(12px, (100dvh - 240px) / 8, 20px)"
-          lastMove={game.lastMove} />
+        {/* Sized in CSS (.sidebar), as it depends on the screen's height and what else is showing */}
+        <ChessboardPreview fen={game.fen} squareSize="var(--sidebar-square)" lastMove={game.lastMove} />
         <Clock />
       </>
     );
@@ -54,20 +59,41 @@ const Sidebar = ({ playing, text, setText, exportable = false, children }: Sideb
     );
   }
 
-  return (
-    <div className="sidebar flex flex-col text-center">
-      <div hidden={!playing}>
-        {/* Inline-block so the clock matches the board's width */}
-        <div className="inline-block">
-          {boardDisplay()}
-        </div>
+  const board = (
+    <div hidden={!showBoard}>
+      {/* Inline-block so the clock matches the board's width */}
+      <div className="inline-block">
+        {boardDisplay()}
       </div>
-      {children}
-      <SidebarSection title="Status">
-        {textDisplay()}
-      </SidebarSection>
-      {/* Pinned to the bottom when there's room to spare */}
-      <SidebarSection title="Game" className="mt-auto">
+    </div>
+  );
+  const status = (
+    <SidebarSection title="Status">
+      {textDisplay()}
+    </SidebarSection>
+  );
+
+  return (
+    <div className={`sidebar flex flex-col text-center${setupFirst ? " sidebar--setup-first" : ""}${playing
+      ? " sidebar--playing" : ""}`}>
+      {setupFirst ? (
+        <>
+          {children}
+          {/* Centred in the room between the setup and the game buttons, which then sit at the bottom */}
+          <div className="sidebar-middle my-auto">
+            {board}
+            {status}
+          </div>
+        </>
+      ) : (
+        <>
+          {board}
+          {children}
+          {status}
+        </>
+      )}
+      {/* Pinned to the bottom when there's room to spare (with setupFirst, by the centring above) */}
+      <SidebarSection title="Game" className={setupFirst ? "" : "mt-auto"}>
         {buttons()}
       </SidebarSection>
     </div>

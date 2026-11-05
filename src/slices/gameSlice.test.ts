@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { gameReset, gameRestart, gameSync, gameUpdate, makeBoard, makePgn, makeUpdatePayload } from "./gameSlice";
+import { gameReset, gameRestart, gameSync, trackerReset, gameUpdate, makeBoard, makePgn, makeUpdatePayload } from "./gameSlice";
 import { useStore } from "../store";
 import { makeGame } from "../test/helpers";
 import type { Game } from "../types";
@@ -158,6 +158,24 @@ describe("gameRestart", () => {
     gameUpdate(makeUpdatePayload(makeBoard(makeGame("1... e5 2. Nf3", start))));
     gameRestart();
     expect(getGame()).toEqual(makeGame("", start));
+  });
+});
+
+describe("trackerReset", () => {
+  it("takes back every move, keeping the start position, and counts the reset", () => {
+    const start = "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1";
+    setGame(makeGame("1... e5 2. Nf3", start));
+    const before = useStore.getState().trackerResets;
+    trackerReset();
+    expect(getGame()).toEqual(makeGame("", start));
+    expect(useStore.getState().trackerResets).toBe(before + 1);
+  });
+
+  it("counts a reset even with no moves to take back, so detection still starts a new tracker", () => {
+    setGame(makeGame());
+    const before = useStore.getState().trackerResets;
+    trackerReset();
+    expect(useStore.getState().trackerResets).toBe(before + 1);
   });
 });
 

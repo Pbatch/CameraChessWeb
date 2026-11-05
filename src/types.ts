@@ -1,3 +1,4 @@
+import type { Analysis } from "./engine/stockfish";
 interface Study {
   id: string,
   name: string
@@ -32,16 +33,22 @@ type RoiRef = React.RefObject<Roi | null>;
 
 type CornerName = "a8" | "h8" | "h1" | "a1";
 
-interface MovesData {
-  sans: string[],
+// The squares a move (or a move and its reply) changes, and the label each ends with
+interface SquaresData {
   from: number[],
   to: number[],
   targets: number[]
 }
+// One move: its UCI (e.g. e2e4, e7e8q, castling as the king's move), which tells moves apart, and its squares
+interface MovesData extends SquaresData {
+  uci: string
+}
+// A first move, which is shown in the game so also has its SAN, and a reply to it with what the two change together.
+// Replies have no SAN, as working it out for every reply was most of the time spent making the pairs.
 interface MovesPair {
-  move1: MovesData,
+  move1: MovesData & { san: string },
   move2: MovesData | null,
-  moves: MovesData | null
+  moves: SquaresData | null
 }
 
 type Clock = {
@@ -67,7 +74,7 @@ interface User {
 }
 
 // Where a toast error came from, so only that source clears it
-type ErrorSource = "login" | "broadcast" | "stream" | "move";
+type ErrorSource = "login" | "broadcast" | "stream" | "move" | "engine";
 
 interface AppError {
   source: ErrorSource,
@@ -79,7 +86,12 @@ interface RootState {
   // Apart from the game, as it updates far more often and only the clock shows it
   clock: Clock | null,
   user: User,
-  errors: AppError[]
+  errors: AppError[],
+  // Stockfish's latest analysis in upload mode, kept while the next position is analysed so the eval bar
+  // doesn't jump back to even
+  analysis: Analysis | null,
+  // Counts the times the tracker was reset, so detection knows to start a new one
+  trackerResets: number
 }
 
 type Mode = "record" | "upload" | "broadcast" | "play";
@@ -99,7 +111,7 @@ interface Camera {
 }
 
 export type { 
-  RootState, Study, Clock, User, Chessqueries, ChessqueriesOutputs, ModelRefs, MovesData, MovesPair, 
+  RootState, Study, Clock, User, Chessqueries, ChessqueriesOutputs, ModelRefs, SquaresData, MovesData, MovesPair, 
   Game, ErrorSource, AppError,
   SetBoolean, SetStringArray, SetNumber, SetFps, Mode,
   SetStudy, VideoRef, Roi, RoiRef, SetRoi, CornerName, SetOrientation, Camera
