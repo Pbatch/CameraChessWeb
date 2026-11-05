@@ -36,8 +36,8 @@ export default defineConfig({
     VitePWA({
       workbox: {
         globPatterns: ["**/*"],
-        // The model and the LiteRT.js runtime are cached on first use instead
-        globIgnores: ["**/*.tflite", "litert/**"],
+        // The model, the LiteRT.js runtime and Stockfish (upload mode only) are cached on first use instead
+        globIgnores: ["**/*.tflite", "litert/**", "**/stockfish-*"],
         maximumFileSizeToCacheInBytes: 5000000,
         runtimeCaching: [
           {
@@ -50,6 +50,15 @@ export default defineConfig({
               cacheName: "chessqueries-model",
               // Only the current model; the old one is dropped once a new one is cached
               expiration: { maxEntries: 1 }
+            }
+          },
+          {
+            // Hashed by Vite, so never changes in place
+            urlPattern: /\/assets\/stockfish-[^/]*\.(js|wasm)$/,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "stockfish",
+              expiration: { maxEntries: 2 }
             }
           },
           {

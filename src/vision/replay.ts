@@ -19,13 +19,17 @@ export interface TimedMove {
   time: number
 }
 
+// Given each game shown, as it changes, whether to stop replaying there, e.g. once the game's true last move is
+// shown, so moves made while the board is cleared afterwards can't replace it
+export type Until = (moves: TimedMove[]) => boolean;
+
 // Replays a video's model outputs, one frame per 1 / fps seconds, through a single BayesianTracker, from `start`
 // seconds (when someone would start detection), and returns the game it would show at the end, with when each move
 // was first played. This is how the app tracked moves before BeamTracker, kept to compare against (dev/replay.mjs
 // --single): a provisional move is shown, but the tracker keeps looking from before it, so a different move can still
 // replace it.
 export const replay = (probs: Float32Array, fps: number, start: number = 0,
-  tracker: BayesianTracker = new BayesianTracker()): TimedMove[] => {
+  tracker: BayesianTracker = new BayesianTracker(), until?: Until): TimedMove[] => {
   // The game the app shows
   let shown: TimedMove[] = [];
   // The board before any provisional move, and its pairs of moves
@@ -44,6 +48,7 @@ export const replay = (probs: Float32Array, fps: number, start: number = 0,
     }
     board.playSan(move.san);
     shown = retime(shown, board.history.map(({ san }) => san), time);
+    if (until?.(shown)) break;
     // A greedy move is shown, but the tracker keeps looking from before it, so a different move can still replace it
     if (move.greedy) {
       board.undo();
@@ -75,7 +80,7 @@ const retime = (shown: TimedMove[], sans: string[], time: number): TimedMove[] =
 // As replay, but with the app's BeamTracker, as findPieces runs it: the game is kept as the store keeps it, and each
 // game the tracker shows replaces it
 export const replayBeam = (probs: Float32Array, fps: number, start: number = 0,
-  tracker: BeamTracker = new BeamTracker()): TimedMove[] => {
+  tracker: BeamTracker = new BeamTracker(), until?: Until): TimedMove[] => {
   let shown: TimedMove[] = [];
   let game: Game = { moves: "", fen: START_FEN, start: START_FEN, lastMove: "", fromOpponent: false, times: [] };
   for (let i = Math.ceil(start * fps); i < probs.length / FRAME_SIZE; i++) {
@@ -89,6 +94,7 @@ export const replayBeam = (probs: Float32Array, fps: number, start: number = 0,
       const { board } = move;
       game = { ...game, moves: board.moves, fen: board.fen, lastMove: board.lastMove };
       shown = retime(shown, move.board.history.map(({ san }) => san), time);
+      if (until?.(shown)) break;
     }
   }
   return shown;

@@ -51,7 +51,7 @@ const storage: PersistStorage<SavedState> = {
 };
 
 export const useStore = create<RootState>()(persist(
-  (): RootState => ({ game: initialGame, clock: null, user: initialUser, errors: [] }),
+  (): RootState => ({ game: initialGame, clock: null, user: initialUser, errors: [], analysis: null, trackerResets: 0 }),
   {
     name: storageKey,
     storage,

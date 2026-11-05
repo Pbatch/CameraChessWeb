@@ -10,10 +10,16 @@ import { getMoveText } from "../../chess/moves";
 import RoiSelector from "./roiSelector";
 import OrientationMarkers, { MARKER_DIAMETER } from "./orientationMarkers";
 import FpsDisplay from "./fpsDisplay";
+import EvalGauge from "./evalGauge";
+import VideoControls from "../upload/videoControls";
+import RecordControls from "../record/recordControls";
+
+// The controls' height over the video, in px, as in .video-controls: uploads have a seek bar above the buttons
+const CONTROLS_HEIGHT = { upload: 52, record: 40 };
 
 const Video = ({ chessqueriesModelRef, videoRef, playing,
   setPlaying, playingRef, setText, mode, roi, setRoi, roiRef, selecting, setSelecting,
-  canPlay, setCanPlay }: {
+  canPlay, setCanPlay, engineEnabled = false }: {
     chessqueriesModelRef: ModelRefs["chessqueriesModelRef"],
     videoRef: VideoRef,
     playing: boolean,
@@ -22,7 +28,9 @@ const Video = ({ chessqueriesModelRef, videoRef, playing,
     setText: SetStringArray, mode: Mode,
     roi: Roi | null, setRoi: SetRoi, roiRef: RoiRef,
     selecting: boolean, setSelecting: SetBoolean,
-    canPlay: boolean, setCanPlay: SetBoolean
+    canPlay: boolean, setCanPlay: SetBoolean,
+    // Shows Stockfish's eval bar on the video's right
+    engineEnabled?: boolean
   }) => {
   const game: Game = useGame();
 
@@ -33,6 +41,9 @@ const Video = ({ chessqueriesModelRef, videoRef, playing,
   const [aspectRatio, setAspectRatio] = useState<number>(MEDIA_ASPECT_RATIO);
   // Kept here rather than in VideoAndSidebar, so its updates re-render only the video and not the sidebar
   const [fps, setFps] = useState<number | null>(null);
+  // Whether the upload controls show over the bottom of the video, which the corner markers then move clear of
+  const [controlsVisible, setControlsVisible] = useState<boolean>(false);
+  const showControls: boolean = ((mode === "upload") || (mode === "record")) && canPlay && !selecting;
 
   useEffect(() => {
     moveTextRef.current = getMoveText(makeBoard(game));
@@ -111,7 +122,7 @@ const Video = ({ chessqueriesModelRef, videoRef, playing,
   }
 
   return (
-    <div className="video-stage flex items-start justify-center">
+    <div className={`video-stage flex items-center justify-center${engineEnabled ? " video-stage--gauge" : ""}`}>
       <div className="video-live" style={liveStyle}>
         <div className="video-live__container">
           <div className="video-live__wrapper">
@@ -120,12 +131,18 @@ const Video = ({ chessqueriesModelRef, videoRef, playing,
               onCanPlay={onCanPlay} onLoadStart={onLoadStart} onError={onError} onEnded={onEnded} />
             <RoiSelector videoRef={videoRef} roi={roi} setRoi={setRoi}
               selecting={selecting} setSelecting={setSelecting} />
-            {!selecting && <OrientationMarkers videoRef={videoRef} roi={roi} orientation={orientation} />}
+            {!selecting && <OrientationMarkers videoRef={videoRef} roi={roi} orientation={orientation}
+              bottomInset={(showControls && controlsVisible) ? CONTROLS_HEIGHT[mode === "upload" ? "upload" : "record"] : 0} />}
             {/* Without a region, the markers sit in the video's corners */}
             <FpsDisplay fps={fps}
               offset={(!selecting && orientation !== null && roi === null) ? MARKER_DIAMETER : 0} />
+            {showControls && (mode === "upload") && <VideoControls videoRef={videoRef} playing={playing}
+              setPlaying={setPlaying} setText={setText} onVisible={setControlsVisible} />}
+            {showControls && (mode === "record") && <RecordControls videoRef={videoRef} playing={playing}
+              setPlaying={setPlaying} setText={setText} onVisible={setControlsVisible} />}
           </div>
         </div>
+        {engineEnabled && <EvalGauge />}
       </div>
     </div>
   );

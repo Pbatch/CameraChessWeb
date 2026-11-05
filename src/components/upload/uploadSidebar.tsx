@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { VideoButton, PlayButton, RestartButton, PlaybackButtons } from "./buttons";
-import { Sidebar, SidebarSection, FenButton, RoiButton, StopButton, ButtonGroup } from "../common";
+import { VideoButton } from "./buttons";
+import { Sidebar, SidebarSection, FenButton, RoiButton } from "../common";
 import type {
   ModelRefs, Roi, SetBoolean, SetRoi, SetStringArray, VideoRef
 } from "../../types";
 
+// Playback is in the controls over the video (videoControls.tsx)
 const UploadSidebar = ({ videoRef, chessqueriesModelRef,
   text, setText, playing, setPlaying, roi, setRoi, selecting, setSelecting, canPlay }: {
   videoRef: VideoRef,
@@ -18,26 +19,23 @@ const UploadSidebar = ({ videoRef, chessqueriesModelRef,
   const [videoSelected, setVideoSelected] = useState(false);
 
   return (
-    <Sidebar playing={playing} text={text} setText={setText} exportable={true} >
-      <SidebarSection title="Setup" hidden={playing}>
+    // The board always shows, so loading a video or pausing to check the game moves nothing. With Setup also
+    // showing, a landscape phone's sidebar then scrolls.
+    <Sidebar playing={playing} text={text} setText={setText} exportable={true} setupFirst={true} showBoard={true}>
+      {/* Stays while playing, disabled, so the board below doesn't move, except on landscape phones, which
+          need the room */}
+      <SidebarSection title="Setup" className={playing ? "sidebar-section--hidden-short" : ""}>
         <VideoButton
           videoRef={videoRef}
           setPlaying={setPlaying}
           videoSelected={videoSelected}
           setVideoSelected={setVideoSelected}
+          disabled={playing}
         />
         <RoiButton roi={roi} setRoi={setRoi} selecting={selecting} setSelecting={setSelecting}
-          canPlay={canPlay} />
+          canPlay={canPlay && !playing} />
         <FenButton chessqueriesModelRef={chessqueriesModelRef} videoRef={videoRef} roi={roi} setText={setText}
-          canPlay={canPlay} />
-        <PlaybackButtons videoRef={videoRef} videoSelected={videoSelected} />
-      </SidebarSection>
-      <SidebarSection title="Playback">
-        <ButtonGroup label="Video controls">
-          <PlayButton videoRef={videoRef} playing={playing} setPlaying={setPlaying} videoSelected={videoSelected} />
-          <StopButton videoRef={videoRef} setPlaying={setPlaying} setText={setText} disabled={!videoSelected} />
-          <RestartButton videoRef={videoRef} setText={setText} videoSelected={videoSelected} />
-        </ButtonGroup>
+          canPlay={canPlay && !playing} />
       </SidebarSection>
     </Sidebar>
   );

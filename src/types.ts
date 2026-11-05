@@ -1,3 +1,4 @@
+import type { Analysis } from "./engine/stockfish";
 interface Study {
   id: string,
   name: string
@@ -73,7 +74,7 @@ interface User {
 }
 
 // Where a toast error came from, so only that source clears it
-type ErrorSource = "login" | "broadcast" | "stream" | "move";
+type ErrorSource = "login" | "broadcast" | "stream" | "move" | "engine";
 
 interface AppError {
   source: ErrorSource,
@@ -85,7 +86,12 @@ interface RootState {
   // Apart from the game, as it updates far more often and only the clock shows it
   clock: Clock | null,
   user: User,
-  errors: AppError[]
+  errors: AppError[],
+  // Stockfish's latest analysis in upload mode, kept while the next position is analysed so the eval bar
+  // doesn't jump back to even
+  analysis: Analysis | null,
+  // Counts the times the tracker was reset, so detection knows to start a new one
+  trackerResets: number
 }
 
 type Mode = "record" | "upload" | "broadcast" | "play";

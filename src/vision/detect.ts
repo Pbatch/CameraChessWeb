@@ -2,7 +2,8 @@ import type { VideoRef } from "../types";
 
 export const invalidVideo = (videoRef: VideoRef) => {
   const video = videoRef.current;
-  if (video === null || video.videoWidth === 0 || video.videoHeight === 0 || video.readyState < 2) {
+  // A frame mid-seek may be from before it, or half-decoded
+  if (video === null || video.videoWidth === 0 || video.videoHeight === 0 || video.readyState < 2 || video.seeking) {
     return true;
   }
 

@@ -3,11 +3,12 @@ import { Folder, FolderX } from "lucide-react";
 import { Icon, SidebarButton } from "../../common";
 import type { SetBoolean, VideoRef } from "../../../types";
 
-const VideoButton = ({ videoRef, setPlaying, videoSelected, setVideoSelected }: {
+const VideoButton = ({ videoRef, setPlaying, videoSelected, setVideoSelected, disabled = false }: {
   videoRef: VideoRef,
   setPlaying: SetBoolean,
   videoSelected: boolean,
-  setVideoSelected: SetBoolean
+  setVideoSelected: SetBoolean,
+  disabled?: boolean
 }) => {
   const inputVideoRef = useRef<HTMLInputElement>(null);
   const [fileName, setFileName] = useState<string>("");
@@ -69,6 +70,7 @@ const VideoButton = ({ videoRef, setPlaying, videoSelected, setVideoSelected }: 
       />
       <SidebarButton
         onClick={handleOnClick}
+        disabled={disabled}
         className="flex items-center justify-center"
         aria-label={title}
         title={title}

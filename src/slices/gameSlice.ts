@@ -21,6 +21,19 @@ export const gameRestart = () => {
   setGame((game) => ({ ...initialGame, start: game.start, fen: game.start }));
 }
 
+// Takes back every move, and has detection start a new tracker, so it reads the board afresh from the next frame
+// even when there were no moves to take back
+export const trackerReset = () => {
+  useStore.setState((state) => ({
+    game: { ...initialGame, start: state.game.start, fen: state.game.start },
+    trackerResets: state.trackerResets + 1
+  }));
+}
+
+export const useTrackerResets = () => {
+  return useStore((state) => state.trackerResets);
+}
+
 // Moves kept from before keep their times, so a move shown before it was confirmed is timed from when it was first
 // seen. New moves are timed at `elapsed`, less how long ago each was seen (`ago`, ms, by index in the game),
 // as a move the tracker corrects may have been played a few seconds before it was shown, and without `elapsed` the

@@ -37,9 +37,11 @@ let root: Root | null = null;
 let host: HTMLDivElement | null = null;
 
 const renderSidebar = async (Sidebar: SidebarComponent, playing: boolean): Promise<HTMLElement> => {
-  // Signed in, so Export shows, and with a clock, so the preview is as tall as it gets
+  // Signed in, so Export shows, and in play mode, the only one with a clock, a clock
   userSet({ token: "token", username: "" });
-  clockSet({ wtime: 600000, btime: 600000, turn: "w", updatedAt: Date.now(), running: false });
+  if (Sidebar === (PlaySidebar as SidebarComponent)) {
+    clockSet({ wtime: 600000, btime: 600000, turn: "w", updatedAt: Date.now(), running: false });
+  }
 
   const noop = () => {};
   const props = {

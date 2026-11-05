@@ -1,35 +1,30 @@
-import {
-  Sidebar, SidebarSection, RecordButton, StopButton, FenButton, DeviceButton, RoiButton, ButtonGroup
-} from "../common";
+import { Sidebar, SidebarSection, FenButton, DeviceButton, RoiButton } from "../common";
 import type {
   Camera, ModelRefs, Roi, SetBoolean, SetRoi, SetStringArray, VideoRef
 } from "../../types";
 
+// Recording is controlled from the bar over the camera (recordControls.tsx)
 const RecordSidebar = ({ chessqueriesModelRef, videoRef, camera,
-  playing, setPlaying, text, setText, roi, setRoi, selecting, setSelecting, canPlay }: {
+  playing, text, setText, roi, setRoi, selecting, setSelecting, canPlay }: {
   chessqueriesModelRef: ModelRefs["chessqueriesModelRef"],
   videoRef: VideoRef,
   camera: Camera,
-  playing: boolean, setPlaying: SetBoolean, 
+  playing: boolean,
   text: string[], setText: SetStringArray,
   roi: Roi | null, setRoi: SetRoi,
   selecting: boolean, setSelecting: SetBoolean,
   canPlay: boolean
 }) => {
   return (
-    <Sidebar playing={playing} text={text} setText={setText} exportable={true} >
-      <SidebarSection title="Setup" hidden={playing}>
-        <DeviceButton camera={camera} />
+    // The board always shows, so pausing to check the game moves nothing
+    <Sidebar playing={playing} text={text} setText={setText} exportable={true} setupFirst={true} showBoard={true}>
+      {/* Stays while recording, disabled, except on landscape phones, which need the room */}
+      <SidebarSection title="Setup" className={playing ? "sidebar-section--hidden-short" : ""}>
+        <DeviceButton camera={camera} disabled={playing} />
         <RoiButton roi={roi} setRoi={setRoi} selecting={selecting} setSelecting={setSelecting}
-          canPlay={canPlay} />
+          canPlay={canPlay && !playing} />
         <FenButton chessqueriesModelRef={chessqueriesModelRef} videoRef={videoRef} roi={roi} setText={setText}
-          canPlay={canPlay} />
-      </SidebarSection>
-      <SidebarSection title="Detection">
-        <ButtonGroup label="Move detection controls">
-          <RecordButton playing={playing} setPlaying={setPlaying} />
-          <StopButton setPlaying={setPlaying} setText={setText} />
-        </ButtonGroup>
+          canPlay={canPlay && !playing} />
       </SidebarSection>
     </Sidebar>
   );
