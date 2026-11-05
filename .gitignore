@@ -1,5 +1,6 @@
 .idea/
 .vscode/
+.vitest/
 yarn-error.log
 node_modules
 dist

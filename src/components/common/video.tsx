@@ -12,10 +12,10 @@ import OrientationMarkers, { MARKER_DIAMETER } from "./orientationMarkers";
 import FpsDisplay from "./fpsDisplay";
 import EvalGauge from "./evalGauge";
 import VideoControls from "../upload/videoControls";
-import RecordControls from "../record/recordControls";
+import CameraControls from "./cameraControls";
 
 // The controls' height over the video, in px, as in .video-controls: uploads have a seek bar above the buttons
-const CONTROLS_HEIGHT = { upload: 52, record: 40 };
+const CONTROLS_HEIGHT = { upload: 52, camera: 40 };
 
 const Video = ({ chessqueriesModelRef, videoRef, playing,
   setPlaying, playingRef, setText, mode, roi, setRoi, roiRef, selecting, setSelecting,
@@ -43,7 +43,7 @@ const Video = ({ chessqueriesModelRef, videoRef, playing,
   const [fps, setFps] = useState<number | null>(null);
   // Whether the upload controls show over the bottom of the video, which the corner markers then move clear of
   const [controlsVisible, setControlsVisible] = useState<boolean>(false);
-  const showControls: boolean = ((mode === "upload") || (mode === "record")) && canPlay && !selecting;
+  const showControls: boolean = canPlay && !selecting;
 
   useEffect(() => {
     moveTextRef.current = getMoveText(makeBoard(game));
@@ -132,13 +132,13 @@ const Video = ({ chessqueriesModelRef, videoRef, playing,
             <RoiSelector videoRef={videoRef} roi={roi} setRoi={setRoi}
               selecting={selecting} setSelecting={setSelecting} />
             {!selecting && <OrientationMarkers videoRef={videoRef} roi={roi} orientation={orientation}
-              bottomInset={(showControls && controlsVisible) ? CONTROLS_HEIGHT[mode === "upload" ? "upload" : "record"] : 0} />}
+              bottomInset={(showControls && controlsVisible) ? CONTROLS_HEIGHT[mode === "upload" ? "upload" : "camera"] : 0} />}
             {/* Without a region, the markers sit in the video's corners */}
             <FpsDisplay fps={fps}
               offset={(!selecting && orientation !== null && roi === null) ? MARKER_DIAMETER : 0} />
             {showControls && (mode === "upload") && <VideoControls videoRef={videoRef} playing={playing}
               setPlaying={setPlaying} setText={setText} onVisible={setControlsVisible} />}
-            {showControls && (mode === "record") && <RecordControls videoRef={videoRef} playing={playing}
+            {showControls && (mode !== "upload") && <CameraControls mode={mode} videoRef={videoRef} playing={playing}
               setPlaying={setPlaying} setText={setText} onVisible={setControlsVisible} />}
           </div>
         </div>

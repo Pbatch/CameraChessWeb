@@ -1,6 +1,4 @@
 import SidebarButton from "./sidebarButton";
-import RecordButton from "./recordButton";
-import StopButton from "./stopButton";
 import PgnButton from "./pgnButton";
 import Icon from "./icon";
 import HomeButton from "./homeButton";
@@ -18,6 +16,6 @@ import Dropdown, { DropdownItem } from "./dropdown";
 
 export {
   SidebarButton, PgnButton, Icon,
-  HomeButton, Sidebar, SidebarSection, Container, VideoAndSidebar, RecordButton, StopButton, StudyButton,
+  HomeButton, Sidebar, SidebarSection, Container, VideoAndSidebar, StudyButton,
   FenButton, DeviceButton, Toast, RoiButton, ButtonGroup, Dropdown, DropdownItem,
 };

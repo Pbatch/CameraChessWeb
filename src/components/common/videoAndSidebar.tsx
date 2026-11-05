@@ -100,6 +100,7 @@ const VideoAndSidebar = ({ mode }: { mode: Mode }) => {
     study,
     setPlaying,
     setText,
+    boardNumber,
     setBoardNumber,
     setStudy,
     roi,

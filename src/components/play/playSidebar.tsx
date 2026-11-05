@@ -1,4 +1,4 @@
-import { Sidebar, SidebarSection, RecordButton, DeviceButton, RoiButton, ButtonGroup } from "../common";
+import { Sidebar, SidebarSection, DeviceButton, RoiButton } from "../common";
 import type {
   Camera, Game, Roi, SetBoolean, SetRoi, SetStringArray
 } from "../../types";
@@ -16,9 +16,9 @@ import { START_FEN } from "../../utils/constants";
 const MOVE_RETRY_DELAY = 2000;
 
 const PlaySidebar = ({ camera,
-  playing, setPlaying, text, setText, roi, setRoi, selecting, setSelecting, canPlay }: {
+  playing, text, setText, roi, setRoi, selecting, setSelecting, canPlay }: {
     camera: Camera,
-    playing: boolean, setPlaying: SetBoolean,
+    playing: boolean,
     text: string[], setText: SetStringArray,
     roi: Roi | null, setRoi: SetRoi,
     selecting: boolean, setSelecting: SetBoolean,
@@ -146,17 +146,15 @@ const PlaySidebar = ({ camera,
   }, [gameId, token]);
 
   return (
-    <Sidebar playing={playing} text={text} setText={setText} >
-      <SidebarSection title="Setup" hidden={playing}>
-        <DeviceButton camera={camera} />
+    // The board and clock always show, so pausing detection moves nothing. Detection is controlled from the bar
+    // over the camera (cameraControls.tsx).
+    <Sidebar playing={playing} text={text} setText={setText} setupFirst={true} showBoard={true}>
+      {/* Stays while detecting, disabled, except on landscape phones, which need the room */}
+      <SidebarSection title="Setup" className={playing ? "sidebar-section--hidden-short" : ""}>
+        <DeviceButton camera={camera} disabled={playing} />
         <RoiButton roi={roi} setRoi={setRoi} selecting={selecting} setSelecting={setSelecting}
-          canPlay={canPlay} />
-        <GamesButton setGameId={setGameId} setColor={setColor} setText={setText} />
-      </SidebarSection>
-      <SidebarSection title="Detection">
-        <ButtonGroup label="Move detection controls">
-          <RecordButton playing={playing} setPlaying={setPlaying} />
-        </ButtonGroup>
+          canPlay={canPlay && !playing} />
+        <GamesButton setGameId={setGameId} setColor={setColor} setText={setText} disabled={playing} />
       </SidebarSection>
     </Sidebar>
   );

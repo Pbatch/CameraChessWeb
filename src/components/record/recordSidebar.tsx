@@ -3,7 +3,7 @@ import type {
   Camera, ModelRefs, Roi, SetBoolean, SetRoi, SetStringArray, VideoRef
 } from "../../types";
 
-// Recording is controlled from the bar over the camera (recordControls.tsx)
+// Recording is controlled from the bar over the camera (cameraControls.tsx)
 const RecordSidebar = ({ chessqueriesModelRef, videoRef, camera,
   playing, text, setText, roi, setRoi, selecting, setSelecting, canPlay }: {
   chessqueriesModelRef: ModelRefs["chessqueriesModelRef"],

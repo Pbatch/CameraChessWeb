@@ -5,8 +5,8 @@ import { describeLichessError, lichessSetStudies } from "../../api/lichess";
 import { Notebook } from "lucide-react";
 import Dropdown, { DropdownItem, DropdownText } from "./dropdown";
 
-const StudyButton = ({ study, setStudy, onlyBroadcasts }: 
-  {study: Study | null, setStudy: SetStudy, onlyBroadcasts: boolean }
+const StudyButton = ({ study, setStudy, onlyBroadcasts, disabled = false }:
+  { study: Study | null, setStudy: SetStudy, onlyBroadcasts: boolean, disabled?: boolean }
 ) => {
   const [studies, setStudies] = useState<Study[]>([]);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -31,7 +31,7 @@ const StudyButton = ({ study, setStudy, onlyBroadcasts }:
   const label = (study === null) ? "Select a Study" : `Study: ${study.name}`;
 
   return (
-    <Dropdown icon={Notebook} label={label}>
+    <Dropdown icon={Notebook} label={label} disabled={disabled}>
       {(loadError !== null) ?
         <DropdownText>{loadError}</DropdownText> :
         (studies.length === 0) ?
