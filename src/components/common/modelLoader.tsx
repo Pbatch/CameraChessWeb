@@ -37,7 +37,7 @@ const ModelLoader = () => {
         <div className="flex items-center gap-2" role="status" aria-live="polite">
           <span className="inline-block size-8 animate-spin rounded-full border-4 border-current border-e-transparent"
             aria-hidden="true" />
-          <span>Loading FEN model...</span>
+          <span>Loading board recognizer...</span>
         </div>
       </main>
     );

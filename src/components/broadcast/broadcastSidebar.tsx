@@ -1,4 +1,4 @@
-import { Sidebar, SidebarSection, StudyButton, DeviceButton, RoiButton } from "../common";
+import { LichessAccount, Sidebar, SidebarSection, StudyButton, DeviceButton, RoiButton } from "../common";
 import type {
   Camera, Roi, SetBoolean, SetNumber, SetRoi, SetStringArray, SetStudy, Study
 } from "../../types";
@@ -22,6 +22,7 @@ const BroadcastSidebar = ({ camera,
     <Sidebar playing={playing} text={text} setText={setText} setupFirst={true} showBoard={true}>
       {/* Stays while broadcasting, disabled, except on landscape phones, which need the room */}
       <SidebarSection title="Setup" className={playing ? "sidebar-section--hidden-short" : ""}>
+        <LichessAccount disabled={playing} />
         <DeviceButton camera={camera} disabled={playing} />
         <RoiButton roi={roi} setRoi={setRoi} selecting={selecting} setSelecting={setSelecting}
           canPlay={canPlay && !playing} />

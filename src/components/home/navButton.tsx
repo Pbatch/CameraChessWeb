@@ -1,33 +1,19 @@
 import { useNavigate } from "react-router";
-import { useUser } from "../../slices/userSlice";
 import buttonClass from "../common/buttonClass";
 
-const NavButton = ({ text, description, tokenRequired }:
-  { text: string, description: string, tokenRequired: boolean }) => {
+// The Lichess modes ask for a login on their own pages
+const NavButton = ({ text, description }: { text: string, description: string }) => {
   const navigate = useNavigate();
-  const token = useUser().token;
-
-  const noNavigate = (token === "") && tokenRequired;
-
-  const handleClick = () => {
-    if (noNavigate) {
-      return;
-    }
-    void navigate(`/${text.toLowerCase()}`);
-  }
 
   return (
-    <button 
+    <button
       type="button"
       className={`${buttonClass("outline-light", "lg")} w-full`}
-      onClick={handleClick}
-      disabled={noNavigate}
-    > 
+      onClick={() => { void navigate(`/${text.toLowerCase()}`); }}
+    >
       <span className="block">{text}</span>
       {/* opacity rather than a fixed grey, so it follows the text colour on hover */}
-      <small className="block text-base opacity-75">
-        {noNavigate ? "Log in with Lichess to use" : description}
-      </small>
+      <small className="block text-base opacity-75">{description}</small>
     </button>
   )
 }

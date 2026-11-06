@@ -84,6 +84,42 @@ describe("Lichess OAuth", () => {
     expect(storage.getItem("lichess-oauth-pkce")).toBeNull();
   });
 
+  const loginReturningTo = async (returnTo: string, accountResponse: Response) => {
+    const location = stubLocation();
+    await (await loadLichess()).lichessLogin(returnTo);
+    const state = new URL(location.assign.mock.calls[0][0] as string).searchParams.get("state");
+    vi.resetModules();
+    stubLocation(`?code=liu_code&state=${state}`);
+    vi.stubGlobal("fetch", vi.fn()
+      .mockResolvedValueOnce(Response.json({ access_token: "lio_token" }))
+      .mockResolvedValueOnce(accountResponse));
+    return loadLichess();
+  }
+
+  it("opens the page that asked for the login once logged in", async () => {
+    const { lichessTrySetUser } = await loginReturningTo("/play", Response.json({ username: "magnus" }));
+
+    await lichessTrySetUser(navigate);
+
+    expect(navigate).toHaveBeenCalledWith("/play");
+  });
+
+  it("returns home rather than to the page that asked when the login fails", async () => {
+    const { lichessTrySetUser } = await loginReturningTo("/play", new Response("down", { status: 503 }));
+
+    await expect(lichessTrySetUser(navigate)).rejects.toMatchObject({ status: 503 });
+
+    expect(navigate).toHaveBeenCalledWith("/");
+  });
+
+  it("never returns to another site", async () => {
+    const { lichessTrySetUser } = await loginReturningTo("//evil.example", Response.json({ username: "magnus" }));
+
+    await lichessTrySetUser(navigate);
+
+    expect(navigate).toHaveBeenCalledWith("/");
+  });
+
   it("rejects a mismatched state without requesting a token", async () => {
     await startLogin();
     vi.resetModules();
@@ -260,5 +296,30 @@ describe("describeLichessError", () => {
   it("explains a network failure", async () => {
     const { describeLichessError } = await loadLichess();
     expect(describeLichessError(new TypeError("Failed to fetch"))).toContain("could not be reached");
+  });
+});
+
+describe("lichessImportGame", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("imports the PGN without a login and returns the game's page", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(Response.json({ id: "abc", url: "https://lichess.org/game/abc" }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    const url = await (await loadLichess()).lichessImportGame("1. e4 e5 *");
+
+    const [importUrl, request] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(importUrl).toBe("https://lichess.org/api/import");
+    expect(new Headers(request.headers).has("Authorization")).toBe(false);
+    expect((request.body as URLSearchParams).get("pgn")).toBe("1. e4 e5 *");
+    expect(url).toBe("https://lichess.org/game/abc");
+  });
+
+  it("throws Lichess's refusal", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response("slow down", { status: 429 })));
+
+    await expect((await loadLichess()).lichessImportGame("*")).rejects.toMatchObject({ status: 429 });
   });
 });

@@ -5,7 +5,6 @@ import type { ReactNode } from "react";
 import ChessboardPreview from "./chessboardPreview.tsx";
 import Clock from "../play/clock.tsx";
 import ExportButton from "./exportButton.tsx";
-import { useUser } from "../../slices/userSlice.ts";
 import SidebarSection from "./sidebarSection.tsx";
 import ButtonGroup from "./buttonGroup.tsx";
 
@@ -26,7 +25,6 @@ type SidebarProps = {
 const Sidebar = ({ playing, text, setText, exportable = false, showBoard = playing, setupFirst = false, children }:
   SidebarProps) => {
   const game: Game = useGame();
-  const token: string = useUser().token;
 
   const boardDisplay = () => {
     return (
@@ -51,7 +49,7 @@ const Sidebar = ({ playing, text, setText, exportable = false, showBoard = playi
       <>
         <ButtonGroup label="Game actions" className="sidebar-actions">
           <PgnButton setText={setText} playing={playing} />
-          {exportable && (token !== "") && <ExportButton setText={setText} />}
+          {exportable && <ExportButton setText={setText} />}
         </ButtonGroup>
         {/* A line of its own, apart from the game actions, as it leaves the page */}
         <HomeButton labelled={true} />

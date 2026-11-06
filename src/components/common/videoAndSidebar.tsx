@@ -12,7 +12,7 @@ import { describeLichessError, isTransientError, lichessPushRound } from "../../
 import { errorClear, errorShow } from "../../slices/errorSlice";
 import { useUser } from "../../slices/userSlice";
 import PlaySidebar from "../play/playSidebar";
-import { useMediaQuery } from "../../utils/hooks";
+import { useMediaQuery, useWakeLock } from "../../utils/hooks";
 import { useCamera } from "../../utils/useCamera";
 import { useStockfish } from "../../engine/useStockfish";
 
@@ -51,6 +51,9 @@ const VideoAndSidebar = ({ mode }: { mode: Mode }) => {
   // Stockfish always runs for uploads, and keeps analysing while paused, as the eval bar still shows
   const engineEnabled: boolean = (mode === "upload");
   useStockfish(fen, engineEnabled);
+
+  // A game can outlast the screen's timeout, which would stop the camera or the video
+  useWakeLock(playing);
 
   useEffect(() => {
     if (mode !== "broadcast" || (study === null) || (boardNumber === -1)) {

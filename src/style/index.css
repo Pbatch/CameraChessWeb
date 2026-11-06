@@ -228,7 +228,12 @@ a, button, input, label, select, summary, textarea {
   background-color: #111;
 }
 
+/* Dark like the others, so it doesn't outshine the modes; its red only on hover */
 .social-link--youtube {
+  background-color: #111;
+}
+
+.social-link--youtube:hover {
   background-color: #f00;
 }
 
