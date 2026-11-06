@@ -3,6 +3,7 @@ import FAQ from "./components/faq/faq";
 import App from "./App";
 import ErrorPage from "./components/common/errorPage";
 import ModelLoader from "./components/common/modelLoader";
+import RequireLichess from "./components/common/requireLichess";
 
 import { createRoot } from 'react-dom/client';
 import "./style/index.css";
@@ -42,14 +43,25 @@ const router = createBrowserRouter([
           {
             path: "/upload",
             element: <VideoAndSidebar mode="upload" />
-          },
+          }
+        ]
+      },
+      {
+        // Asks for a Lichess login first, so the model and camera only start once logged in
+        element: <RequireLichess />,
+        children: [
           {
-            path: "/broadcast",
-            element: <VideoAndSidebar mode="broadcast" />
-          },
-          {
-            path: "/play",
-            element: <VideoAndSidebar mode="play" />
+            element: <ModelLoader />,
+            children: [
+              {
+                path: "/broadcast",
+                element: <VideoAndSidebar mode="broadcast" />
+              },
+              {
+                path: "/play",
+                element: <VideoAndSidebar mode="play" />
+              }
+            ]
           }
         ]
       },

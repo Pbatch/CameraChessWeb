@@ -11,7 +11,8 @@ const clientUrl = `${location.protocol}//${location.host}/`;
 
 // Pending authorization request, kept in session storage across the redirect to Lichess.
 const pkceStorageKey = 'lichess-oauth-pkce';
-type PkceState = { verifier: string; state: string };
+// returnTo is the page to open once logged in, such as the mode that asked for the login
+type PkceState = { verifier: string; state: string; returnTo?: string };
 
 const base64Url = (bytes: Uint8Array) =>
   btoa(String.fromCharCode(...bytes)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
@@ -70,6 +71,10 @@ export const describeLichessError = (error: unknown): string => {
 // Worth retrying, rather than a request Lichess will keep refusing
 export const isTransientError = (error: unknown): boolean =>
   !(error instanceof LichessError) || error.status === 429 || error.status >= 500;
+
+// Only a path on this site, never another origin such as "//evil.example"
+const safeReturnTo = (returnTo: string | undefined): string =>
+  (returnTo?.startsWith("/") && !returnTo.startsWith("//")) ? returnTo : "/";
 
 const takePkceState = (): PkceState | null => {
   const stored = sessionStorage.getItem(pkceStorageKey);
@@ -180,8 +185,8 @@ const setBroadcastlessStudies = async (token: string, username: string, setStudi
   setStudies(studies);
 }
 
-export const lichessLogin = async () => {
-  const pkce: PkceState = { verifier: randomString(), state: randomString() };
+export const lichessLogin = async (returnTo: string = "/") => {
+  const pkce: PkceState = { verifier: randomString(), state: randomString(), returnTo };
   sessionStorage.setItem(pkceStorageKey, JSON.stringify(pkce));
 
   const params = new URLSearchParams({
@@ -204,6 +209,20 @@ export const lichessLogout = async (token: string) => {
   }
   sessionStorage.removeItem(pkceStorageKey);
   userReset();
+}
+
+// Imports a game anonymously, so it needs no login, and returns the game's page on Lichess
+export const lichessImportGame = async (pgn: string): Promise<string> => {
+  const response = await fetch(`${lichessHost}/api/import`, {
+    method: 'POST',
+    headers: { Accept: 'application/json' },
+    body: new URLSearchParams({ pgn }),
+  });
+  if (!response.ok) {
+    throw await lichessError(response);
+  }
+  const { url } = await response.json() as { url: string };
+  return url;
 }
 
 const lichessGetAccount = (token: string): Promise<Account> => {
@@ -331,6 +350,8 @@ export const lichessTrySetUser = async (navigate: NavigateFunction) => {
     return;
   }
 
+  // Home unless the login succeeds, so a failed or cancelled one does not open a page that needs it
+  let destination = "/";
   try {
     if (error === 'access_denied') {
       console.warn('Lichess authorization was cancelled.');
@@ -344,7 +365,8 @@ export const lichessTrySetUser = async (navigate: NavigateFunction) => {
     // Both together, so a failed account lookup does not leave a token without a username
     const account = await lichessGetAccount(newToken);
     userSet({ token: newToken, username: account.username });
+    destination = safeReturnTo(pkce.returnTo);
   } finally {
-    void navigate("/");
+    void navigate(destination);
   }
 }
