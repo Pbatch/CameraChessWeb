@@ -97,6 +97,8 @@ const PlaySidebar = ({ camera,
 
     // From the gameFull that opens every stream, which gameState events follow
     let start: string | undefined;
+    // Untimed games (unlimited and correspondence) have no clock, though their states still carry times
+    let timed = false;
 
     const onEvent = (response: BoardStreamEvent) => {
       // Chat and opponent-gone events don't change the board
@@ -104,18 +106,19 @@ const PlaySidebar = ({ camera,
 
       if (response.type === "gameFull") {
         start = (response.initialFen === "startpos") ? START_FEN : response.initialFen;
+        timed = response.clock !== undefined && response.clock !== null;
       }
       // gameFull nests the game state under `state`; gameState is the state itself.
       const { moves, wtime, btime, status } = response.type === "gameFull" ? response.state : response;
 
       const lichessMoves: string[] = (moves.trim() === "") ? [] : moves.trim().split(" ");
-      clockSet({
+      clockSet(timed ? {
         wtime,
         btime,
         turn: lichessMoves.length % 2 === 0 ? "w" : "b",
         updatedAt: Date.now(),
         running: status === "started",
-      });
+      } : null);
 
       if (start === undefined) {
         throw new Error("Lichess sent a move before the game");
