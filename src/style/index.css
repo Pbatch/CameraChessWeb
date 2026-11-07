@@ -29,8 +29,10 @@
 
 html, body {
   width: 100%;
-  /* Follows the mobile address bar as it shows and hides */
-  height: 100dvh;
+  /* Not 100dvh: in the installed Android app (a TWA), Chrome counts the status and navigation bars in dvh while a
+     video plays, which made the page 56px taller than the screen. The page never scrolls, so the address bar never
+     hides and there's nothing for dvh to follow anyway. */
+  height: 100%;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Oxygen", "Ubuntu",
     "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -65,12 +67,17 @@ a, button, input, label, select, summary, textarea {
   overflow-y: auto;
   /* The board's squares: shrinking on short screens so the controls around it stay visible, and at most as wide
      as the buttons (the 220px less the padding and border) */
-  --sidebar-square: clamp(12px, (100dvh - 240px) / 8, (220px - 1.5rem - 1px) / 8);
+  --sidebar-square: clamp(12px, (100cqh - 240px) / 8, (220px - 1.5rem - 1px) / 8);
 }
 
 /* With the setup above the board (upload and record), which stays while detecting, there's less room for it */
 .sidebar--setup-first {
-  --sidebar-square: clamp(12px, (100dvh - 380px) / 8, (220px - 1.5rem - 1px) / 8);
+  --sidebar-square: clamp(12px, (100cqh - 380px) / 8, (220px - 1.5rem - 1px) / 8);
+}
+
+/* The sidebar's board sizes itself by this height (cqh) rather than by 100dvh, which can be wrong; see html above */
+.video-and-sidebar {
+  container-type: size;
 }
 
 /* Portrait (upload only) puts the video above the sidebar */
