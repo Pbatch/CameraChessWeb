@@ -134,7 +134,9 @@
     "connectAnother": "Connect a camera or select another device",
     "inUse": "Camera is in use",
     "closeOthers": "Close other apps using the camera",
-    "startFailed": "Unable to start the camera"
+    "startFailed": "Unable to start the camera",
+    "selectGameFirst": "Select a game first",
+    "selectStudyBoardFirst": "Select a study and a board first"
   },
   "reset": {
     "confirmTitle": "Press again to reset the game",

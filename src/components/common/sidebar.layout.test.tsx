@@ -60,6 +60,7 @@ const renderSidebar = async (mode: Mode, Sidebar: SidebarComponent, playing: boo
     canPlay: true,
     study: null, setStudy: noop,
     boardNumber: -1, setBoardNumber: noop,
+    setGameSelected: noop,
   };
 
   host = document.createElement("div");

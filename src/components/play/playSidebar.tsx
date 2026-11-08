@@ -18,13 +18,15 @@ import { START_FEN } from "../../utils/constants";
 const MOVE_RETRY_DELAY = 2000;
 
 const PlaySidebar = ({ camera,
-  playing, text, setText, roi, setRoi, selecting, setSelecting, canPlay }: {
+  playing, text, setText, roi, setRoi, selecting, setSelecting, canPlay, setGameSelected }: {
     camera: Camera,
     playing: boolean,
     text: string[], setText: SetStringArray,
     roi: Roi | null, setRoi: SetRoi,
     selecting: boolean, setSelecting: SetBoolean,
-    canPlay: boolean
+    canPlay: boolean,
+    // Whether a game is chosen, which detection waits for
+    setGameSelected: SetBoolean
   }) => {
   const { t } = useTranslation();
   const token: string = useUser().token;
@@ -152,6 +154,10 @@ const PlaySidebar = ({ camera,
       errorClear("move");
     };
   }, [gameId, token]);
+
+  useEffect(() => {
+    setGameSelected(gameId !== undefined);
+  }, [gameId, setGameSelected]);
 
   return (
     // The board and clock always show, so pausing detection moves nothing. Detection is controlled from the bar

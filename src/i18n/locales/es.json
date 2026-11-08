@@ -134,7 +134,9 @@
     "connectAnother": "Conecta una cámara o elige otro dispositivo",
     "inUse": "La cámara está en uso",
     "closeOthers": "Cierra otras aplicaciones que usen la cámara",
-    "startFailed": "No se pudo iniciar la cámara"
+    "startFailed": "No se pudo iniciar la cámara",
+    "selectGameFirst": "Elige una partida primero",
+    "selectStudyBoardFirst": "Elige un estudio y un tablero primero"
   },
   "reset": {
     "confirmTitle": "Pulsa de nuevo para reiniciar la partida",

@@ -14,13 +14,14 @@ import FpsDisplay from "./fpsDisplay";
 import EvalGauge from "./evalGauge";
 import VideoControls from "../upload/videoControls";
 import CameraControls from "./cameraControls";
+import type { StartBlock } from "./cameraControls";
 
 // The controls' height over the video, in px, as in .video-controls: uploads have a seek bar above the buttons
 const CONTROLS_HEIGHT = { upload: 52, camera: 40 };
 
 const Video = ({ chessqueriesModelRef, videoRef, playing,
   setPlaying, playingRef, setText, mode, roi, setRoi, roiRef, selecting, setSelecting,
-  canPlay, setCanPlay, engineEnabled = false }: {
+  canPlay, setCanPlay, engineEnabled = false, startBlock = null }: {
     chessqueriesModelRef: ModelRefs["chessqueriesModelRef"],
     videoRef: VideoRef,
     playing: boolean,
@@ -30,6 +31,8 @@ const Video = ({ chessqueriesModelRef, videoRef, playing,
     roi: Roi | null, setRoi: SetRoi, roiRef: RoiRef,
     selecting: boolean, setSelecting: SetBoolean,
     canPlay: boolean, setCanPlay: SetBoolean,
+    // What the camera modes need chosen before detection can start
+    startBlock?: StartBlock | null,
     // Shows Stockfish's eval bar on the video's right
     engineEnabled?: boolean
   }) => {
@@ -141,7 +144,7 @@ const Video = ({ chessqueriesModelRef, videoRef, playing,
             {showControls && (mode === "upload") && <VideoControls videoRef={videoRef} playing={playing}
               setPlaying={setPlaying} setText={setText} onVisible={setControlsVisible} />}
             {showControls && (mode !== "upload") && <CameraControls mode={mode} videoRef={videoRef} playing={playing}
-              setPlaying={setPlaying} setText={setText} onVisible={setControlsVisible} />}
+              setPlaying={setPlaying} setText={setText} onVisible={setControlsVisible} blocked={startBlock} />}
           </div>
         </div>
         {engineEnabled && <EvalGauge />}
