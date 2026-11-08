@@ -126,7 +126,8 @@ const Video = ({ chessqueriesModelRef, videoRef, playing,
       <div className="video-live" style={liveStyle}>
         <div className="video-live__container">
           <div className="video-live__wrapper">
-            <video ref={videoRef} autoPlay={mode !== "upload"} playsInline={true} muted={true}
+            {/* No picture-in-picture: Chrome would add a button for it, and float the video out when the tab is left */}
+            <video ref={videoRef} autoPlay={mode !== "upload"} playsInline={true} muted={true} disablePictureInPicture={true}
               className="video-live__video" onResize={onResize}
               onCanPlay={onCanPlay} onLoadStart={onLoadStart} onError={onError} onEnded={onEnded} />
             <RoiSelector videoRef={videoRef} roi={roi} setRoi={setRoi}
