@@ -323,7 +323,7 @@
     },
     "openSource": {
       "question": "Is ChessCam open source?",
-      "answer": "Yes. The code is on <github>GitHub</github>, under the AGPL-3.0 licence. You can report bugs and suggest ideas there too."
+      "answer": "Yes. The code is on <github>GitHub</github>, under the AGPL-3.0 licence, and the board recognition model is on <hf>Hugging Face</hf>. You can report bugs and suggest ideas on GitHub too."
     },
     "contact": {
       "question": "How can I get in touch?",

@@ -323,7 +323,7 @@
     },
     "openSource": {
       "question": "¿ChessCam es de código abierto?",
-      "answer": "Sí. El código está en <github>GitHub</github>, bajo la licencia AGPL-3.0. Allí también puedes informar de errores y proponer ideas."
+      "answer": "Sí. El código está en <github>GitHub</github>, bajo la licencia AGPL-3.0, y el modelo de reconocimiento del tablero está en <hf>Hugging Face</hf>. En GitHub también puedes informar de errores y proponer ideas."
     },
     "contact": {
       "question": "¿Cómo puedo ponerme en contacto?",
