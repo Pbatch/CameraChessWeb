@@ -323,3 +323,40 @@ describe("lichessImportGame", () => {
     await expect((await loadLichess()).lichessImportGame("*")).rejects.toMatchObject({ status: 429 });
   });
 });
+
+describe("lichessPushRound", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("sends the PGN to the round", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(Response.json({ games: [{ tags: {}, moves: 2 }] }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await (await loadLichess()).lichessPushRound("token", "1. e4 e5 *", "round1");
+
+    const [pushUrl, request] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(pushUrl).toBe("https://lichess.org/api/broadcast/round/round1/push");
+    expect(request.body).toBe("1. e4 e5 *");
+  });
+
+  it("treats a refused game as a refusal, not a failure to retry", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(Response.json({ games: [{ tags: {}, error: "Invalid PGN" }] })));
+    const { lichessPushRound, describeLichessError, isTransientError, LichessError } = await loadLichess();
+
+    const error: unknown = await lichessPushRound("token", "?", "round1").catch((e: unknown) => e);
+
+    expect(error).toBeInstanceOf(LichessError);
+    expect(isTransientError(error)).toBe(false);
+    expect(describeLichessError(error)).toBe("Lichess refused the request: Invalid PGN");
+  });
+
+  it("retries a server error", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response("", { status: 503 })));
+    const { lichessPushRound, isTransientError } = await loadLichess();
+
+    const error: unknown = await lichessPushRound("token", "*", "round1").catch((e: unknown) => e);
+
+    expect(isTransientError(error)).toBe(true);
+  });
+});

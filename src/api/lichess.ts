@@ -265,9 +265,12 @@ export const lichessPushRound = async (token: string, pgn: string, roundId: stri
     headers: { 'Content-Type': 'text/plain' }
   }
   const result = await fetchBody<Schemas["BroadcastPgnPush"]>(token, path, options);
+  // Lichess accepts the push but can still refuse the game in it, e.g. a PGN it can't read. That is a refusal, which
+  // sending the same game again won't fix, so it isn't retried as a failed request would be.
   const errors = result.games.flatMap(({ error }) => error === undefined ? [] : [error]);
   if (errors.length > 0) {
-    throw new Error(errors.join('\n'));
+    const reason = errors.join('\n');
+    throw new LichessError(422, `Lichess refused the broadcast game: ${reason}`, reason);
   }
   return result;
 }
