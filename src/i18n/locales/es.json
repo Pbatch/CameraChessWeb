@@ -1,0 +1,334 @@
+{
+  "app": {
+    "updateAvailable": "Hay contenido nuevo disponible. ¿Recargar?"
+  },
+  "home": {
+    "upload": "Subir",
+    "uploadDescription": "Convierte un video de ajedrez en un PGN",
+    "record": "Grabar",
+    "recordDescription": "Graba una partida en directo con una cámara",
+    "play": "Jugar",
+    "playDescription": "Juega una partida de Lichess en un tablero real",
+    "broadcast": "Retransmitir",
+    "broadcastDescription": "Retransmite una partida en Lichess en directo"
+  },
+  "common": {
+    "language": "Idioma",
+    "goHome": "Ir al inicio",
+    "backHome": "Volver al inicio",
+    "setup": "Configuración",
+    "status": "Estado",
+    "game": "Partida",
+    "gameActions": "Acciones de la partida",
+    "copyPgn": "Copiar PGN",
+    "copiedPgn": "PGN copiado",
+    "copyPgnFailed": "No se pudo copiar el PGN",
+    "signInLichess": "Iniciar sesión con Lichess",
+    "dismissError": "Cerrar el error",
+    "noStudies": "No se encontraron estudios",
+    "rotate": "Gira tu dispositivo a horizontal",
+    "loadingModel": "Cargando el reconocedor del tablero...",
+    "modelFailed": "ChessCam no pudo cargar su modelo de reconocimiento del tablero. Recarga la página e inténtalo de nuevo.",
+    "modelFailedReason": "ChessCam no pudo cargar su modelo de reconocimiento del tablero ({{reason}}). Recarga la página e inténtalo de nuevo.",
+    "close": "Cerrar"
+  },
+  "account": {
+    "menu": "Cuenta y ajustes",
+    "signIn": "Iniciar sesión",
+    "signOut": "Cerrar sesión",
+    "engine": "Evaluación del motor",
+    "engineNotInPlay": "No disponible al jugar en Lichess",
+    "help": "Ayuda",
+    "videoGuides": "Guías en video",
+    "pauseToSignOut": "Pausa para cerrar sesión"
+  },
+  "errorPage": {
+    "title": "Algo salió mal",
+    "unexpected": "ChessCam encontró un error inesperado.",
+    "help": "Si recargar no lo soluciona, borrar los datos guardados debería hacerlo. Esto también cierra tu sesión de Lichess.",
+    "reload": "Recargar",
+    "clearData": "Borrar datos guardados"
+  },
+  "device": {
+    "select": "Elige un dispositivo",
+    "selected": "Dispositivo: {{name}}"
+  },
+  "region": {
+    "draw": "Dibujar región",
+    "drawTitle": "Dibuja una región alrededor del tablero",
+    "drawing": "Arrastra un recuadro (cancelar)",
+    "drawingTitle": "Cancelar el dibujo de la región",
+    "clear": "Borrar región",
+    "clearTitle": "Borra la región y usa el encuadre completo"
+  },
+  "position": {
+    "label": "Posición: {{option}}",
+    "standard": "Estándar",
+    "detectWhite": "Detectar (juegan blancas)",
+    "detectBlack": "Detectar (juegan negras)",
+    "detectFailed": "No se pudo detectar la posición inicial",
+    "invalid": "FEN no válido:",
+    "set": "FEN inicial establecido",
+    "errors": {
+      "empty": "El tablero está vacío",
+      "kings": "Cada bando necesita exactamente un rey",
+      "oppositeCheck": "El rival del bando que mueve está en jaque",
+      "pawnsOnBackrank": "Hay peones en la primera o la última fila"
+    }
+  },
+  "board": {
+    "label": "Posición actual: {{pieces}}",
+    "empty": "tablero vacío",
+    "pieceOn": "{{piece}} en {{square}}",
+    "pieces": {
+      "whiteKing": "rey blanco",
+      "whiteQueen": "dama blanca",
+      "whiteRook": "torre blanca",
+      "whiteBishop": "alfil blanco",
+      "whiteKnight": "caballo blanco",
+      "whitePawn": "peón blanco",
+      "blackKing": "rey negro",
+      "blackQueen": "dama negra",
+      "blackRook": "torre negra",
+      "blackBishop": "alfil negro",
+      "blackKnight": "caballo negro",
+      "blackPawn": "peón negro"
+    }
+  },
+  "video": {
+    "choose": "Elegir video",
+    "chooseTitle": "Elige un video",
+    "selected": "Video: {{name}}",
+    "remove": "Quitar el video: {{name}}",
+    "playFailed": "No se pudo reproducir este video",
+    "loadFailed": "No se pudo cargar este video",
+    "formatHint": "Usa un archivo MP4 (H.264/AAC) o WebM compatible con el navegador",
+    "play": "Reproducir (k)",
+    "pause": "Pausa (k)",
+    "replay": "Volver a reproducir",
+    "seek": "Barra de progreso",
+    "seekValue": "{{time}} de {{duration}}",
+    "resetTracker": "Reiniciar el seguimiento a la posición inicial",
+    "trackerWasReset": "Seguimiento reiniciado",
+    "pgnWasReset": "PGN reiniciado a la posición inicial",
+    "speed": "Velocidad de reproducción",
+    "speedLabel": "Velocidad de reproducción {{speed}}x",
+    "speedValue": "{{speed}}x"
+  },
+  "camera": {
+    "record": "Grabar",
+    "startDetecting": "Empezar a detectar",
+    "startKey": "{{action}} (k)",
+    "pause": "Pausa (k)",
+    "rec": "REC",
+    "reset": "Reiniciar a la posición inicial",
+    "wasReset": "Reiniciado a la posición inicial",
+    "detecting": "Detectando jugadas",
+    "fps": "{{fps}} FPS",
+    "fpsCpu": "{{fps}} FPS · CPU",
+    "unavailable": "Cámara no disponible",
+    "needsHttps": "La cámara necesita una conexión segura (https)",
+    "blocked": "Se bloqueó el acceso a la cámara",
+    "allowAccess": "Permite el acceso a la cámara en los ajustes del navegador",
+    "notFound": "No se encontró ninguna cámara",
+    "connectAnother": "Conecta una cámara o elige otro dispositivo",
+    "inUse": "La cámara está en uso",
+    "closeOthers": "Cierra otras aplicaciones que usen la cámara",
+    "startFailed": "No se pudo iniciar la cámara"
+  },
+  "reset": {
+    "confirmTitle": "Pulsa de nuevo para reiniciar la partida",
+    "confirm": "¿Reiniciar?"
+  },
+  "export": {
+    "button": "Lichess",
+    "title": "Enviar la partida a Lichess",
+    "open": "Abrir en Lichess",
+    "opened": "Partida abierta en Lichess",
+    "openFailed": "No se pudo abrir la partida en Lichess",
+    "addToStudy": "Añadir a un estudio",
+    "exported": "Partida exportada a",
+    "exportFailed": "No se pudo exportar la partida al estudio de Lichess",
+    "signInWarning": "Al iniciar sesión se sale de esta página, así que se perderá esta partida. Copia antes el PGN para conservarla.",
+    "signInAnyway": "Iniciar sesión de todos modos"
+  },
+  "study": {
+    "select": "Elige un estudio",
+    "selected": "Estudio: {{name}}"
+  },
+  "boardNumber": {
+    "select": "Elige un tablero",
+    "selected": "Tablero: {{number}}",
+    "item": "Tablero {{number}}"
+  },
+  "play": {
+    "selectGame": "Elige una partida",
+    "selectedGame": "Partida: {{opponent}}",
+    "starting": "Empezando la partida",
+    "whiteVs": "Blancas contra {{opponent}}",
+    "blackVs": "Negras contra {{opponent}}",
+    "loadGamesFailed": "No se pudieron cargar las partidas de Lichess",
+    "refused": "Lichess rechazó {{move}}. Comprueba que el tablero coincide con la partida de Lichess.",
+    "refusedReason": "Lichess rechazó {{move}} ({{reason}}). Comprueba que el tablero coincide con la partida de Lichess.",
+    "sendFailed": "No se pudo enviar tu jugada a Lichess. {{reason}}",
+    "retrying": "{{message}} Reintentando...",
+    "lostConnection": "Se perdió la conexión con la partida de Lichess. {{reason}}",
+    "reconnecting": "{{message}} Reconectando...",
+    "followFailed": "No se puede seguir la partida de Lichess."
+  },
+  "broadcast": {
+    "updateFailed": "No se pudo actualizar la retransmisión de Lichess. {{reason}}",
+    "willRetry": "{{message}} Se reintentará con la próxima jugada."
+  },
+  "lichess": {
+    "title": "Lichess",
+    "signInFailed": "No se pudo iniciar sesión en Lichess. {{reason}}",
+    "needsAccount": "Esto necesita tu cuenta de Lichess.",
+    "playReason": "ChessCam juega en tus partidas de Lichess las jugadas que haces en tu tablero, así que necesita tu cuenta de Lichess.",
+    "broadcastReason": "ChessCam retransmite la partida de tu tablero en una de tus retransmisiones de Lichess, así que necesita tu cuenta de Lichess.",
+    "expired": "Tu sesión de Lichess ha caducado. Vuelve a iniciar sesión.",
+    "forbidden": "Lichess no lo ha permitido. Volver a iniciar sesión puede ayudar.",
+    "notFound": "Lichess no lo encontró.",
+    "rateLimited": "Lichess está limitando las peticiones. Inténtalo de nuevo en un minuto.",
+    "serverError": "Lichess tiene problemas. Inténtalo de nuevo en breve.",
+    "refusedReason": "Lichess rechazó la petición: {{reason}}",
+    "refusedStatus": "Lichess rechazó la petición ({{status}}).",
+    "unreachable": "No se pudo conectar con Lichess. Comprueba tu conexión."
+  },
+  "detection": {
+    "failed": "Falló la detección de piezas",
+    "stopped": "La detección de piezas se detuvo. Recarga la página.",
+    "reloadFailed": "No se pudo recargar el modelo. Recarga la página.",
+    "gpuReset": "La GPU se reinició. Recargando el modelo..."
+  },
+  "engine": {
+    "failed": "No se puede ejecutar Stockfish en este navegador."
+  },
+  "faq": {
+    "title": "Preguntas frecuentes",
+    "sections": {
+      "gettingStarted": "Primeros pasos",
+      "modes": "Modos",
+      "detection": "Detección",
+      "saving": "Guardar tu partida",
+      "about": "Sobre ChessCam"
+    },
+    "stand": {
+      "question": "¿Dónde puedo comprar un soporte?",
+      "answer": "Puedes comprar un soporte por 12,99 £ en <stand>https://www.amazon.co.uk/dp/B07NVBXYPJ</stand>."
+    },
+    "videos": {
+      "question": "¿Hay guías en video?",
+      "answer": "Sí. La lista de reproducción «How to use ChessCam» de YouTube tiene un video corto, en inglés, para cada modo. Ábrela con <b>Guías en video</b> en el menú de arriba a la derecha."
+    },
+    "camera": {
+      "question": "¿Cómo coloco la cámara?",
+      "step1": "Pon el teléfono o la cámara en un soporte a un lado del tablero, en horizontal.",
+      "step2": "Asegúrate de que el soporte es estable y de que la cámara ve todo el tablero.",
+      "step3": "Asegúrate de que la pieza más alta (el rey o la dama) sigue en el encuadre cuando está en la casilla más alejada de la cámara.",
+      "step4": "Si el tablero se ve pequeño, pulsa <b>Dibujar región</b> y arrastra un recuadro a su alrededor.",
+      "step5": "ChessCam aleja el zoom de la cámara todo lo posible. Para usar otra cámara, elígela en el menú <b>Dispositivo</b>.",
+      "halfZoom": "Montaje con zoom de 0,5x",
+      "halfZoomCaption": "Mi montaje con zoom de 0,5x",
+      "fullZoom": "Montaje con zoom de 1x",
+      "fullZoomCaption": "Mi montaje con zoom de 1x"
+    },
+    "moving": {
+      "question": "¿Funciona la aplicación si el tablero o la cámara se mueven a mitad de partida?",
+      "answer": "Sí, siempre que todo el tablero quede dentro de la región. Si no has dibujado una región, todo el tablero debe seguir en el encuadre."
+    },
+    "power": {
+      "question": "¿Qué potencia necesita mi dispositivo?",
+      "answer": "La aplicación necesita funcionar al menos a 1 FPS. La velocidad se muestra en la esquina superior derecha del video."
+    },
+    "record": {
+      "question": "¿Cómo grabo?",
+      "step1": "Pulsa <b>Grabar</b> en la página de inicio, o ve directamente a <record>https://www.chesscam.net/record</record>.",
+      "step2": "Coloca la cámara (consulta «¿Cómo coloco la cámara?»).",
+      "step3": "Pulsa el botón rojo de grabar sobre el video, o pulsa <b>K</b>, para empezar a grabar. Vuelve a pulsarlo para pausar.",
+      "reset": "Para empezar de nuevo desde el principio, pulsa el botón de la goma sobre el video. Si la partida tiene jugadas, púlsalo una segunda vez para confirmar."
+    },
+    "upload": {
+      "question": "¿Cómo subo una partida?",
+      "step1": "Pulsa <b>Subir</b> en la página de inicio, o ve directamente a <upload>https://www.chesscam.net/upload</upload>.",
+      "step2": "Pulsa <b>Elegir video</b> y elige un video de la partida. Los archivos MP4 (H.264/AAC) y WebM funcionan en la mayoría de los navegadores.",
+      "step3": "Si el tablero se ve pequeño en el video, pulsa <b>Dibujar región</b> y arrastra un recuadro a su alrededor.",
+      "step4": "Pulsa el botón de reproducir sobre el video, o pulsa <b>K</b>, para empezar a detectar jugadas.",
+      "speed": "El botón de velocidad sobre el video cambia entre 1x, 2x y 4x. 1x es la más precisa.",
+      "seek": "Usa la barra de progreso o las flechas del teclado para moverte por el video. Al hacerlo, el video se pausa, para que puedas comprobar el tablero antes de seguir. El botón de la goma reinicia la partida a la posición inicial.",
+      "eval": "La barra junto al video muestra la evaluación de Stockfish de la posición. Está activada al abrir Subir y desactivada al abrir Grabar o Retransmitir, ya que los jugadores del tablero podrían verla. Cámbiala con <b>Evaluación del motor</b> en el menú de arriba a la derecha. Nunca aparece al jugar en Lichess."
+    },
+    "play": {
+      "question": "¿Cómo juego una partida de Lichess en un tablero real?",
+      "step1": "Empieza una partida en Lichess.",
+      "step2": "Pulsa <b>Jugar</b> en la página de inicio, o ve directamente a <play>https://www.chesscam.net/play</play>. Inicia sesión con Lichess si se te pide.",
+      "step3": "Coloca la cámara (consulta «¿Cómo coloco la cámara?»).",
+      "step4": "Elige tu partida en <b>Elige una partida</b>.",
+      "step5": "Pulsa el botón de reproducir sobre el video, o pulsa <b>K</b>, para empezar a detectar jugadas.",
+      "moves": "Las jugadas que haces en tu tablero se envían a Lichess. Las jugadas de tu rival se muestran en el tablero de la barra lateral, para que puedas hacerlas en tu tablero.",
+      "limits": "Lichess solo lo permite en partidas rápidas, clásicas y por correspondencia."
+    },
+    "broadcast": {
+      "question": "¿Cómo retransmito una partida en Lichess?",
+      "step1": "Crea una retransmisión en la web de Lichess, si aún no tienes una.",
+      "step2": "Pulsa <b>Retransmitir</b> en la página de inicio, o ve directamente a <broadcast>https://www.chesscam.net/broadcast</broadcast>. Inicia sesión con Lichess si se te pide.",
+      "step3": "Coloca la cámara (consulta «¿Cómo coloco la cámara?»).",
+      "step4": "Elige la ronda de la retransmisión en <b>Elige un estudio</b>. Solo aparecen las rondas que puedes editar.",
+      "step5": "Elige el número de tablero, del 1 al 64, en <b>Elige un tablero</b>.",
+      "step6": "Pulsa el botón rojo de grabar sobre el video, o pulsa <b>K</b>, para empezar a retransmitir.",
+      "moves": "Cada jugada se envía a la retransmisión en cuanto se detecta, junto con toda la partida hasta ese momento. Si el envío falla por un problema de conexión, aparece un error en la parte superior de la pantalla y la siguiente jugada completa lo que faltaba. No se vuelve a enviar nada hasta entonces, así que si falla el envío de la última jugada de la partida, comprueba la retransmisión en Lichess."
+    },
+    "position": {
+      "question": "¿Puedo empezar desde una posición personalizada?",
+      "intro": "Sí, al grabar o al subir. Antes de empezar, coloca la posición en tu tablero y elige una opción del menú <b>Posición</b>:",
+      "standard": "<b>Estándar</b>: la posición inicial normal.",
+      "white": "<b>Detectar (juegan blancas)</b>: lee la posición desde la cámara, con turno de las blancas.",
+      "black": "<b>Detectar (juegan negras)</b>: lee la posición desde la cámara, con turno de las negras.",
+      "check": "Comprueba el tablero de la barra lateral después de detectar, ya que una pieza mal leída impedirá que se reconozcan las jugadas siguientes."
+    },
+    "corners": {
+      "question": "¿Qué son las etiquetas de las esquinas del video?",
+      "answer": "Mientras la aplicación detecta jugadas, marca cada esquina de la región (o de todo el video, si no has dibujado una región) con la casilla que cree que está ahí: a1, a8, h1 o h8. Si las etiquetas son incorrectas, las jugadas se leerán mal. Es más probable cuando el tablero está a unos 45 grados de la cámara, así que gira el tablero o la cámara hasta que sus bordes queden más alineados con los bordes del video."
+    },
+    "save": {
+      "question": "¿Cómo guardo mi partida?",
+      "answer": "Pulsa <b>Copiar PGN</b> en la barra lateral para copiar la partida al portapapeles. Las partidas grabadas incluyen el tiempo que llevó cada jugada, desde que se vio, con una precisión de alrededor de un segundo. El tiempo en pausa no se cuenta."
+    },
+    "export": {
+      "question": "¿Cómo envío mi partida a Lichess?",
+      "intro": "Después de grabar o subir una partida, pulsa <b>Lichess</b> en la barra lateral, junto a <b>Copiar PGN</b>:",
+      "open": "<b>Abrir en Lichess</b> importa la partida a Lichess y la abre en una pestaña nueva. No necesitas iniciar sesión.",
+      "study": "<b>Añadir a un estudio</b> guarda la partida en uno de tus estudios de Lichess, con la fecha y la hora actuales como nombre. Primero inicia sesión con Lichess desde el menú. Si no aparece ningún estudio, crea uno en la web de Lichess.",
+      "signIn": "Al iniciar sesión se sale de la página, así que se pierde la partida en curso. Copia antes el PGN para conservarla."
+    },
+    "offline": {
+      "question": "¿Funciona la aplicación sin conexión?",
+      "answer": "Una vez que hayas usado Grabar o Subir con conexión a internet, también funcionan sin conexión. Jugar, retransmitir y enviar partidas a Lichess necesitan conexión, pero puedes seguir copiando el PGN."
+    },
+    "illegal": {
+      "question": "¿Qué pasa con las jugadas ilegales?",
+      "answer": "La aplicación ignora las jugadas ilegales."
+    },
+    "variants": {
+      "question": "¿Se admiten variantes?",
+      "answer": "De momento no."
+    },
+    "privacy": {
+      "question": "¿Mis videos son privados?",
+      "answer": "Sí. Los videos subidos y la imagen de la cámara se procesan en tu dispositivo. ChessCam nunca los recibe."
+    },
+    "licences": {
+      "question": "¿Qué licencias cubren el modelo de reconocimiento del tablero?",
+      "answer": "El modelo es un modelo ChessQueries con un codificador DINOv3 de Meta, descargado de <hf>Hugging Face</hf>. Sus pesos están disponibles bajo la <polyform>PolyForm Noncommercial License 1.0.0</polyform> y bajo la <dinov3>DINOv3 License</dinov3>. Consulta el archivo <notice>NOTICE</notice> para más detalles."
+    },
+    "openSource": {
+      "question": "¿ChessCam es de código abierto?",
+      "answer": "Sí. El código está en <github>GitHub</github>, bajo la licencia AGPL-3.0, y el modelo de reconocimiento del tablero está en <hf>Hugging Face</hf>. En GitHub también puedes informar de errores y proponer ideas."
+    },
+    "contact": {
+      "question": "¿Cómo puedo ponerme en contacto?",
+      "answer": "Escríbeme en Lichess: <lichess>https://lichess.org/@/BlindfoldBlunderer</lichess>",
+      "happy": "¡Siempre me alegra hablar de cualquier idea o problema que tengas!"
+    }
+  }
+}

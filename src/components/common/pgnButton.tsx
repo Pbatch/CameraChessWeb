@@ -1,9 +1,11 @@
+import { useTranslation } from "react-i18next";
 import SidebarButton from "./sidebarButton";
 import type { SetStringArray } from "../../types";
 import { makePgn, useGame } from "../../slices/gameSlice";
 
 const PgnButton = ({ setText, playing }: {setText: SetStringArray, playing: boolean}) => {
   const pgn: string = makePgn(useGame());
+  const { t } = useTranslation();
 
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
@@ -11,20 +13,20 @@ const PgnButton = ({ setText, playing }: {setText: SetStringArray, playing: bool
     void navigator.clipboard.writeText(pgn)
       .then(() => {
         if (!playing) {
-          setText(["Copied PGN"]);
+          setText([t("common.copiedPgn")]);
         }
       })
       .catch((error: unknown) => {
         console.error("Unable to copy PGN", error);
         if (!playing) {
-          setText(["Unable to copy PGN"]);
+          setText([t("common.copyPgnFailed")]);
         }
       });
   }
 
   return (
     <SidebarButton onClick={handleClick}>
-      Copy PGN
+      {t("common.copyPgn")}
     </SidebarButton>
   );
 };

@@ -1,3 +1,4 @@
+import i18n from "../i18n";
 import { type Accelerator, type CompiledModel, getGlobalLiteRt, isWebGPUSupported, loadAndCompile, loadLiteRt, Tensor } from "@litertjs/core";
 import { version as LITERT_VERSION } from "@litertjs/core/package.json";
 import { CHESSQUERIES_SIZE, LABEL_MAP, NUM_LABELS } from "../utils/constants";
@@ -271,7 +272,7 @@ const loadWorker = async (): Promise<Chessqueries> => {
   // e.g. the worker failed to start, or ran out of memory
   worker.onerror = (event: ErrorEvent) => {
     console.error("Piece detection worker failed", event.message);
-    stop(new Error("Piece detection stopped. Please reload the page."));
+    stop(new Error(i18n.t("detection.stopped")));
   }
 
   const send = (call: WorkerCall, transfer: Transferable[] = []): Promise<Float32Array[]> => {
@@ -389,14 +390,14 @@ const checkDevice = (modelRef: ModelRefs["chessqueriesModelRef"]) => {
     recovering = recover(modelRef, model)
       .catch((error: unknown) => {
         console.error("Unable to reload the model", error);
-        recoveryError = new Error("Unable to reload the model. Please reload the page.");
+        recoveryError = new Error(i18n.t("detection.reloadFailed"));
       })
       .finally(() => {
         recovering = null;
       });
   }
   if (recovering !== null) {
-    throw new Error("The GPU was reset. Reloading the model...");
+    throw new Error(i18n.t("detection.gpuReset"));
   }
 }
 

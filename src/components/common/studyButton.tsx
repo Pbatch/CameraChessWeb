@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState, useEffect } from "react";
 import type { SetStudy, Study } from "../../types";
 import { useUser } from "../../slices/userSlice";
@@ -11,6 +12,7 @@ const StudyButton = ({ study, setStudy, onlyBroadcasts, disabled = false }:
   const [studies, setStudies] = useState<Study[]>([]);
   const [loadError, setLoadError] = useState<string | null>(null);
   const user = useUser();
+  const { t } = useTranslation();
 
   useEffect(() => {
     const onStudies = (studies: Study[]) => {
@@ -28,14 +30,14 @@ const StudyButton = ({ study, setStudy, onlyBroadcasts, disabled = false }:
     setStudy(study);
   }
 
-  const label = (study === null) ? "Select a Study" : `Study: ${study.name}`;
+  const label = (study === null) ? t("study.select") : t("study.selected", { name: study.name });
 
   return (
     <Dropdown icon={Notebook} label={label} disabled={disabled}>
       {(loadError !== null) ?
         <DropdownText>{loadError}</DropdownText> :
         (studies.length === 0) ?
-        <DropdownText>No studies found</DropdownText> :
+        <DropdownText>{t("common.noStudies")}</DropdownText> :
         studies.map(study =>
           <DropdownItem key={study.id} onClick={() => handleClick(study)}>{study.name} ({study.id})</DropdownItem>
         )}

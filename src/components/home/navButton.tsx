@@ -2,14 +2,14 @@ import { useNavigate } from "react-router";
 import buttonClass from "../common/buttonClass";
 
 // The Lichess modes ask for a login on their own pages
-const NavButton = ({ text, description }: { text: string, description: string }) => {
+const NavButton = ({ to, text, description }: { to: string, text: string, description: string }) => {
   const navigate = useNavigate();
 
   return (
     <button
       type="button"
       className={`${buttonClass("outline-light", "lg")} w-full`}
-      onClick={() => { void navigate(`/${text.toLowerCase()}`); }}
+      onClick={() => { void navigate(to); }}
     >
       <span className="block">{text}</span>
       {/* opacity rather than a fixed grey, so it follows the text colour on hover */}

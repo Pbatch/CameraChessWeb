@@ -1,3 +1,4 @@
+import i18n from "../../i18n";
 import { findPieces } from "../../vision/findPieces";
 import { useEffect, useRef, useState } from "react";
 import { MEDIA_ASPECT_RATIO } from "../../utils/constants";
@@ -68,7 +69,7 @@ const Video = ({ chessqueriesModelRef, videoRef, playing,
 
     void video.play().catch(() => {
       setPlaying(false);
-      setText(["Unable to play this video", "Use a browser-supported H.264/AAC MP4 or WebM file"]);
+      setText([i18n.t("video.playFailed"), i18n.t("video.formatHint")]);
     });
   }, [canPlay, mode, playing, setPlaying, setText, videoRef])
 
@@ -106,7 +107,7 @@ const Video = ({ chessqueriesModelRef, videoRef, playing,
   const onError = () => {
     if (mode === "upload") {
       setPlaying(false);
-      setText(["Unable to load this video", "Use a browser-supported H.264/AAC MP4 or WebM file"]);
+      setText([i18n.t("video.loadFailed"), i18n.t("video.formatHint")]);
     }
   }
 
@@ -126,7 +127,8 @@ const Video = ({ chessqueriesModelRef, videoRef, playing,
       <div className="video-live" style={liveStyle}>
         <div className="video-live__container">
           <div className="video-live__wrapper">
-            <video ref={videoRef} autoPlay={mode !== "upload"} playsInline={true} muted={true}
+            {/* No picture-in-picture: Chrome would add a button for it, and float the video out when the tab is left */}
+            <video ref={videoRef} autoPlay={mode !== "upload"} playsInline={true} muted={true} disablePictureInPicture={true}
               className="video-live__video" onResize={onResize}
               onCanPlay={onCanPlay} onLoadStart={onLoadStart} onError={onError} onEnded={onEnded} />
             <RoiSelector videoRef={videoRef} roi={roi} setRoi={setRoi}

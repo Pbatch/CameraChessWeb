@@ -73,6 +73,12 @@ interface User {
   username: string
 }
 
+// Stockfish's eval bar turned on or off in the account menu, for the mode it was turned on or off in
+interface EngineChoice {
+  mode: Mode,
+  on: boolean
+}
+
 // Where a toast error came from, so only that source clears it
 type ErrorSource = "login" | "broadcast" | "stream" | "move" | "engine";
 
@@ -86,8 +92,12 @@ interface RootState {
   // Apart from the game, as it updates far more often and only the clock shows it
   clock: Clock | null,
   user: User,
+  // Until changed in the menu, the eval bar follows the mode's default (see engineSlice)
+  engineChoice: EngineChoice | null,
+  // A mode page is detecting, which the header's account menu doesn't let a sign-out interrupt
+  detecting: boolean,
   errors: AppError[],
-  // Stockfish's latest analysis in upload mode, kept while the next position is analysed so the eval bar
+  // Stockfish's latest analysis, kept while the next position is analysed so the eval bar
   // doesn't jump back to even
   analysis: Analysis | null,
   // Counts the times the tracker was reset, so detection knows to start a new one
@@ -111,7 +121,7 @@ interface Camera {
 }
 
 export type { 
-  RootState, Study, Clock, User, Chessqueries, ChessqueriesOutputs, ModelRefs, SquaresData, MovesData, MovesPair, 
+  RootState, Study, Clock, User, EngineChoice, Chessqueries, ChessqueriesOutputs, ModelRefs, SquaresData, MovesData, MovesPair, 
   Game, ErrorSource, AppError,
   SetBoolean, SetStringArray, SetNumber, SetFps, Mode,
   SetStudy, VideoRef, Roi, RoiRef, SetRoi, CornerName, SetOrientation, Camera

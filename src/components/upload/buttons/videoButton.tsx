@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useRef, useState } from "react";
 import { Folder, FolderX } from "lucide-react";
 import { Icon, SidebarButton } from "../../common";
@@ -10,6 +11,7 @@ const VideoButton = ({ videoRef, setPlaying, videoSelected, setVideoSelected, di
   setVideoSelected: SetBoolean,
   disabled?: boolean
 }) => {
+  const { t } = useTranslation();
   const inputVideoRef = useRef<HTMLInputElement>(null);
   const [fileName, setFileName] = useState<string>("");
 
@@ -56,8 +58,8 @@ const VideoButton = ({ videoRef, setPlaying, videoSelected, setVideoSelected, di
     setPlaying(false);
   }
 
-  const label = videoSelected ? `Video: ${fileName}` : "Choose Video";
-  const title = videoSelected ? `Remove video: ${fileName}` : "Choose video";
+  const label = videoSelected ? t("video.selected", { name: fileName }) : t("video.choose");
+  const title = videoSelected ? t("video.remove", { name: fileName }) : t("video.chooseTitle");
 
   return (
     <>

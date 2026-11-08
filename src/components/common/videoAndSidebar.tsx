@@ -1,3 +1,5 @@
+import i18n from "../../i18n";
+import { useTranslation } from "react-i18next";
 import { useRef, useState, useEffect } from "react";
 import Video from "../common/video";
 import { useOutletContext } from "react-router";
@@ -11,17 +13,21 @@ import { gameReset, makePgn, useGame } from "../../slices/gameSlice";
 import { describeLichessError, isTransientError, lichessPushRound } from "../../api/lichess";
 import { errorClear, errorShow } from "../../slices/errorSlice";
 import { useUser } from "../../slices/userSlice";
+import { useEngineOn } from "../../slices/engineSlice";
+import { detectingSet } from "../../slices/detectingSlice";
 import PlaySidebar from "../play/playSidebar";
 import { useMediaQuery, useWakeLock } from "../../utils/hooks";
 import { useCamera } from "../../utils/useCamera";
 import { useStockfish } from "../../engine/useStockfish";
 
 const PortraitWarning = () => {
+  const { t } = useTranslation();
+
   return (
     <div className="flex w-full flex-1 flex-col items-center justify-center gap-4 p-4 text-center text-white">
       {/* A phone on its side */}
       <Icon icon={Smartphone} className="rotate-90 text-[5rem]" />
-      <h1 className="text-2xl/[1.2] font-medium">Rotate your device to landscape</h1>
+      <h1 className="text-2xl/[1.2] font-medium">{t("common.rotate")}</h1>
     </div>
   )
 }
@@ -48,9 +54,16 @@ const VideoAndSidebar = ({ mode }: { mode: Mode }) => {
   const showCamera = (mode !== "upload") && !isPortrait;
   const camera = useCamera({ enabled: showCamera, videoRef, setText });
 
-  // Stockfish always runs for uploads, and keeps analysing while paused, as the eval bar still shows
-  const engineEnabled: boolean = (mode === "upload");
+  // Stockfish runs while the eval bar is on (see engineSlice for when), and keeps analysing while paused, as the bar
+  // still shows
+  const engineEnabled: boolean = useEngineOn(mode);
   useStockfish(fen, engineEnabled);
+
+  // For the header, which can't sign out mid-game
+  useEffect(() => {
+    detectingSet(playing);
+    return () => detectingSet(false);
+  }, [playing]);
 
   // A game can outlast the screen's timeout, which would stop the camera or the video
   useWakeLock(playing);
@@ -72,8 +85,8 @@ const VideoAndSidebar = ({ mode }: { mode: Mode }) => {
       .catch((error: unknown) => {
         console.error('Unable to push Lichess broadcast round.', error);
         // Each push sends the whole game, so the next move catches the broadcast up
-        const retry: string = isTransientError(error) ? " It will retry on the next move." : "";
-        errorShow({ source: "broadcast", message: `Unable to update the Lichess broadcast. ${describeLichessError(error)}${retry}` });
+        const message: string = i18n.t("broadcast.updateFailed", { reason: describeLichessError(error) });
+        errorShow({ source: "broadcast", message: isTransientError(error) ? i18n.t("broadcast.willRetry", { message }) : message });
       });
   }, [boardNumber, mode, moves, start, study, token])
 

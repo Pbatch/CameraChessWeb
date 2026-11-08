@@ -1,15 +1,20 @@
 import "../../style/index.css";
+import i18n, { resources } from "../../i18n";
+import type { Language } from "../../i18n";
 import { act, createRef } from "react";
 import type { ComponentProps, ComponentType } from "react";
 import { createRoot } from "react-dom/client";
 import type { Root } from "react-dom/client";
-import { MemoryRouter } from "react-router";
-import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
+import { createMemoryRouter, RouterProvider } from "react-router";
+import type { ModeHandle } from "../../utils/modes";
+import type { Mode } from "../../types";
+import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { page } from "vitest/browser";
 import { useStore } from "../../store";
 import { clockSet } from "../../slices/clockSlice";
 import { userSet } from "../../slices/userSlice";
 import Container from "./container";
+import Header from "./header";
 import RecordSidebar from "../record/recordSidebar";
 import UploadSidebar from "../upload/uploadSidebar";
 import BroadcastSidebar from "../broadcast/broadcastSidebar";
@@ -26,7 +31,7 @@ declare global {
 type SidebarComponent = ComponentType<ComponentProps<typeof RecordSidebar> & ComponentProps<typeof UploadSidebar>
   & ComponentProps<typeof BroadcastSidebar> & ComponentProps<typeof PlaySidebar>>;
 
-const SIDEBARS: [string, SidebarComponent][] = [
+const SIDEBARS: [Mode, SidebarComponent][] = [
   ["record", RecordSidebar as SidebarComponent],
   ["upload", UploadSidebar as SidebarComponent],
   ["broadcast", BroadcastSidebar as SidebarComponent],
@@ -36,7 +41,7 @@ const SIDEBARS: [string, SidebarComponent][] = [
 let root: Root | null = null;
 let host: HTMLDivElement | null = null;
 
-const renderSidebar = async (Sidebar: SidebarComponent, playing: boolean): Promise<HTMLElement> => {
+const renderSidebar = async (mode: Mode, Sidebar: SidebarComponent, playing: boolean): Promise<HTMLElement> => {
   // Signed in, so Export shows, and in play mode, the only one with a clock, a clock
   userSet({ token: "token", username: "" });
   if (Sidebar === (PlaySidebar as SidebarComponent)) {
@@ -62,13 +67,22 @@ const renderSidebar = async (Sidebar: SidebarComponent, playing: boolean): Promi
   document.body.appendChild(host);
   root = createRoot(host);
   await act(async () => {
-    root?.render(
-      <MemoryRouter>
-        <Container className="video-and-sidebar">
-          <Sidebar {...props} />
-        </Container>
-      </MemoryRouter>
-    );
+    // Laid out as in App, with the data router it uses: the header, and the page below it
+    const router = createMemoryRouter([{
+      path: `/${mode}`,
+      handle: { mode } satisfies ModeHandle,
+      element: (
+        <div className="flex h-full flex-col">
+          <Header />
+          <div className="min-h-0 flex-1">
+            <Container className="video-and-sidebar">
+              <Sidebar {...props} />
+            </Container>
+          </div>
+        </div>
+      ),
+    }], { initialEntries: [`/${mode}`] });
+    root?.render(<RouterProvider router={router} />);
   });
 
   const sidebar = host.querySelector<HTMLElement>(".sidebar");
@@ -96,15 +110,23 @@ describe("sidebar on a landscape phone", () => {
     useStore.setState(useStore.getInitialState(), true);
   });
 
-  for (const [mode, Sidebar] of SIDEBARS) {
+  afterAll(async () => {
+    await i18n.changeLanguage("en");
+  });
+
+  // Translations run longer than English
+  for (const language of Object.keys(resources) as Language[]) for (const [mode, Sidebar] of SIDEBARS) {
     for (const playing of [false, true]) {
       // Paused, broadcast and play show the board beside setup too long to fit with it, so their sidebars scroll
       if ((mode === "broadcast" || mode === "play") && !playing) continue;
-      it(`fits without scrolling in ${mode} mode while ${playing ? "detecting" : "setting up"}`, async () => {
-        const sidebar = await renderSidebar(Sidebar, playing);
+      it(`fits without scrolling in ${mode} mode while ${playing ? "detecting" : "setting up"} (${language})`, async () => {
+        await i18n.changeLanguage(language);
+        const sidebar = await renderSidebar(mode, Sidebar, playing);
         await document.fonts.ready;
 
-        expect(sidebar.clientHeight).toBe(PHONE_HEIGHT);
+        // All the height the header leaves
+        const header = document.querySelector<HTMLElement>(".app-header");
+        expect(sidebar.clientHeight).toBe(PHONE_HEIGHT - (header?.offsetHeight ?? 0));
         expect(sidebar.scrollHeight).toBeLessThanOrEqual(sidebar.clientHeight);
         // Buttons that don't wrap their labels must still fit across
         expect(sidebar.scrollWidth).toBeLessThanOrEqual(sidebar.clientWidth);

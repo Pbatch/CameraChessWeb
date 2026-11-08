@@ -1,3 +1,4 @@
+import i18n from "../i18n";
 import { useEffect, useRef } from "react";
 import { Stockfish } from "./stockfish";
 import { engineAnalysis } from "../slices/engineSlice";
@@ -15,7 +16,7 @@ export const useStockfish = (fen: string, enabled: boolean): void => {
 
     const engine = new Stockfish(engineAnalysis, (error: unknown) => {
       console.error("Stockfish failed.", error);
-      errorShow({ source: "engine", message: "Unable to run Stockfish in this browser." });
+      errorShow({ source: "engine", message: i18n.t("engine.failed") });
     });
     engineRef.current = engine;
     engine.analyse(fenRef.current);

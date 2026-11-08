@@ -1,21 +1,22 @@
+import { useTranslation } from "react-i18next";
 import type { CSSProperties } from "react";
 import CBURNETT_PIECES from "../../vendor/cburnettPieces.ts";
 
 const FILES = ["a", "b", "c", "d", "e", "f", "g", "h"] as const;
 
 const PIECES = {
-  K: { image: CBURNETT_PIECES.K, label: "white king" },
-  Q: { image: CBURNETT_PIECES.Q, label: "white queen" },
-  R: { image: CBURNETT_PIECES.R, label: "white rook" },
-  B: { image: CBURNETT_PIECES.B, label: "white bishop" },
-  N: { image: CBURNETT_PIECES.N, label: "white knight" },
-  P: { image: CBURNETT_PIECES.P, label: "white pawn" },
-  k: { image: CBURNETT_PIECES.k, label: "black king" },
-  q: { image: CBURNETT_PIECES.q, label: "black queen" },
-  r: { image: CBURNETT_PIECES.r, label: "black rook" },
-  b: { image: CBURNETT_PIECES.b, label: "black bishop" },
-  n: { image: CBURNETT_PIECES.n, label: "black knight" },
-  p: { image: CBURNETT_PIECES.p, label: "black pawn" },
+  K: { image: CBURNETT_PIECES.K, label: "board.pieces.whiteKing" },
+  Q: { image: CBURNETT_PIECES.Q, label: "board.pieces.whiteQueen" },
+  R: { image: CBURNETT_PIECES.R, label: "board.pieces.whiteRook" },
+  B: { image: CBURNETT_PIECES.B, label: "board.pieces.whiteBishop" },
+  N: { image: CBURNETT_PIECES.N, label: "board.pieces.whiteKnight" },
+  P: { image: CBURNETT_PIECES.P, label: "board.pieces.whitePawn" },
+  k: { image: CBURNETT_PIECES.k, label: "board.pieces.blackKing" },
+  q: { image: CBURNETT_PIECES.q, label: "board.pieces.blackQueen" },
+  r: { image: CBURNETT_PIECES.r, label: "board.pieces.blackRook" },
+  b: { image: CBURNETT_PIECES.b, label: "board.pieces.blackBishop" },
+  n: { image: CBURNETT_PIECES.n, label: "board.pieces.blackKnight" },
+  p: { image: CBURNETT_PIECES.p, label: "board.pieces.blackPawn" },
 } as const;
 
 type PieceCode = keyof typeof PIECES;
@@ -77,10 +78,11 @@ const parseFen = (fen: string): BoardSquare[] => {
 };
 
 const ChessboardPreview = ({ fen, squareSize = "20px", lastMove = null }: ChessboardPreviewProps) => {
+  const { t } = useTranslation();
   const board = parseFen(fen);
   const positionDescription = board
     .filter((square): square is BoardSquare & { piece: PieceCode } => square.piece !== undefined)
-    .map(({ coordinate, piece }) => `${PIECES[piece].label} on ${coordinate}`)
+    .map(({ coordinate, piece }) => t("board.pieceOn", { piece: t(PIECES[piece].label), square: coordinate }))
     .join(", ");
   const style = {
     "--chess-square-size": squareSize,
@@ -94,7 +96,7 @@ const ChessboardPreview = ({ fen, squareSize = "20px", lastMove = null }: Chessb
       className="chessboard-preview mx-auto"
       style={style}
       role="img"
-      aria-label={`Current chess position: ${positionDescription || "empty board"}`}
+      aria-label={t("board.label", { pieces: positionDescription || t("board.empty") })}
     >
       {board.map(({ coordinate, piece }, index) => {
         const isLastMove = (coordinate === from) || (coordinate === to);

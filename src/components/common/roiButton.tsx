@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import SidebarButton from "./sidebarButton";
 import { SquareDashed } from "lucide-react";
 import Icon from "./icon";
@@ -10,6 +11,8 @@ const RoiButton = ({ roi, setRoi, selecting, setSelecting, canPlay }: {
   setSelecting: SetBoolean,
   canPlay: boolean
 }) => {
+  const { t } = useTranslation();
+
   const handleClick = () => {
     if (selecting) {
       setSelecting(false);
@@ -20,14 +23,14 @@ const RoiButton = ({ roi, setRoi, selecting, setSelecting, canPlay }: {
     }
   }
 
-  let label: string = "Draw Region";
-  let title: string = "Draw a region around the board";
+  let label: string = t("region.draw");
+  let title: string = t("region.drawTitle");
   if (selecting) {
-    label = "Drag a box (cancel)";
-    title = "Cancel drawing the region";
+    label = t("region.drawing");
+    title = t("region.drawingTitle");
   } else if (roi !== null) {
-    label = "Clear Region";
-    title = "Clear the region and use the full frame";
+    label = t("region.clear");
+    title = t("region.clearTitle");
   }
 
   return (

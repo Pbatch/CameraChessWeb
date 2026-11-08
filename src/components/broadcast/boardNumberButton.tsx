@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Hash } from "lucide-react";
 import { Dropdown, DropdownItem } from "../common";
 import type { SetNumber } from "../../types";
@@ -11,12 +12,13 @@ const BoardNumberButton = ({ boardNumber, setBoardNumber, disabled = false }: {
   setBoardNumber: SetNumber,
   disabled?: boolean
 }) => {
-  const label = (boardNumber === -1) ? "Select a Board" : `Board: ${boardNumber}`;
+  const { t } = useTranslation();
+  const label = (boardNumber === -1) ? t("boardNumber.select") : t("boardNumber.selected", { number: boardNumber });
 
   return (
     <Dropdown icon={Hash} label={label} disabled={disabled}>
       {BOARDS.map((board) =>
-        <DropdownItem key={board} onClick={() => setBoardNumber(board)}>Board {board}</DropdownItem>
+        <DropdownItem key={board} onClick={() => setBoardNumber(board)}>{t("boardNumber.item", { number: board })}</DropdownItem>
       )}
     </Dropdown>
   );

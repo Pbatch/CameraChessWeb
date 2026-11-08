@@ -1,3 +1,4 @@
+import i18n from "../i18n";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { MEDIA_CONSTRAINTS } from "./constants";
 import type { Camera, SetStringArray, VideoRef } from "../types";
@@ -18,11 +19,11 @@ const isCameraBusy = (error: unknown): boolean => {
 const cameraErrorText = (error: unknown): string[] => {
   const name = (error instanceof DOMException) ? error.name : "";
   switch (name) {
-    case "NotAllowedError": return ["Camera access was blocked", "Allow camera access in your browser settings"];
+    case "NotAllowedError": return [i18n.t("camera.blocked"), i18n.t("camera.allowAccess")];
     case "NotFoundError":
-    case "OverconstrainedError": return ["No camera found", "Connect a camera or select another device"];
-    case "NotReadableError": return ["Camera is in use", "Close other apps using the camera"];
-    default: return ["Unable to start the camera"];
+    case "OverconstrainedError": return [i18n.t("camera.notFound"), i18n.t("camera.connectAnother")];
+    case "NotReadableError": return [i18n.t("camera.inUse"), i18n.t("camera.closeOthers")];
+    default: return [i18n.t("camera.startFailed")];
   }
 }
 
@@ -73,7 +74,7 @@ export const useCamera = ({ enabled, videoRef, setText }: {
       return;
     }
     if (navigator.mediaDevices === undefined) {
-      setText(["Camera unavailable", "The camera needs a secure (https) connection"]);
+      setText([i18n.t("camera.unavailable"), i18n.t("camera.needsHttps")]);
       return;
     }
 

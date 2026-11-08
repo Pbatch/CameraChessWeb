@@ -1,3 +1,4 @@
+import i18n from "../i18n";
 import { invalidVideo } from "./detect";
 import { runChessqueries } from "./chessqueries";
 import { makeFen } from "chessops/fen";
@@ -18,12 +19,12 @@ interface FindFenInput {
   color: Color
 }
 
-const SETUP_ERRORS: { [code: string]: string } = {
-  [IllegalSetup.Empty]: "Board is empty",
-  [IllegalSetup.Kings]: "Each side needs exactly one king",
-  [IllegalSetup.OppositeCheck]: "Side to move has opponent in check",
-  [IllegalSetup.PawnsOnBackrank]: "Pawns on the first or last rank"
-};
+const SETUP_ERRORS = {
+  [IllegalSetup.Empty]: "position.errors.empty",
+  [IllegalSetup.Kings]: "position.errors.kings",
+  [IllegalSetup.OppositeCheck]: "position.errors.oppositeCheck",
+  [IllegalSetup.PawnsOnBackrank]: "position.errors.pawnsOnBackrank"
+} as const;
 
 const NUM_FRAMES: number = 3;
 const BLACK_KING: number = LABEL_MAP.k;
@@ -125,11 +126,12 @@ export const findFen = async ({ chessqueriesModelRef, videoRef, roi,
 
   const pos = Chess.fromSetup(setup);
   if (pos.isErr) {
-    setText(["Invalid FEN:", SETUP_ERRORS[pos.error.message] ?? pos.error.message]);
+    const key = SETUP_ERRORS[pos.error.message as keyof typeof SETUP_ERRORS];
+    setText([i18n.t("position.invalid"), (key === undefined) ? pos.error.message : i18n.t(key)]);
     return;
   }
 
   const fen = makeFen(setup);
   gameReset(fen);
-  setText(["Set starting FEN"]);
+  setText([i18n.t("position.set")]);
 }
