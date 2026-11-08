@@ -11,6 +11,9 @@ import type { SetBoolean, SetStringArray, VideoRef } from "../../types";
 
 export type CameraMode = "record" | "broadcast" | "play";
 
+// Why detection can't start yet: play mode needs a game to send the moves to, and broadcast a study and a board
+export type StartBlock = "camera.selectGameFirst" | "camera.selectStudyBoardFirst";
+
 const hasMoves = (): boolean => useStore.getState().game.moves !== "";
 
 // What each camera mode's controls say. Play mode's game comes from Lichess, so it has nothing to reset or time.
@@ -23,15 +26,18 @@ const MODES = {
 // YouTube-style controls over the camera: start and pause in one button, a reset (record and broadcast), and how
 // long detection has been running for (record and broadcast). Like the moves' times in record mode, the time starts
 // again when detection starts on a game without moves.
-const CameraControls = ({ mode, videoRef, playing, setPlaying, setText, onVisible }: {
+const CameraControls = ({ mode, videoRef, playing, setPlaying, setText, onVisible, blocked = null }: {
   mode: CameraMode,
   videoRef: VideoRef,
   playing: boolean,
   setPlaying: SetBoolean,
   setText: SetStringArray,
-  onVisible: (visible: boolean) => void
+  onVisible: (visible: boolean) => void,
+  // Holds back starting (the button, K and a click on the video), and says why. Pausing is never held back.
+  blocked?: StartBlock | null
 }) => {
   const { t } = useTranslation();
+  const startBlocked: boolean = !playing && (blocked !== null);
   const { start, badge, reset: canReset } = MODES[mode];
   // Time detecting, in ms, which runs only while detecting
   const [elapsed, setElapsed] = useState(0);
@@ -50,7 +56,10 @@ const CameraControls = ({ mode, videoRef, playing, setPlaying, setText, onVisibl
     return () => window.clearInterval(id);
   }, [badge, playing, showElapsed]);
 
-  const togglePlay = useCallback(() => setPlaying(!playing), [playing, setPlaying]);
+  const togglePlay = useCallback(() => {
+    if (!playing && blocked !== null) return;
+    setPlaying(!playing);
+  }, [blocked, playing, setPlaying]);
   const { barRef, visible, poke, toggle } = useOverlayControls({ videoRef, playing, togglePlay, onVisible });
 
   const reset = () => {
@@ -60,14 +69,16 @@ const CameraControls = ({ mode, videoRef, playing, setPlaying, setText, onVisibl
     setText([t("camera.wasReset")]);
   };
 
-  const label = playing ? t("camera.pause") : t("camera.startKey", { action: t(start) });
+  const label = playing ? t("camera.pause")
+    : (blocked !== null) ? t(blocked) : t("camera.startKey", { action: t(start) });
   const startIcon = (mode === "play") ? <Icon icon={Play} filled={true} />
     : <Icon icon={Circle} filled={true} className="text-2xl text-[#f00]" />;
 
   return (
     <div ref={barRef} className={`video-controls video-controls--live${visible ? "" : " video-controls--hidden"}`}>
       <div className="video-controls__row">
-        <button type="button" className="video-controls__button" onClick={toggle} aria-label={label} title={label}>
+        <button type="button" className="video-controls__button" onClick={toggle} aria-label={label} title={label}
+          disabled={startBlocked}>
           {playing ? <Icon icon={Pause} filled={true} /> : startIcon}
         </button>
         {canReset && <ResetButton label={t("camera.reset")} onReset={reset} onPress={poke} />}

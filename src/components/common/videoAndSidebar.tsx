@@ -16,6 +16,7 @@ import { useUser } from "../../slices/userSlice";
 import { useEngineOn } from "../../slices/engineSlice";
 import { detectingSet } from "../../slices/detectingSlice";
 import PlaySidebar from "../play/playSidebar";
+import type { StartBlock } from "./cameraControls";
 import { useMediaQuery, useWakeLock } from "../../utils/hooks";
 import { useCamera } from "../../utils/useCamera";
 import { useStockfish } from "../../engine/useStockfish";
@@ -45,6 +46,8 @@ const VideoAndSidebar = ({ mode }: { mode: Mode }) => {
   const [roi, setRoi] = useState<Roi | null>(null);
   const [selecting, setSelecting] = useState<boolean>(false);
   const [canPlay, setCanPlay] = useState<boolean>(false);
+  // Play mode's game, which its sidebar chooses
+  const [gameSelected, setGameSelected] = useState<boolean>(false);
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const playingRef = useRef<boolean>(playing);
@@ -57,6 +60,24 @@ const VideoAndSidebar = ({ mode }: { mode: Mode }) => {
   // Stockfish runs while the eval bar is on (see engineSlice for when), and keeps analysing while paused, as the bar
   // still shows
   const engineEnabled: boolean = useEngineOn(mode);
+
+  // Detection waits until there's somewhere for the moves to go, as they'd otherwise go nowhere without a word
+  const startBlock: StartBlock | null = ((mode === "play") && !gameSelected) ? "camera.selectGameFirst"
+    : ((mode === "broadcast") && ((study === null) || (boardNumber === -1))) ? "camera.selectStudyBoardFirst"
+    : null;
+
+  // Says so in the status too, which phones show (the start button's label is only read out), and takes it away once
+  // chosen, unless something else has been said since
+  const shownBlock = useRef<string | null>(null);
+  useEffect(() => {
+    const hint: string | null = (startBlock === null) ? null : i18n.t(startBlock);
+    const previous: string | null = shownBlock.current;
+    shownBlock.current = hint;
+    setText((text) => {
+      if (hint !== null) return [hint];
+      return ((previous !== null) && (text.length === 1) && (text[0] === previous)) ? [] : text;
+    });
+  }, [startBlock]);
   useStockfish(fen, engineEnabled);
 
   // For the header, which can't sign out mid-game
@@ -131,7 +152,9 @@ const VideoAndSidebar = ({ mode }: { mode: Mode }) => {
     camera,
     playingRef,
     mode,
-    engineEnabled
+    engineEnabled,
+    startBlock,
+    setGameSelected
   }
   const renderSidebar = () => {
     switch(mode) {

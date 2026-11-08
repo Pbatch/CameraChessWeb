@@ -816,6 +816,16 @@ a, button, input, label, select, summary, textarea {
   background-color: rgb(255 255 255 / 12%);
 }
 
+/* Can't start yet (play and broadcast need choices first); the button's label says why */
+.video-controls__button:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.video-controls__button:disabled:hover {
+  background-color: transparent;
+}
+
 .video-controls__button:focus-visible {
   outline: 2px solid #fff;
   outline-offset: -2px;
