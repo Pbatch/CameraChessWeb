@@ -4,9 +4,10 @@ import type { VideoRef } from "../types";
 // How long the controls stay after the pointer stops while playing, in ms, as on YouTube
 const HIDE_AFTER = 2500;
 
-// Whether a key press is meant for an element on the page rather than the video: anything typed into (the seek bar's
-// arrows already seek), and Space on a button or link, which presses it
+// Whether a key press is meant for an element on the page rather than the video: anything in an open dialog (the help
+// panel), anything typed into (the seek bar's arrows already seek), and Space on a button or link, which presses it
 const keyForElement = (e: KeyboardEvent): boolean => {
+  if (document.querySelector("dialog[open]") !== null) return true;
   const target = e.target;
   if (!(target instanceof HTMLElement)) return false;
   if (target.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName)) return true;

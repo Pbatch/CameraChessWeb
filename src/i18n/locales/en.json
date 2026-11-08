@@ -1,0 +1,334 @@
+{
+  "app": {
+    "updateAvailable": "New content available. Reload?"
+  },
+  "home": {
+    "upload": "Upload",
+    "uploadDescription": "Turn a chess video into a PGN",
+    "record": "Record",
+    "recordDescription": "Record a game live with a camera",
+    "play": "Play",
+    "playDescription": "Play a Lichess game on a real board",
+    "broadcast": "Broadcast",
+    "broadcastDescription": "Stream a game to Lichess live"
+  },
+  "common": {
+    "language": "Language",
+    "goHome": "Go to home",
+    "backHome": "Back to home",
+    "setup": "Setup",
+    "status": "Status",
+    "game": "Game",
+    "gameActions": "Game actions",
+    "copyPgn": "Copy PGN",
+    "copiedPgn": "Copied PGN",
+    "copyPgnFailed": "Unable to copy PGN",
+    "signInLichess": "Sign in with Lichess",
+    "dismissError": "Dismiss error",
+    "noStudies": "No studies found",
+    "rotate": "Rotate your device to landscape",
+    "loadingModel": "Loading board recognizer...",
+    "modelFailed": "ChessCam could not load its board-recognition model. Please reload and try again.",
+    "modelFailedReason": "ChessCam could not load its board-recognition model ({{reason}}). Please reload and try again.",
+    "close": "Close"
+  },
+  "account": {
+    "menu": "Account and settings",
+    "signIn": "Sign in",
+    "signOut": "Sign out",
+    "engine": "Engine evaluation",
+    "engineNotInPlay": "Not available when playing on Lichess",
+    "help": "Help",
+    "videoGuides": "Video guides",
+    "pauseToSignOut": "Pause to sign out"
+  },
+  "errorPage": {
+    "title": "Something went wrong",
+    "unexpected": "ChessCam hit an unexpected error.",
+    "help": "If reloading does not help, clearing the saved data should. This also signs you out of Lichess.",
+    "reload": "Reload",
+    "clearData": "Clear saved data"
+  },
+  "device": {
+    "select": "Select a Device",
+    "selected": "Device: {{name}}"
+  },
+  "region": {
+    "draw": "Draw Region",
+    "drawTitle": "Draw a region around the board",
+    "drawing": "Drag a box (cancel)",
+    "drawingTitle": "Cancel drawing the region",
+    "clear": "Clear Region",
+    "clearTitle": "Clear the region and use the full frame"
+  },
+  "position": {
+    "label": "Position: {{option}}",
+    "standard": "Standard",
+    "detectWhite": "Detect (White to move)",
+    "detectBlack": "Detect (Black to move)",
+    "detectFailed": "Unable to infer the starting position",
+    "invalid": "Invalid FEN:",
+    "set": "Set starting FEN",
+    "errors": {
+      "empty": "Board is empty",
+      "kings": "Each side needs exactly one king",
+      "oppositeCheck": "Side to move has opponent in check",
+      "pawnsOnBackrank": "Pawns on the first or last rank"
+    }
+  },
+  "board": {
+    "label": "Current chess position: {{pieces}}",
+    "empty": "empty board",
+    "pieceOn": "{{piece}} on {{square}}",
+    "pieces": {
+      "whiteKing": "white king",
+      "whiteQueen": "white queen",
+      "whiteRook": "white rook",
+      "whiteBishop": "white bishop",
+      "whiteKnight": "white knight",
+      "whitePawn": "white pawn",
+      "blackKing": "black king",
+      "blackQueen": "black queen",
+      "blackRook": "black rook",
+      "blackBishop": "black bishop",
+      "blackKnight": "black knight",
+      "blackPawn": "black pawn"
+    }
+  },
+  "video": {
+    "choose": "Choose Video",
+    "chooseTitle": "Choose video",
+    "selected": "Video: {{name}}",
+    "remove": "Remove video: {{name}}",
+    "playFailed": "Unable to play this video",
+    "loadFailed": "Unable to load this video",
+    "formatHint": "Use a browser-supported H.264/AAC MP4 or WebM file",
+    "play": "Play (k)",
+    "pause": "Pause (k)",
+    "replay": "Replay",
+    "seek": "Seek",
+    "seekValue": "{{time}} of {{duration}}",
+    "resetTracker": "Reset tracker to the start position",
+    "trackerWasReset": "Reset tracker",
+    "pgnWasReset": "Reset PGN to start position",
+    "speed": "Playback speed",
+    "speedLabel": "Playback speed {{speed}}x",
+    "speedValue": "{{speed}}x"
+  },
+  "camera": {
+    "record": "Record",
+    "startDetecting": "Start detecting",
+    "startKey": "{{action}} (k)",
+    "pause": "Pause (k)",
+    "rec": "REC",
+    "reset": "Reset to the start position",
+    "wasReset": "Reset to start position",
+    "detecting": "Detecting moves",
+    "fps": "{{fps}} FPS",
+    "fpsCpu": "{{fps}} FPS · CPU",
+    "unavailable": "Camera unavailable",
+    "needsHttps": "The camera needs a secure (https) connection",
+    "blocked": "Camera access was blocked",
+    "allowAccess": "Allow camera access in your browser settings",
+    "notFound": "No camera found",
+    "connectAnother": "Connect a camera or select another device",
+    "inUse": "Camera is in use",
+    "closeOthers": "Close other apps using the camera",
+    "startFailed": "Unable to start the camera"
+  },
+  "reset": {
+    "confirmTitle": "Press again to reset the game",
+    "confirm": "Reset?"
+  },
+  "export": {
+    "button": "Lichess",
+    "title": "Send the game to Lichess",
+    "open": "Open in Lichess",
+    "opened": "Opened game on Lichess",
+    "openFailed": "Unable to open game on Lichess",
+    "addToStudy": "Add to a study",
+    "exported": "Exported game to",
+    "exportFailed": "Unable to export game to Lichess study",
+    "signInWarning": "Signing in leaves this page, so this game will be lost. Copy the PGN first to keep it.",
+    "signInAnyway": "Sign in anyway"
+  },
+  "study": {
+    "select": "Select a Study",
+    "selected": "Study: {{name}}"
+  },
+  "boardNumber": {
+    "select": "Select a Board",
+    "selected": "Board: {{number}}",
+    "item": "Board {{number}}"
+  },
+  "play": {
+    "selectGame": "Select a Game",
+    "selectedGame": "Game: {{opponent}}",
+    "starting": "Starting game",
+    "whiteVs": "White vs {{opponent}}",
+    "blackVs": "Black vs {{opponent}}",
+    "loadGamesFailed": "Unable to load Lichess games",
+    "refused": "Lichess refused {{move}}. Check the board matches the game on Lichess.",
+    "refusedReason": "Lichess refused {{move}} ({{reason}}). Check the board matches the game on Lichess.",
+    "sendFailed": "Unable to send your move to Lichess. {{reason}}",
+    "retrying": "{{message}} Retrying...",
+    "lostConnection": "Lost connection to the Lichess game. {{reason}}",
+    "reconnecting": "{{message}} Reconnecting...",
+    "followFailed": "Unable to follow the Lichess game."
+  },
+  "broadcast": {
+    "updateFailed": "Unable to update the Lichess broadcast. {{reason}}",
+    "willRetry": "{{message}} It will retry on the next move."
+  },
+  "lichess": {
+    "title": "Lichess",
+    "signInFailed": "Unable to sign in to Lichess. {{reason}}",
+    "needsAccount": "This needs your Lichess account.",
+    "playReason": "ChessCam plays the moves you make on your board in your Lichess games, so it needs your Lichess account.",
+    "broadcastReason": "ChessCam streams the game on your board to one of your Lichess broadcasts, so it needs your Lichess account.",
+    "expired": "Your Lichess sign-in has expired. Please sign in again.",
+    "forbidden": "Lichess did not allow this. Signing in again may help.",
+    "notFound": "Lichess could not find it.",
+    "rateLimited": "Lichess is limiting requests. Try again in a minute.",
+    "serverError": "Lichess is having problems. Try again shortly.",
+    "refusedReason": "Lichess refused the request: {{reason}}",
+    "refusedStatus": "Lichess refused the request ({{status}}).",
+    "unreachable": "Lichess could not be reached. Check your connection."
+  },
+  "detection": {
+    "failed": "Piece detection failed",
+    "stopped": "Piece detection stopped. Please reload the page.",
+    "reloadFailed": "Unable to reload the model. Please reload the page.",
+    "gpuReset": "The GPU was reset. Reloading the model..."
+  },
+  "engine": {
+    "failed": "Unable to run Stockfish in this browser."
+  },
+  "faq": {
+    "title": "Frequently Asked Questions",
+    "sections": {
+      "gettingStarted": "Getting started",
+      "modes": "Modes",
+      "detection": "Detection",
+      "saving": "Saving your game",
+      "about": "About ChessCam"
+    },
+    "stand": {
+      "question": "Where can I buy a stand?",
+      "answer": "You can buy a stand for £12.99 at <stand>https://www.amazon.co.uk/dp/B07NVBXYPJ</stand>."
+    },
+    "videos": {
+      "question": "Are there video guides?",
+      "answer": "Yes. The \"How to use ChessCam\" playlist on YouTube has a short video for each mode. Open it with <b>Video guides</b> in the menu at the top right."
+    },
+    "camera": {
+      "question": "How do I set up my camera?",
+      "step1": "Put your phone or camera on a stand to the side of the board, in landscape.",
+      "step2": "Make sure that the stand is stable and that the camera can see the whole board.",
+      "step3": "Make sure that the tallest piece (the king or queen) is still in shot when placed on the furthest square from the camera.",
+      "step4": "If the board is small in the shot, click <b>Draw Region</b> and drag a box around it.",
+      "step5": "ChessCam zooms the camera out as far as it can. To use a different camera, choose it from the <b>Device</b> menu.",
+      "halfZoom": "0.5x zoom setup",
+      "halfZoomCaption": "My setup with 0.5x zoom",
+      "fullZoom": "1x zoom setup",
+      "fullZoomCaption": "My setup with 1x zoom"
+    },
+    "moving": {
+      "question": "Will the app work if the board or the camera move mid-way through?",
+      "answer": "Yes, as long as the whole board stays inside the region. If you have not drawn a region, the whole board must stay in shot."
+    },
+    "power": {
+      "question": "How powerful does my device have to be?",
+      "answer": "The app needs to run at least 1 FPS. The speed is shown in the top right corner of the video."
+    },
+    "record": {
+      "question": "How do I record?",
+      "step1": "Click <b>Record</b> on the Home page, or go straight to <record>https://www.chesscam.net/record</record>.",
+      "step2": "Set up your camera (see \"How do I set up my camera?\").",
+      "step3": "Press the red record button over the video, or press <b>K</b>, to start recording. Press it again to pause.",
+      "reset": "To start again from the beginning, press the eraser button over the video. If the game has moves, press it a second time to confirm."
+    },
+    "upload": {
+      "question": "How do I upload a game?",
+      "step1": "Click <b>Upload</b> on the Home page, or go straight to <upload>https://www.chesscam.net/upload</upload>.",
+      "step2": "Click <b>Choose Video</b> and pick a video of the game. MP4 (H.264/AAC) and WebM files work in most browsers.",
+      "step3": "If the board is small in the video, click <b>Draw Region</b> and drag a box around it.",
+      "step4": "Press the play button over the video, or press <b>K</b>, to start detecting moves.",
+      "speed": "The speed button over the video switches between 1x, 2x and 4x. 1x is the most accurate.",
+      "seek": "Use the seek bar or the arrow keys to skip through the video. Skipping pauses the video, so you can check the board before going on. The eraser button resets the game to the start position.",
+      "eval": "The bar beside the video shows Stockfish's evaluation of the position. It's on when you open Upload, and off when you open Record or Broadcast, as the players at the board could see it. Switch it with <b>Engine evaluation</b> in the menu at the top right. It never shows when playing on Lichess."
+    },
+    "play": {
+      "question": "How do I play a Lichess game on a real board?",
+      "step1": "Start a game on Lichess.",
+      "step2": "Click <b>Play</b> on the Home page, or go straight to <play>https://www.chesscam.net/play</play>. Sign in with Lichess if you are asked to.",
+      "step3": "Set up your camera (see \"How do I set up my camera?\").",
+      "step4": "Choose your game from <b>Select a Game</b>.",
+      "step5": "Press the play button over the video, or press <b>K</b>, to start detecting moves.",
+      "moves": "The moves you make on your board are sent to Lichess. Your opponent's moves are shown on the board in the sidebar, so you can play them on your board.",
+      "limits": "Lichess only allows this for Rapid, Classical and Correspondence games."
+    },
+    "broadcast": {
+      "question": "How do I broadcast a game to Lichess?",
+      "step1": "Create a broadcast on the Lichess website, if you don't have one already.",
+      "step2": "Click <b>Broadcast</b> on the Home page, or go straight to <broadcast>https://www.chesscam.net/broadcast</broadcast>. Sign in with Lichess if you are asked to.",
+      "step3": "Set up your camera (see \"How do I set up my camera?\").",
+      "step4": "Choose the broadcast round from <b>Select a Study</b>. Only rounds that you can edit are listed.",
+      "step5": "Choose the board number, from 1 to 64, from <b>Select a Board</b>.",
+      "step6": "Press the red record button over the video, or press <b>K</b>, to start broadcasting.",
+      "moves": "Each move is sent to the broadcast as it is detected, with the whole game so far. If sending fails because of a connection problem, an error shows at the top of the screen, and the next move fills in what was missed. Nothing is sent again until then, so if the last move of the game fails to send, check the broadcast on Lichess."
+    },
+    "position": {
+      "question": "Can I start from a custom position?",
+      "intro": "Yes, when recording or uploading. Before starting, set up the position on your board, then choose an option from the <b>Position</b> menu:",
+      "standard": "<b>Standard</b>: the normal starting position.",
+      "white": "<b>Detect (White to move)</b>: reads the position from the camera, with White to move.",
+      "black": "<b>Detect (Black to move)</b>: reads the position from the camera, with Black to move.",
+      "check": "Check the board in the sidebar after detecting, as a misread piece will stop later moves from being recognised."
+    },
+    "corners": {
+      "question": "What are the labels in the corners of the video?",
+      "answer": "While the app is detecting moves, it labels each corner of the region (or of the whole video, if you have not drawn a region) with the square it thinks is there: a1, a8, h1 or h8. If the labels are wrong, moves will be misread. This is most likely when the board is at about 45 degrees to the camera, so turn the board or the camera until its edges are closer to the edges of the video."
+    },
+    "save": {
+      "question": "How do I save my game?",
+      "answer": "Click <b>Copy PGN</b> in the sidebar to copy the game to the clipboard. Recorded games include the time each move took, from when it was seen, to about a second. Time spent paused is not counted."
+    },
+    "export": {
+      "question": "How do I send my game to Lichess?",
+      "intro": "After recording or uploading a game, click <b>Lichess</b> in the sidebar, next to <b>Copy PGN</b>:",
+      "open": "<b>Open in Lichess</b> imports the game to Lichess and opens it in a new tab. You don't need to sign in.",
+      "study": "<b>Add to a study</b> saves the game to one of your Lichess studies, named after the current date and time. Sign in with Lichess from the menu first. If no studies are listed, create one on the Lichess website.",
+      "signIn": "Signing in leaves the page, so a game in progress is lost. Copy the PGN first to keep it."
+    },
+    "offline": {
+      "question": "Does the app work offline?",
+      "answer": "Once you have used Record or Upload with an internet connection, they also work offline. Playing, broadcasting and sending games to Lichess need a connection, but you can still copy the PGN."
+    },
+    "illegal": {
+      "question": "How are illegal moves handled?",
+      "answer": "Illegal moves are ignored by the app."
+    },
+    "variants": {
+      "question": "Are variants supported?",
+      "answer": "Not at the moment."
+    },
+    "privacy": {
+      "question": "Are my videos kept private?",
+      "answer": "Yes. Uploaded videos and the camera feed are processed on your device. ChessCam never receives them."
+    },
+    "licences": {
+      "question": "What licences cover the board recognition model?",
+      "answer": "The model is a ChessQueries model with a DINOv3 encoder from Meta, downloaded from <hf>Hugging Face</hf>. Its weights are available under both the <polyform>PolyForm Noncommercial License 1.0.0</polyform> and the <dinov3>DINOv3 License</dinov3>. See the <notice>NOTICE</notice> for details."
+    },
+    "openSource": {
+      "question": "Is ChessCam open source?",
+      "answer": "Yes. The code is on <github>GitHub</github>, under the AGPL-3.0 licence. You can report bugs and suggest ideas there too."
+    },
+    "contact": {
+      "question": "How can I get in touch?",
+      "answer": "Message me on Lichess: <lichess>https://lichess.org/@/BlindfoldBlunderer</lichess>",
+      "happy": "I am always happy to chat about any ideas or problems that you might have!"
+    }
+  }
+}

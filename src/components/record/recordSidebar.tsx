@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Sidebar, SidebarSection, FenButton, DeviceButton, RoiButton } from "../common";
 import type {
   Camera, ModelRefs, Roi, SetBoolean, SetRoi, SetStringArray, VideoRef
@@ -15,11 +16,13 @@ const RecordSidebar = ({ chessqueriesModelRef, videoRef, camera,
   selecting: boolean, setSelecting: SetBoolean,
   canPlay: boolean
 }) => {
+  const { t } = useTranslation();
+
   return (
     // The board always shows, so pausing to check the game moves nothing
     <Sidebar playing={playing} text={text} setText={setText} exportable={true} setupFirst={true} showBoard={true}>
       {/* Stays while recording, disabled, except on landscape phones, which need the room */}
-      <SidebarSection title="Setup" className={playing ? "sidebar-section--hidden-short" : ""}>
+      <SidebarSection title={t("common.setup")} className={playing ? "sidebar-section--hidden-short" : ""}>
         <DeviceButton camera={camera} disabled={playing} />
         <RoiButton roi={roi} setRoi={setRoi} selecting={selecting} setSelecting={setSelecting}
           canPlay={canPlay && !playing} />

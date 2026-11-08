@@ -1,3 +1,4 @@
+import i18n from "../../i18n";
 import { findPieces } from "../../vision/findPieces";
 import { useEffect, useRef, useState } from "react";
 import { MEDIA_ASPECT_RATIO } from "../../utils/constants";
@@ -68,7 +69,7 @@ const Video = ({ chessqueriesModelRef, videoRef, playing,
 
     void video.play().catch(() => {
       setPlaying(false);
-      setText(["Unable to play this video", "Use a browser-supported H.264/AAC MP4 or WebM file"]);
+      setText([i18n.t("video.playFailed"), i18n.t("video.formatHint")]);
     });
   }, [canPlay, mode, playing, setPlaying, setText, videoRef])
 
@@ -106,7 +107,7 @@ const Video = ({ chessqueriesModelRef, videoRef, playing,
   const onError = () => {
     if (mode === "upload") {
       setPlaying(false);
-      setText(["Unable to load this video", "Use a browser-supported H.264/AAC MP4 or WebM file"]);
+      setText([i18n.t("video.loadFailed"), i18n.t("video.formatHint")]);
     }
   }
 

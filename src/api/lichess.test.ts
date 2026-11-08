@@ -269,7 +269,7 @@ describe("Lichess game stream", () => {
 
 describe("describeLichessError", () => {
   it.each([
-    [401, "log in again"],
+    [401, "sign in again"],
     [429, "limiting requests"],
     [503, "having problems"],
     [418, "refused the request (418)"]

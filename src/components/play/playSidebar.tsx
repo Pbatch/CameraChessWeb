@@ -1,4 +1,6 @@
-import { LichessAccount, Sidebar, SidebarSection, DeviceButton, RoiButton } from "../common";
+import i18n from "../../i18n";
+import { useTranslation } from "react-i18next";
+import { Sidebar, SidebarSection, DeviceButton, RoiButton } from "../common";
 import type {
   Camera, Game, Roi, SetBoolean, SetRoi, SetStringArray
 } from "../../types";
@@ -24,6 +26,7 @@ const PlaySidebar = ({ camera,
     selecting: boolean, setSelecting: SetBoolean,
     canPlay: boolean
   }) => {
+  const { t } = useTranslation();
   const token: string = useUser().token;
   const game: Game = useGame();
   const [gameId, setGameId] = useState<string>();
@@ -52,8 +55,10 @@ const PlaySidebar = ({ camera,
     // Lichess refuses a move with a 400, which most often means the board does not match its game
     const describeMoveError = (error: unknown): string =>
       (error instanceof LichessError && error.status === 400)
-        ? `Lichess refused ${lastMove}${error.reason ? ` (${error.reason})` : ""}. Check the board matches the game on Lichess.`
-        : `Unable to send your move to Lichess. ${describeLichessError(error)}`;
+        ? (error.reason
+          ? i18n.t("play.refusedReason", { move: lastMove, reason: error.reason })
+          : i18n.t("play.refused", { move: lastMove }))
+        : i18n.t("play.sendFailed", { reason: describeLichessError(error) });
 
     // Retries until Lichess has the move, as the opponent cannot reply without it
     const sendMove = async () => {
@@ -78,7 +83,7 @@ const PlaySidebar = ({ camera,
             return;
           }
           console.warn("Unable to send the move to Lichess, retrying", error);
-          errorShow({ source: "move", message: `${describeMoveError(error)} Retrying...` });
+          errorShow({ source: "move", message: i18n.t("play.retrying", { message: describeMoveError(error) }) });
           await new Promise((resolve) => setTimeout(resolve, MOVE_RETRY_DELAY));
           if (sendGeneration.current !== generation) {
             return;
@@ -133,10 +138,10 @@ const PlaySidebar = ({ camera,
       onEvent,
       onConnect: () => errorClear("stream"),
       onDisconnect: (error, reconnecting) => {
-        const next: string = reconnecting ? " Reconnecting..." : "";
-        errorShow({ source: "stream", message: `Lost connection to the Lichess game. ${describeLichessError(error)}${next}` });
+        const message: string = i18n.t("play.lostConnection", { reason: describeLichessError(error) });
+        errorShow({ source: "stream", message: reconnecting ? i18n.t("play.reconnecting", { message }) : message });
       },
-      onEventError: () => errorShow({ source: "stream", message: "Unable to follow the Lichess game." })
+      onEventError: () => errorShow({ source: "stream", message: i18n.t("play.followFailed") })
     });
     return () => {
       controller.abort();
@@ -153,8 +158,7 @@ const PlaySidebar = ({ camera,
     // over the camera (cameraControls.tsx).
     <Sidebar playing={playing} text={text} setText={setText} setupFirst={true} showBoard={true}>
       {/* Stays while detecting, disabled, except on landscape phones, which need the room */}
-      <SidebarSection title="Setup" className={playing ? "sidebar-section--hidden-short" : ""}>
-        <LichessAccount disabled={playing} />
+      <SidebarSection title={t("common.setup")} className={playing ? "sidebar-section--hidden-short" : ""}>
         <DeviceButton camera={camera} disabled={playing} />
         <RoiButton roi={roi} setRoi={setRoi} selecting={selecting} setSelecting={setSelecting}
           canPlay={canPlay && !playing} />

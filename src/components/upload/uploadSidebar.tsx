@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { VideoButton } from "./buttons";
 import { Sidebar, SidebarSection, FenButton, RoiButton } from "../common";
@@ -16,6 +17,7 @@ const UploadSidebar = ({ videoRef, chessqueriesModelRef,
   selecting: boolean, setSelecting: SetBoolean,
   canPlay: boolean
 }) => {
+  const { t } = useTranslation();
   const [videoSelected, setVideoSelected] = useState(false);
 
   return (
@@ -24,7 +26,7 @@ const UploadSidebar = ({ videoRef, chessqueriesModelRef,
     <Sidebar playing={playing} text={text} setText={setText} exportable={true} setupFirst={true} showBoard={true}>
       {/* Stays while playing, disabled, so the board below doesn't move, except on landscape phones, which
           need the room */}
-      <SidebarSection title="Setup" className={playing ? "sidebar-section--hidden-short" : ""}>
+      <SidebarSection title={t("common.setup")} className={playing ? "sidebar-section--hidden-short" : ""}>
         <VideoButton
           videoRef={videoRef}
           setPlaying={setPlaying}

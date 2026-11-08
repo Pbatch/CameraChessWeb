@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useCallback, useEffect, useState } from "react";
 import type { CSSProperties } from "react";
 import { Pause, Play, RotateCcw } from "lucide-react";
@@ -20,6 +21,7 @@ const VideoControls = ({ videoRef, playing, setPlaying, setText, onVisible }: {
   setText: SetStringArray,
   onVisible: (visible: boolean) => void
 }) => {
+  const { t } = useTranslation();
   const [time, setTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [speed, setSpeed] = useState(1);
@@ -93,7 +95,7 @@ const VideoControls = ({ videoRef, playing, setPlaying, setText, onVisible }: {
 
   const resetTracker = () => {
     trackerReset();
-    setText(["Reset tracker", "Reset PGN to start position"]);
+    setText([t("video.trackerWasReset"), t("video.pgnWasReset")]);
   };
 
   // Pauses as soon as the seek bar is pressed, so detection stops before the first frame skimmed past
@@ -110,7 +112,7 @@ const VideoControls = ({ videoRef, playing, setPlaying, setText, onVisible }: {
   };
 
   const progress = (duration > 0) ? (100 * time / duration) : 0;
-  const playLabel = playing ? "Pause (k)" : (ended ? "Replay" : "Play (k)");
+  const playLabel = playing ? t("video.pause") : (ended ? t("video.replay") : t("video.play"));
 
   return (
     <div ref={barRef} className={`video-controls${visible ? "" : " video-controls--hidden"}`}>
@@ -118,8 +120,8 @@ const VideoControls = ({ videoRef, playing, setPlaying, setText, onVisible }: {
         {hover !== null && (
           <span className="video-controls__hover-time" style={{ left: hover.x }}>{formatTime(hover.time)}</span>
         )}
-        <input type="range" className="video-controls__range" aria-label="Seek"
-          aria-valuetext={`${formatTime(time)} of ${formatTime(duration)}`}
+        <input type="range" className="video-controls__range" aria-label={t("video.seek")}
+          aria-valuetext={t("video.seekValue", { time: formatTime(time), duration: formatTime(duration) })}
           min={0} max={duration || 0} step="any" value={time}
           style={{ "--progress": `${progress}%` } as CSSProperties}
           onChange={(e) => seekTo(Number(e.target.value))}
@@ -131,11 +133,11 @@ const VideoControls = ({ videoRef, playing, setPlaying, setText, onVisible }: {
           aria-label={playLabel} title={playLabel}>
           <Icon icon={playing ? Pause : (ended ? RotateCcw : Play)} filled={!ended} />
         </button>
-        <ResetButton label="Reset tracker to the start position" onReset={resetTracker} onPress={poke} />
+        <ResetButton label={t("video.resetTracker")} onReset={resetTracker} onPress={poke} />
         <span className="video-controls__time">{formatTime(time)} / {formatTime(duration)}</span>
         <button type="button" className="video-controls__button video-controls__speed ms-auto" onClick={cycleSpeed}
-          aria-label={`Playback speed ${speed}x`} title="Playback speed">
-          {speed}x
+          aria-label={t("video.speedLabel", { speed })} title={t("video.speed")}>
+          {t("video.speedValue", { speed })}
         </button>
       </div>
     </div>

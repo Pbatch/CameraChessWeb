@@ -54,6 +54,100 @@ a, button, input, label, select, summary, textarea {
     env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
 
+/* The logo (home) on the left, the mode in the middle, the language and the account on the right, across the top of
+   every page */
+:root {
+  --header-height: 2.5rem;
+}
+
+.app-header {
+  display: grid;
+  flex: 0 0 auto;
+  /* Equal sides, so the title is centred on the page */
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0.5rem;
+  height: var(--header-height);
+  padding: 0 0.5rem;
+  background-color: #1e2125;
+  border-bottom: 1px solid rgb(255 255 255 / 10%);
+}
+
+.app-header__button {
+  display: flex;
+  align-items: center;
+  height: calc(var(--header-height) - 0.5rem);
+  padding: 0 0.5rem;
+  border-radius: 0.375rem;
+  color: #dee2e6;
+}
+
+.app-header__button:hover {
+  background-color: rgb(255 255 255 / 10%);
+  color: #fff;
+}
+
+.app-header__button:focus-visible {
+  outline: 2px solid #6ea8fe;
+  outline-offset: -2px;
+}
+
+.app-header__start,
+.app-header__end {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.app-header__end {
+  justify-content: flex-end;
+  gap: 0.25rem;
+}
+
+.app-header__title {
+  overflow: hidden;
+  color: #fff;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Like Lichess's "lichess.org": the name, with the domain fainter */
+.app-header__home {
+  flex-shrink: 0;
+  gap: 0.375rem;
+  font-size: 1.15rem;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.app-header__tld {
+  opacity: 0.6;
+}
+
+/* Narrow phones in portrait: the logo alone goes home, and the account is its icon alone (as on Lichess's mobile
+   site), leaving room for the mode */
+@media (max-width: 479px) {
+  .app-header__wordmark,
+  .app-header__account .truncate {
+    display: none;
+  }
+
+  .app-header__account svg {
+    margin-inline-start: 0;
+  }
+}
+
+.app-header__language {
+  font-size: 0.9rem;
+}
+
+/* A long username gives way to the logo and the language rather than pushing them off */
+.app-header__account {
+  max-width: 100%;
+  font-size: 0.9rem;
+}
+
 .sidebar {
   /* Fixed so the column doesn't resize when a device or game label changes */
   width: 220px;
@@ -130,27 +224,114 @@ a, button, input, label, select, summary, textarea {
   user-select: none;
 }
 
-.faq-page {
-  max-width: 60rem;
+/* An on/off switch in a menu item: the knob slides right and the track fills in when the item is on */
+.menu-switch {
+  position: relative;
+  width: 2.25rem;
+  height: 1.25rem;
+  flex: 0 0 auto;
+  margin-inline-start: 1rem;
+  border-radius: 999px;
+  background-color: rgb(255 255 255 / 25%);
+  transition: background-color 150ms ease;
 }
 
-.faq-list {
-  border-top: 1px solid rgb(255 255 255 / 25%);
+.menu-switch::after {
+  position: absolute;
+  top: 0.125rem;
+  left: 0.125rem;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  background-color: #fff;
+  content: "";
+  transition: transform 150ms ease;
+}
+
+[aria-checked="true"] > .menu-switch {
+  background-color: #6ea8fe;
+}
+
+[aria-checked="true"] > .menu-switch::after {
+  transform: translateX(1rem);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .menu-switch,
+  .menu-switch::after {
+    transition: none;
+  }
+}
+
+/* The FAQ over any page, scrolling inside so its header stays */
+.faq-panel {
+  width: min(60rem, calc(100% - 1rem));
+  max-width: none;
+  max-height: calc(100% - 1rem);
+  margin: auto;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid rgb(255 255 255 / 15%);
+  border-radius: 0.5rem;
+  background-color: var(--color-dark);
+  color: #fff;
+}
+
+.faq-panel[open] {
+  display: flex;
+  flex-direction: column;
+}
+
+.faq-panel::backdrop {
+  background-color: rgb(0 0 0 / 60%);
+}
+
+.faq-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.25rem 0.25rem 0.25rem 0.75rem;
+  border-bottom: 1px solid rgb(255 255 255 / 15%);
+}
+
+.faq-panel__body {
+  min-height: 0;
+  padding: 0.5rem 1rem 1rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* Laid out as Lichess's FAQ: a light, large title for each topic, then each question as a card of its own, which
+   opens to show its answer */
+.faq-section + .faq-section {
+  margin-top: 1.5rem;
+}
+
+.faq-section__title {
+  margin: 0.5rem 0 0.25rem;
+  color: #dee2e6;
+  font-size: 1.6rem;
+  font-weight: 300;
 }
 
 .faq-item {
-  border-bottom: 1px solid rgb(255 255 255 / 25%);
+  margin-top: 0.75rem;
+  border: 1px solid rgb(255 255 255 / 12%);
+  border-radius: 0.375rem;
+  background-color: #2b3035;
 }
 
 .faq-question {
   display: flex;
-  min-height: 3rem;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 0.9rem 0.75rem;
+  align-items: baseline;
+  gap: 0.75rem;
+  padding: 0.75rem 1.25rem;
+  border-radius: inherit;
+  color: #dee2e6;
   cursor: pointer;
-  font-weight: 600;
+  font-size: 1.05rem;
+  font-weight: 700;
   list-style: none;
 }
 
@@ -158,34 +339,39 @@ a, button, input, label, select, summary, textarea {
   display: none;
 }
 
-.faq-question::after {
-  width: 0.65rem;
-  height: 0.65rem;
+/* A triangle before the question, pointing down when it's open */
+.faq-question::before {
   flex: 0 0 auto;
-  border-right: 2px solid currentcolor;
-  border-bottom: 2px solid currentcolor;
+  border-block: 0.35em solid transparent;
+  border-inline-start: 0.55em solid currentcolor;
   content: "";
-  transform: rotate(45deg);
+  opacity: 0.7;
   transition: transform 150ms ease;
 }
 
-.faq-item[open] > .faq-question::after {
-  transform: rotate(225deg);
+.faq-item[open] > .faq-question {
+  color: #6ea8fe;
+}
+
+.faq-item[open] > .faq-question::before {
+  opacity: 1;
+  transform: rotate(90deg);
 }
 
 .faq-question:hover {
-  background-color: rgb(255 255 255 / 7%);
+  color: #fff;
 }
 
 .faq-question:focus-visible {
-  border-radius: 0.25rem;
   outline: 3px solid #6ea8fe;
   outline-offset: -3px;
 }
 
+/* In line with the question's text, past the triangle */
 .faq-answer {
-  padding: 0 0.75rem 1rem;
+  padding: 0 1.25rem 1rem calc(1.25rem + 0.55em + 0.75rem);
   color: #dee2e6;
+  font-size: 0.95rem;
 }
 
 .faq-answer :last-child {
@@ -221,55 +407,19 @@ a, button, input, label, select, summary, textarea {
   max-width: 400px;
 }
 
-.social-link {
-  display: inline-grid;
-  width: 3.125rem;
-  height: 3.125rem;
-  border-radius: 50%;
-  color: #fff;
-  place-items: center;
-  transition: filter 150ms ease, transform 150ms ease;
-}
+/* Landscape phones: the modes two by two, so all four show without scrolling */
+@media (orientation: landscape) and (max-height: 450px) {
+  .home-modes {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    /* Wide enough that the descriptions stay on one line, even in Spanish */
+    max-width: 800px;
+    gap: 0.75rem;
+    padding: 0.75rem;
+  }
 
-.social-link--github {
-  background-color: #111;
-}
-
-/* Dark like the others, so it doesn't outshine the modes; its red only on hover */
-.social-link--youtube {
-  background-color: #111;
-}
-
-.social-link--youtube:hover {
-  background-color: #f00;
-}
-
-.social-link--faq {
-  background-color: #111;
-  font-weight: 700;
-  text-decoration: none;
-}
-
-.social-link:hover {
-  color: #fff;
-  filter: brightness(1.15);
-  transform: translateY(-2px);
-}
-
-.social-link:focus-visible {
-  outline: 3px solid #6ea8fe;
-  outline-offset: 3px;
-}
-
-.social-link__icon {
-  width: 55%;
-  height: 55%;
-  fill: currentcolor;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .social-link {
-    transition: none;
+  /* A touch smaller, so they stay on one line on smaller phones too */
+  .home-modes small {
+    font-size: 0.9rem;
   }
 }
 
@@ -305,7 +455,7 @@ a, button, input, label, select, summary, textarea {
   gap: 0.5rem;
 }
 
-/* Labels can't shrink below their text, so "Copy PGN" stays on one line and the icon-only Home gives way */
+/* Labels can't shrink below their text, so "Copy PGN" stays on one line */
 .sidebar-actions button {
   white-space: nowrap;
 }
@@ -419,6 +569,10 @@ a, button, input, label, select, summary, textarea {
 
 /* Landscape phones (e.g. a Pixel 7a in Chrome has ~330px): tighter spacing */
 @media (max-height: 450px) {
+  :root {
+    --header-height: 2rem;
+  }
+
   .sidebar {
     gap: 0.375rem;
     padding: 0.375rem;

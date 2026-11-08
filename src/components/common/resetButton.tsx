@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useEffect, useRef, useState } from "react";
 import { Eraser } from "lucide-react";
 import Icon from "./icon";
@@ -13,6 +14,7 @@ const ResetButton = ({ label, onReset, onPress }: {
   onReset: () => void,
   onPress?: () => void
 }) => {
+  const { t } = useTranslation();
   const [confirming, setConfirming] = useState(false);
   const timer = useRef<number | undefined>(undefined);
 
@@ -30,13 +32,13 @@ const ResetButton = ({ label, onReset, onPress }: {
     onReset();
   };
 
-  const title = confirming ? "Press again to reset the game" : label;
+  const title = confirming ? t("reset.confirmTitle") : label;
 
   return (
     <button type="button" className={`video-controls__button${confirming ? " video-controls__button--confirm" : ""}`}
       onClick={handleClick} aria-label={title} title={title}>
       <Icon icon={Eraser} />
-      {confirming && <span className="ms-1.5 text-sm font-semibold">Reset?</span>}
+      {confirming && <span className="ms-1.5 text-sm font-semibold">{t("reset.confirm")}</span>}
     </button>
   );
 };

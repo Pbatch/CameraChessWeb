@@ -1,3 +1,4 @@
+import i18n from "../i18n";
 import { gameUpdate, makeUpdatePayload } from "../slices/gameSlice";
 import { invalidVideo } from "./detect";
 import { getOrientation, runChessqueries } from "./chessqueries";
@@ -158,7 +159,7 @@ export const findPieces = ({ chessqueriesModelRef, videoRef, roiRef, playingRef,
       }
     } catch (error) {
       console.error("Piece detection failed", error);
-      setTextIfChanged(setText, ["Piece detection failed", (error instanceof Error) ? error.message : String(error)]);
+      setTextIfChanged(setText, [i18n.t("detection.failed"), (error instanceof Error) ? error.message : String(error)]);
     } finally {
       if (active) {
         requestId = requestAnimationFrame(() => {

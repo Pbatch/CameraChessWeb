@@ -1,3 +1,4 @@
+import i18n from '../i18n';
 import { userReset, userSet } from '../slices/userSlice';
 import type { NavigateFunction } from 'react-router';
 import type { Study } from '../types';
@@ -56,15 +57,17 @@ const lichessError = async (response: Response): Promise<LichessError> => {
 // Why a Lichess request failed, as a sentence for the user
 export const describeLichessError = (error: unknown): string => {
   if (error instanceof LichessError) {
-    if (error.status === 401) return "Your Lichess login has expired. Please log in again.";
-    if (error.status === 403) return "Lichess did not allow this. Logging in again may help.";
-    if (error.status === 404) return "Lichess could not find it.";
-    if (error.status === 429) return "Lichess is limiting requests. Try again in a minute.";
-    if (error.status >= 500) return "Lichess is having problems. Try again shortly.";
-    return error.reason ? `Lichess refused the request: ${error.reason}` : `Lichess refused the request (${error.status}).`;
+    if (error.status === 401) return i18n.t("lichess.expired");
+    if (error.status === 403) return i18n.t("lichess.forbidden");
+    if (error.status === 404) return i18n.t("lichess.notFound");
+    if (error.status === 429) return i18n.t("lichess.rateLimited");
+    if (error.status >= 500) return i18n.t("lichess.serverError");
+    return error.reason
+      ? i18n.t("lichess.refusedReason", { reason: error.reason })
+      : i18n.t("lichess.refusedStatus", { status: error.status });
   }
   // fetch rejects with a TypeError when the network fails
-  if (error instanceof TypeError) return "Lichess could not be reached. Check your connection.";
+  if (error instanceof TypeError) return i18n.t("lichess.unreachable");
   return (error instanceof Error) ? error.message : String(error);
 }
 

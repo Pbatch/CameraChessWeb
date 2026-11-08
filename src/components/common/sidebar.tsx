@@ -1,4 +1,5 @@
-import { HomeButton, PgnButton } from "./index.tsx";
+import { useTranslation } from "react-i18next";
+import { PgnButton } from "./index.tsx";
 import type { Game, SetStringArray } from "../../types.ts";
 import { useGame } from "../../slices/gameSlice.ts";
 import type { ReactNode } from "react";
@@ -25,6 +26,7 @@ type SidebarProps = {
 const Sidebar = ({ playing, text, setText, exportable = false, showBoard = playing, setupFirst = false, children }:
   SidebarProps) => {
   const game: Game = useGame();
+  const { t } = useTranslation();
 
   const boardDisplay = () => {
     return (
@@ -46,14 +48,10 @@ const Sidebar = ({ playing, text, setText, exportable = false, showBoard = playi
 
   const buttons = () => {
     return (
-      <>
-        <ButtonGroup label="Game actions" className="sidebar-actions">
-          <PgnButton setText={setText} playing={playing} />
-          {exportable && <ExportButton setText={setText} />}
-        </ButtonGroup>
-        {/* A line of its own, apart from the game actions, as it leaves the page */}
-        <HomeButton labelled={true} />
-      </>
+      <ButtonGroup label={t("common.gameActions")} className="sidebar-actions">
+        <PgnButton setText={setText} playing={playing} />
+        {exportable && <ExportButton setText={setText} />}
+      </ButtonGroup>
     );
   }
 
@@ -66,7 +64,7 @@ const Sidebar = ({ playing, text, setText, exportable = false, showBoard = playi
     </div>
   );
   const status = (
-    <SidebarSection title="Status">
+    <SidebarSection title={t("common.status")}>
       {textDisplay()}
     </SidebarSection>
   );
@@ -91,7 +89,7 @@ const Sidebar = ({ playing, text, setText, exportable = false, showBoard = playi
         </>
       )}
       {/* Pinned to the bottom when there's room to spare (with setupFirst, by the centring above) */}
-      <SidebarSection title="Game" className={setupFirst ? "" : "mt-auto"}>
+      <SidebarSection title={t("common.game")} className={setupFirst ? "" : "mt-auto"}>
         {buttons()}
       </SidebarSection>
     </div>

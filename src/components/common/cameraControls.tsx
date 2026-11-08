@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Circle, Pause, Play } from "lucide-react";
 import Icon from "./icon";
@@ -13,11 +14,11 @@ export type CameraMode = "record" | "broadcast" | "play";
 const hasMoves = (): boolean => useStore.getState().game.moves !== "";
 
 // What each camera mode's controls say. Play mode's game comes from Lichess, so it has nothing to reset or time.
-const MODES: Record<CameraMode, { start: string, badge: string | null, reset: boolean }> = {
-  record: { start: "Record", badge: "REC", reset: true },
-  broadcast: { start: "Record", badge: "REC", reset: true },
-  play: { start: "Start detecting", badge: null, reset: false },
-};
+const MODES = {
+  record: { start: "camera.record", badge: "camera.rec", reset: true },
+  broadcast: { start: "camera.record", badge: "camera.rec", reset: true },
+  play: { start: "camera.startDetecting", badge: null, reset: false },
+} as const satisfies Record<CameraMode, { start: string, badge: string | null, reset: boolean }>;
 
 // YouTube-style controls over the camera: start and pause in one button, a reset (record and broadcast), and how
 // long detection has been running for (record and broadcast). Like the moves' times in record mode, the time starts
@@ -30,6 +31,7 @@ const CameraControls = ({ mode, videoRef, playing, setPlaying, setText, onVisibl
   setText: SetStringArray,
   onVisible: (visible: boolean) => void
 }) => {
+  const { t } = useTranslation();
   const { start, badge, reset: canReset } = MODES[mode];
   // Time detecting, in ms, which runs only while detecting
   const [elapsed, setElapsed] = useState(0);
@@ -55,10 +57,10 @@ const CameraControls = ({ mode, videoRef, playing, setPlaying, setText, onVisibl
     setPlaying(false);
     trackerReset();
     showElapsed(0);
-    setText(["Reset to start position"]);
+    setText([t("camera.wasReset")]);
   };
 
-  const label = playing ? "Pause (k)" : `${start} (k)`;
+  const label = playing ? t("camera.pause") : t("camera.startKey", { action: t(start) });
   const startIcon = (mode === "play") ? <Icon icon={Play} filled={true} />
     : <Icon icon={Circle} filled={true} className="text-2xl text-[#f00]" />;
 
@@ -68,14 +70,14 @@ const CameraControls = ({ mode, videoRef, playing, setPlaying, setText, onVisibl
         <button type="button" className="video-controls__button" onClick={toggle} aria-label={label} title={label}>
           {playing ? <Icon icon={Pause} filled={true} /> : startIcon}
         </button>
-        {canReset && <ResetButton label="Reset to the start position" onReset={reset} onPress={poke} />}
+        {canReset && <ResetButton label={t("camera.reset")} onReset={reset} onPress={poke} />}
         {badge !== null && (
           <span className="video-controls__time">
             {playing && <span className="video-controls__rec" aria-hidden="true" />}
-            {playing ? `${badge} ` : ""}{formatTime(elapsed / 1000)}
+            {playing ? `${t(badge)} ` : ""}{formatTime(elapsed / 1000)}
           </span>
         )}
-        {(badge === null) && playing && <span className="video-controls__time">Detecting moves</span>}
+        {(badge === null) && playing && <span className="video-controls__time">{t("camera.detecting")}</span>}
       </div>
     </div>
   );

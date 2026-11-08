@@ -1,12 +1,14 @@
+import { useTranslation } from "react-i18next";
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router";
 import type { SetStringArray, Study } from "../../types";
 import { useUser } from "../../slices/userSlice";
 import { makePgn, useGame } from "../../slices/gameSlice";
 import {
-  describeLichessError, lichessImportGame, lichessImportPgnToStudy, lichessLogin, lichessLogout, lichessSetStudies
+  describeLichessError, lichessImportGame, lichessImportPgnToStudy, lichessSetStudies
 } from "../../api/lichess";
-import Dropdown, { DropdownItem, DropdownText } from "./dropdown";
+import Dropdown, { DropdownDivider, DropdownHeading, DropdownItem, DropdownText } from "./dropdown";
+import SignInItems from "./signInItems";
 
 const createName = () => {
   const now = new Date();
@@ -19,14 +21,9 @@ const createName = () => {
   return `${year}-${month}-${day}-${hour}-${minute}-${second}`;
 }
 
-const Divider = () => <hr className="my-2 border-white/15" />;
-
-// A heading for a part of the menu, which can't be chosen
-const MenuHeading = ({ children }: { children: string }) =>
-  <div className="px-4 py-1 text-sm opacity-65">{children}</div>;
-
 // Sends the game to Lichess: as a game of its own, which needs no login, or to one of the user's studies, which does
 const ExportButton = ({ setText }: { setText: SetStringArray }) => {
+  const { t } = useTranslation();
   const [studies, setStudies] = useState<Study[]>([]);
   const [loadError, setLoadError] = useState<string | null>(null);
   const { token, username } = useUser();
@@ -61,11 +58,11 @@ const ExportButton = ({ setText }: { setText: SetStringArray }) => {
       } else {
         window.open(url, "_blank", "noopener");
       }
-      setText(["Opened game on Lichess"]);
+      setText([t("export.opened")]);
     } catch (error) {
       page?.close();
       console.error("Unable to import game to Lichess", error);
-      setText(["Unable to open game on Lichess", describeLichessError(error)]);
+      setText([t("export.openFailed"), describeLichessError(error)]);
     }
   }
 
@@ -73,19 +70,19 @@ const ExportButton = ({ setText }: { setText: SetStringArray }) => {
     const name = createName();
     try {
       await lichessImportPgnToStudy(token, pgn, name, study.id);
-      setText(["Exported game to", `"${study.name}/${name}"`]);
+      setText([t("export.exported"), `"${study.name}/${name}"`]);
     } catch (error) {
       console.error("Unable to export game to Lichess study", error);
-      setText(["Unable to export game to Lichess study", describeLichessError(error)]);
+      setText([t("export.exportFailed"), describeLichessError(error)]);
     }
   }
 
   const copyPgn = () => {
     void navigator.clipboard.writeText(pgn)
-      .then(() => setText(["Copied PGN"]))
+      .then(() => setText([t("common.copiedPgn")]))
       .catch((error: unknown) => {
         console.error("Unable to copy PGN", error);
-        setText(["Unable to copy PGN"]);
+        setText([t("common.copyPgnFailed")]);
       });
   }
 
@@ -94,7 +91,7 @@ const ExportButton = ({ setText }: { setText: SetStringArray }) => {
       return <DropdownText>{loadError}</DropdownText>;
     }
     if (studies.length === 0) {
-      return <DropdownText>No studies found</DropdownText>;
+      return <DropdownText>{t("common.noStudies")}</DropdownText>;
     }
     return studies.map(study =>
       <DropdownItem key={study.id} onClick={() => { void exportToStudy(study); }}>
@@ -103,34 +100,15 @@ const ExportButton = ({ setText }: { setText: SetStringArray }) => {
     );
   }
 
-  // Logging in reloads the page, and only the login outlives a reload, so a game in progress would be lost
-  const loginItems = () => {
-    if (game.moves === "") {
-      return (
-        <DropdownItem onClick={() => { void lichessLogin(pathname); }}>Log in with Lichess</DropdownItem>
-      );
-    }
-    return (<>
-      <DropdownText>
-        <span className="block max-w-56 text-sm opacity-75">
-          Logging in leaves this page, so this game will be lost. Copy the PGN first to keep it.
-        </span>
-      </DropdownText>
-      <DropdownItem onClick={copyPgn}>Copy PGN</DropdownItem>
-      <DropdownItem onClick={() => { void lichessLogin(pathname); }}>Log in anyway</DropdownItem>
-    </>);
-  }
 
   return (
-    <Dropdown label="Lichess" title="Send the game to Lichess">
-      <DropdownItem onClick={() => { void openInLichess(); }}>Open in Lichess</DropdownItem>
-      <Divider />
-      <MenuHeading>Add to a study</MenuHeading>
-      {loggedIn ? studyItems() : loginItems()}
-      {loggedIn && (<>
-        <Divider />
-        <DropdownItem onClick={() => { void lichessLogout(token); }}>Log out ({username})</DropdownItem>
-      </>)}
+    <Dropdown label={t("export.button")} title={t("export.title")}>
+      <DropdownItem onClick={() => { void openInLichess(); }}>{t("export.open")}</DropdownItem>
+      <DropdownDivider />
+      <DropdownHeading>{t("export.addToStudy")}</DropdownHeading>
+      {/* Signing out is in the header's account menu, with the rest of the account */}
+      {loggedIn ? studyItems()
+        : <SignInItems returnTo={pathname} gameInProgress={game.moves !== ""} onCopyPgn={copyPgn} />}
     </Dropdown>
   );
 };

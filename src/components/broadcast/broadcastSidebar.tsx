@@ -1,4 +1,5 @@
-import { LichessAccount, Sidebar, SidebarSection, StudyButton, DeviceButton, RoiButton } from "../common";
+import { useTranslation } from "react-i18next";
+import { Sidebar, SidebarSection, StudyButton, DeviceButton, RoiButton } from "../common";
 import type {
   Camera, Roi, SetBoolean, SetNumber, SetRoi, SetStringArray, SetStudy, Study
 } from "../../types";
@@ -17,12 +18,13 @@ const BroadcastSidebar = ({ camera,
   selecting: boolean, setSelecting: SetBoolean,
   canPlay: boolean
 }) => {
+  const { t } = useTranslation();
+
   return (
     // The board always shows, so pausing to check the game moves nothing
     <Sidebar playing={playing} text={text} setText={setText} setupFirst={true} showBoard={true}>
       {/* Stays while broadcasting, disabled, except on landscape phones, which need the room */}
-      <SidebarSection title="Setup" className={playing ? "sidebar-section--hidden-short" : ""}>
-        <LichessAccount disabled={playing} />
+      <SidebarSection title={t("common.setup")} className={playing ? "sidebar-section--hidden-short" : ""}>
         <DeviceButton camera={camera} disabled={playing} />
         <RoiButton roi={roi} setRoi={setRoi} selecting={selecting} setSelecting={setSelecting}
           canPlay={canPlay && !playing} />
