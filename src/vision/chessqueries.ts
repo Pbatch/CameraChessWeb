@@ -55,6 +55,8 @@ let accelerator: Accelerator | null = null;
 // so frames never come back to the CPU
 let gpuInput: Tensor | null = null;
 let gpuResize: GpuResize | null = null;
+// Set once the browser turns out unable to copy a video into a texture
+let resizeOnCanvas = false;
 // Runs share gpuInput, so each waits for the one before it to finish reading it
 let lastRun: Promise<unknown> = Promise.resolve();
 // Set when the browser takes the GPU away (e.g. a backgrounded phone tab), so the model is reloaded
@@ -145,12 +147,24 @@ const toInput = async (video: HTMLVideoElement | null, roi: Roi | null): Promise
   }
   if (video !== null) {
     const device = gpuInput.environment.webGpuDevice;
-    // Firefox can't import a video as a texture or copy one into a texture, so it resizes on the canvas and uploads the
-    // small result instead. It is told apart by having no importExternalTexture.
+    // Firefox's copy takes images and canvases but not a video, so it resizes on the canvas and uploads the small result
+    // instead. Firefox on Linux has no importExternalTexture, but some builds do, so the copy throwing a TypeError
+    // also switches to the canvas, for the rest of the session.
     if (device !== null && typeof device.importExternalTexture !== "function") {
+      resizeOnCanvas = true;
+    }
+    if (!resizeOnCanvas) {
+      try {
+        resizeOnGpu(gpuInput, video, roi);
+      } catch (error) {
+        if (!(error instanceof TypeError)) {
+          throw error;
+        }
+        resizeOnCanvas = true;
+      }
+    }
+    if (resizeOnCanvas && device !== null) {
       device.queue.writeBuffer(gpuInput.toGpuBuffer(), 0, getPixels(video, roi));
-    } else {
-      resizeOnGpu(gpuInput, video, roi);
     }
   }
   return gpuInput;
