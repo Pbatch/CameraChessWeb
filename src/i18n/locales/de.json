@@ -1,0 +1,336 @@
+{
+  "app": {
+    "updateAvailable": "Neue Inhalte verfügbar. Neu laden?"
+  },
+  "home": {
+    "upload": "Hochladen",
+    "uploadDescription": "Mach aus einem Schachvideo ein PGN",
+    "record": "Aufnehmen",
+    "recordDescription": "Nimm eine Partie live mit einer Kamera auf",
+    "play": "Spielen",
+    "playDescription": "Spiel eine Lichess-Partie auf einem echten Brett",
+    "broadcast": "Übertragen",
+    "broadcastDescription": "Übertrag eine Partie live auf Lichess"
+  },
+  "common": {
+    "language": "Sprache",
+    "goHome": "Zur Startseite",
+    "backHome": "Zurück zur Startseite",
+    "setup": "Einrichtung",
+    "status": "Status",
+    "game": "Partie",
+    "gameActions": "Partieaktionen",
+    "copyPgn": "PGN kopieren",
+    "copiedPgn": "PGN kopiert",
+    "copyPgnFailed": "PGN konnte nicht kopiert werden",
+    "signInLichess": "Mit Lichess anmelden",
+    "dismissError": "Fehler schließen",
+    "noStudies": "Keine Studien gefunden",
+    "rotate": "Dreh dein Gerät ins Querformat",
+    "loadingModel": "Bretterkennung wird geladen...",
+    "modelFailed": "ChessCam konnte das Modell zur Bretterkennung nicht laden. Bitte lade die Seite neu und versuch es noch einmal.",
+    "modelFailedReason": "ChessCam konnte das Modell zur Bretterkennung nicht laden ({{reason}}). Bitte lade die Seite neu und versuch es noch einmal.",
+    "close": "Schließen"
+  },
+  "account": {
+    "menu": "Konto und Einstellungen",
+    "signIn": "Anmelden",
+    "signOut": "Abmelden",
+    "engine": "Engine-Bewertung",
+    "engineNotInPlay": "Nicht verfügbar beim Spielen auf Lichess",
+    "help": "Hilfe",
+    "videoGuides": "Videoanleitungen",
+    "pauseToSignOut": "Pausieren, um dich abzumelden"
+  },
+  "errorPage": {
+    "title": "Etwas ist schiefgelaufen",
+    "unexpected": "In ChessCam ist ein unerwarteter Fehler aufgetreten.",
+    "help": "Wenn Neuladen nicht hilft, sollte das Löschen der gespeicherten Daten helfen. Dabei wirst du auch von Lichess abgemeldet.",
+    "reload": "Neu laden",
+    "clearData": "Gespeicherte Daten löschen"
+  },
+  "device": {
+    "select": "Gerät wählen",
+    "selected": "Gerät: {{name}}"
+  },
+  "region": {
+    "draw": "Bereich zeichnen",
+    "drawTitle": "Zeichne einen Bereich um das Brett",
+    "drawing": "Rahmen ziehen (abbrechen)",
+    "drawingTitle": "Zeichnen des Bereichs abbrechen",
+    "clear": "Bereich löschen",
+    "clearTitle": "Bereich löschen und das ganze Bild verwenden"
+  },
+  "position": {
+    "label": "Stellung: {{option}}",
+    "standard": "Standard",
+    "detectWhite": "Erkennen (Weiß am Zug)",
+    "detectBlack": "Erkennen (Schwarz am Zug)",
+    "detectFailed": "Die Ausgangsstellung konnte nicht erkannt werden",
+    "invalid": "Ungültige FEN:",
+    "set": "Start-FEN festlegen",
+    "errors": {
+      "empty": "Das Brett ist leer",
+      "kings": "Jede Seite braucht genau einen König",
+      "oppositeCheck": "Die Seite am Zug setzt den Gegner Schach",
+      "pawnsOnBackrank": "Bauern auf der ersten oder letzten Reihe"
+    }
+  },
+  "board": {
+    "label": "Aktuelle Schachstellung: {{pieces}}",
+    "empty": "leeres Brett",
+    "pieceOn": "{{piece}} auf {{square}}",
+    "pieces": {
+      "whiteKing": "weißer König",
+      "whiteQueen": "weiße Dame",
+      "whiteRook": "weißer Turm",
+      "whiteBishop": "weißer Läufer",
+      "whiteKnight": "weißer Springer",
+      "whitePawn": "weißer Bauer",
+      "blackKing": "schwarzer König",
+      "blackQueen": "schwarze Dame",
+      "blackRook": "schwarzer Turm",
+      "blackBishop": "schwarzer Läufer",
+      "blackKnight": "schwarzer Springer",
+      "blackPawn": "schwarzer Bauer"
+    }
+  },
+  "video": {
+    "choose": "Video wählen",
+    "chooseTitle": "Video wählen",
+    "selected": "Video: {{name}}",
+    "remove": "Video entfernen: {{name}}",
+    "playFailed": "Dieses Video kann nicht abgespielt werden",
+    "loadFailed": "Dieses Video kann nicht geladen werden",
+    "formatHint": "Verwende eine vom Browser unterstützte MP4- (H.264/AAC) oder WebM-Datei",
+    "play": "Abspielen (k)",
+    "pause": "Pause (k)",
+    "replay": "Erneut abspielen",
+    "seek": "Spulen",
+    "seekValue": "{{time}} von {{duration}}",
+    "resetTracker": "Erkennung auf die Ausgangsstellung zurücksetzen",
+    "trackerWasReset": "Erkennung zurückgesetzt",
+    "pgnWasReset": "PGN auf die Ausgangsstellung zurückgesetzt",
+    "speed": "Wiedergabegeschwindigkeit",
+    "speedLabel": "Wiedergabegeschwindigkeit {{speed}}x",
+    "speedValue": "{{speed}}x"
+  },
+  "camera": {
+    "record": "Aufnehmen",
+    "startDetecting": "Erkennung starten",
+    "startKey": "{{action}} (k)",
+    "pause": "Pause (k)",
+    "rec": "REC",
+    "reset": "Auf die Ausgangsstellung zurücksetzen",
+    "wasReset": "Auf die Ausgangsstellung zurückgesetzt",
+    "detecting": "Züge werden erkannt",
+    "fps": "{{fps}} FPS",
+    "fpsCpu": "{{fps}} FPS · CPU",
+    "unavailable": "Kamera nicht verfügbar",
+    "needsHttps": "Die Kamera braucht eine sichere (https-)Verbindung",
+    "blocked": "Der Kamerazugriff wurde blockiert",
+    "allowAccess": "Erlaube den Kamerazugriff in den Browsereinstellungen",
+    "notFound": "Keine Kamera gefunden",
+    "connectAnother": "Schließ eine Kamera an oder wähle ein anderes Gerät",
+    "inUse": "Die Kamera wird bereits verwendet",
+    "closeOthers": "Schließ andere Apps, die die Kamera verwenden",
+    "startFailed": "Die Kamera konnte nicht gestartet werden",
+    "selectGameFirst": "Wähle zuerst eine Partie",
+    "selectStudyBoardFirst": "Wähle zuerst eine Studie und ein Brett"
+  },
+  "reset": {
+    "confirmTitle": "Zum Zurücksetzen der Partie noch einmal drücken",
+    "confirm": "Zurücksetzen?"
+  },
+  "export": {
+    "button": "Lichess",
+    "title": "Partie an Lichess senden",
+    "open": "In Lichess öffnen",
+    "opened": "Partie in Lichess geöffnet",
+    "openFailed": "Partie konnte nicht in Lichess geöffnet werden",
+    "addToStudy": "Zu einer Studie hinzufügen",
+    "exported": "Partie exportiert nach",
+    "exportFailed": "Partie konnte nicht in die Lichess-Studie exportiert werden",
+    "signInWarning": "Beim Anmelden verlässt du diese Seite, und diese Partie geht verloren. Kopiere zuerst das PGN, um sie zu behalten.",
+    "signInAnyway": "Trotzdem anmelden"
+  },
+  "study": {
+    "select": "Studie wählen",
+    "selected": "Studie: {{name}}"
+  },
+  "boardNumber": {
+    "select": "Brett wählen",
+    "selected": "Brett: {{number}}",
+    "item": "Brett {{number}}"
+  },
+  "play": {
+    "selectGame": "Partie wählen",
+    "selectedGame": "Partie: {{opponent}}",
+    "starting": "Partie startet",
+    "whiteVs": "Weiß gegen {{opponent}}",
+    "blackVs": "Schwarz gegen {{opponent}}",
+    "loadGamesFailed": "Lichess-Partien konnten nicht geladen werden",
+    "refused": "Lichess hat {{move}} abgelehnt. Prüfe, ob das Brett mit der Partie auf Lichess übereinstimmt.",
+    "refusedReason": "Lichess hat {{move}} abgelehnt ({{reason}}). Prüfe, ob das Brett mit der Partie auf Lichess übereinstimmt.",
+    "sendFailed": "Dein Zug konnte nicht an Lichess gesendet werden. {{reason}}",
+    "retrying": "{{message}} Neuer Versuch...",
+    "lostConnection": "Die Verbindung zur Lichess-Partie wurde unterbrochen. {{reason}}",
+    "reconnecting": "{{message}} Verbindung wird wiederhergestellt...",
+    "followFailed": "Der Lichess-Partie kann nicht gefolgt werden."
+  },
+  "broadcast": {
+    "updateFailed": "Die Lichess-Übertragung konnte nicht aktualisiert werden. {{reason}}",
+    "willRetry": "{{message}} Beim nächsten Zug wird es erneut versucht."
+  },
+  "lichess": {
+    "title": "Lichess",
+    "signInFailed": "Anmeldung bei Lichess fehlgeschlagen. {{reason}}",
+    "needsAccount": "Dafür wird dein Lichess-Konto benötigt.",
+    "playReason": "ChessCam spielt die Züge, die du auf deinem Brett machst, in deinen Lichess-Partien und braucht dafür dein Lichess-Konto.",
+    "broadcastReason": "ChessCam überträgt die Partie auf deinem Brett in eine deiner Lichess-Übertragungen und braucht dafür dein Lichess-Konto.",
+    "expired": "Deine Lichess-Anmeldung ist abgelaufen. Bitte melde dich erneut an.",
+    "forbidden": "Lichess hat das nicht erlaubt. Erneutes Anmelden kann helfen.",
+    "notFound": "Lichess konnte es nicht finden.",
+    "rateLimited": "Lichess begrenzt die Anfragen. Versuch es in einer Minute noch einmal.",
+    "serverError": "Lichess hat Probleme. Versuch es gleich noch einmal.",
+    "refusedReason": "Lichess hat die Anfrage abgelehnt: {{reason}}",
+    "refusedStatus": "Lichess hat die Anfrage abgelehnt ({{status}}).",
+    "unreachable": "Lichess ist nicht erreichbar. Prüfe deine Verbindung."
+  },
+  "detection": {
+    "failed": "Figurenerkennung fehlgeschlagen",
+    "stopped": "Die Figurenerkennung wurde beendet. Bitte lade die Seite neu.",
+    "reloadFailed": "Das Modell konnte nicht neu geladen werden. Bitte lade die Seite neu.",
+    "gpuReset": "Die GPU wurde zurückgesetzt. Das Modell wird neu geladen..."
+  },
+  "engine": {
+    "failed": "Stockfish kann in diesem Browser nicht ausgeführt werden."
+  },
+  "faq": {
+    "title": "Häufig gestellte Fragen",
+    "sections": {
+      "gettingStarted": "Erste Schritte",
+      "modes": "Modi",
+      "detection": "Erkennung",
+      "saving": "Partie speichern",
+      "about": "Über ChessCam"
+    },
+    "stand": {
+      "question": "Wo kann ich eine Halterung kaufen?",
+      "answer": "Eine Halterung bekommst du für 12,99 £ unter <stand>https://www.amazon.co.uk/dp/B07NVBXYPJ</stand>."
+    },
+    "videos": {
+      "question": "Gibt es Videoanleitungen?",
+      "answer": "Ja. Die YouTube-Playlist „How to use ChessCam“ hat ein kurzes Video zu jedem Modus (auf Englisch). Öffne sie mit <b>Videoanleitungen</b> im Menü oben rechts."
+    },
+    "camera": {
+      "question": "Wie richte ich meine Kamera ein?",
+      "step1": "Stell dein Handy oder deine Kamera im Querformat auf eine Halterung neben dem Brett.",
+      "step2": "Achte darauf, dass die Halterung stabil steht und die Kamera das ganze Brett sieht.",
+      "step3": "Achte darauf, dass die höchste Figur (König oder Dame) noch im Bild ist, wenn sie auf dem Feld steht, das am weitesten von der Kamera entfernt ist.",
+      "step4": "Wenn das Brett im Bild klein ist, tippe auf <b>Bereich zeichnen</b> und zieh einen Rahmen darum.",
+      "step5": "ChessCam zoomt die Kamera so weit wie möglich heraus. Um eine andere Kamera zu verwenden, wähle sie im Menü <b>Gerät</b>.",
+      "halfZoom": "Aufbau mit 0,5x-Zoom",
+      "halfZoomCaption": "Mein Aufbau mit 0,5x-Zoom",
+      "fullZoom": "Aufbau mit 1x-Zoom",
+      "fullZoomCaption": "Mein Aufbau mit 1x-Zoom"
+    },
+    "moving": {
+      "question": "Funktioniert die App, wenn sich das Brett oder die Kamera zwischendurch bewegen?",
+      "answer": "Ja, solange das ganze Brett innerhalb des Bereichs bleibt. Wenn du keinen Bereich gezeichnet hast, muss das ganze Brett im Bild bleiben."
+    },
+    "power": {
+      "question": "Wie leistungsstark muss mein Gerät sein?",
+      "answer": "Die App muss mit mindestens 1 FPS laufen. Die Geschwindigkeit wird oben rechts im Video angezeigt."
+    },
+    "record": {
+      "question": "Wie nehme ich auf?",
+      "step1": "Tippe auf der Startseite auf <b>Aufnehmen</b> oder geh direkt zu <record>https://www.chesscam.net/record</record>.",
+      "step2": "Richte deine Kamera ein (siehe „Wie richte ich meine Kamera ein?“).",
+      "step3": "Drück den roten Aufnahmeknopf über dem Video oder die Taste <b>K</b>, um die Aufnahme zu starten. Drück ihn noch einmal zum Pausieren.",
+      "reset": "Um wieder von vorn zu beginnen, drück den Radiergummi-Knopf über dem Video. Wenn die Partie schon Züge hat, drück ihn zur Bestätigung ein zweites Mal."
+    },
+    "upload": {
+      "question": "Wie lade ich eine Partie hoch?",
+      "step1": "Tippe auf der Startseite auf <b>Hochladen</b> oder geh direkt zu <upload>https://www.chesscam.net/upload</upload>.",
+      "step2": "Tippe auf <b>Video wählen</b> und wähle ein Video der Partie. MP4- (H.264/AAC) und WebM-Dateien funktionieren in den meisten Browsern.",
+      "step3": "Wenn das Brett im Video klein ist, tippe auf <b>Bereich zeichnen</b> und zieh einen Rahmen darum.",
+      "step4": "Drück den Abspielknopf über dem Video oder die Taste <b>K</b>, um mit der Zugerkennung zu beginnen.",
+      "speed": "Der Geschwindigkeitsknopf über dem Video wechselt zwischen 1x, 2x und 4x. 1x ist am genauesten.",
+      "seek": "Mit der Zeitleiste oder den Pfeiltasten kannst du im Video springen. Dabei wird das Video pausiert, damit du das Brett prüfen kannst, bevor es weitergeht. Der Radiergummi-Knopf setzt die Partie auf die Ausgangsstellung zurück.",
+      "eval": "Der Balken neben dem Video zeigt die Stockfish-Bewertung der Stellung. Er ist an, wenn du Hochladen öffnest, und aus, wenn du Aufnehmen oder Übertragen öffnest, da die Spieler am Brett ihn sehen könnten. Schalte ihn mit <b>Engine-Bewertung</b> im Menü oben rechts um. Beim Spielen auf Lichess wird er nie angezeigt."
+    },
+    "play": {
+      "question": "Wie spiele ich eine Lichess-Partie auf einem echten Brett?",
+      "step1": "Starte eine Partie auf Lichess.",
+      "step2": "Tippe auf der Startseite auf <b>Spielen</b> oder geh direkt zu <play>https://www.chesscam.net/play</play>. Melde dich mit Lichess an, wenn du dazu aufgefordert wirst.",
+      "step3": "Richte deine Kamera ein (siehe „Wie richte ich meine Kamera ein?“).",
+      "step4": "Wähle deine Partie unter <b>Partie wählen</b>.",
+      "step5": "Drück den Abspielknopf über dem Video oder die Taste <b>K</b>, um mit der Zugerkennung zu beginnen.",
+      "moves": "Die Züge, die du auf deinem Brett machst, werden an Lichess gesendet. Die Züge deines Gegners werden auf dem Brett in der Seitenleiste angezeigt, damit du sie auf deinem Brett nachspielen kannst.",
+      "limits": "Lichess erlaubt das nur bei Schnellschach-, klassischen und Fernschachpartien."
+    },
+    "broadcast": {
+      "question": "Wie übertrage ich eine Partie auf Lichess?",
+      "step1": "Erstelle auf der Lichess-Website eine Übertragung, falls du noch keine hast.",
+      "step2": "Tippe auf der Startseite auf <b>Übertragen</b> oder geh direkt zu <broadcast>https://www.chesscam.net/broadcast</broadcast>. Melde dich mit Lichess an, wenn du dazu aufgefordert wirst.",
+      "step3": "Richte deine Kamera ein (siehe „Wie richte ich meine Kamera ein?“).",
+      "step4": "Wähle die Runde der Übertragung unter <b>Studie wählen</b>. Nur Runden, die du bearbeiten kannst, werden aufgelistet.",
+      "step5": "Wähle die Brettnummer, von 1 bis 64, unter <b>Brett wählen</b>.",
+      "step6": "Drück den roten Aufnahmeknopf über dem Video oder die Taste <b>K</b>, um die Übertragung zu starten.",
+      "moves": "Jeder Zug wird gleich nach dem Erkennen mit der ganzen bisherigen Partie an die Übertragung gesendet. Schlägt das Senden wegen eines Verbindungsproblems fehl, erscheint oben auf dem Bildschirm ein Fehler, und der nächste Zug holt das Verpasste nach. Bis dahin wird nichts erneut gesendet. Wenn also der letzte Zug der Partie nicht gesendet werden kann, prüfe die Übertragung auf Lichess."
+    },
+    "position": {
+      "question": "Kann ich mit einer eigenen Stellung beginnen?",
+      "intro": "Ja, beim Aufnehmen oder Hochladen. Bau vor dem Start die Stellung auf deinem Brett auf und wähle dann eine Option im Menü <b>Stellung</b>:",
+      "standard": "<b>Standard</b>: die normale Ausgangsstellung.",
+      "white": "<b>Erkennen (Weiß am Zug)</b>: liest die Stellung von der Kamera ab, mit Weiß am Zug.",
+      "black": "<b>Erkennen (Schwarz am Zug)</b>: liest die Stellung von der Kamera ab, mit Schwarz am Zug.",
+      "check": "Prüfe nach dem Erkennen das Brett in der Seitenleiste, denn eine falsch erkannte Figur verhindert, dass spätere Züge erkannt werden."
+    },
+    "corners": {
+      "question": "Was bedeuten die Beschriftungen in den Ecken des Videos?",
+      "answer": "Während die App Züge erkennt, beschriftet sie jede Ecke des Bereichs (oder des ganzen Videos, wenn du keinen Bereich gezeichnet hast) mit dem Feld, das sie dort vermutet: a1, a8, h1 oder h8. Wenn die Beschriftungen falsch sind, werden Züge falsch erkannt. Das passiert am ehesten, wenn das Brett etwa im 45-Grad-Winkel zur Kamera steht. Dreh dann das Brett oder die Kamera, bis die Brettkanten näher an den Kanten des Videos liegen."
+    },
+    "save": {
+      "question": "Wie speichere ich meine Partie?",
+      "answer": "Tippe in der Seitenleiste auf <b>PGN kopieren</b>, um die Partie in die Zwischenablage zu kopieren. Aufgenommene Partien enthalten die Zeit jedes Zuges, ab dem Moment, in dem er erkannt wurde, auf etwa eine Sekunde genau. Pausenzeit wird nicht mitgezählt."
+    },
+    "export": {
+      "question": "Wie sende ich meine Partie an Lichess?",
+      "intro": "Tippe nach dem Aufnehmen oder Hochladen einer Partie in der Seitenleiste auf <b>Lichess</b>, neben <b>PGN kopieren</b>:",
+      "open": "<b>In Lichess öffnen</b> importiert die Partie in Lichess und öffnet sie in einem neuen Tab. Du musst dich dafür nicht anmelden.",
+      "study": "<b>Zu einer Studie hinzufügen</b> speichert die Partie in einer deiner Lichess-Studien, benannt nach dem aktuellen Datum und der Uhrzeit. Melde dich zuerst über das Menü mit Lichess an. Wenn keine Studien aufgelistet sind, erstelle eine auf der Lichess-Website.",
+      "signIn": "Beim Anmelden verlässt du die Seite, und eine laufende Partie geht verloren. Kopiere zuerst das PGN, um sie zu behalten."
+    },
+    "offline": {
+      "question": "Funktioniert die App offline?",
+      "answer": "Sobald du Aufnehmen oder Hochladen einmal mit Internetverbindung verwendet hast, funktionieren sie auch offline. Spielen, Übertragen und das Senden von Partien an Lichess brauchen eine Verbindung, aber das PGN kannst du trotzdem kopieren."
+    },
+    "illegal": {
+      "question": "Wie werden illegale Züge behandelt?",
+      "answer": "Illegale Züge werden von der App ignoriert."
+    },
+    "variants": {
+      "question": "Werden Varianten unterstützt?",
+      "answer": "Im Moment nicht."
+    },
+    "privacy": {
+      "question": "Bleiben meine Videos privat?",
+      "answer": "Ja. Hochgeladene Videos und das Kamerabild werden auf deinem Gerät verarbeitet. ChessCam erhält sie nie."
+    },
+    "licences": {
+      "question": "Welche Lizenzen gelten für das Modell zur Bretterkennung?",
+      "answer": "Das Modell ist ein ChessQueries-Modell mit einem DINOv3-Encoder von Meta und wird von <hf>Hugging Face</hf> heruntergeladen. Seine Gewichte sind sowohl unter der <polyform>PolyForm Noncommercial License 1.0.0</polyform> als auch unter der <dinov3>DINOv3 License</dinov3> verfügbar. Details stehen in der <notice>NOTICE</notice>."
+    },
+    "openSource": {
+      "question": "Ist ChessCam Open Source?",
+      "answer": "Ja. Der Code liegt auf <github>GitHub</github> unter der AGPL-3.0-Lizenz, und das Modell zur Bretterkennung liegt auf <hf>Hugging Face</hf>. Auf GitHub kannst du auch Fehler melden und Ideen vorschlagen."
+    },
+    "contact": {
+      "question": "Wie kann ich Kontakt aufnehmen?",
+      "answer": "Schreib mir auf Lichess: <lichess>https://lichess.org/@/BlindfoldBlunderer</lichess>",
+      "happy": "Ich unterhalte mich immer gern über deine Ideen oder Probleme!"
+    }
+  }
+}

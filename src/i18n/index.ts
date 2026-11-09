@@ -2,13 +2,25 @@ import i18n from "i18next";
 import LanguageDetector from "i18next-browser-languagedetector";
 import { initReactI18next } from "react-i18next";
 import en from "./locales/en.json";
+import de from "./locales/de.json";
 import es from "./locales/es.json";
+import fr from "./locales/fr.json";
+import hi from "./locales/hi.json";
+import it from "./locales/it.json";
+import nl from "./locales/nl.json";
+import pl from "./locales/pl.json";
 
 // English is the source, and every other language is translated from it. Add a language here, in LANGUAGES, and as a
 // file in locales/ with the same keys as en.json (locales.test.ts checks).
 export const resources = {
   en: { translation: en },
   es: { translation: es },
+  de: { translation: de },
+  fr: { translation: fr },
+  it: { translation: it },
+  nl: { translation: nl },
+  pl: { translation: pl },
+  hi: { translation: hi },
 } as const;
 
 export type Language = keyof typeof resources;
@@ -17,6 +29,12 @@ export type Language = keyof typeof resources;
 export const LANGUAGES: Record<Language, string> = {
   en: "English",
   es: "Español",
+  de: "Deutsch",
+  fr: "Français",
+  it: "Italiano",
+  nl: "Nederlands",
+  pl: "Polski",
+  hi: "हिन्दी",
 };
 
 // Where a language picked in the app is kept, which the detector reads first
