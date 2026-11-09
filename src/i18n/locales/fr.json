@@ -1,0 +1,336 @@
+{
+  "app": {
+    "updateAvailable": "Nouveau contenu disponible. Recharger ?"
+  },
+  "home": {
+    "upload": "Importer",
+    "uploadDescription": "Transformez une vidéo d'échecs en PGN",
+    "record": "Enregistrer",
+    "recordDescription": "Enregistrez une partie en direct avec une caméra",
+    "play": "Jouer",
+    "playDescription": "Jouez une partie Lichess sur un vrai échiquier",
+    "broadcast": "Diffuser",
+    "broadcastDescription": "Diffusez une partie en direct sur Lichess"
+  },
+  "common": {
+    "language": "Langue",
+    "goHome": "Aller à l'accueil",
+    "backHome": "Retour à l'accueil",
+    "setup": "Configuration",
+    "status": "État",
+    "game": "Partie",
+    "gameActions": "Actions de la partie",
+    "copyPgn": "Copier le PGN",
+    "copiedPgn": "PGN copié",
+    "copyPgnFailed": "Impossible de copier le PGN",
+    "signInLichess": "Se connecter avec Lichess",
+    "dismissError": "Fermer l'erreur",
+    "noStudies": "Aucune étude trouvée",
+    "rotate": "Tournez votre appareil en mode paysage",
+    "loadingModel": "Chargement de la reconnaissance de l'échiquier...",
+    "modelFailed": "ChessCam n'a pas pu charger son modèle de reconnaissance de l'échiquier. Rechargez la page et réessayez.",
+    "modelFailedReason": "ChessCam n'a pas pu charger son modèle de reconnaissance de l'échiquier ({{reason}}). Rechargez la page et réessayez.",
+    "close": "Fermer"
+  },
+  "account": {
+    "menu": "Compte et paramètres",
+    "signIn": "Se connecter",
+    "signOut": "Se déconnecter",
+    "engine": "Évaluation du moteur",
+    "engineNotInPlay": "Indisponible en jouant sur Lichess",
+    "help": "Aide",
+    "videoGuides": "Guides vidéo",
+    "pauseToSignOut": "Mettez en pause pour vous déconnecter"
+  },
+  "errorPage": {
+    "title": "Une erreur s'est produite",
+    "unexpected": "ChessCam a rencontré une erreur inattendue.",
+    "help": "Si recharger la page ne suffit pas, effacer les données enregistrées devrait régler le problème. Cela vous déconnecte aussi de Lichess.",
+    "reload": "Recharger",
+    "clearData": "Effacer les données enregistrées"
+  },
+  "device": {
+    "select": "Choisir un appareil",
+    "selected": "Appareil : {{name}}"
+  },
+  "region": {
+    "draw": "Tracer une zone",
+    "drawTitle": "Tracez une zone autour de l'échiquier",
+    "drawing": "Faites glisser un cadre (annuler)",
+    "drawingTitle": "Annuler le tracé de la zone",
+    "clear": "Effacer la zone",
+    "clearTitle": "Effacer la zone et utiliser toute l'image"
+  },
+  "position": {
+    "label": "Position : {{option}}",
+    "standard": "Standard",
+    "detectWhite": "Détecter (trait aux Blancs)",
+    "detectBlack": "Détecter (trait aux Noirs)",
+    "detectFailed": "Impossible de déterminer la position de départ",
+    "invalid": "FEN invalide :",
+    "set": "Définir la FEN de départ",
+    "errors": {
+      "empty": "L'échiquier est vide",
+      "kings": "Chaque camp doit avoir exactement un roi",
+      "oppositeCheck": "Le camp au trait met l'adversaire en échec",
+      "pawnsOnBackrank": "Pions sur la première ou la dernière rangée"
+    }
+  },
+  "board": {
+    "label": "Position actuelle : {{pieces}}",
+    "empty": "échiquier vide",
+    "pieceOn": "{{piece}} en {{square}}",
+    "pieces": {
+      "whiteKing": "roi blanc",
+      "whiteQueen": "dame blanche",
+      "whiteRook": "tour blanche",
+      "whiteBishop": "fou blanc",
+      "whiteKnight": "cavalier blanc",
+      "whitePawn": "pion blanc",
+      "blackKing": "roi noir",
+      "blackQueen": "dame noire",
+      "blackRook": "tour noire",
+      "blackBishop": "fou noir",
+      "blackKnight": "cavalier noir",
+      "blackPawn": "pion noir"
+    }
+  },
+  "video": {
+    "choose": "Choisir une vidéo",
+    "chooseTitle": "Choisir une vidéo",
+    "selected": "Vidéo : {{name}}",
+    "remove": "Retirer la vidéo : {{name}}",
+    "playFailed": "Impossible de lire cette vidéo",
+    "loadFailed": "Impossible de charger cette vidéo",
+    "formatHint": "Utilisez un fichier MP4 (H.264/AAC) ou WebM pris en charge par le navigateur",
+    "play": "Lecture (k)",
+    "pause": "Pause (k)",
+    "replay": "Revoir",
+    "seek": "Avancer ou reculer",
+    "seekValue": "{{time}} sur {{duration}}",
+    "resetTracker": "Réinitialiser la détection à la position de départ",
+    "trackerWasReset": "Détection réinitialisée",
+    "pgnWasReset": "PGN réinitialisé à la position de départ",
+    "speed": "Vitesse de lecture",
+    "speedLabel": "Vitesse de lecture {{speed}}x",
+    "speedValue": "{{speed}}x"
+  },
+  "camera": {
+    "record": "Enregistrer",
+    "startDetecting": "Lancer la détection",
+    "startKey": "{{action}} (k)",
+    "pause": "Pause (k)",
+    "rec": "REC",
+    "reset": "Revenir à la position de départ",
+    "wasReset": "Retour à la position de départ",
+    "detecting": "Détection des coups",
+    "fps": "{{fps}} FPS",
+    "fpsCpu": "{{fps}} FPS · CPU",
+    "unavailable": "Caméra indisponible",
+    "needsHttps": "La caméra nécessite une connexion sécurisée (https)",
+    "blocked": "L'accès à la caméra a été bloqué",
+    "allowAccess": "Autorisez l'accès à la caméra dans les paramètres du navigateur",
+    "notFound": "Aucune caméra trouvée",
+    "connectAnother": "Branchez une caméra ou choisissez un autre appareil",
+    "inUse": "La caméra est déjà utilisée",
+    "closeOthers": "Fermez les autres applications qui utilisent la caméra",
+    "startFailed": "Impossible de démarrer la caméra",
+    "selectGameFirst": "Choisissez d'abord une partie",
+    "selectStudyBoardFirst": "Choisissez d'abord une étude et un échiquier"
+  },
+  "reset": {
+    "confirmTitle": "Appuyez de nouveau pour réinitialiser la partie",
+    "confirm": "Réinitialiser ?"
+  },
+  "export": {
+    "button": "Lichess",
+    "title": "Envoyer la partie sur Lichess",
+    "open": "Ouvrir dans Lichess",
+    "opened": "Partie ouverte sur Lichess",
+    "openFailed": "Impossible d'ouvrir la partie sur Lichess",
+    "addToStudy": "Ajouter à une étude",
+    "exported": "Partie exportée vers",
+    "exportFailed": "Impossible d'exporter la partie vers l'étude Lichess",
+    "signInWarning": "Se connecter quitte cette page, et cette partie sera perdue. Copiez d'abord le PGN pour la garder.",
+    "signInAnyway": "Se connecter quand même"
+  },
+  "study": {
+    "select": "Choisir une étude",
+    "selected": "Étude : {{name}}"
+  },
+  "boardNumber": {
+    "select": "Choisir un échiquier",
+    "selected": "Échiquier : {{number}}",
+    "item": "Échiquier {{number}}"
+  },
+  "play": {
+    "selectGame": "Choisir une partie",
+    "selectedGame": "Partie : {{opponent}}",
+    "starting": "Début de la partie",
+    "whiteVs": "Blancs contre {{opponent}}",
+    "blackVs": "Noirs contre {{opponent}}",
+    "loadGamesFailed": "Impossible de charger les parties Lichess",
+    "refused": "Lichess a refusé {{move}}. Vérifiez que l'échiquier correspond à la partie sur Lichess.",
+    "refusedReason": "Lichess a refusé {{move}} ({{reason}}). Vérifiez que l'échiquier correspond à la partie sur Lichess.",
+    "sendFailed": "Impossible d'envoyer votre coup à Lichess. {{reason}}",
+    "retrying": "{{message}} Nouvelle tentative...",
+    "lostConnection": "Connexion à la partie Lichess perdue. {{reason}}",
+    "reconnecting": "{{message}} Reconnexion...",
+    "followFailed": "Impossible de suivre la partie Lichess."
+  },
+  "broadcast": {
+    "updateFailed": "Impossible de mettre à jour la diffusion Lichess. {{reason}}",
+    "willRetry": "{{message}} Nouvelle tentative au prochain coup."
+  },
+  "lichess": {
+    "title": "Lichess",
+    "signInFailed": "Impossible de se connecter à Lichess. {{reason}}",
+    "needsAccount": "Cela nécessite votre compte Lichess.",
+    "playReason": "ChessCam joue les coups que vous faites sur votre échiquier dans vos parties Lichess, il a donc besoin de votre compte Lichess.",
+    "broadcastReason": "ChessCam diffuse la partie de votre échiquier dans l'une de vos diffusions Lichess, il a donc besoin de votre compte Lichess.",
+    "expired": "Votre connexion à Lichess a expiré. Reconnectez-vous.",
+    "forbidden": "Lichess n'a pas autorisé cette action. Se reconnecter peut aider.",
+    "notFound": "Lichess ne l'a pas trouvé.",
+    "rateLimited": "Lichess limite les requêtes. Réessayez dans une minute.",
+    "serverError": "Lichess rencontre des problèmes. Réessayez dans un instant.",
+    "refusedReason": "Lichess a refusé la requête : {{reason}}",
+    "refusedStatus": "Lichess a refusé la requête ({{status}}).",
+    "unreachable": "Impossible de joindre Lichess. Vérifiez votre connexion."
+  },
+  "detection": {
+    "failed": "La détection des pièces a échoué",
+    "stopped": "La détection des pièces s'est arrêtée. Rechargez la page.",
+    "reloadFailed": "Impossible de recharger le modèle. Rechargez la page.",
+    "gpuReset": "Le GPU a été réinitialisé. Rechargement du modèle..."
+  },
+  "engine": {
+    "failed": "Impossible d'exécuter Stockfish dans ce navigateur."
+  },
+  "faq": {
+    "title": "Questions fréquentes",
+    "sections": {
+      "gettingStarted": "Premiers pas",
+      "modes": "Modes",
+      "detection": "Détection",
+      "saving": "Enregistrer votre partie",
+      "about": "À propos de ChessCam"
+    },
+    "stand": {
+      "question": "Où puis-je acheter un support ?",
+      "answer": "Vous pouvez acheter un support pour 12,99 £ sur <stand>https://www.amazon.co.uk/dp/B07NVBXYPJ</stand>."
+    },
+    "videos": {
+      "question": "Y a-t-il des guides vidéo ?",
+      "answer": "Oui. La playlist YouTube « How to use ChessCam » propose une courte vidéo, en anglais, pour chaque mode. Ouvrez-la avec <b>Guides vidéo</b> dans le menu en haut à droite."
+    },
+    "camera": {
+      "question": "Comment installer ma caméra ?",
+      "step1": "Placez votre téléphone ou votre caméra sur un support à côté de l'échiquier, en mode paysage.",
+      "step2": "Vérifiez que le support est stable et que la caméra voit tout l'échiquier.",
+      "step3": "Vérifiez que la pièce la plus haute (le roi ou la dame) reste dans le champ quand elle est posée sur la case la plus éloignée de la caméra.",
+      "step4": "Si l'échiquier est petit dans l'image, appuyez sur <b>Tracer une zone</b> et faites glisser un cadre autour.",
+      "step5": "ChessCam dézoome la caméra au maximum. Pour utiliser une autre caméra, choisissez-la dans le menu <b>Appareil</b>.",
+      "halfZoom": "Installation avec un zoom 0,5x",
+      "halfZoomCaption": "Mon installation avec un zoom 0,5x",
+      "fullZoom": "Installation avec un zoom 1x",
+      "fullZoomCaption": "Mon installation avec un zoom 1x"
+    },
+    "moving": {
+      "question": "L'application fonctionne-t-elle si l'échiquier ou la caméra bougent en cours de partie ?",
+      "answer": "Oui, tant que tout l'échiquier reste dans la zone. Si vous n'avez pas tracé de zone, tout l'échiquier doit rester dans le champ."
+    },
+    "power": {
+      "question": "Quelle puissance doit avoir mon appareil ?",
+      "answer": "L'application doit tourner à au moins 1 FPS. La vitesse s'affiche en haut à droite de la vidéo."
+    },
+    "record": {
+      "question": "Comment enregistrer ?",
+      "step1": "Appuyez sur <b>Enregistrer</b> sur la page d'accueil, ou allez directement sur <record>https://www.chesscam.net/record</record>.",
+      "step2": "Installez votre caméra (voir « Comment installer ma caméra ? »).",
+      "step3": "Appuyez sur le bouton rouge d'enregistrement au-dessus de la vidéo, ou sur la touche <b>K</b>, pour lancer l'enregistrement. Appuyez de nouveau pour mettre en pause.",
+      "reset": "Pour recommencer depuis le début, appuyez sur le bouton gomme au-dessus de la vidéo. Si la partie comporte des coups, appuyez une seconde fois pour confirmer."
+    },
+    "upload": {
+      "question": "Comment importer une partie ?",
+      "step1": "Appuyez sur <b>Importer</b> sur la page d'accueil, ou allez directement sur <upload>https://www.chesscam.net/upload</upload>.",
+      "step2": "Appuyez sur <b>Choisir une vidéo</b> et sélectionnez une vidéo de la partie. Les fichiers MP4 (H.264/AAC) et WebM fonctionnent dans la plupart des navigateurs.",
+      "step3": "Si l'échiquier est petit dans la vidéo, appuyez sur <b>Tracer une zone</b> et faites glisser un cadre autour.",
+      "step4": "Appuyez sur le bouton de lecture au-dessus de la vidéo, ou sur la touche <b>K</b>, pour lancer la détection des coups.",
+      "speed": "Le bouton de vitesse au-dessus de la vidéo passe de 1x à 2x et à 4x. 1x est la plus précise.",
+      "seek": "Utilisez la barre de progression ou les flèches du clavier pour vous déplacer dans la vidéo. Cela met la vidéo en pause, pour que vous puissiez vérifier l'échiquier avant de continuer. Le bouton gomme ramène la partie à la position de départ.",
+      "eval": "La barre à côté de la vidéo affiche l'évaluation de la position par Stockfish. Elle est activée quand vous ouvrez Importer, et désactivée quand vous ouvrez Enregistrer ou Diffuser, car les joueurs devant l'échiquier pourraient la voir. Changez-la avec <b>Évaluation du moteur</b> dans le menu en haut à droite. Elle ne s'affiche jamais quand vous jouez sur Lichess."
+    },
+    "play": {
+      "question": "Comment jouer une partie Lichess sur un vrai échiquier ?",
+      "step1": "Lancez une partie sur Lichess.",
+      "step2": "Appuyez sur <b>Jouer</b> sur la page d'accueil, ou allez directement sur <play>https://www.chesscam.net/play</play>. Connectez-vous avec Lichess si on vous le demande.",
+      "step3": "Installez votre caméra (voir « Comment installer ma caméra ? »).",
+      "step4": "Choisissez votre partie dans <b>Choisir une partie</b>.",
+      "step5": "Appuyez sur le bouton de lecture au-dessus de la vidéo, ou sur la touche <b>K</b>, pour lancer la détection des coups.",
+      "moves": "Les coups que vous jouez sur votre échiquier sont envoyés à Lichess. Les coups de votre adversaire s'affichent sur l'échiquier de la barre latérale, pour que vous les jouiez sur votre échiquier.",
+      "limits": "Lichess ne le permet que pour les parties rapides, classiques et par correspondance."
+    },
+    "broadcast": {
+      "question": "Comment diffuser une partie sur Lichess ?",
+      "step1": "Créez une diffusion sur le site de Lichess, si vous n'en avez pas déjà une.",
+      "step2": "Appuyez sur <b>Diffuser</b> sur la page d'accueil, ou allez directement sur <broadcast>https://www.chesscam.net/broadcast</broadcast>. Connectez-vous avec Lichess si on vous le demande.",
+      "step3": "Installez votre caméra (voir « Comment installer ma caméra ? »).",
+      "step4": "Choisissez la ronde de la diffusion dans <b>Choisir une étude</b>. Seules les rondes que vous pouvez modifier sont affichées.",
+      "step5": "Choisissez le numéro d'échiquier, de 1 à 64, dans <b>Choisir un échiquier</b>.",
+      "step6": "Appuyez sur le bouton rouge d'enregistrement au-dessus de la vidéo, ou sur la touche <b>K</b>, pour lancer la diffusion.",
+      "moves": "Chaque coup est envoyé à la diffusion dès qu'il est détecté, avec toute la partie jusque-là. Si l'envoi échoue à cause d'un problème de connexion, une erreur s'affiche en haut de l'écran, et le coup suivant rattrape ce qui manquait. Rien n'est renvoyé d'ici là : si le dernier coup de la partie n'a pas pu être envoyé, vérifiez la diffusion sur Lichess."
+    },
+    "position": {
+      "question": "Puis-je partir d'une position personnalisée ?",
+      "intro": "Oui, en enregistrant ou en important. Avant de commencer, installez la position sur votre échiquier, puis choisissez une option dans le menu <b>Position</b> :",
+      "standard": "<b>Standard</b> : la position de départ habituelle.",
+      "white": "<b>Détecter (trait aux Blancs)</b> : lit la position avec la caméra, avec le trait aux Blancs.",
+      "black": "<b>Détecter (trait aux Noirs)</b> : lit la position avec la caméra, avec le trait aux Noirs.",
+      "check": "Vérifiez l'échiquier de la barre latérale après la détection, car une pièce mal lue empêchera de reconnaître les coups suivants."
+    },
+    "corners": {
+      "question": "Que sont les étiquettes dans les coins de la vidéo ?",
+      "answer": "Pendant la détection des coups, l'application étiquette chaque coin de la zone (ou de toute la vidéo, si vous n'avez pas tracé de zone) avec la case qu'elle pense y voir : a1, a8, h1 ou h8. Si les étiquettes sont fausses, les coups seront mal lus. Cela arrive surtout quand l'échiquier est à environ 45 degrés de la caméra : tournez alors l'échiquier ou la caméra jusqu'à ce que ses bords soient plus proches de ceux de la vidéo."
+    },
+    "save": {
+      "question": "Comment enregistrer ma partie ?",
+      "answer": "Appuyez sur <b>Copier le PGN</b> dans la barre latérale pour copier la partie dans le presse-papiers. Les parties enregistrées indiquent le temps pris par chaque coup, à partir du moment où il a été vu, à une seconde près environ. Le temps passé en pause n'est pas compté."
+    },
+    "export": {
+      "question": "Comment envoyer ma partie sur Lichess ?",
+      "intro": "Après avoir enregistré ou importé une partie, appuyez sur <b>Lichess</b> dans la barre latérale, à côté de <b>Copier le PGN</b> :",
+      "open": "<b>Ouvrir dans Lichess</b> importe la partie sur Lichess et l'ouvre dans un nouvel onglet. Pas besoin de vous connecter.",
+      "study": "<b>Ajouter à une étude</b> enregistre la partie dans l'une de vos études Lichess, sous le nom de la date et de l'heure actuelles. Connectez-vous d'abord avec Lichess depuis le menu. Si aucune étude n'apparaît, créez-en une sur le site de Lichess.",
+      "signIn": "Se connecter quitte la page, donc une partie en cours est perdue. Copiez d'abord le PGN pour la garder."
+    },
+    "offline": {
+      "question": "L'application fonctionne-t-elle hors ligne ?",
+      "answer": "Une fois que vous avez utilisé Enregistrer ou Importer avec une connexion internet, ils fonctionnent aussi hors ligne. Jouer, diffuser et envoyer des parties sur Lichess nécessitent une connexion, mais vous pouvez toujours copier le PGN."
+    },
+    "illegal": {
+      "question": "Comment les coups illégaux sont-ils gérés ?",
+      "answer": "L'application ignore les coups illégaux."
+    },
+    "variants": {
+      "question": "Les variantes sont-elles prises en charge ?",
+      "answer": "Pas pour le moment."
+    },
+    "privacy": {
+      "question": "Mes vidéos restent-elles privées ?",
+      "answer": "Oui. Les vidéos importées et l'image de la caméra sont traitées sur votre appareil. ChessCam ne les reçoit jamais."
+    },
+    "licences": {
+      "question": "Quelles licences couvrent le modèle de reconnaissance de l'échiquier ?",
+      "answer": "Le modèle est un modèle ChessQueries avec un encodeur DINOv3 de Meta, téléchargé depuis <hf>Hugging Face</hf>. Ses poids sont disponibles à la fois sous la <polyform>PolyForm Noncommercial License 1.0.0</polyform> et sous la <dinov3>DINOv3 License</dinov3>. Consultez le fichier <notice>NOTICE</notice> pour plus de détails."
+    },
+    "openSource": {
+      "question": "ChessCam est-il open source ?",
+      "answer": "Oui. Le code est sur <github>GitHub</github>, sous licence AGPL-3.0, et le modèle de reconnaissance de l'échiquier est sur <hf>Hugging Face</hf>. Vous pouvez aussi signaler des bugs et proposer des idées sur GitHub."
+    },
+    "contact": {
+      "question": "Comment vous contacter ?",
+      "answer": "Écrivez-moi sur Lichess : <lichess>https://lichess.org/@/BlindfoldBlunderer</lichess>",
+      "happy": "Je suis toujours ravi de discuter de vos idées ou de vos problèmes !"
+    }
+  }
+}

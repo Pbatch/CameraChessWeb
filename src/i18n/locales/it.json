@@ -1,0 +1,336 @@
+{
+  "app": {
+    "updateAvailable": "Nuovi contenuti disponibili. Ricaricare?"
+  },
+  "home": {
+    "upload": "Carica",
+    "uploadDescription": "Trasforma un video di scacchi in un PGN",
+    "record": "Registra",
+    "recordDescription": "Registra una partita dal vivo con una fotocamera",
+    "play": "Gioca",
+    "playDescription": "Gioca una partita di Lichess su una scacchiera vera",
+    "broadcast": "Trasmetti",
+    "broadcastDescription": "Trasmetti una partita su Lichess dal vivo"
+  },
+  "common": {
+    "language": "Lingua",
+    "goHome": "Vai alla home",
+    "backHome": "Torna alla home",
+    "setup": "Configurazione",
+    "status": "Stato",
+    "game": "Partita",
+    "gameActions": "Azioni della partita",
+    "copyPgn": "Copia PGN",
+    "copiedPgn": "PGN copiato",
+    "copyPgnFailed": "Impossibile copiare il PGN",
+    "signInLichess": "Accedi con Lichess",
+    "dismissError": "Chiudi l'errore",
+    "noStudies": "Nessuno studio trovato",
+    "rotate": "Ruota il dispositivo in orizzontale",
+    "loadingModel": "Caricamento del riconoscimento della scacchiera...",
+    "modelFailed": "ChessCam non è riuscito a caricare il modello di riconoscimento della scacchiera. Ricarica la pagina e riprova.",
+    "modelFailedReason": "ChessCam non è riuscito a caricare il modello di riconoscimento della scacchiera ({{reason}}). Ricarica la pagina e riprova.",
+    "close": "Chiudi"
+  },
+  "account": {
+    "menu": "Account e impostazioni",
+    "signIn": "Accedi",
+    "signOut": "Esci",
+    "engine": "Valutazione del motore",
+    "engineNotInPlay": "Non disponibile quando giochi su Lichess",
+    "help": "Aiuto",
+    "videoGuides": "Guide video",
+    "pauseToSignOut": "Metti in pausa per uscire"
+  },
+  "errorPage": {
+    "title": "Qualcosa è andato storto",
+    "unexpected": "ChessCam ha riscontrato un errore imprevisto.",
+    "help": "Se ricaricare non basta, cancellare i dati salvati dovrebbe risolvere. In questo modo esci anche da Lichess.",
+    "reload": "Ricarica",
+    "clearData": "Cancella i dati salvati"
+  },
+  "device": {
+    "select": "Scegli un dispositivo",
+    "selected": "Dispositivo: {{name}}"
+  },
+  "region": {
+    "draw": "Disegna area",
+    "drawTitle": "Disegna un'area intorno alla scacchiera",
+    "drawing": "Trascina un riquadro (annulla)",
+    "drawingTitle": "Annulla il disegno dell'area",
+    "clear": "Cancella area",
+    "clearTitle": "Cancella l'area e usa l'intera inquadratura"
+  },
+  "position": {
+    "label": "Posizione: {{option}}",
+    "standard": "Standard",
+    "detectWhite": "Rileva (muove il Bianco)",
+    "detectBlack": "Rileva (muove il Nero)",
+    "detectFailed": "Impossibile ricavare la posizione iniziale",
+    "invalid": "FEN non valida:",
+    "set": "Imposta la FEN iniziale",
+    "errors": {
+      "empty": "La scacchiera è vuota",
+      "kings": "Ogni lato deve avere esattamente un re",
+      "oppositeCheck": "Il lato che muove dà scacco all'avversario",
+      "pawnsOnBackrank": "Pedoni sulla prima o sull'ultima traversa"
+    }
+  },
+  "board": {
+    "label": "Posizione attuale: {{pieces}}",
+    "empty": "scacchiera vuota",
+    "pieceOn": "{{piece}} in {{square}}",
+    "pieces": {
+      "whiteKing": "re bianco",
+      "whiteQueen": "donna bianca",
+      "whiteRook": "torre bianca",
+      "whiteBishop": "alfiere bianco",
+      "whiteKnight": "cavallo bianco",
+      "whitePawn": "pedone bianco",
+      "blackKing": "re nero",
+      "blackQueen": "donna nera",
+      "blackRook": "torre nera",
+      "blackBishop": "alfiere nero",
+      "blackKnight": "cavallo nero",
+      "blackPawn": "pedone nero"
+    }
+  },
+  "video": {
+    "choose": "Scegli video",
+    "chooseTitle": "Scegli un video",
+    "selected": "Video: {{name}}",
+    "remove": "Rimuovi video: {{name}}",
+    "playFailed": "Impossibile riprodurre questo video",
+    "loadFailed": "Impossibile caricare questo video",
+    "formatHint": "Usa un file MP4 (H.264/AAC) o WebM supportato dal browser",
+    "play": "Riproduci (k)",
+    "pause": "Pausa (k)",
+    "replay": "Riproduci di nuovo",
+    "seek": "Scorri",
+    "seekValue": "{{time}} di {{duration}}",
+    "resetTracker": "Riporta il rilevamento alla posizione iniziale",
+    "trackerWasReset": "Rilevamento azzerato",
+    "pgnWasReset": "PGN riportato alla posizione iniziale",
+    "speed": "Velocità di riproduzione",
+    "speedLabel": "Velocità di riproduzione {{speed}}x",
+    "speedValue": "{{speed}}x"
+  },
+  "camera": {
+    "record": "Registra",
+    "startDetecting": "Avvia il rilevamento",
+    "startKey": "{{action}} (k)",
+    "pause": "Pausa (k)",
+    "rec": "REC",
+    "reset": "Torna alla posizione iniziale",
+    "wasReset": "Tornato alla posizione iniziale",
+    "detecting": "Rilevamento delle mosse",
+    "fps": "{{fps}} FPS",
+    "fpsCpu": "{{fps}} FPS · CPU",
+    "unavailable": "Fotocamera non disponibile",
+    "needsHttps": "La fotocamera richiede una connessione sicura (https)",
+    "blocked": "L'accesso alla fotocamera è stato bloccato",
+    "allowAccess": "Consenti l'accesso alla fotocamera nelle impostazioni del browser",
+    "notFound": "Nessuna fotocamera trovata",
+    "connectAnother": "Collega una fotocamera o scegli un altro dispositivo",
+    "inUse": "La fotocamera è già in uso",
+    "closeOthers": "Chiudi le altre app che usano la fotocamera",
+    "startFailed": "Impossibile avviare la fotocamera",
+    "selectGameFirst": "Scegli prima una partita",
+    "selectStudyBoardFirst": "Scegli prima uno studio e una scacchiera"
+  },
+  "reset": {
+    "confirmTitle": "Premi di nuovo per azzerare la partita",
+    "confirm": "Azzerare?"
+  },
+  "export": {
+    "button": "Lichess",
+    "title": "Invia la partita a Lichess",
+    "open": "Apri in Lichess",
+    "opened": "Partita aperta su Lichess",
+    "openFailed": "Impossibile aprire la partita su Lichess",
+    "addToStudy": "Aggiungi a uno studio",
+    "exported": "Partita esportata in",
+    "exportFailed": "Impossibile esportare la partita nello studio Lichess",
+    "signInWarning": "Accedendo lasci questa pagina, quindi questa partita andrà persa. Copia prima il PGN per conservarla.",
+    "signInAnyway": "Accedi comunque"
+  },
+  "study": {
+    "select": "Scegli uno studio",
+    "selected": "Studio: {{name}}"
+  },
+  "boardNumber": {
+    "select": "Scegli una scacchiera",
+    "selected": "Scacchiera: {{number}}",
+    "item": "Scacchiera {{number}}"
+  },
+  "play": {
+    "selectGame": "Scegli una partita",
+    "selectedGame": "Partita: {{opponent}}",
+    "starting": "Inizio della partita",
+    "whiteVs": "Bianco contro {{opponent}}",
+    "blackVs": "Nero contro {{opponent}}",
+    "loadGamesFailed": "Impossibile caricare le partite di Lichess",
+    "refused": "Lichess ha rifiutato {{move}}. Controlla che la scacchiera corrisponda alla partita su Lichess.",
+    "refusedReason": "Lichess ha rifiutato {{move}} ({{reason}}). Controlla che la scacchiera corrisponda alla partita su Lichess.",
+    "sendFailed": "Impossibile inviare la tua mossa a Lichess. {{reason}}",
+    "retrying": "{{message}} Nuovo tentativo...",
+    "lostConnection": "Connessione alla partita di Lichess persa. {{reason}}",
+    "reconnecting": "{{message}} Riconnessione...",
+    "followFailed": "Impossibile seguire la partita di Lichess."
+  },
+  "broadcast": {
+    "updateFailed": "Impossibile aggiornare la trasmissione di Lichess. {{reason}}",
+    "willRetry": "{{message}} Riproverà alla prossima mossa."
+  },
+  "lichess": {
+    "title": "Lichess",
+    "signInFailed": "Impossibile accedere a Lichess. {{reason}}",
+    "needsAccount": "Serve il tuo account Lichess.",
+    "playReason": "ChessCam gioca nelle tue partite di Lichess le mosse che fai sulla tua scacchiera, quindi gli serve il tuo account Lichess.",
+    "broadcastReason": "ChessCam trasmette la partita sulla tua scacchiera in una delle tue trasmissioni di Lichess, quindi gli serve il tuo account Lichess.",
+    "expired": "Il tuo accesso a Lichess è scaduto. Accedi di nuovo.",
+    "forbidden": "Lichess non lo ha consentito. Accedere di nuovo potrebbe aiutare.",
+    "notFound": "Lichess non l'ha trovato.",
+    "rateLimited": "Lichess sta limitando le richieste. Riprova tra un minuto.",
+    "serverError": "Lichess ha dei problemi. Riprova tra poco.",
+    "refusedReason": "Lichess ha rifiutato la richiesta: {{reason}}",
+    "refusedStatus": "Lichess ha rifiutato la richiesta ({{status}}).",
+    "unreachable": "Impossibile raggiungere Lichess. Controlla la connessione."
+  },
+  "detection": {
+    "failed": "Rilevamento dei pezzi non riuscito",
+    "stopped": "Il rilevamento dei pezzi si è interrotto. Ricarica la pagina.",
+    "reloadFailed": "Impossibile ricaricare il modello. Ricarica la pagina.",
+    "gpuReset": "La GPU è stata reimpostata. Ricaricamento del modello..."
+  },
+  "engine": {
+    "failed": "Impossibile eseguire Stockfish in questo browser."
+  },
+  "faq": {
+    "title": "Domande frequenti",
+    "sections": {
+      "gettingStarted": "Per iniziare",
+      "modes": "Modalità",
+      "detection": "Rilevamento",
+      "saving": "Salvare la partita",
+      "about": "Informazioni su ChessCam"
+    },
+    "stand": {
+      "question": "Dove posso comprare un supporto?",
+      "answer": "Puoi comprare un supporto per 12,99 £ su <stand>https://www.amazon.co.uk/dp/B07NVBXYPJ</stand>."
+    },
+    "videos": {
+      "question": "Ci sono guide video?",
+      "answer": "Sì. La playlist \"How to use ChessCam\" su YouTube ha un breve video, in inglese, per ogni modalità. Aprila con <b>Guide video</b> nel menu in alto a destra."
+    },
+    "camera": {
+      "question": "Come posiziono la fotocamera?",
+      "step1": "Metti il telefono o la fotocamera su un supporto a lato della scacchiera, in orizzontale.",
+      "step2": "Assicurati che il supporto sia stabile e che la fotocamera veda tutta la scacchiera.",
+      "step3": "Assicurati che il pezzo più alto (il re o la donna) resti inquadrato quando è sulla casa più lontana dalla fotocamera.",
+      "step4": "Se la scacchiera è piccola nell'inquadratura, tocca <b>Disegna area</b> e trascina un riquadro intorno a essa.",
+      "step5": "ChessCam riduce lo zoom della fotocamera il più possibile. Per usare un'altra fotocamera, sceglila dal menu <b>Dispositivo</b>.",
+      "halfZoom": "Configurazione con zoom 0,5x",
+      "halfZoomCaption": "La mia configurazione con zoom 0,5x",
+      "fullZoom": "Configurazione con zoom 1x",
+      "fullZoomCaption": "La mia configurazione con zoom 1x"
+    },
+    "moving": {
+      "question": "L'app funziona se la scacchiera o la fotocamera si spostano durante la partita?",
+      "answer": "Sì, purché tutta la scacchiera resti dentro l'area. Se non hai disegnato un'area, tutta la scacchiera deve restare inquadrata."
+    },
+    "power": {
+      "question": "Quanto deve essere potente il mio dispositivo?",
+      "answer": "L'app deve girare ad almeno 1 FPS. La velocità è mostrata nell'angolo in alto a destra del video."
+    },
+    "record": {
+      "question": "Come registro una partita?",
+      "step1": "Tocca <b>Registra</b> nella pagina iniziale, oppure vai direttamente su <record>https://www.chesscam.net/record</record>.",
+      "step2": "Posiziona la fotocamera (vedi \"Come posiziono la fotocamera?\").",
+      "step3": "Premi il pulsante rosso di registrazione sopra il video, o il tasto <b>K</b>, per iniziare a registrare. Premilo di nuovo per mettere in pausa.",
+      "reset": "Per ricominciare dall'inizio, premi il pulsante con la gomma sopra il video. Se la partita ha già delle mosse, premilo una seconda volta per confermare."
+    },
+    "upload": {
+      "question": "Come carico una partita?",
+      "step1": "Tocca <b>Carica</b> nella pagina iniziale, oppure vai direttamente su <upload>https://www.chesscam.net/upload</upload>.",
+      "step2": "Tocca <b>Scegli video</b> e seleziona un video della partita. I file MP4 (H.264/AAC) e WebM funzionano nella maggior parte dei browser.",
+      "step3": "Se la scacchiera è piccola nel video, tocca <b>Disegna area</b> e trascina un riquadro intorno a essa.",
+      "step4": "Premi il pulsante di riproduzione sopra il video, o il tasto <b>K</b>, per iniziare a rilevare le mosse.",
+      "speed": "Il pulsante della velocità sopra il video passa tra 1x, 2x e 4x. 1x è la più precisa.",
+      "seek": "Usa la barra di avanzamento o i tasti freccia per spostarti nel video. Spostarsi mette in pausa il video, così puoi controllare la scacchiera prima di continuare. Il pulsante con la gomma riporta la partita alla posizione iniziale.",
+      "eval": "La barra accanto al video mostra la valutazione della posizione di Stockfish. È attiva quando apri Carica, e spenta quando apri Registra o Trasmetti, perché i giocatori alla scacchiera potrebbero vederla. Cambiala con <b>Valutazione del motore</b> nel menu in alto a destra. Non compare mai quando giochi su Lichess."
+    },
+    "play": {
+      "question": "Come gioco una partita di Lichess su una scacchiera vera?",
+      "step1": "Inizia una partita su Lichess.",
+      "step2": "Tocca <b>Gioca</b> nella pagina iniziale, oppure vai direttamente su <play>https://www.chesscam.net/play</play>. Accedi con Lichess se ti viene chiesto.",
+      "step3": "Posiziona la fotocamera (vedi \"Come posiziono la fotocamera?\").",
+      "step4": "Scegli la tua partita da <b>Scegli una partita</b>.",
+      "step5": "Premi il pulsante di riproduzione sopra il video, o il tasto <b>K</b>, per iniziare a rilevare le mosse.",
+      "moves": "Le mosse che fai sulla tua scacchiera vengono inviate a Lichess. Le mosse dell'avversario compaiono sulla scacchiera nella barra laterale, così puoi giocarle sulla tua scacchiera.",
+      "limits": "Lichess lo consente solo per le partite Rapid, Classiche e per Corrispondenza."
+    },
+    "broadcast": {
+      "question": "Come trasmetto una partita su Lichess?",
+      "step1": "Crea una trasmissione sul sito di Lichess, se non ne hai già una.",
+      "step2": "Tocca <b>Trasmetti</b> nella pagina iniziale, oppure vai direttamente su <broadcast>https://www.chesscam.net/broadcast</broadcast>. Accedi con Lichess se ti viene chiesto.",
+      "step3": "Posiziona la fotocamera (vedi \"Come posiziono la fotocamera?\").",
+      "step4": "Scegli il turno della trasmissione da <b>Scegli uno studio</b>. Sono elencati solo i turni che puoi modificare.",
+      "step5": "Scegli il numero della scacchiera, da 1 a 64, da <b>Scegli una scacchiera</b>.",
+      "step6": "Premi il pulsante rosso di registrazione sopra il video, o il tasto <b>K</b>, per iniziare a trasmettere.",
+      "moves": "Ogni mossa viene inviata alla trasmissione appena è rilevata, insieme a tutta la partita fino a quel momento. Se l'invio non riesce per un problema di connessione, compare un errore in cima allo schermo, e la mossa successiva recupera ciò che mancava. Fino ad allora non viene reinviato nulla, quindi se l'ultima mossa della partita non viene inviata, controlla la trasmissione su Lichess."
+    },
+    "position": {
+      "question": "Posso partire da una posizione personalizzata?",
+      "intro": "Sì, quando registri o carichi. Prima di iniziare, disponi la posizione sulla tua scacchiera, poi scegli un'opzione dal menu <b>Posizione</b>:",
+      "standard": "<b>Standard</b>: la normale posizione iniziale.",
+      "white": "<b>Rileva (muove il Bianco)</b>: legge la posizione dalla fotocamera, con il Bianco al tratto.",
+      "black": "<b>Rileva (muove il Nero)</b>: legge la posizione dalla fotocamera, con il Nero al tratto.",
+      "check": "Controlla la scacchiera nella barra laterale dopo il rilevamento, perché un pezzo letto male impedirà di riconoscere le mosse successive."
+    },
+    "corners": {
+      "question": "Cosa sono le etichette negli angoli del video?",
+      "answer": "Mentre l'app rileva le mosse, etichetta ogni angolo dell'area (o dell'intero video, se non hai disegnato un'area) con la casa che pensa ci sia: a1, a8, h1 o h8. Se le etichette sono sbagliate, le mosse verranno lette male. Succede soprattutto quando la scacchiera è a circa 45 gradi rispetto alla fotocamera, quindi ruota la scacchiera o la fotocamera finché i suoi bordi non sono più vicini ai bordi del video."
+    },
+    "save": {
+      "question": "Come salvo la mia partita?",
+      "answer": "Tocca <b>Copia PGN</b> nella barra laterale per copiare la partita negli appunti. Le partite registrate includono il tempo impiegato per ogni mossa, da quando è stata vista, con una precisione di circa un secondo. Il tempo in pausa non viene contato."
+    },
+    "export": {
+      "question": "Come invio la mia partita a Lichess?",
+      "intro": "Dopo aver registrato o caricato una partita, tocca <b>Lichess</b> nella barra laterale, accanto a <b>Copia PGN</b>:",
+      "open": "<b>Apri in Lichess</b> importa la partita su Lichess e la apre in una nuova scheda. Non serve accedere.",
+      "study": "<b>Aggiungi a uno studio</b> salva la partita in uno dei tuoi studi di Lichess, con il nome della data e dell'ora attuali. Prima accedi con Lichess dal menu. Se non compare nessuno studio, creane uno sul sito di Lichess.",
+      "signIn": "Accedendo lasci la pagina, quindi una partita in corso va persa. Copia prima il PGN per conservarla."
+    },
+    "offline": {
+      "question": "L'app funziona offline?",
+      "answer": "Dopo aver usato Registra o Carica con una connessione a internet, funzionano anche offline. Giocare, trasmettere e inviare partite a Lichess richiedono una connessione, ma puoi comunque copiare il PGN."
+    },
+    "illegal": {
+      "question": "Come vengono gestite le mosse illegali?",
+      "answer": "L'app ignora le mosse illegali."
+    },
+    "variants": {
+      "question": "Le varianti sono supportate?",
+      "answer": "Al momento no."
+    },
+    "privacy": {
+      "question": "I miei video restano privati?",
+      "answer": "Sì. I video caricati e le immagini della fotocamera vengono elaborati sul tuo dispositivo. ChessCam non li riceve mai."
+    },
+    "licences": {
+      "question": "Quali licenze coprono il modello di riconoscimento della scacchiera?",
+      "answer": "Il modello è un modello ChessQueries con un encoder DINOv3 di Meta, scaricato da <hf>Hugging Face</hf>. I suoi pesi sono disponibili sia con la <polyform>PolyForm Noncommercial License 1.0.0</polyform> sia con la <dinov3>DINOv3 License</dinov3>. Consulta il file <notice>NOTICE</notice> per i dettagli."
+    },
+    "openSource": {
+      "question": "ChessCam è open source?",
+      "answer": "Sì. Il codice è su <github>GitHub</github>, con licenza AGPL-3.0, e il modello di riconoscimento della scacchiera è su <hf>Hugging Face</hf>. Su GitHub puoi anche segnalare bug e proporre idee."
+    },
+    "contact": {
+      "question": "Come posso mettermi in contatto?",
+      "answer": "Scrivimi su Lichess: <lichess>https://lichess.org/@/BlindfoldBlunderer</lichess>",
+      "happy": "Mi fa sempre piacere parlare delle tue idee o dei tuoi problemi!"
+    }
+  }
+}

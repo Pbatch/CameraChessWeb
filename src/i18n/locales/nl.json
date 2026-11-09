@@ -1,0 +1,336 @@
+{
+  "app": {
+    "updateAvailable": "Nieuwe inhoud beschikbaar. Opnieuw laden?"
+  },
+  "home": {
+    "upload": "Uploaden",
+    "uploadDescription": "Maak van een schaakvideo een PGN",
+    "record": "Opnemen",
+    "recordDescription": "Neem een partij live op met een camera",
+    "play": "Spelen",
+    "playDescription": "Speel een Lichess-partij op een echt bord",
+    "broadcast": "Uitzenden",
+    "broadcastDescription": "Zend een partij live uit op Lichess"
+  },
+  "common": {
+    "language": "Taal",
+    "goHome": "Naar de startpagina",
+    "backHome": "Terug naar de startpagina",
+    "setup": "Instellen",
+    "status": "Status",
+    "game": "Partij",
+    "gameActions": "Partijacties",
+    "copyPgn": "PGN kopiëren",
+    "copiedPgn": "PGN gekopieerd",
+    "copyPgnFailed": "Kan PGN niet kopiëren",
+    "signInLichess": "Inloggen met Lichess",
+    "dismissError": "Foutmelding sluiten",
+    "noStudies": "Geen studies gevonden",
+    "rotate": "Draai je apparaat naar liggend",
+    "loadingModel": "Bordherkenning laden...",
+    "modelFailed": "ChessCam kon het model voor bordherkenning niet laden. Laad de pagina opnieuw en probeer het nog eens.",
+    "modelFailedReason": "ChessCam kon het model voor bordherkenning niet laden ({{reason}}). Laad de pagina opnieuw en probeer het nog eens.",
+    "close": "Sluiten"
+  },
+  "account": {
+    "menu": "Account en instellingen",
+    "signIn": "Inloggen",
+    "signOut": "Uitloggen",
+    "engine": "Engine-evaluatie",
+    "engineNotInPlay": "Niet beschikbaar tijdens spelen op Lichess",
+    "help": "Help",
+    "videoGuides": "Videohandleidingen",
+    "pauseToSignOut": "Pauzeer om uit te loggen"
+  },
+  "errorPage": {
+    "title": "Er is iets misgegaan",
+    "unexpected": "ChessCam kreeg een onverwachte fout.",
+    "help": "Als opnieuw laden niet helpt, zou het wissen van de opgeslagen gegevens moeten helpen. Hiermee log je ook uit bij Lichess.",
+    "reload": "Opnieuw laden",
+    "clearData": "Opgeslagen gegevens wissen"
+  },
+  "device": {
+    "select": "Kies een apparaat",
+    "selected": "Apparaat: {{name}}"
+  },
+  "region": {
+    "draw": "Gebied tekenen",
+    "drawTitle": "Teken een gebied rond het bord",
+    "drawing": "Sleep een kader (annuleren)",
+    "drawingTitle": "Tekenen van het gebied annuleren",
+    "clear": "Gebied wissen",
+    "clearTitle": "Wis het gebied en gebruik het hele beeld"
+  },
+  "position": {
+    "label": "Stelling: {{option}}",
+    "standard": "Standaard",
+    "detectWhite": "Herkennen (wit aan zet)",
+    "detectBlack": "Herkennen (zwart aan zet)",
+    "detectFailed": "Kan de beginstelling niet bepalen",
+    "invalid": "Ongeldige FEN:",
+    "set": "Begin-FEN instellen",
+    "errors": {
+      "empty": "Het bord is leeg",
+      "kings": "Elke kant heeft precies één koning nodig",
+      "oppositeCheck": "De kant aan zet geeft de tegenstander schaak",
+      "pawnsOnBackrank": "Pionnen op de eerste of laatste rij"
+    }
+  },
+  "board": {
+    "label": "Huidige schaakstelling: {{pieces}}",
+    "empty": "leeg bord",
+    "pieceOn": "{{piece}} op {{square}}",
+    "pieces": {
+      "whiteKing": "witte koning",
+      "whiteQueen": "witte dame",
+      "whiteRook": "witte toren",
+      "whiteBishop": "witte loper",
+      "whiteKnight": "wit paard",
+      "whitePawn": "witte pion",
+      "blackKing": "zwarte koning",
+      "blackQueen": "zwarte dame",
+      "blackRook": "zwarte toren",
+      "blackBishop": "zwarte loper",
+      "blackKnight": "zwart paard",
+      "blackPawn": "zwarte pion"
+    }
+  },
+  "video": {
+    "choose": "Video kiezen",
+    "chooseTitle": "Video kiezen",
+    "selected": "Video: {{name}}",
+    "remove": "Video verwijderen: {{name}}",
+    "playFailed": "Kan deze video niet afspelen",
+    "loadFailed": "Kan deze video niet laden",
+    "formatHint": "Gebruik een MP4- (H.264/AAC) of WebM-bestand dat je browser ondersteunt",
+    "play": "Afspelen (k)",
+    "pause": "Pauzeren (k)",
+    "replay": "Opnieuw afspelen",
+    "seek": "Spoelen",
+    "seekValue": "{{time}} van {{duration}}",
+    "resetTracker": "Herkenning terugzetten naar de beginstelling",
+    "trackerWasReset": "Herkenning teruggezet",
+    "pgnWasReset": "PGN teruggezet naar de beginstelling",
+    "speed": "Afspeelsnelheid",
+    "speedLabel": "Afspeelsnelheid {{speed}}x",
+    "speedValue": "{{speed}}x"
+  },
+  "camera": {
+    "record": "Opnemen",
+    "startDetecting": "Herkenning starten",
+    "startKey": "{{action}} (k)",
+    "pause": "Pauzeren (k)",
+    "rec": "REC",
+    "reset": "Terugzetten naar de beginstelling",
+    "wasReset": "Teruggezet naar de beginstelling",
+    "detecting": "Zetten herkennen",
+    "fps": "{{fps}} FPS",
+    "fpsCpu": "{{fps}} FPS · CPU",
+    "unavailable": "Camera niet beschikbaar",
+    "needsHttps": "De camera heeft een beveiligde (https-)verbinding nodig",
+    "blocked": "Toegang tot de camera is geblokkeerd",
+    "allowAccess": "Sta cameratoegang toe in de instellingen van je browser",
+    "notFound": "Geen camera gevonden",
+    "connectAnother": "Sluit een camera aan of kies een ander apparaat",
+    "inUse": "De camera is al in gebruik",
+    "closeOthers": "Sluit andere apps die de camera gebruiken",
+    "startFailed": "Kan de camera niet starten",
+    "selectGameFirst": "Kies eerst een partij",
+    "selectStudyBoardFirst": "Kies eerst een studie en een bord"
+  },
+  "reset": {
+    "confirmTitle": "Druk nogmaals om de partij terug te zetten",
+    "confirm": "Terugzetten?"
+  },
+  "export": {
+    "button": "Lichess",
+    "title": "Partij naar Lichess sturen",
+    "open": "Openen in Lichess",
+    "opened": "Partij geopend op Lichess",
+    "openFailed": "Kan de partij niet openen op Lichess",
+    "addToStudy": "Toevoegen aan een studie",
+    "exported": "Partij geëxporteerd naar",
+    "exportFailed": "Kan de partij niet exporteren naar de Lichess-studie",
+    "signInWarning": "Bij het inloggen verlaat je deze pagina, dus deze partij gaat verloren. Kopieer eerst de PGN om hem te bewaren.",
+    "signInAnyway": "Toch inloggen"
+  },
+  "study": {
+    "select": "Kies een studie",
+    "selected": "Studie: {{name}}"
+  },
+  "boardNumber": {
+    "select": "Kies een bord",
+    "selected": "Bord: {{number}}",
+    "item": "Bord {{number}}"
+  },
+  "play": {
+    "selectGame": "Kies een partij",
+    "selectedGame": "Partij: {{opponent}}",
+    "starting": "Partij starten",
+    "whiteVs": "Wit tegen {{opponent}}",
+    "blackVs": "Zwart tegen {{opponent}}",
+    "loadGamesFailed": "Kan Lichess-partijen niet laden",
+    "refused": "Lichess heeft {{move}} geweigerd. Controleer of het bord overeenkomt met de partij op Lichess.",
+    "refusedReason": "Lichess heeft {{move}} geweigerd ({{reason}}). Controleer of het bord overeenkomt met de partij op Lichess.",
+    "sendFailed": "Kan je zet niet naar Lichess sturen. {{reason}}",
+    "retrying": "{{message}} Opnieuw proberen...",
+    "lostConnection": "Verbinding met de Lichess-partij verbroken. {{reason}}",
+    "reconnecting": "{{message}} Opnieuw verbinden...",
+    "followFailed": "Kan de Lichess-partij niet volgen."
+  },
+  "broadcast": {
+    "updateFailed": "Kan de Lichess-uitzending niet bijwerken. {{reason}}",
+    "willRetry": "{{message}} Bij de volgende zet wordt het opnieuw geprobeerd."
+  },
+  "lichess": {
+    "title": "Lichess",
+    "signInFailed": "Kan niet inloggen bij Lichess. {{reason}}",
+    "needsAccount": "Hiervoor is je Lichess-account nodig.",
+    "playReason": "ChessCam speelt de zetten die je op je bord doet in je Lichess-partijen, en heeft daarvoor je Lichess-account nodig.",
+    "broadcastReason": "ChessCam zendt de partij op je bord uit naar een van je Lichess-uitzendingen, en heeft daarvoor je Lichess-account nodig.",
+    "expired": "Je Lichess-login is verlopen. Log opnieuw in.",
+    "forbidden": "Lichess stond dit niet toe. Opnieuw inloggen kan helpen.",
+    "notFound": "Lichess kon het niet vinden.",
+    "rateLimited": "Lichess beperkt het aantal verzoeken. Probeer het over een minuut opnieuw.",
+    "serverError": "Lichess heeft problemen. Probeer het zo opnieuw.",
+    "refusedReason": "Lichess heeft het verzoek geweigerd: {{reason}}",
+    "refusedStatus": "Lichess heeft het verzoek geweigerd ({{status}}).",
+    "unreachable": "Lichess is niet bereikbaar. Controleer je verbinding."
+  },
+  "detection": {
+    "failed": "Stukherkenning mislukt",
+    "stopped": "De stukherkenning is gestopt. Laad de pagina opnieuw.",
+    "reloadFailed": "Kan het model niet opnieuw laden. Laad de pagina opnieuw.",
+    "gpuReset": "De GPU is opnieuw gestart. Het model wordt opnieuw geladen..."
+  },
+  "engine": {
+    "failed": "Kan Stockfish niet uitvoeren in deze browser."
+  },
+  "faq": {
+    "title": "Veelgestelde vragen",
+    "sections": {
+      "gettingStarted": "Aan de slag",
+      "modes": "Modi",
+      "detection": "Herkenning",
+      "saving": "Je partij opslaan",
+      "about": "Over ChessCam"
+    },
+    "stand": {
+      "question": "Waar kan ik een standaard kopen?",
+      "answer": "Je kunt een standaard kopen voor £ 12,99 op <stand>https://www.amazon.co.uk/dp/B07NVBXYPJ</stand>."
+    },
+    "videos": {
+      "question": "Zijn er videohandleidingen?",
+      "answer": "Ja. De afspeellijst \"How to use ChessCam\" op YouTube heeft een korte video, in het Engels, voor elke modus. Open hem met <b>Videohandleidingen</b> in het menu rechtsboven."
+    },
+    "camera": {
+      "question": "Hoe stel ik mijn camera op?",
+      "step1": "Zet je telefoon of camera liggend op een standaard naast het bord.",
+      "step2": "Zorg dat de standaard stevig staat en dat de camera het hele bord ziet.",
+      "step3": "Zorg dat het hoogste stuk (de koning of dame) nog in beeld is als het op het veld staat dat het verst van de camera af ligt.",
+      "step4": "Als het bord klein in beeld is, tik je op <b>Gebied tekenen</b> en sleep je er een kader omheen.",
+      "step5": "ChessCam zoomt de camera zo ver mogelijk uit. Kies een andere camera in het menu <b>Apparaat</b> als je die wilt gebruiken.",
+      "halfZoom": "Opstelling met 0,5x zoom",
+      "halfZoomCaption": "Mijn opstelling met 0,5x zoom",
+      "fullZoom": "Opstelling met 1x zoom",
+      "fullZoomCaption": "Mijn opstelling met 1x zoom"
+    },
+    "moving": {
+      "question": "Werkt de app als het bord of de camera halverwege verschuift?",
+      "answer": "Ja, zolang het hele bord binnen het gebied blijft. Als je geen gebied hebt getekend, moet het hele bord in beeld blijven."
+    },
+    "power": {
+      "question": "Hoe krachtig moet mijn apparaat zijn?",
+      "answer": "De app moet minstens 1 FPS halen. De snelheid staat rechtsboven in de video."
+    },
+    "record": {
+      "question": "Hoe neem ik een partij op?",
+      "step1": "Tik op <b>Opnemen</b> op de startpagina, of ga direct naar <record>https://www.chesscam.net/record</record>.",
+      "step2": "Stel je camera op (zie \"Hoe stel ik mijn camera op?\").",
+      "step3": "Druk op de rode opnameknop boven de video, of op <b>K</b>, om de opname te starten. Druk nogmaals om te pauzeren.",
+      "reset": "Druk op de gumknop boven de video om opnieuw te beginnen. Als de partij al zetten heeft, druk je een tweede keer om te bevestigen."
+    },
+    "upload": {
+      "question": "Hoe upload ik een partij?",
+      "step1": "Tik op <b>Uploaden</b> op de startpagina, of ga direct naar <upload>https://www.chesscam.net/upload</upload>.",
+      "step2": "Tik op <b>Video kiezen</b> en kies een video van de partij. MP4- (H.264/AAC) en WebM-bestanden werken in de meeste browsers.",
+      "step3": "Als het bord klein in de video is, tik je op <b>Gebied tekenen</b> en sleep je er een kader omheen.",
+      "step4": "Druk op de afspeelknop boven de video, of op <b>K</b>, om zetten te gaan herkennen.",
+      "speed": "De snelheidsknop boven de video wisselt tussen 1x, 2x en 4x. 1x is het nauwkeurigst.",
+      "seek": "Gebruik de tijdbalk of de pijltjestoetsen om door de video te springen. Springen pauzeert de video, zodat je het bord kunt controleren voordat je verdergaat. De gumknop zet de partij terug naar de beginstelling.",
+      "eval": "De balk naast de video toont de evaluatie van de stelling door Stockfish. Hij staat aan als je Uploaden opent, en uit als je Opnemen of Uitzenden opent, omdat de spelers aan het bord hem zouden kunnen zien. Zet hem aan of uit met <b>Engine-evaluatie</b> in het menu rechtsboven. Tijdens spelen op Lichess wordt hij nooit getoond."
+    },
+    "play": {
+      "question": "Hoe speel ik een Lichess-partij op een echt bord?",
+      "step1": "Start een partij op Lichess.",
+      "step2": "Tik op <b>Spelen</b> op de startpagina, of ga direct naar <play>https://www.chesscam.net/play</play>. Log in met Lichess als daarom gevraagd wordt.",
+      "step3": "Stel je camera op (zie \"Hoe stel ik mijn camera op?\").",
+      "step4": "Kies je partij bij <b>Kies een partij</b>.",
+      "step5": "Druk op de afspeelknop boven de video, of op <b>K</b>, om zetten te gaan herkennen.",
+      "moves": "De zetten die je op je bord doet, worden naar Lichess gestuurd. De zetten van je tegenstander verschijnen op het bord in de zijbalk, zodat je ze op je bord kunt spelen.",
+      "limits": "Lichess staat dit alleen toe bij rapid-, klassieke en correspondentiepartijen."
+    },
+    "broadcast": {
+      "question": "Hoe zend ik een partij uit op Lichess?",
+      "step1": "Maak een uitzending op de website van Lichess, als je er nog geen hebt.",
+      "step2": "Tik op <b>Uitzenden</b> op de startpagina, of ga direct naar <broadcast>https://www.chesscam.net/broadcast</broadcast>. Log in met Lichess als daarom gevraagd wordt.",
+      "step3": "Stel je camera op (zie \"Hoe stel ik mijn camera op?\").",
+      "step4": "Kies de ronde van de uitzending bij <b>Kies een studie</b>. Alleen rondes die je kunt bewerken staan in de lijst.",
+      "step5": "Kies het bordnummer, van 1 tot 64, bij <b>Kies een bord</b>.",
+      "step6": "Druk op de rode opnameknop boven de video, of op <b>K</b>, om de uitzending te starten.",
+      "moves": "Elke zet wordt naar de uitzending gestuurd zodra hij herkend is, samen met de hele partij tot dan toe. Als het versturen mislukt door een verbindingsprobleem, verschijnt er bovenaan het scherm een foutmelding, en vult de volgende zet aan wat er gemist is. Tot dan wordt er niets opnieuw verstuurd, dus als de laatste zet van de partij niet verstuurd kon worden, controleer dan de uitzending op Lichess."
+    },
+    "position": {
+      "question": "Kan ik vanuit een eigen stelling beginnen?",
+      "intro": "Ja, bij opnemen of uploaden. Zet voor het starten de stelling op je bord en kies dan een optie in het menu <b>Stelling</b>:",
+      "standard": "<b>Standaard</b>: de normale beginstelling.",
+      "white": "<b>Herkennen (wit aan zet)</b>: leest de stelling af met de camera, met wit aan zet.",
+      "black": "<b>Herkennen (zwart aan zet)</b>: leest de stelling af met de camera, met zwart aan zet.",
+      "check": "Controleer na het herkennen het bord in de zijbalk, want een verkeerd gelezen stuk zorgt ervoor dat latere zetten niet herkend worden."
+    },
+    "corners": {
+      "question": "Wat zijn de labels in de hoeken van de video?",
+      "answer": "Terwijl de app zetten herkent, zet hij in elke hoek van het gebied (of van de hele video, als je geen gebied hebt getekend) het veld dat hij daar denkt te zien: a1, a8, h1 of h8. Als de labels niet kloppen, worden zetten verkeerd gelezen. Dat gebeurt vooral als het bord ongeveer 45 graden ten opzichte van de camera staat, dus draai het bord of de camera tot de randen van het bord dichter bij de randen van de video liggen."
+    },
+    "save": {
+      "question": "Hoe sla ik mijn partij op?",
+      "answer": "Tik op <b>PGN kopiëren</b> in de zijbalk om de partij naar het klembord te kopiëren. Opgenomen partijen bevatten de bedenktijd van elke zet, vanaf het moment dat hij gezien werd, tot op ongeveer een seconde. Gepauzeerde tijd telt niet mee."
+    },
+    "export": {
+      "question": "Hoe stuur ik mijn partij naar Lichess?",
+      "intro": "Tik na het opnemen of uploaden van een partij op <b>Lichess</b> in de zijbalk, naast <b>PGN kopiëren</b>:",
+      "open": "<b>Openen in Lichess</b> importeert de partij in Lichess en opent hem in een nieuw tabblad. Je hoeft niet in te loggen.",
+      "study": "<b>Toevoegen aan een studie</b> slaat de partij op in een van je Lichess-studies, met de huidige datum en tijd als naam. Log eerst via het menu in met Lichess. Als er geen studies in de lijst staan, maak er dan een op de website van Lichess.",
+      "signIn": "Bij het inloggen verlaat je de pagina, dus een lopende partij gaat verloren. Kopieer eerst de PGN om hem te bewaren."
+    },
+    "offline": {
+      "question": "Werkt de app offline?",
+      "answer": "Zodra je Opnemen of Uploaden een keer met internetverbinding hebt gebruikt, werken ze ook offline. Spelen, uitzenden en partijen naar Lichess sturen hebben een verbinding nodig, maar je kunt de PGN altijd kopiëren."
+    },
+    "illegal": {
+      "question": "Wat gebeurt er met illegale zetten?",
+      "answer": "De app negeert illegale zetten."
+    },
+    "variants": {
+      "question": "Worden varianten ondersteund?",
+      "answer": "Op dit moment niet."
+    },
+    "privacy": {
+      "question": "Blijven mijn video's privé?",
+      "answer": "Ja. Geüploade video's en het camerabeeld worden op je eigen apparaat verwerkt. ChessCam ontvangt ze nooit."
+    },
+    "licences": {
+      "question": "Welke licenties gelden voor het model voor bordherkenning?",
+      "answer": "Het model is een ChessQueries-model met een DINOv3-encoder van Meta, gedownload van <hf>Hugging Face</hf>. De gewichten zijn beschikbaar onder zowel de <polyform>PolyForm Noncommercial License 1.0.0</polyform> als de <dinov3>DINOv3 License</dinov3>. Zie de <notice>NOTICE</notice> voor details."
+    },
+    "openSource": {
+      "question": "Is ChessCam open source?",
+      "answer": "Ja. De code staat op <github>GitHub</github>, onder de AGPL-3.0-licentie, en het model voor bordherkenning staat op <hf>Hugging Face</hf>. Op GitHub kun je ook bugs melden en ideeën voorstellen."
+    },
+    "contact": {
+      "question": "Hoe kan ik contact opnemen?",
+      "answer": "Stuur me een bericht op Lichess: <lichess>https://lichess.org/@/BlindfoldBlunderer</lichess>",
+      "happy": "Ik praat altijd graag over je ideeën of problemen!"
+    }
+  }
+}

@@ -1,0 +1,336 @@
+{
+  "app": {
+    "updateAvailable": "Dostępna jest nowa wersja. Odświeżyć?"
+  },
+  "home": {
+    "upload": "Prześlij",
+    "uploadDescription": "Zamień nagranie partii szachowej w PGN",
+    "record": "Nagrywaj",
+    "recordDescription": "Nagraj partię na żywo kamerą",
+    "play": "Graj",
+    "playDescription": "Graj partię na Lichess na prawdziwej szachownicy",
+    "broadcast": "Transmituj",
+    "broadcastDescription": "Transmituj partię na żywo na Lichess"
+  },
+  "common": {
+    "language": "Język",
+    "goHome": "Przejdź do strony głównej",
+    "backHome": "Wróć do strony głównej",
+    "setup": "Ustawienia",
+    "status": "Stan",
+    "game": "Partia",
+    "gameActions": "Opcje partii",
+    "copyPgn": "Kopiuj PGN",
+    "copiedPgn": "Skopiowano PGN",
+    "copyPgnFailed": "Nie udało się skopiować PGN",
+    "signInLichess": "Zaloguj się przez Lichess",
+    "dismissError": "Zamknij błąd",
+    "noStudies": "Nie znaleziono opracowań",
+    "rotate": "Obróć urządzenie poziomo",
+    "loadingModel": "Wczytywanie rozpoznawania szachownicy...",
+    "modelFailed": "ChessCam nie mógł wczytać modelu rozpoznawania szachownicy. Odśwież stronę i spróbuj ponownie.",
+    "modelFailedReason": "ChessCam nie mógł wczytać modelu rozpoznawania szachownicy ({{reason}}). Odśwież stronę i spróbuj ponownie.",
+    "close": "Zamknij"
+  },
+  "account": {
+    "menu": "Konto i ustawienia",
+    "signIn": "Zaloguj się",
+    "signOut": "Wyloguj się",
+    "engine": "Ocena silnika",
+    "engineNotInPlay": "Niedostępne podczas gry na Lichess",
+    "help": "Pomoc",
+    "videoGuides": "Poradniki wideo",
+    "pauseToSignOut": "Wstrzymaj, aby się wylogować"
+  },
+  "errorPage": {
+    "title": "Coś poszło nie tak",
+    "unexpected": "W ChessCam wystąpił nieoczekiwany błąd.",
+    "help": "Jeśli odświeżenie nie pomoże, powinno pomóc wyczyszczenie zapisanych danych. Spowoduje to też wylogowanie z Lichess.",
+    "reload": "Odśwież",
+    "clearData": "Wyczyść zapisane dane"
+  },
+  "device": {
+    "select": "Wybierz urządzenie",
+    "selected": "Urządzenie: {{name}}"
+  },
+  "region": {
+    "draw": "Zaznacz obszar",
+    "drawTitle": "Zaznacz obszar wokół szachownicy",
+    "drawing": "Przeciągnij ramkę (anuluj)",
+    "drawingTitle": "Anuluj zaznaczanie obszaru",
+    "clear": "Wyczyść obszar",
+    "clearTitle": "Wyczyść obszar i użyj całego kadru"
+  },
+  "position": {
+    "label": "Pozycja: {{option}}",
+    "standard": "Standardowa",
+    "detectWhite": "Wykryj (ruch białych)",
+    "detectBlack": "Wykryj (ruch czarnych)",
+    "detectFailed": "Nie udało się ustalić pozycji początkowej",
+    "invalid": "Nieprawidłowy FEN:",
+    "set": "Ustaw początkowy FEN",
+    "errors": {
+      "empty": "Szachownica jest pusta",
+      "kings": "Każda strona musi mieć dokładnie jednego króla",
+      "oppositeCheck": "Strona na posunięciu szachuje przeciwnika",
+      "pawnsOnBackrank": "Piony na pierwszej lub ostatniej linii"
+    }
+  },
+  "board": {
+    "label": "Aktualna pozycja: {{pieces}}",
+    "empty": "pusta szachownica",
+    "pieceOn": "{{piece}} na {{square}}",
+    "pieces": {
+      "whiteKing": "biały król",
+      "whiteQueen": "biały hetman",
+      "whiteRook": "biała wieża",
+      "whiteBishop": "biały goniec",
+      "whiteKnight": "biały skoczek",
+      "whitePawn": "biały pion",
+      "blackKing": "czarny król",
+      "blackQueen": "czarny hetman",
+      "blackRook": "czarna wieża",
+      "blackBishop": "czarny goniec",
+      "blackKnight": "czarny skoczek",
+      "blackPawn": "czarny pion"
+    }
+  },
+  "video": {
+    "choose": "Wybierz wideo",
+    "chooseTitle": "Wybierz wideo",
+    "selected": "Wideo: {{name}}",
+    "remove": "Usuń wideo: {{name}}",
+    "playFailed": "Nie można odtworzyć tego wideo",
+    "loadFailed": "Nie można wczytać tego wideo",
+    "formatHint": "Użyj pliku MP4 (H.264/AAC) lub WebM obsługiwanego przez przeglądarkę",
+    "play": "Odtwórz (k)",
+    "pause": "Wstrzymaj (k)",
+    "replay": "Odtwórz ponownie",
+    "seek": "Przewiń",
+    "seekValue": "{{time}} z {{duration}}",
+    "resetTracker": "Zresetuj rozpoznawanie do pozycji początkowej",
+    "trackerWasReset": "Zresetowano rozpoznawanie",
+    "pgnWasReset": "Zresetowano PGN do pozycji początkowej",
+    "speed": "Prędkość odtwarzania",
+    "speedLabel": "Prędkość odtwarzania {{speed}}x",
+    "speedValue": "{{speed}}x"
+  },
+  "camera": {
+    "record": "Nagrywaj",
+    "startDetecting": "Zacznij rozpoznawanie",
+    "startKey": "{{action}} (k)",
+    "pause": "Wstrzymaj (k)",
+    "rec": "REC",
+    "reset": "Wróć do pozycji początkowej",
+    "wasReset": "Przywrócono pozycję początkową",
+    "detecting": "Rozpoznawanie ruchów",
+    "fps": "{{fps}} FPS",
+    "fpsCpu": "{{fps}} FPS · CPU",
+    "unavailable": "Kamera niedostępna",
+    "needsHttps": "Kamera wymaga bezpiecznego połączenia (https)",
+    "blocked": "Dostęp do kamery został zablokowany",
+    "allowAccess": "Zezwól na dostęp do kamery w ustawieniach przeglądarki",
+    "notFound": "Nie znaleziono kamery",
+    "connectAnother": "Podłącz kamerę lub wybierz inne urządzenie",
+    "inUse": "Kamera jest już używana",
+    "closeOthers": "Zamknij inne aplikacje korzystające z kamery",
+    "startFailed": "Nie udało się uruchomić kamery",
+    "selectGameFirst": "Najpierw wybierz partię",
+    "selectStudyBoardFirst": "Najpierw wybierz opracowanie i szachownicę"
+  },
+  "reset": {
+    "confirmTitle": "Naciśnij ponownie, aby zresetować partię",
+    "confirm": "Zresetować?"
+  },
+  "export": {
+    "button": "Lichess",
+    "title": "Wyślij partię na Lichess",
+    "open": "Otwórz w Lichess",
+    "opened": "Otwarto partię na Lichess",
+    "openFailed": "Nie udało się otworzyć partii na Lichess",
+    "addToStudy": "Dodaj do opracowania",
+    "exported": "Wyeksportowano partię do",
+    "exportFailed": "Nie udało się wyeksportować partii do opracowania na Lichess",
+    "signInWarning": "Logowanie opuszcza tę stronę, więc ta partia zostanie utracona. Najpierw skopiuj PGN, aby ją zachować.",
+    "signInAnyway": "Zaloguj się mimo to"
+  },
+  "study": {
+    "select": "Wybierz opracowanie",
+    "selected": "Opracowanie: {{name}}"
+  },
+  "boardNumber": {
+    "select": "Wybierz szachownicę",
+    "selected": "Szachownica: {{number}}",
+    "item": "Szachownica {{number}}"
+  },
+  "play": {
+    "selectGame": "Wybierz partię",
+    "selectedGame": "Partia: {{opponent}}",
+    "starting": "Rozpoczynanie partii",
+    "whiteVs": "Białe przeciwko {{opponent}}",
+    "blackVs": "Czarne przeciwko {{opponent}}",
+    "loadGamesFailed": "Nie udało się wczytać partii z Lichess",
+    "refused": "Lichess odrzucił {{move}}. Sprawdź, czy szachownica zgadza się z partią na Lichess.",
+    "refusedReason": "Lichess odrzucił {{move}} ({{reason}}). Sprawdź, czy szachownica zgadza się z partią na Lichess.",
+    "sendFailed": "Nie udało się wysłać twojego ruchu na Lichess. {{reason}}",
+    "retrying": "{{message}} Ponawianie...",
+    "lostConnection": "Utracono połączenie z partią na Lichess. {{reason}}",
+    "reconnecting": "{{message}} Ponowne łączenie...",
+    "followFailed": "Nie można śledzić partii na Lichess."
+  },
+  "broadcast": {
+    "updateFailed": "Nie udało się zaktualizować transmisji na Lichess. {{reason}}",
+    "willRetry": "{{message}} Kolejna próba nastąpi przy następnym ruchu."
+  },
+  "lichess": {
+    "title": "Lichess",
+    "signInFailed": "Nie udało się zalogować do Lichess. {{reason}}",
+    "needsAccount": "To wymaga twojego konta Lichess.",
+    "playReason": "ChessCam wykonuje w twoich partiach na Lichess ruchy, które robisz na swojej szachownicy, więc potrzebuje twojego konta Lichess.",
+    "broadcastReason": "ChessCam transmituje partię z twojej szachownicy do jednej z twoich transmisji na Lichess, więc potrzebuje twojego konta Lichess.",
+    "expired": "Twoje logowanie do Lichess wygasło. Zaloguj się ponownie.",
+    "forbidden": "Lichess na to nie zezwolił. Ponowne zalogowanie może pomóc.",
+    "notFound": "Lichess tego nie znalazł.",
+    "rateLimited": "Lichess ogranicza liczbę zapytań. Spróbuj ponownie za minutę.",
+    "serverError": "Lichess ma problemy. Spróbuj ponownie za chwilę.",
+    "refusedReason": "Lichess odrzucił zapytanie: {{reason}}",
+    "refusedStatus": "Lichess odrzucił zapytanie ({{status}}).",
+    "unreachable": "Nie można połączyć się z Lichess. Sprawdź połączenie."
+  },
+  "detection": {
+    "failed": "Rozpoznawanie bierek nie powiodło się",
+    "stopped": "Rozpoznawanie bierek zostało zatrzymane. Odśwież stronę.",
+    "reloadFailed": "Nie udało się ponownie wczytać modelu. Odśwież stronę.",
+    "gpuReset": "GPU zostało zresetowane. Ponowne wczytywanie modelu..."
+  },
+  "engine": {
+    "failed": "Nie można uruchomić Stockfisha w tej przeglądarce."
+  },
+  "faq": {
+    "title": "Najczęściej zadawane pytania",
+    "sections": {
+      "gettingStarted": "Pierwsze kroki",
+      "modes": "Tryby",
+      "detection": "Rozpoznawanie",
+      "saving": "Zapisywanie partii",
+      "about": "O ChessCam"
+    },
+    "stand": {
+      "question": "Gdzie mogę kupić statyw?",
+      "answer": "Statyw możesz kupić za 12,99 £ na <stand>https://www.amazon.co.uk/dp/B07NVBXYPJ</stand>."
+    },
+    "videos": {
+      "question": "Czy są poradniki wideo?",
+      "answer": "Tak. Playlista „How to use ChessCam” na YouTube ma krótki film, po angielsku, dla każdego trybu. Otwórz ją przyciskiem <b>Poradniki wideo</b> w menu w prawym górnym rogu."
+    },
+    "camera": {
+      "question": "Jak ustawić kamerę?",
+      "step1": "Postaw telefon lub kamerę na statywie z boku szachownicy, w poziomie.",
+      "step2": "Upewnij się, że statyw stoi stabilnie, a kamera widzi całą szachownicę.",
+      "step3": "Upewnij się, że najwyższa bierka (król lub hetman) nadal mieści się w kadrze, gdy stoi na polu najdalej od kamery.",
+      "step4": "Jeśli szachownica jest w kadrze mała, dotknij <b>Zaznacz obszar</b> i przeciągnij wokół niej ramkę.",
+      "step5": "ChessCam oddala obraz kamery najbardziej, jak się da. Aby użyć innej kamery, wybierz ją z menu <b>Urządzenie</b>.",
+      "halfZoom": "Ustawienie z zoomem 0,5x",
+      "halfZoomCaption": "Moje ustawienie z zoomem 0,5x",
+      "fullZoom": "Ustawienie z zoomem 1x",
+      "fullZoomCaption": "Moje ustawienie z zoomem 1x"
+    },
+    "moving": {
+      "question": "Czy aplikacja zadziała, jeśli szachownica lub kamera przesuną się w trakcie partii?",
+      "answer": "Tak, o ile cała szachownica pozostaje w obszarze. Jeśli nie zaznaczono obszaru, cała szachownica musi pozostać w kadrze."
+    },
+    "power": {
+      "question": "Jak wydajne musi być moje urządzenie?",
+      "answer": "Aplikacja musi działać z prędkością co najmniej 1 FPS. Prędkość jest wyświetlana w prawym górnym rogu wideo."
+    },
+    "record": {
+      "question": "Jak nagrywać?",
+      "step1": "Dotknij <b>Nagrywaj</b> na stronie głównej albo przejdź od razu do <record>https://www.chesscam.net/record</record>.",
+      "step2": "Ustaw kamerę (zobacz „Jak ustawić kamerę?”).",
+      "step3": "Naciśnij czerwony przycisk nagrywania nad wideo lub klawisz <b>K</b>, aby zacząć nagrywanie. Naciśnij go ponownie, aby wstrzymać.",
+      "reset": "Aby zacząć od nowa, naciśnij przycisk z gumką nad wideo. Jeśli w partii są już ruchy, naciśnij go drugi raz, aby potwierdzić."
+    },
+    "upload": {
+      "question": "Jak przesłać partię?",
+      "step1": "Dotknij <b>Prześlij</b> na stronie głównej albo przejdź od razu do <upload>https://www.chesscam.net/upload</upload>.",
+      "step2": "Dotknij <b>Wybierz wideo</b> i wybierz nagranie partii. Pliki MP4 (H.264/AAC) i WebM działają w większości przeglądarek.",
+      "step3": "Jeśli szachownica jest na wideo mała, dotknij <b>Zaznacz obszar</b> i przeciągnij wokół niej ramkę.",
+      "step4": "Naciśnij przycisk odtwarzania nad wideo lub klawisz <b>K</b>, aby zacząć rozpoznawać ruchy.",
+      "speed": "Przycisk prędkości nad wideo przełącza między 1x, 2x i 4x. 1x jest najdokładniejsze.",
+      "seek": "Użyj paska przewijania lub strzałek, aby przeskakiwać w wideo. Przeskakiwanie wstrzymuje wideo, więc możesz sprawdzić szachownicę przed kontynuacją. Przycisk z gumką przywraca partię do pozycji początkowej.",
+      "eval": "Pasek obok wideo pokazuje ocenę pozycji przez Stockfisha. Jest włączony po otwarciu trybu Prześlij i wyłączony po otwarciu trybów Nagrywaj i Transmituj, bo gracze przy szachownicy mogliby go widzieć. Przełączysz go opcją <b>Ocena silnika</b> w menu w prawym górnym rogu. Nigdy nie jest wyświetlany podczas gry na Lichess."
+    },
+    "play": {
+      "question": "Jak grać partię z Lichess na prawdziwej szachownicy?",
+      "step1": "Rozpocznij partię na Lichess.",
+      "step2": "Dotknij <b>Graj</b> na stronie głównej albo przejdź od razu do <play>https://www.chesscam.net/play</play>. Zaloguj się przez Lichess, jeśli pojawi się taka prośba.",
+      "step3": "Ustaw kamerę (zobacz „Jak ustawić kamerę?”).",
+      "step4": "Wybierz swoją partię z <b>Wybierz partię</b>.",
+      "step5": "Naciśnij przycisk odtwarzania nad wideo lub klawisz <b>K</b>, aby zacząć rozpoznawać ruchy.",
+      "moves": "Ruchy wykonane na twojej szachownicy są wysyłane na Lichess. Ruchy przeciwnika pojawiają się na szachownicy w panelu bocznym, więc możesz je wykonać na swojej szachownicy.",
+      "limits": "Lichess pozwala na to tylko w partiach szybkich, klasycznych i korespondencyjnych."
+    },
+    "broadcast": {
+      "question": "Jak transmitować partię na Lichess?",
+      "step1": "Utwórz transmisję na stronie Lichess, jeśli jeszcze jej nie masz.",
+      "step2": "Dotknij <b>Transmituj</b> na stronie głównej albo przejdź od razu do <broadcast>https://www.chesscam.net/broadcast</broadcast>. Zaloguj się przez Lichess, jeśli pojawi się taka prośba.",
+      "step3": "Ustaw kamerę (zobacz „Jak ustawić kamerę?”).",
+      "step4": "Wybierz rundę transmisji z <b>Wybierz opracowanie</b>. Na liście są tylko rundy, które możesz edytować.",
+      "step5": "Wybierz numer szachownicy, od 1 do 64, z <b>Wybierz szachownicę</b>.",
+      "step6": "Naciśnij czerwony przycisk nagrywania nad wideo lub klawisz <b>K</b>, aby zacząć transmisję.",
+      "moves": "Każdy ruch jest wysyłany do transmisji zaraz po rozpoznaniu, razem z całą dotychczasową partią. Jeśli wysyłanie nie powiedzie się z powodu problemu z połączeniem, u góry ekranu pojawi się błąd, a następny ruch uzupełni to, czego brakowało. Do tego czasu nic nie jest wysyłane ponownie, więc jeśli nie udało się wysłać ostatniego ruchu partii, sprawdź transmisję na Lichess."
+    },
+    "position": {
+      "question": "Czy mogę zacząć od własnej pozycji?",
+      "intro": "Tak, podczas nagrywania lub przesyłania. Przed rozpoczęciem ustaw pozycję na szachownicy, a potem wybierz opcję z menu <b>Pozycja</b>:",
+      "standard": "<b>Standardowa</b>: zwykła pozycja początkowa.",
+      "white": "<b>Wykryj (ruch białych)</b>: odczytuje pozycję z kamery, z białymi na posunięciu.",
+      "black": "<b>Wykryj (ruch czarnych)</b>: odczytuje pozycję z kamery, z czarnymi na posunięciu.",
+      "check": "Po wykryciu sprawdź szachownicę w panelu bocznym, bo źle odczytana bierka uniemożliwi rozpoznanie kolejnych ruchów."
+    },
+    "corners": {
+      "question": "Co oznaczają etykiety w rogach wideo?",
+      "answer": "Podczas rozpoznawania ruchów aplikacja oznacza każdy róg obszaru (lub całego wideo, jeśli nie zaznaczono obszaru) polem, które według niej tam jest: a1, a8, h1 lub h8. Jeśli etykiety są błędne, ruchy będą źle odczytywane. Najczęściej zdarza się to, gdy szachownica jest ustawiona pod kątem około 45 stopni do kamery, więc obróć szachownicę lub kamerę, aż jej krawędzie będą bliżej krawędzi wideo."
+    },
+    "save": {
+      "question": "Jak zapisać partię?",
+      "answer": "Dotknij <b>Kopiuj PGN</b> w panelu bocznym, aby skopiować partię do schowka. Nagrane partie zawierają czas każdego ruchu, liczony od chwili, gdy został zauważony, z dokładnością do około sekundy. Czas wstrzymania nie jest liczony."
+    },
+    "export": {
+      "question": "Jak wysłać partię na Lichess?",
+      "intro": "Po nagraniu lub przesłaniu partii dotknij <b>Lichess</b> w panelu bocznym, obok <b>Kopiuj PGN</b>:",
+      "open": "<b>Otwórz w Lichess</b> importuje partię na Lichess i otwiera ją w nowej karcie. Nie trzeba się logować.",
+      "study": "<b>Dodaj do opracowania</b> zapisuje partię w jednym z twoich opracowań na Lichess, pod nazwą z bieżącą datą i godziną. Najpierw zaloguj się przez Lichess z menu. Jeśli lista opracowań jest pusta, utwórz opracowanie na stronie Lichess.",
+      "signIn": "Logowanie opuszcza stronę, więc trwająca partia zostanie utracona. Najpierw skopiuj PGN, aby ją zachować."
+    },
+    "offline": {
+      "question": "Czy aplikacja działa offline?",
+      "answer": "Po jednorazowym użyciu trybów Nagrywaj lub Prześlij z dostępem do internetu działają one też offline. Gra, transmisja i wysyłanie partii na Lichess wymagają połączenia, ale PGN możesz skopiować zawsze."
+    },
+    "illegal": {
+      "question": "Co dzieje się z nieprawidłowymi ruchami?",
+      "answer": "Aplikacja ignoruje nieprawidłowe ruchy."
+    },
+    "variants": {
+      "question": "Czy warianty są obsługiwane?",
+      "answer": "Na razie nie."
+    },
+    "privacy": {
+      "question": "Czy moje nagrania pozostają prywatne?",
+      "answer": "Tak. Przesłane nagrania i obraz z kamery są przetwarzane na twoim urządzeniu. ChessCam nigdy ich nie otrzymuje."
+    },
+    "licences": {
+      "question": "Jakie licencje obejmują model rozpoznawania szachownicy?",
+      "answer": "Model to model ChessQueries z koderem DINOv3 od Meta, pobierany z <hf>Hugging Face</hf>. Jego wagi są dostępne zarówno na licencji <polyform>PolyForm Noncommercial License 1.0.0</polyform>, jak i <dinov3>DINOv3 License</dinov3>. Szczegóły znajdziesz w pliku <notice>NOTICE</notice>."
+    },
+    "openSource": {
+      "question": "Czy ChessCam jest open source?",
+      "answer": "Tak. Kod jest na <github>GitHubie</github>, na licencji AGPL-3.0, a model rozpoznawania szachownicy jest na <hf>Hugging Face</hf>. Na GitHubie możesz też zgłaszać błędy i proponować pomysły."
+    },
+    "contact": {
+      "question": "Jak mogę się skontaktować?",
+      "answer": "Napisz do mnie na Lichess: <lichess>https://lichess.org/@/BlindfoldBlunderer</lichess>",
+      "happy": "Zawsze chętnie porozmawiam o twoich pomysłach czy problemach!"
+    }
+  }
+}
