@@ -68,6 +68,11 @@ export interface BayesianOptions {
 // does as well (16) wherever evidenceWeight is 0.4 to 0.6 times the temperature, from 2.2 up, and at 0.4 to 0.5 times
 // from 1.5; at 0.6 times below 2.2 it needs 26, and at 0.7 times 13 to 26 with 56 to 67 uncapped. Against v3 it
 // reads a promoted queen v3 took for a rook (dL6Q 7 to 0), but gets LEYx's swapped move order worse (11 to 20).
+// The current model (chessq-chesscam-dinov3-320-v4) is v4 fine-tuned at 320 x 320, which runs twice as fast (Pixel 7a:
+// 383 ms against 788 on the CPU, 196 against 416 on WebGPU). It gets 16% more squares wrong (1.07% against 0.92%), but
+// at 3.0 and 1.5 needs 18 (11 + 7; 38 uncapped, 38 of 42 perfect), and no other setting did better (2.0 and 1.0 to
+// 4.0 and 2.0 need 22 to 28). Its speed matters more: on the CPU v4 managed about one frame a second, and at 1 it needs
+// 64, at 2 v4 needs 13 and this model 9.
 // Playing a move that ends the game for good once shown, as nothing can reply to it, took 146 games (at the earlier
 // model's 1.78 and 0.8) from 540 edits to 519: 21 games had lost their last move, a checkmate, to the board being
 // cleared. One game that was already out of step got a wrong mate.
