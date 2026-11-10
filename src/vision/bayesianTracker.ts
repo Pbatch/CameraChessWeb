@@ -5,7 +5,7 @@ import { EMPTY, NUM_LABELS, pieceToLabel } from "../utils/constants";
 // The game as the tracker sees it: the position it looks for moves from, and the moves and replies from there.
 // movesPairs must be a new array for each new position, as that is how the tracker knows the game has moved on: it
 // starts again whenever the array changes, and after playing a move for good it waits for a new one.
-export interface TrackerGame {
+interface TrackerGame {
   movesPairs: MovesPair[],
   position: Position
 }

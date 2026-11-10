@@ -5,7 +5,7 @@ import { defaultGame, defaultHeaders, makeComment, makeOutcome, makePgn as write
 import { GameBoard, makeBoard } from '../chess/board';
 
 // Everything a move changes; the start position is kept, and the times worked out
-export type GameUpdate = Omit<Game, 'start' | 'times'>;
+type GameUpdate = Omit<Game, 'start' | 'times'>;
 
 const setGame = (update: (game: Game) => Game) => {
   useStore.setState((state) => ({ game: update(state.game) }));

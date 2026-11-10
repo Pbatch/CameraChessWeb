@@ -278,7 +278,7 @@ export const lichessPushRound = async (token: string, pgn: string, roundId: stri
   return result;
 }
 
-export interface GameStreamHandlers {
+interface GameStreamHandlers {
   onEvent: (event: BoardStreamEvent) => void | Promise<void>,
   // The stream opened, at first or after a reconnect
   onConnect: () => void,

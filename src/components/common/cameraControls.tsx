@@ -9,7 +9,7 @@ import { formatTime } from "../../utils/formatTime";
 import { useOverlayControls } from "../../utils/useOverlayControls";
 import type { SetBoolean, SetStringArray, VideoRef } from "../../types";
 
-export type CameraMode = "record" | "broadcast" | "play";
+type CameraMode = "record" | "broadcast" | "play";
 
 // Why detection can't start yet: play mode needs a game to send the moves to, and broadcast a study and a board
 export type StartBlock = "camera.selectGameFirst" | "camera.selectStudyBoardFirst";

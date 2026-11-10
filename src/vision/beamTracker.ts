@@ -25,7 +25,7 @@ import { BayesianTracker, DEFAULT_BAYESIAN_OPTIONS, type BayesianOptions } from 
 // tracker (a move taken back, a new game), it starts again from there, with every move in it final, as the user has
 // just set them. Pausing detection doesn't start it again, so a move from just before a pause can still be corrected.
 
-export interface BeamOptions {
+interface BeamOptions {
   // How many histories to keep
   width: number,
   // How far behind the best a history may fall before it is dropped, in log-probability per unit of evidenceWeight,
@@ -43,7 +43,7 @@ export interface BeamOptions {
 
 // Chosen on earlier models (see this file's git history) and kept for the current one, whose tracker settings were
 // tuned with them. The margin is 37.5 per unit of evidenceWeight.
-export const DEFAULT_BEAM_OPTIONS: BeamOptions = { width: 4, margin: 37.5, horizon: 10, finalOnly: false,
+const DEFAULT_BEAM_OPTIONS: BeamOptions = { width: 4, margin: 37.5, horizon: 10, finalOnly: false,
   waitForOpponent: false };
 
 // Play mode can't take a move back once Lichess has it, so it only sends final moves, and as the clock is running, a
@@ -56,7 +56,7 @@ export const PLAY_BEAM_OPTIONS: Partial<BeamOptions> = { horizon: 1, finalOnly: 
 
 // What the tracker shows: the whole game, and when each move was played (the `now` of the frame its tracker played
 // it on, or null for a provisional move or one from before the tracker started)
-export interface BeamMove {
+interface BeamMove {
   board: GameBoard,
   times: (number | null)[]
 }

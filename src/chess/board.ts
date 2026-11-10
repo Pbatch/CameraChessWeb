@@ -5,7 +5,7 @@ import { parseSan, makeSan } from "chessops/san";
 import { makeUci, parseUci } from "chessops/util";
 import { parsePgn } from "chessops/pgn";
 
-export type HistoryEntry = { move: Move; san: string };
+type HistoryEntry = { move: Move; san: string };
 
 const positionFromFen = (fen: string): Chess => Chess.fromSetup(parseFen(fen).unwrap()).unwrap();
 
