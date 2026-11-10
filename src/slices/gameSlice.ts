@@ -16,11 +16,6 @@ export const gameReset = (start: string = initialGame.start) => {
   setGame(() => ({ ...initialGame, start, fen: start }));
 }
 
-// Takes back every move, keeping the start position
-export const gameRestart = () => {
-  setGame((game) => ({ ...initialGame, start: game.start, fen: game.start }));
-}
-
 // Takes back every move, and has detection start a new tracker, so it reads the board afresh from the next frame
 // even when there were no moves to take back
 export const trackerReset = () => {
@@ -28,10 +23,6 @@ export const trackerReset = () => {
     game: { ...initialGame, start: state.game.start, fen: state.game.start },
     trackerResets: state.trackerResets + 1
   }));
-}
-
-export const useTrackerResets = () => {
-  return useStore((state) => state.trackerResets);
 }
 
 // Moves kept from before keep their times, so a move shown before it was confirmed is timed from when it was first
