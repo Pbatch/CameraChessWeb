@@ -81,8 +81,7 @@ interface Hypothesis {
 // moves of the same piece, so it is not shown on a guess.
 //
 // The app doesn't use it on its own: BeamTracker runs one for each way the game may have gone, splitting where one
-// plays a move for good (see beamTracker.ts), so a move can still be taken back. Run on its own, as dev/replay.mjs
-// --single does, it is the app's tracker before the beam, to compare against.
+// plays a move for good (see beamTracker.ts), so a move can still be taken back.
 export class BayesianTracker {
   readonly #options: BayesianOptions;
   #movesPairs: MovesPair[] | null = null;
