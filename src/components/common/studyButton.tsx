@@ -1,30 +1,16 @@
 import { useTranslation } from "react-i18next";
-import { useState, useEffect } from "react";
 import type { SetStudy, Study } from "../../types";
 import { useUser } from "../../slices/userSlice";
-import { describeLichessError, lichessSetStudies } from "../../api/lichess";
+import { useLichessStudies } from "../../utils/useLichessStudies";
 import { Notebook } from "lucide-react";
 import Dropdown, { DropdownItem, DropdownText } from "./dropdown";
 
 const StudyButton = ({ study, setStudy, onlyBroadcasts, disabled = false }:
   { study: Study | null, setStudy: SetStudy, onlyBroadcasts: boolean, disabled?: boolean }
 ) => {
-  const [studies, setStudies] = useState<Study[]>([]);
-  const [loadError, setLoadError] = useState<string | null>(null);
   const user = useUser();
+  const { studies, loadError } = useLichessStudies(user.token, user.username, onlyBroadcasts);
   const { t } = useTranslation();
-
-  useEffect(() => {
-    const onStudies = (studies: Study[]) => {
-      setStudies(studies);
-      setLoadError(null);
-    }
-    void lichessSetStudies(user.token, onStudies, user.username, onlyBroadcasts)
-      .catch((error: unknown) => {
-        console.error("Unable to load Lichess studies", error);
-        setLoadError(describeLichessError(error));
-      });
-  }, [onlyBroadcasts, user.token, user.username]);
 
   const handleClick = (study: Study) => {
     setStudy(study);
