@@ -3,6 +3,9 @@
   "description": "Camera Chess web app",
   "version": "1.0.0",
   "type": "module",
+  "engines": {
+    "node": ">=26"
+  },
   "scripts": {
     "start": "vite",
     "build": "npm test && npm run tsc && biome lint src --error-on-warnings && vite build",
@@ -16,33 +19,33 @@
   "license": "AGPL-3.0-only",
   "dependencies": {
     "@litertjs/core": "2.6.0",
-    "chessops": "^0.15.0",
-    "i18next": "^27.0.1",
+    "chessops": "^0.15.1",
+    "i18next": "^27.1.1",
     "i18next-browser-languagedetector": "^8.3.0",
-    "lucide-react": "^1.63.0",
-    "react": "^19.2.7",
-    "react-dom": "^19.2.7",
-    "react-i18next": "^18.0.0",
+    "lucide-react": "^1.71.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "react-i18next": "^18.0.1",
     "react-router": "^8.5.1",
     "stockfish": "19.0.1",
-    "zustand": "^5.0.16"
+    "zustand": "^5.1.0"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.5.9",
-    "@lichess-org/types": "^2.0.176",
-    "@tailwindcss/vite": "^4.3.3",
-    "@types/node": "^22.20.5",
-    "@types/react": "^19.2.17",
-    "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^6.0.3",
-    "@vitest/browser-playwright": "^5.0.5",
+    "@biomejs/biome": "^2.6.6",
+    "@lichess-org/types": "^2.0.178",
+    "@tailwindcss/vite": "^4.3.5",
+    "@types/node": "^26.6.6",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.3.0",
+    "@vitest/browser-playwright": "^5.1.0",
     "npm-check-updates": "^23.1.1",
-    "playwright": "^1.64.1",
-    "tailwindcss": "^4.3.3",
+    "playwright": "^1.65.0",
+    "tailwindcss": "^4.3.5",
     "typescript": "^7.0.2",
-    "vite": "^8.1.4",
+    "vite": "^8.3.7",
     "vite-bundle-visualizer": "^1.2.1",
     "vite-plugin-pwa": "^2.0.0",
-    "vitest": "^5.0.5"
+    "vitest": "^5.1.0"
   }
 }
