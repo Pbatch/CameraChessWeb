@@ -42,40 +42,13 @@ export interface BayesianOptions {
   flipChance: number
 }
 
-// From a sweep over 44 recorded blitz games (dev/replay.mjs), on the 43 without takebacks: 210 edits to fix, 88.5% of
-// moves right before each game's first mistake and a median delay of 0.1s, against 271, 83% and 0.2s at the earlier
-// evidenceWeight 0.6. evidenceWeight is what matters: 0.4 needed 394 edits, 0.6 271, 0.8 212, 1.0 238. Lower, moves
-// are confirmed too slowly, and a third move often comes before the reply confirms the first. temperature is the
-// model's calibration, measured on held-out data elsewhere (1.4 to 2.2 did about as well; 1 was worse). floor,
-// moveChance and threshold barely matter (210 to 231 edits; threshold 0.98 was worse).
-// Evidence doesn't fade, so a move shown for a while and then taken back needs about as long again to unwind. Moving a
-// little share back to no move each frame (1e-8) fixed that, but cost more edits.
-// Scaled to the time between frames, at 2 frames a second 24 of the games needed 174 edits and at 1, 408 (at
-// evidenceWeight 0.6); with the same values per frame instead, 525 and 1354.
-// flipChance took the 210 edits to 184 (89.2% right before the first mistake), changing only the four games whose
-// endgames had frames read turned round: 0.001 needed 186 edits, 0.01 190, 0.05 and 0.2 184.
-// The numbers above are for the earlier model. The current one (chessq-chesscam-dinov3-448-v2) needs 158 edits (90.7%)
-// at temperature 3.5 and evidenceWeight 1.4, against 166 at the earlier 1.78 and 0.8. It does about as well wherever
-// evidenceWeight is 0.35 to 0.4 times the temperature, from 2.5 up; 5 and 2 needed 171.
-// The next model (chessq-chesscam-dinov3-448-v3) fits temperature 1.8 by NLL on the benchmark frames (v2: 1.9). On
-// 48 benchmark games with the beam (edits capped at 10 a game, KxBH left out, in two alternating halves), 1.8 and 1.08
-// need 29 (14 + 15; 102 uncapped, 92.0% right before the first mistake), against v2's best of 32 (16 + 16; 113) at 3.5
-// and 1.4. It does about as well wherever evidenceWeight is 0.5 to 0.6 times the temperature, from 1.8 up (27 to 30);
-// at 0.4 times it needs 33 to 35, at 0.3 times 36 to 51, and temperature 1.5 needs 40 or more.
-// The current model (chessq-chesscam-dinov3-448-v4, trained on twice the YunkerChess frames) fits temperature 1.75 by
-// NLL. With the tracker as it now is, on the same games and count (42 games), 3.0 and 1.5 need 16 (12 + 4; 27
-// uncapped; 41 of 47 games perfect, 92.3%), against v3's 20 (12 + 8; 21) at its 1.8 and 1.08 and its best of 18. It
-// does as well (16) wherever evidenceWeight is 0.4 to 0.6 times the temperature, from 2.2 up, and at 0.4 to 0.5 times
-// from 1.5; at 0.6 times below 2.2 it needs 26, and at 0.7 times 13 to 26 with 56 to 67 uncapped. Against v3 it
-// reads a promoted queen v3 took for a rook (dL6Q 7 to 0), but gets LEYx's swapped move order worse (11 to 20).
-// The current model (chessq-chesscam-dinov3-320-v4) is v4 fine-tuned at 320 x 320, which runs twice as fast (Pixel 7a:
-// 383 ms against 788 on the CPU, 196 against 416 on WebGPU). It gets 16% more squares wrong (1.07% against 0.92%), but
-// at 3.0 and 1.5 needs 18 (11 + 7; 38 uncapped, 38 of 42 perfect), and no other setting did better (2.0 and 1.0 to
-// 4.0 and 2.0 need 22 to 28). Its speed matters more: on the CPU v4 managed about one frame a second, and at 1 it needs
-// 64, at 2 v4 needs 13 and this model 9.
-// Playing a move that ends the game for good once shown, as nothing can reply to it, took 146 games (at the earlier
-// model's 1.78 and 0.8) from 540 edits to 519: 21 games had lost their last move, a checkmate, to the board being
-// cleared. One game that was already out of step got a wrong mate.
+// Set for the current model (chessq-chesscam-dinov3-320-v4) by replaying 42 recorded blitz games with the beam
+// (dev/replay.mjs), with edits to fix capped at 10 a game. Temperature 3.0 and evidenceWeight 1.5 need 18 edits (38
+// uncapped; 38 of 42 games perfect), and no other setting did better: 2.0 and 1.0 needed 27, 2.5 and 1.25 22, 3.5 and
+// 1.75 25, 4.0 and 2.0 25. floor, moveChance, threshold and flipChance keep the values earlier models' tuning gave
+// them (see this file's git history), as they barely change the result.
+// Frame rate matters as much: at 2 frames a second it does about as well (9 edits, the gain all in one game), but at
+// 1 it needs 75. The model manages about 2.6 frames a second on a Pixel 7a's CPU, and the app's cap of 4 with WebGPU.
 export const DEFAULT_BAYESIAN_OPTIONS: BayesianOptions = {
   provisional: true, moveChance: 0.01, temperature: 3.0, floor: 0.05, evidenceWeight: 1.5, threshold: 0.95,
   flipChance: 0.05
@@ -124,7 +97,8 @@ export class BayesianTracker {
   #groups = new Int32Array(0);
   #groupCount = 0;
   #replies = new Int32Array(0);
-  // Whether each first move ends the game (checkmate or stalemate), so no reply can ever confirm it
+  // Whether each first move ends the game (checkmate or stalemate), so no reply can ever confirm it. Such a move is
+  // played for good once shown, or the board being cleared after the game would lose it.
   #ends = new Uint8Array(0);
   // The share of no move, and of each way. Each frame's shares are worked out in #next, then the two are swapped.
   #none = 1;
