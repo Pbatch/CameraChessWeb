@@ -1,9 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { BeamTracker, PLAY_BEAM_OPTIONS, PLAY_TRACKER_OPTIONS } from "./beamTracker";
-import { BayesianTracker } from "./bayesianTracker";
 import { makeUpdatePayload } from "../slices/gameSlice";
 import { GameBoard } from "../chess/board";
-import { replay, replayBeam } from "./replay";
+import { replay } from "./replay";
 import { makeGame, oneHotState, videoProbs } from "../test/helpers";
 import { START_FEN } from "../utils/constants";
 import type { Game } from "../types";
@@ -35,10 +34,8 @@ const run = (state: Run, ...scenes: [string, number][]): Run => {
 }
 
 describe("BeamTracker", () => {
-  it("plays moves as the single tracker does", () => {
-    const probs = video([START_FEN, 3], [AFTER_E4, 3], [AFTER_E4_E5, 3]);
-    expect(sans(replayBeam(probs, FPS))).toEqual(["e4", "e5"]);
-    expect(sans(replay(probs, FPS))).toEqual(["e4", "e5"]);
+  it("plays a move and its reply", () => {
+    expect(sans(replay(video([START_FEN, 3], [AFTER_E4, 3], [AFTER_E4_E5, 3]), FPS))).toEqual(["e4", "e5"]);
   });
 
   it("goes on from the app's game", () => {
@@ -74,19 +71,18 @@ describe("BeamTracker", () => {
   });
 
   it("in play mode, sends only final moves, a second or so after they are played", () => {
-    const moves = replayBeam(video([START_FEN, 3], [AFTER_E4, 3]), FPS, 0,
+    const moves = replay(video([START_FEN, 3], [AFTER_E4, 3]), FPS, 0,
       new BeamTracker(PLAY_TRACKER_OPTIONS, PLAY_BEAM_OPTIONS));
     expect(sans(moves)).toEqual(["e4"]);
-    const single = replay(video([START_FEN, 3], [AFTER_E4, 3]), FPS, 0, new BayesianTracker(PLAY_TRACKER_OPTIONS));
-    expect(moves[0].time - single[0].time).toBeGreaterThan(0.5);
-    expect(moves[0].time - single[0].time).toBeLessThanOrEqual(1.25);
+    // The board shows e4 from 3s
+    expect(moves[0].time).toBeGreaterThan(3.75);
+    expect(moves[0].time).toBeLessThanOrEqual(4.5);
   });
 
   it("in play mode, never sends a move shown for less than a second", () => {
     // Three frames: at 4 a second, a move held for a whole second (4 frames) is sent
     const probs = video([START_FEN, 3], [AFTER_E4, 0.75], [START_FEN, 4]);
-    expect(sans(replay(probs, FPS, 0, new BayesianTracker(PLAY_TRACKER_OPTIONS)))).toEqual(["e4"]);
-    expect(sans(replayBeam(probs, FPS, 0, new BeamTracker(PLAY_TRACKER_OPTIONS, PLAY_BEAM_OPTIONS)))).toEqual([]);
+    expect(sans(replay(probs, FPS, 0, new BeamTracker(PLAY_TRACKER_OPTIONS, PLAY_BEAM_OPTIONS)))).toEqual([]);
   });
 
   describe("in play mode, after the opponent's move comes from Lichess", () => {

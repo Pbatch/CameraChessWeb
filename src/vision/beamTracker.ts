@@ -25,7 +25,7 @@ import { BayesianTracker, DEFAULT_BAYESIAN_OPTIONS, type BayesianOptions } from 
 // tracker (a move taken back, a new game), it starts again from there, with every move in it final, as the user has
 // just set them. Pausing detection doesn't start it again, so a move from just before a pause can still be corrected.
 
-export interface BeamOptions {
+interface BeamOptions {
   // How many histories to keep
   width: number,
   // How far behind the best a history may fall before it is dropped, in log-probability per unit of evidenceWeight,
@@ -41,32 +41,22 @@ export interface BeamOptions {
   waitForOpponent: boolean
 }
 
-// From replaying 146 recorded games (dev/replay.mjs), at the earlier model's temperature 1.78 and evidenceWeight 0.8:
-// one tracker needed 540 edits to fix (87.2% right before the first mistake, 80 games perfect), 8 histories 349,
-// with a 10 s horizon 333, and 4 histories 324 (92.7%, 89 perfect; 16 histories 335), for about 10% more time in
-// all. The margin was 30 at that evidenceWeight; 15 needed 396 edits and 60 326 (with 8 histories). On alternating
-// halves of the games, one tracker needed 295 and 245 edits, and 4 histories 201 and 123. Neither capping how much
-// one frame can count against a history (as if a frame may be junk, such as an arm over the board) nor how much a
-// history loses by going on without a move helped: they kept wrong histories alive too (330 to 575 edits). Nor did
-// counting a piece read as missing for less (790 or more), as most of a move's evidence is its piece leaving.
-export const DEFAULT_BEAM_OPTIONS: BeamOptions = { width: 4, margin: 30 / 0.8, horizon: 10, finalOnly: false,
+// Chosen on earlier models (see this file's git history) and kept for the current one, whose tracker settings were
+// tuned with them. The margin is 37.5 per unit of evidenceWeight.
+const DEFAULT_BEAM_OPTIONS: BeamOptions = { width: 4, margin: 37.5, horizon: 10, finalOnly: false,
   waitForOpponent: false };
 
 // Play mode can't take a move back once Lichess has it, so it only sends final moves, and as the clock is running, a
 // move is final after at most a second: a move the tracker plays is sent once its history is still the best a second
 // on, or sooner once no other history is within the margin. The opponent's moves come from Lichess, which changes the
 // game, so the tracker starts again after each. Its trackers play a move on its own, as the reply comes from Lichess.
-// Replayed as play mode on recorded games (both sides' moves read from the board, so harder than play mode, where
-// the opponent's come from Lichess), one tracker playing each move on its own share needed 1236 edits on 44 games
-// (v2 model, 53.3% right before the first mistake) and 2978 on 146 (earlier model); this, 542 (76.4%) and 1271. Moves
-// went a second later: a median of 1.0 s after the true move against -0.1 s, and 90% within 1.35 s against 0.15 s.
 // It waits for each of the opponent's moves to be played on the board before looking for the user's.
 export const PLAY_TRACKER_OPTIONS: Partial<BayesianOptions> = { provisional: false };
 export const PLAY_BEAM_OPTIONS: Partial<BeamOptions> = { horizon: 1, finalOnly: true, waitForOpponent: true };
 
 // What the tracker shows: the whole game, and when each move was played (the `now` of the frame its tracker played
 // it on, or null for a provisional move or one from before the tracker started)
-export interface BeamMove {
+interface BeamMove {
   board: GameBoard,
   times: (number | null)[]
 }

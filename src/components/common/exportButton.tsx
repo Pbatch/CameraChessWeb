@@ -1,12 +1,11 @@
 import { useTranslation } from "react-i18next";
-import { useEffect, useState } from "react";
 import { useLocation } from "react-router";
 import type { SetStringArray, Study } from "../../types";
 import { useUser } from "../../slices/userSlice";
 import { makePgn, useGame } from "../../slices/gameSlice";
-import {
-  describeLichessError, lichessImportGame, lichessImportPgnToStudy, lichessSetStudies
-} from "../../api/lichess";
+import { describeLichessError, lichessImportGame, lichessImportPgnToStudy } from "../../api/lichess";
+import { useLichessStudies } from "../../utils/useLichessStudies";
+import { useCopyPgn } from "../../utils/useCopyPgn";
 import Dropdown, { DropdownDivider, DropdownHeading, DropdownItem, DropdownText } from "./dropdown";
 import SignInItems from "./signInItems";
 
@@ -24,28 +23,13 @@ const createName = () => {
 // Sends the game to Lichess: as a game of its own, which needs no login, or to one of the user's studies, which does
 const ExportButton = ({ setText }: { setText: SetStringArray }) => {
   const { t } = useTranslation();
-  const [studies, setStudies] = useState<Study[]>([]);
-  const [loadError, setLoadError] = useState<string | null>(null);
   const { token, username } = useUser();
+  const { studies, loadError } = useLichessStudies(token, username, false);
+  const copy = useCopyPgn(setText);
   const game = useGame();
   const pgn: string = makePgn(game);
   const { pathname } = useLocation();
   const loggedIn = (token !== "");
-
-  useEffect(() => {
-    if (token === "") {
-      return;
-    }
-    const onStudies = (studies: Study[]) => {
-      setStudies(studies);
-      setLoadError(null);
-    }
-    void lichessSetStudies(token, onStudies, username, false)
-      .catch((error: unknown) => {
-        console.error("Unable to load Lichess studies", error);
-        setLoadError(describeLichessError(error));
-      });
-  }, [token, username]);
 
   const openInLichess = async () => {
     // Opened now, while the click still counts, as browsers block a window opened after waiting for Lichess
@@ -77,14 +61,7 @@ const ExportButton = ({ setText }: { setText: SetStringArray }) => {
     }
   }
 
-  const copyPgn = () => {
-    void navigator.clipboard.writeText(pgn)
-      .then(() => setText([t("common.copiedPgn")]))
-      .catch((error: unknown) => {
-        console.error("Unable to copy PGN", error);
-        setText([t("common.copyPgnFailed")]);
-      });
-  }
+  const copyPgn = () => copy(pgn);
 
   const studyItems = () => {
     if (loadError !== null) {

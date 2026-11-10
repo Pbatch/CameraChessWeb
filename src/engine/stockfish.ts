@@ -39,7 +39,7 @@ export const parseInfo = (line: string): Info | null => {
   return { depth: Number(tokens[depthAt + 1]), score: { type, value } };
 };
 
-export const whiteToMove = (fen: string): boolean => fen.split(" ")[1] !== "b";
+const whiteToMove = (fen: string): boolean => fen.split(" ")[1] !== "b";
 
 // Engines score from the side to move. mate 0 stays 0, as the side to move is the one mated.
 export const toWhite = (score: Score, fen: string): Score => {

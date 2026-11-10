@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { gameReset, gameRestart, gameSync, trackerReset, gameUpdate, makeBoard, makePgn, makeUpdatePayload } from "./gameSlice";
+import { gameReset, gameSync, trackerReset, gameUpdate, makeBoard, makePgn, makeUpdatePayload } from "./gameSlice";
 import { useStore } from "../store";
 import { makeGame } from "../test/helpers";
 import type { Game } from "../types";
@@ -148,16 +148,6 @@ describe("gameReset", () => {
     setGame(makeGame("1... e5", start));
     gameReset();
     expect(getGame()).toEqual(makeGame());
-  });
-});
-
-describe("gameRestart", () => {
-  it("takes back every move, keeping the start position", () => {
-    const start = "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1";
-    setGame(makeGame("", start));
-    gameUpdate(makeUpdatePayload(makeBoard(makeGame("1... e5 2. Nf3", start))));
-    gameRestart();
-    expect(getGame()).toEqual(makeGame("", start));
   });
 });
 

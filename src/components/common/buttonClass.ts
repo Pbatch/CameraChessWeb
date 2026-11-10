@@ -1,5 +1,5 @@
 export type ButtonVariant = "outline-light" | "outline-success" | "outline-warning" | "outline-danger" | "light";
-export type ButtonSize = "sm" | "md" | "lg";
+type ButtonSize = "sm" | "md" | "lg";
 
 const VARIANTS: Record<ButtonVariant, string> = {
   "outline-light": "border-light text-light hover:bg-light hover:text-black focus-visible:ring-light/50",

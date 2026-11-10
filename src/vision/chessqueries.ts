@@ -327,7 +327,7 @@ const hasGpuAdapter = async (): Promise<boolean> => {
   }
 }
 
-export const loadChessqueries = async (): Promise<Chessqueries> => {
+const loadChessqueries = async (): Promise<Chessqueries> => {
   if (await hasGpuAdapter()) {
     try {
       // JSPI lets WebGPU hand unsupported ops to the CPU
