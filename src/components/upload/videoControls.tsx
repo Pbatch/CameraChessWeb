@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import { Pause, Play, RotateCcw } from "lucide-react";
 import Icon from "../common/icon";
@@ -27,8 +27,9 @@ const VideoControls = ({ videoRef, playing, setPlaying, setText, onVisible }: {
   const [speed, setSpeed] = useState(1);
   const [ended, setEnded] = useState(false);
   const [hover, setHover] = useState<{ x: number, time: number } | null>(null);
+  const rangeRef = useRef<HTMLInputElement>(null);
 
-  // Follows the video. The time updates every frame while playing, as timeupdate only fires a few times a second.
+  // Follows the video, a few times a second as timeupdate fires. The seek bar also moves every frame, below.
   useEffect(() => {
     const video = videoRef.current;
     if (video === null) return;
@@ -43,18 +44,10 @@ const VideoControls = ({ videoRef, playing, setPlaying, setText, onVisible }: {
     const events = ["timeupdate", "durationchange", "loadedmetadata", "seeked", "ratechange", "ended", "play"];
     for (const event of events) video.addEventListener(event, sync);
 
-    let frame = 0;
-    const tick = () => {
-      setTime(video.currentTime);
-      frame = requestAnimationFrame(tick);
-    };
-    if (playing) frame = requestAnimationFrame(tick);
-
     return () => {
       for (const event of events) video.removeEventListener(event, sync);
-      cancelAnimationFrame(frame);
     };
-  }, [videoRef, playing]);
+  }, [videoRef]);
 
   const togglePlay = useCallback(() => {
     const video = videoRef.current;
@@ -85,6 +78,24 @@ const VideoControls = ({ videoRef, playing, setPlaying, setText, onVisible }: {
   const { barRef, visible, poke, toggle } = useOverlayControls({
     videoRef, playing, togglePlay, onVisible, held: hover !== null, onKey
   });
+
+  // Moves the seek bar every frame while it shows, as timeupdate alone would make it jump. It's set on the element
+  // rather than through state, as re-rendering the controls every frame took about half the page's main-thread time.
+  useEffect(() => {
+    const video = videoRef.current;
+    const range = rangeRef.current;
+    if (!playing || !visible || video === null || range === null) return;
+
+    let frame = 0;
+    const tick = () => {
+      const length: number = Number.isFinite(video.duration) ? video.duration : 0;
+      range.value = String(video.currentTime);
+      range.style.setProperty("--progress", `${(length > 0) ? (100 * video.currentTime / length) : 0}%`);
+      frame = requestAnimationFrame(tick);
+    };
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, [videoRef, playing, visible]);
 
   const cycleSpeed = () => {
     const video = videoRef.current;
@@ -120,7 +131,7 @@ const VideoControls = ({ videoRef, playing, setPlaying, setText, onVisible }: {
         {hover !== null && (
           <span className="video-controls__hover-time" style={{ left: hover.x }}>{formatTime(hover.time)}</span>
         )}
-        <input type="range" className="video-controls__range" aria-label={t("video.seek")}
+        <input ref={rangeRef} type="range" className="video-controls__range" aria-label={t("video.seek")}
           aria-valuetext={t("video.seekValue", { time: formatTime(time), duration: formatTime(duration) })}
           min={0} max={duration || 0} step="any" value={time}
           style={{ "--progress": `${progress}%` } as CSSProperties}
