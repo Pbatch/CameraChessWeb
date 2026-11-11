@@ -51,7 +51,9 @@ const DEFAULT_BEAM_OPTIONS: BeamOptions = { width: 4, margin: 37.5, horizon: 10,
 // on, or sooner once no other history is within the margin. The opponent's moves come from Lichess, which changes the
 // game, so the tracker starts again after each. Its trackers play a move on its own, as the reply comes from Lichess.
 // It waits for each of the opponent's moves to be played on the board before looking for the user's.
-export const PLAY_TRACKER_OPTIONS: Partial<BayesianOptions> = { provisional: false };
+// Its evidenceWeight is 1.5, below the 2.5 the other modes use, as it replays best in play mode (100 edits to fix capped
+// at 10 a game, 161 uncapped, 31 of 42 games perfect; 2.0 needed 110, 2.5 111).
+export const PLAY_TRACKER_OPTIONS: Partial<BayesianOptions> = { provisional: false, evidenceWeight: 1.5 };
 export const PLAY_BEAM_OPTIONS: Partial<BeamOptions> = { horizon: 1, finalOnly: true, waitForOpponent: true };
 
 // What the tracker shows: the whole game, and when each move was played (the `now` of the frame its tracker played

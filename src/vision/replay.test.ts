@@ -16,8 +16,9 @@ describe("replay", () => {
   it("plays each move, timed from when it was first shown", () => {
     const moves = replay(video([START_FEN, 3], [AFTER_E4, 3], [AFTER_E4_E5, 3]), FPS);
     expect(moves.map(({ san }) => san)).toEqual(["e4", "e5"]);
-    // e4 shows from 3s and e5 from 6s. e5 first has to confirm e4, so it takes a frame or so longer.
-    expect(moves[0].time).toBeGreaterThan(3);
+    // e4 shows from 3s and e5 from 6s; a move can be shown from its first clear frame. e5 first has to confirm e4, so
+    // it takes a frame or so longer.
+    expect(moves[0].time).toBeGreaterThanOrEqual(3);
     expect(moves[0].time).toBeLessThanOrEqual(4);
     expect(moves[1].time).toBeGreaterThan(6);
     expect(moves[1].time).toBeLessThanOrEqual(7.5);
@@ -26,7 +27,8 @@ describe("replay", () => {
   it("starts at the given time, timing moves from the video's start", () => {
     const moves = replay(video([AFTER_E4, 3], [START_FEN, 3], [AFTER_E4, 3]), FPS, 3);
     expect(moves.map(({ san }) => san)).toEqual(["e4"]);
-    expect(moves[0].time).toBeGreaterThan(6);
+    // From the video's start, not from the given time: e4 shows again from 6s
+    expect(moves[0].time).toBeGreaterThanOrEqual(6);
   });
 
   it("skips frames with non-finite probabilities", () => {

@@ -79,6 +79,13 @@ describe("BeamTracker", () => {
     expect(moves[0].time).toBeLessThanOrEqual(4.5);
   });
 
+  it("in play mode, never sends a move from a single clear frame of another position", () => {
+    for (const stray of [AFTER_E4, AFTER_E4_E5]) {
+      const probs = video([START_FEN, 1], [stray, 0.25], [START_FEN, 3]);
+      expect(sans(replay(probs, FPS, 0, new BeamTracker(PLAY_TRACKER_OPTIONS, PLAY_BEAM_OPTIONS)))).toEqual([]);
+    }
+  });
+
   it("in play mode, never sends a move shown for less than a second", () => {
     // Three frames: at 4 a second, a move held for a whole second (4 frames) is sent
     const probs = video([START_FEN, 3], [AFTER_E4, 0.75], [START_FEN, 4]);
