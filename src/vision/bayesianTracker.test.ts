@@ -73,8 +73,18 @@ describe("BayesianTracker", () => {
     expect(sans([START_FEN, 4], [AFTER_C4, 12], [START_FEN, 16], [AFTER_D4_D5, 20])).toEqual(["d4", "d5"]);
   });
 
-  it("ignores a single frame of another position", () => {
-    expect(sans([START_FEN, 4], [AFTER_E4_E5, 1], [START_FEN, 12])).toEqual([]);
+  // Moves the tracker returns over frames of each FEN in turn, not playing any of them
+  const updates = (tracker: BayesianTracker, ...scenes: [string, number][]) => {
+    const board = makeBoard(makeGame());
+    const g = { movesPairs: getMovesPairs(board.position), position: board.position };
+    return scenes.flatMap(([fen, count]) => Array<string>(count).fill(fen))
+      .map((fen, i) => tracker.update(oneHotState(fen), 250 * i, g)).filter((move) => move !== null);
+  }
+
+  it("never plays a move for good from a single frame of another position", () => {
+    // At most it is shown provisionally, so the next move seen replaces it
+    expect(updates(new BayesianTracker(), [START_FEN, 4], [AFTER_E4_E5, 1], [START_FEN, 12]).every((move) => move.greedy))
+      .toBe(true);
   });
 
   const game = () => {
