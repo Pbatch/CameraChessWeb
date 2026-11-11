@@ -70,13 +70,13 @@ describe("BeamTracker", () => {
     expect(run(state, [AFTER_E4_E5, 2], [AFTER_E4_E5_NF3, 3]).game.moves).toBe("1. e4 e5 2. Nf3");
   });
 
-  it("in play mode, sends only final moves, a second or so after they are played", () => {
-    const moves = replay(video([START_FEN, 3], [AFTER_E4, 3]), FPS, 0,
+  it("in play mode, sends only final moves, a couple of seconds after they are played", () => {
+    const moves = replay(video([START_FEN, 3], [AFTER_E4, 4]), FPS, 0,
       new BeamTracker(PLAY_TRACKER_OPTIONS, PLAY_BEAM_OPTIONS));
     expect(sans(moves)).toEqual(["e4"]);
     // The board shows e4 from 3s
-    expect(moves[0].time).toBeGreaterThan(3.75);
-    expect(moves[0].time).toBeLessThanOrEqual(4.5);
+    expect(moves[0].time).toBeGreaterThan(4.5);
+    expect(moves[0].time).toBeLessThanOrEqual(5.5);
   });
 
   it("in play mode, never sends a move from a single clear frame of another position", () => {

@@ -51,9 +51,11 @@ const DEFAULT_BEAM_OPTIONS: BeamOptions = { width: 4, margin: 37.5, horizon: 10,
 // on, or sooner once no other history is within the margin. The opponent's moves come from Lichess, which changes the
 // game, so the tracker starts again after each. Its trackers play a move on its own, as the reply comes from Lichess.
 // It waits for each of the opponent's moves to be played on the board before looking for the user's.
-// Its evidenceWeight is 1.5, below the 2.5 the other modes use, as it replays best in play mode (100 edits to fix capped
-// at 10 a game, 161 uncapped, 31 of 42 games perfect; 2.0 needed 110, 2.5 111).
-export const PLAY_TRACKER_OPTIONS: Partial<BayesianOptions> = { provisional: false, evidenceWeight: 1.5 };
+// Its evidenceWeight is 0.4, below the 2.5 the other modes use, as it replays best in play mode (43 edits to fix capped
+// at 10 a game, 87 uncapped, 35 of 42 games perfect; 0.25 needed 93, 0.5 46, 0.75 57, 1.0 85, 1.5 100). Moves need more
+// evidence to be sent, so they reach Lichess later: a median 1.45 s after they are played (90th percentile 2.05 s),
+// against 1.0 s (1.35 s) at 1.5.
+export const PLAY_TRACKER_OPTIONS: Partial<BayesianOptions> = { provisional: false, evidenceWeight: 0.4 };
 export const PLAY_BEAM_OPTIONS: Partial<BeamOptions> = { horizon: 1, finalOnly: true, waitForOpponent: true };
 
 // What the tracker shows: the whole game, and when each move was played (the `now` of the frame its tracker played
@@ -114,7 +116,9 @@ export class BeamTracker {
   update(update: number[][], now: number, game: Game): BeamMove | null {
     let histories = this.#histories;
     if (histories === null || game.start !== this.#start || game.moves !== this.#known) {
+      // Kept at once, so frames spent waiting for the opponent's move add up instead of each starting again
       histories = this.#restart(game);
+      this.#histories = histories;
     }
     if (this.#waiting !== null) {
       const { tracker, movesPairs, position } = this.#waiting;
