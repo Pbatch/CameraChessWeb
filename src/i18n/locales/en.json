@@ -321,7 +321,7 @@
     },
     "licences": {
       "question": "What licences cover the board recognition model?",
-      "answer": "The model is a ChessQueries model with a DINOv3 encoder from Meta, downloaded from <hf>Hugging Face</hf>. Its weights are available under both the <polyform>PolyForm Noncommercial License 1.0.0</polyform> and the <dinov3>DINOv3 License</dinov3>. See the <notice>NOTICE</notice> for details."
+      "answer": "The model is a ChessQueries model with a MobileNetV4 encoder, downloaded from <hf>Hugging Face</hf>. Its weights are available under the <polyform>PolyForm Noncommercial License 1.0.0</polyform>. See the <notice>NOTICE</notice> for details."
     },
     "openSource": {
       "question": "Is ChessCam open source?",

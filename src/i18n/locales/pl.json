@@ -321,7 +321,7 @@
     },
     "licences": {
       "question": "Jakie licencje obejmują model rozpoznawania szachownicy?",
-      "answer": "Model to model ChessQueries z koderem DINOv3 od Meta, pobierany z <hf>Hugging Face</hf>. Jego wagi są dostępne zarówno na licencji <polyform>PolyForm Noncommercial License 1.0.0</polyform>, jak i <dinov3>DINOv3 License</dinov3>. Szczegóły znajdziesz w pliku <notice>NOTICE</notice>."
+      "answer": "Model to model ChessQueries z koderem MobileNetV4, pobierany z <hf>Hugging Face</hf>. Jego wagi są dostępne na licencji <polyform>PolyForm Noncommercial License 1.0.0</polyform>. Szczegóły znajdziesz w pliku <notice>NOTICE</notice>."
     },
     "openSource": {
       "question": "Czy ChessCam jest open source?",

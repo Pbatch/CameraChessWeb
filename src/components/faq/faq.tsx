@@ -11,14 +11,13 @@ const Link = ({ href, children }: { href: string, children?: ReactNode }) =>
 const COMPONENTS = {
   b: <b />,
   stand: <Link href="https://www.amazon.co.uk/dp/B07NVBXYPJ" />,
-  github: <Link href="https://github.com/Pbatch/CameraChessWeb" />,
+  github: <Link href="https://github.com/Pbatch/ChessCam" />,
   record: <Link href="https://www.chesscam.net/record" />,
   upload: <Link href="https://www.chesscam.net/upload" />,
   play: <Link href="https://www.chesscam.net/play" />,
   broadcast: <Link href="https://www.chesscam.net/broadcast" />,
   hf: <Link href="https://huggingface.co/PBatch23888/chessq-chesscam" />,
   polyform: <Link href="https://huggingface.co/PBatch23888/chessq-chesscam/blob/main/LICENSE" />,
-  dinov3: <Link href="https://huggingface.co/PBatch23888/chessq-chesscam/blob/main/LICENSE-DINOv3" />,
   notice: <Link href="https://huggingface.co/PBatch23888/chessq-chesscam/blob/main/NOTICE" />,
   lichess: <Link href="https://lichess.org/@/BlindfoldBlunderer" />,
 };
