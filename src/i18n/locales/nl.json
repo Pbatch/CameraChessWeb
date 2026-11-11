@@ -321,7 +321,7 @@
     },
     "licences": {
       "question": "Welke licenties gelden voor het model voor bordherkenning?",
-      "answer": "Het model is een ChessQueries-model met een DINOv3-encoder van Meta, gedownload van <hf>Hugging Face</hf>. De gewichten zijn beschikbaar onder zowel de <polyform>PolyForm Noncommercial License 1.0.0</polyform> als de <dinov3>DINOv3 License</dinov3>. Zie de <notice>NOTICE</notice> voor details."
+      "answer": "Het model is een ChessQueries-model met een MobileNetV4-encoder, gedownload van <hf>Hugging Face</hf>. De gewichten zijn beschikbaar onder de <polyform>PolyForm Noncommercial License 1.0.0</polyform>. Zie de <notice>NOTICE</notice> voor details."
     },
     "openSource": {
       "question": "Is ChessCam open source?",

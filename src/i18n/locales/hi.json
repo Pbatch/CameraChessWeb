@@ -321,7 +321,7 @@
     },
     "licences": {
       "question": "बोर्ड पहचानने वाले मॉडल पर कौन-से लाइसेंस लागू होते हैं?",
-      "answer": "यह मॉडल Meta के DINOv3 एनकोडर वाला एक ChessQueries मॉडल है, जो <hf>Hugging Face</hf> से डाउनलोड होता है। इसके वेट्स <polyform>PolyForm Noncommercial License 1.0.0</polyform> और <dinov3>DINOv3 License</dinov3> दोनों के तहत उपलब्ध हैं। ज़्यादा जानकारी के लिए <notice>NOTICE</notice> देखें।"
+      "answer": "यह मॉडल MobileNetV4 एनकोडर वाला एक ChessQueries मॉडल है, जो <hf>Hugging Face</hf> से डाउनलोड होता है। इसके वेट्स <polyform>PolyForm Noncommercial License 1.0.0</polyform> के तहत उपलब्ध हैं। ज़्यादा जानकारी के लिए <notice>NOTICE</notice> देखें।"
     },
     "openSource": {
       "question": "क्या ChessCam ओपन सोर्स है?",

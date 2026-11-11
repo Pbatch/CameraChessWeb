@@ -42,12 +42,13 @@ export interface BayesianOptions {
   flipChance: number
 }
 
-// Set for the current model (chessq-chesscam-dinov3-320-v5) by replaying 42 recorded blitz games with the beam
-// (dev/replay.mjs), with edits to fix capped at 10 a game. Temperature 3.0 and evidenceWeight 2.5 need 17 edits (17
-// uncapped; 38 of 42 games perfect). 3.0 and 3.0, and 3.5 and 3.0, did as well, and no setting of temperatures 2.0 to
-// 5.0 and weights 1.0 to 4.0 did better; 3.0 and 1.5 needed 27. floor, moveChance, threshold and flipChance keep the
-// values earlier tuning gave them (see this file's git history), as they barely change the result. The model manages
-// about 2.6 frames a second on a Pixel 7a's CPU, and the app's cap of 4 with WebGPU.
+// Set for the current model (chessq-chesscam-mnv4m-320-v1) by replaying 42 recorded blitz games with the beam
+// (dev/replay.mjs), with edits to fix capped at 10 a game. Temperature 3.0 and evidenceWeight 2.5 need 10 edits (10
+// uncapped; 39 of 42 games perfect). Temperatures 2.5 to 4.0 did as well with weights about 0.83 times the
+// temperature, and no setting of temperatures 2.0 to 4.0 and weights 0.4 to 0.83 times the temperature did better;
+// at 3.0, weights 1.8 and 3.0 needed 13 and 20. floor, moveChance, threshold and flipChance keep the values earlier
+// tuning gave them (see this file's git history), as they barely change the result. The model manages about 10
+// frames a second on a Pixel 7a's CPU, and the app's cap of 4 with WebGPU.
 export const DEFAULT_BAYESIAN_OPTIONS: BayesianOptions = {
   provisional: true, moveChance: 0.01, temperature: 3.0, floor: 0.05, evidenceWeight: 2.5, threshold: 0.95,
   flipChance: 0.05
