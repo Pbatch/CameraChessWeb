@@ -1,6 +1,6 @@
 {
-  "name": "camera-chess",
-  "description": "Camera Chess web app",
+  "name": "chesscam",
+  "description": "ChessCam web app",
   "version": "1.0.0",
   "type": "module",
   "engines": {
