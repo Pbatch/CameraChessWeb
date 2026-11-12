@@ -52,7 +52,7 @@ const renderSidebar = async (mode: Mode, Sidebar: SidebarComponent, playing: boo
   const props = {
     videoRef: createRef<HTMLVideoElement>(),
     camera: { devices: [], deviceId: null, selectDevice: noop },
-    chessqueriesModelRef: { current: null },
+    modelRef: { current: null },
     playing, setPlaying: noop,
     text: ["Starting game", "White vs DrNykterstein"], setText: noop,
     roi: null, setRoi: noop,

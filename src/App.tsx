@@ -1,7 +1,7 @@
 import i18n from "./i18n";
 import { useEffect, useRef } from "react";
 import { type NavigateFunction, Outlet, useNavigate } from "react-router";
-import type { Chessqueries, ModelRefs } from "./types";
+import type { PieceModel, ModelRefs } from "./types";
 import { useUser } from "./slices/userSlice";
 import { describeLichessError, lichessTrySetUser } from "./api/lichess";
 import { Toast } from "./components/common";
@@ -14,9 +14,9 @@ const App = () => {
   const helpOpen: boolean = useHelpOpen();
   const navigate: NavigateFunction = useNavigate();
   const token = useUser().token;
-  const chessqueriesModelRef = useRef<Chessqueries | null>(null);
+  const modelRef = useRef<PieceModel | null>(null);
   const modelRefs: ModelRefs = {
-    chessqueriesModelRef,
+    modelRef,
   }
 
   useEffect(() => {

@@ -125,7 +125,6 @@
     "wasReset": "Przywrócono pozycję początkową",
     "detecting": "Rozpoznawanie ruchów",
     "fps": "{{fps}} FPS",
-    "fpsCpu": "{{fps}} FPS · CPU",
     "unavailable": "Kamera niedostępna",
     "needsHttps": "Kamera wymaga bezpiecznego połączenia (https)",
     "blocked": "Dostęp do kamery został zablokowany",
@@ -199,9 +198,7 @@
   },
   "detection": {
     "failed": "Rozpoznawanie bierek nie powiodło się",
-    "stopped": "Rozpoznawanie bierek zostało zatrzymane. Odśwież stronę.",
-    "reloadFailed": "Nie udało się ponownie wczytać modelu. Odśwież stronę.",
-    "gpuReset": "GPU zostało zresetowane. Ponowne wczytywanie modelu..."
+    "stopped": "Rozpoznawanie bierek zostało zatrzymane. Odśwież stronę."
   },
   "engine": {
     "failed": "Nie można uruchomić Stockfisha w tej przeglądarce."
@@ -321,7 +318,7 @@
     },
     "licences": {
       "question": "Jakie licencje obejmują model rozpoznawania szachownicy?",
-      "answer": "Model to model ChessQueries z koderem MobileNetV4, pobierany z <hf>Hugging Face</hf>. Jego wagi są dostępne na licencji <polyform>PolyForm Noncommercial License 1.0.0</polyform>. Szczegóły znajdziesz w pliku <notice>NOTICE</notice>."
+      "answer": "Model to model ChessQueries z koderem MobileNetV4, opublikowany na <hf>Hugging Face</hf>. Jego wagi są dostępne na licencji <polyform>PolyForm Noncommercial License 1.0.0</polyform>. Szczegóły znajdziesz w pliku <notice>NOTICE</notice>."
     },
     "openSource": {
       "question": "Czy ChessCam jest open source?",

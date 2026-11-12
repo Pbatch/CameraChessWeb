@@ -5,19 +5,19 @@ interface Study {
 }
 
 // Square probabilities, and where each square query looked (null for models without that output)
-interface ChessqueriesOutputs {
+interface PieceModelOutputs {
   probs: Float32Array,
   centroids: Float32Array | null
 }
 
-// The piece model, on the GPU or in a CPU worker. A null video gives blank pixels, for the warm-up.
-interface Chessqueries {
-  run: (video: HTMLVideoElement | null, roi: Roi | null) => Promise<ChessqueriesOutputs>,
+// The piece model, in a CPU worker. A null video gives blank pixels, for the warm-up.
+interface PieceModel {
+  run: (video: HTMLVideoElement | null, roi: Roi | null) => Promise<PieceModelOutputs>,
   delete: () => void
 }
 
 interface ModelRefs {
-  chessqueriesModelRef: React.RefObject<Chessqueries | null>
+  modelRef: React.RefObject<PieceModel | null>
 }
 
 type VideoRef = React.RefObject<HTMLVideoElement | null>;
@@ -121,7 +121,7 @@ interface Camera {
 }
 
 export type { 
-  RootState, Study, Clock, User, EngineChoice, Chessqueries, ChessqueriesOutputs, ModelRefs, SquaresData, MovesData, MovesPair, 
+  RootState, Study, Clock, User, EngineChoice, PieceModel, PieceModelOutputs, ModelRefs, SquaresData, MovesData, MovesPair, 
   Game, ErrorSource, AppError,
   SetBoolean, SetStringArray, SetNumber, SetFps, Mode,
   SetStudy, VideoRef, Roi, RoiRef, SetRoi, CornerName, SetOrientation, Camera

@@ -147,7 +147,7 @@ const VideoAndSidebar = ({ mode }: { mode: Mode }) => {
     canPlay,
     setCanPlay,
     roiRef,
-    chessqueriesModelRef: context.chessqueriesModelRef,
+    modelRef: context.modelRef,
     videoRef,
     camera,
     playingRef,

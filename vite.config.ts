@@ -41,10 +41,9 @@ export default defineConfig({
         maximumFileSizeToCacheInBytes: 5000000,
         runtimeCaching: [
           {
-            // Cross-origin patterns must match from the start of the URL. The model URL is pinned
-            // to a commit, so it never changes in place, and caching it skips Hugging Face's redirect
-            // to a freshly signed CDN URL that the browser can't cache.
-            urlPattern: /^https:\/\/huggingface\.co\/.*\.tflite$/,
+            // The piece model, fetched by scripts/fetchModel.mjs. Each model has its own file name, so
+            // it never changes in place; too big to precache with the app.
+            urlPattern: /\/models\/[^/]*\.tflite$/,
             handler: "CacheFirst",
             options: {
               cacheName: "chessqueries-model",
@@ -102,7 +101,7 @@ export default defineConfig({
   },
   preview: {
     // Cross-origin isolation enables SharedArrayBuffer, so the CPU fallback can use wasm threads.
-    // credentialless still allows CORS requests, such as the model from Hugging Face.
+    // credentialless still allows CORS requests, such as the icons from jsDelivr.
     headers: {
       "Cross-Origin-Opener-Policy": "same-origin",
       "Cross-Origin-Embedder-Policy": "credentialless"

@@ -125,7 +125,6 @@
     "wasReset": "शुरुआती पोज़िशन पर रीसेट हो गया",
     "detecting": "चालें पहचानी जा रही हैं",
     "fps": "{{fps}} FPS",
-    "fpsCpu": "{{fps}} FPS · CPU",
     "unavailable": "कैमरा उपलब्ध नहीं है",
     "needsHttps": "कैमरे के लिए सुरक्षित (https) कनेक्शन चाहिए",
     "blocked": "कैमरे की अनुमति रोक दी गई",
@@ -199,9 +198,7 @@
   },
   "detection": {
     "failed": "मोहरों की पहचान विफल रही",
-    "stopped": "मोहरों की पहचान रुक गई। कृपया पेज फिर से लोड करें।",
-    "reloadFailed": "मॉडल फिर से लोड नहीं हो सका। कृपया पेज फिर से लोड करें।",
-    "gpuReset": "GPU रीसेट हो गया। मॉडल फिर से लोड हो रहा है..."
+    "stopped": "मोहरों की पहचान रुक गई। कृपया पेज फिर से लोड करें।"
   },
   "engine": {
     "failed": "इस ब्राउज़र में Stockfish नहीं चल सका।"
@@ -321,7 +318,7 @@
     },
     "licences": {
       "question": "बोर्ड पहचानने वाले मॉडल पर कौन-से लाइसेंस लागू होते हैं?",
-      "answer": "यह मॉडल MobileNetV4 एनकोडर वाला एक ChessQueries मॉडल है, जो <hf>Hugging Face</hf> से डाउनलोड होता है। इसके वेट्स <polyform>PolyForm Noncommercial License 1.0.0</polyform> के तहत उपलब्ध हैं। ज़्यादा जानकारी के लिए <notice>NOTICE</notice> देखें।"
+      "answer": "यह मॉडल MobileNetV4 एनकोडर वाला एक ChessQueries मॉडल है, जो <hf>Hugging Face</hf> पर प्रकाशित है। इसके वेट्स <polyform>PolyForm Noncommercial License 1.0.0</polyform> के तहत उपलब्ध हैं। ज़्यादा जानकारी के लिए <notice>NOTICE</notice> देखें।"
     },
     "openSource": {
       "question": "क्या ChessCam ओपन सोर्स है?",

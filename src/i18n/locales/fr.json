@@ -125,7 +125,6 @@
     "wasReset": "Retour à la position de départ",
     "detecting": "Détection des coups",
     "fps": "{{fps}} FPS",
-    "fpsCpu": "{{fps}} FPS · CPU",
     "unavailable": "Caméra indisponible",
     "needsHttps": "La caméra nécessite une connexion sécurisée (https)",
     "blocked": "L'accès à la caméra a été bloqué",
@@ -199,9 +198,7 @@
   },
   "detection": {
     "failed": "La détection des pièces a échoué",
-    "stopped": "La détection des pièces s'est arrêtée. Rechargez la page.",
-    "reloadFailed": "Impossible de recharger le modèle. Rechargez la page.",
-    "gpuReset": "Le GPU a été réinitialisé. Rechargement du modèle..."
+    "stopped": "La détection des pièces s'est arrêtée. Rechargez la page."
   },
   "engine": {
     "failed": "Impossible d'exécuter Stockfish dans ce navigateur."
@@ -321,7 +318,7 @@
     },
     "licences": {
       "question": "Quelles licences couvrent le modèle de reconnaissance de l'échiquier ?",
-      "answer": "Le modèle est un modèle ChessQueries avec un encodeur MobileNetV4, téléchargé depuis <hf>Hugging Face</hf>. Ses poids sont disponibles sous la <polyform>PolyForm Noncommercial License 1.0.0</polyform>. Consultez le fichier <notice>NOTICE</notice> pour plus de détails."
+      "answer": "Le modèle est un modèle ChessQueries avec un encodeur MobileNetV4, publié sur <hf>Hugging Face</hf>. Ses poids sont disponibles sous la <polyform>PolyForm Noncommercial License 1.0.0</polyform>. Consultez le fichier <notice>NOTICE</notice> pour plus de détails."
     },
     "openSource": {
       "question": "ChessCam est-il open source ?",

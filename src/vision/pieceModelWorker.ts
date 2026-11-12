@@ -1,14 +1,16 @@
 // Runs the model on the CPU, off the main thread. A CPU run blocks its thread for the whole
 // inference (about 0.2 s with threads and 1.2 s without on a desktop), which would freeze the page.
 import { type CompiledModel, loadAndCompile, loadLiteRt, supportsFeature, Tensor } from "@litertjs/core";
-import { CHESSQUERIES_SIZE } from "../utils/constants";
+import { MODEL_SIZE } from "../utils/constants";
 
 export type WorkerCall = { type: "load", wasmUrl: string, modelUrl: string } | { type: "run", pixels: Uint8Array<ArrayBuffer> };
 export type WorkerRequest = WorkerCall & { id: number };
 // The model's outputs, or why the request failed
 export type WorkerResponse = { id: number, arrays: Float32Array<ArrayBuffer>[] } | { id: number, error: string };
 
-const INPUT_SHAPE: number[] = [1, CHESSQUERIES_SIZE, CHESSQUERIES_SIZE, 4];
+const INPUT_SHAPE: number[] = [1, MODEL_SIZE, MODEL_SIZE, 4];
+// More threads were slower on a Pixel 7a (8 cores): 4 threads took 67 ms a frame and 8 took 92-100 ms
+const MAX_THREADS = 4;
 
 let model: CompiledModel | null = null;
 // Requests are handled one at a time, so runs never overlap on the model
@@ -77,10 +79,10 @@ const load = async (wasmUrl: string, modelUrl: string): Promise<Float32Array<Arr
   await loadLiteRt(wasmUrl, { jspi: !threaded && "Suspending" in WebAssembly, threads: threaded });
   model = await loadAndCompile(modelUrl, {
     accelerator: "wasm",
-    cpuOptions: { numThreads: threaded ? navigator.hardwareConcurrency : 1 }
+    cpuOptions: { numThreads: threaded ? Math.min(MAX_THREADS, navigator.hardwareConcurrency) : 1 }
   });
   // Warm up, so the first frame is not slow
-  await run(new Uint8Array(CHESSQUERIES_SIZE * CHESSQUERIES_SIZE * 4));
+  await run(new Uint8Array(MODEL_SIZE * MODEL_SIZE * 4));
   return [];
 }
 

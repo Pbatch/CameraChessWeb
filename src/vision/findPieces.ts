@@ -1,7 +1,7 @@
 import i18n from "../i18n";
 import { gameUpdate, makeUpdatePayload } from "../slices/gameSlice";
 import { invalidVideo } from "./detect";
-import { getOrientation, runChessqueries } from "./chessqueries";
+import { getOrientation, runPieceModel } from "./pieceModel";
 import { BeamTracker, PLAY_BEAM_OPTIONS, PLAY_TRACKER_OPTIONS } from "./beamTracker";
 import { useStore } from "../store";
 import type {
@@ -11,7 +11,7 @@ import type { RefObject } from "react";
 
 // How often the FPS shown updates, in ms
 const FPS_INTERVAL = 1000;
-// Detections per second of video, to spare the GPU and battery.
+// Detections per second of video, to spare the CPU and battery.
 // Faster playback scales it, e.g. 16 FPS at 4x; the live camera plays at 1x.
 const MAX_FPS = 4;
 
@@ -21,7 +21,7 @@ const setTextIfChanged = (setText: SetStringArray, text: string[]) => {
 }
 
 interface FindPiecesInput {
-  chessqueriesModelRef: ModelRefs["chessqueriesModelRef"],
+  modelRef: ModelRefs["modelRef"],
   videoRef: VideoRef,
   roiRef: RoiRef,
   playingRef: RefObject<boolean>,
@@ -33,7 +33,7 @@ interface FindPiecesInput {
   mode: Mode
 }
 
-export const findPieces = ({ chessqueriesModelRef, videoRef, roiRef, playingRef, setText, setFps, setOrientation,
+export const findPieces = ({ modelRef, videoRef, roiRef, playingRef, setText, setFps, setOrientation,
   lastMoveRef, moveTextRef, mode }: FindPiecesInput) => {
   // Follows several ways the game may have gone, so a move can still be corrected a few seconds on. Play mode sends
   // moves to Lichess as they are shown and can't take any back, so it shows only final moves.
@@ -123,7 +123,7 @@ export const findPieces = ({ chessqueriesModelRef, videoRef, roiRef, playingRef,
         }
         fpsFrames += 1;
 
-        const { update, direction: newDirection } = await runChessqueries(chessqueriesModelRef, videoRef, roiRef.current);
+        const { update, direction: newDirection } = await runPieceModel(modelRef, videoRef, roiRef.current);
         // A NaN would stay in the smoothed state for good, and no move scores above 0 against it.
         // The finally below still queues the next frame.
         if (!update.every((square) => square.every(Number.isFinite))) {

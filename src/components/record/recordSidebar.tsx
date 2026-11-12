@@ -5,9 +5,9 @@ import type {
 } from "../../types";
 
 // Recording is controlled from the bar over the camera (cameraControls.tsx)
-const RecordSidebar = ({ chessqueriesModelRef, videoRef, camera,
+const RecordSidebar = ({ modelRef, videoRef, camera,
   playing, text, setText, roi, setRoi, selecting, setSelecting, canPlay }: {
-  chessqueriesModelRef: ModelRefs["chessqueriesModelRef"],
+  modelRef: ModelRefs["modelRef"],
   videoRef: VideoRef,
   camera: Camera,
   playing: boolean,
@@ -26,7 +26,7 @@ const RecordSidebar = ({ chessqueriesModelRef, videoRef, camera,
         <DeviceButton camera={camera} disabled={playing} />
         <RoiButton roi={roi} setRoi={setRoi} selecting={selecting} setSelecting={setSelecting}
           canPlay={canPlay && !playing} />
-        <FenButton chessqueriesModelRef={chessqueriesModelRef} videoRef={videoRef} roi={roi} setText={setText}
+        <FenButton modelRef={modelRef} videoRef={videoRef} roi={roi} setText={setText}
           canPlay={canPlay && !playing} />
       </SidebarSection>
     </Sidebar>

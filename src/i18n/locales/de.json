@@ -125,7 +125,6 @@
     "wasReset": "Auf die Ausgangsstellung zurückgesetzt",
     "detecting": "Züge werden erkannt",
     "fps": "{{fps}} FPS",
-    "fpsCpu": "{{fps}} FPS · CPU",
     "unavailable": "Kamera nicht verfügbar",
     "needsHttps": "Die Kamera braucht eine sichere (https-)Verbindung",
     "blocked": "Der Kamerazugriff wurde blockiert",
@@ -199,9 +198,7 @@
   },
   "detection": {
     "failed": "Figurenerkennung fehlgeschlagen",
-    "stopped": "Die Figurenerkennung wurde beendet. Bitte lade die Seite neu.",
-    "reloadFailed": "Das Modell konnte nicht neu geladen werden. Bitte lade die Seite neu.",
-    "gpuReset": "Die GPU wurde zurückgesetzt. Das Modell wird neu geladen..."
+    "stopped": "Die Figurenerkennung wurde beendet. Bitte lade die Seite neu."
   },
   "engine": {
     "failed": "Stockfish kann in diesem Browser nicht ausgeführt werden."
@@ -321,7 +318,7 @@
     },
     "licences": {
       "question": "Welche Lizenzen gelten für das Modell zur Bretterkennung?",
-      "answer": "Das Modell ist ein ChessQueries-Modell mit einem MobileNetV4-Encoder und wird von <hf>Hugging Face</hf> heruntergeladen. Seine Gewichte sind unter der <polyform>PolyForm Noncommercial License 1.0.0</polyform> verfügbar. Details stehen in der <notice>NOTICE</notice>."
+      "answer": "Das Modell ist ein ChessQueries-Modell mit einem MobileNetV4-Encoder und ist auf <hf>Hugging Face</hf> veröffentlicht. Seine Gewichte sind unter der <polyform>PolyForm Noncommercial License 1.0.0</polyform> verfügbar. Details stehen in der <notice>NOTICE</notice>."
     },
     "openSource": {
       "question": "Ist ChessCam Open Source?",

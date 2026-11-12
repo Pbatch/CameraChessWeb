@@ -15,8 +15,8 @@ const OPTIONS = {
 } as const;
 type Option = keyof typeof OPTIONS;
 
-const FenButton = ({ chessqueriesModelRef, videoRef, roi, setText, canPlay }:
-  Pick<ModelRefs, "chessqueriesModelRef"> & {
+const FenButton = ({ modelRef, videoRef, roi, setText, canPlay }:
+  Pick<ModelRefs, "modelRef"> & {
     videoRef: VideoRef,
     roi: Roi | null,
     setText: SetStringArray,
@@ -30,7 +30,7 @@ const FenButton = ({ chessqueriesModelRef, videoRef, roi, setText, canPlay }:
       gameReset();
     } else {
       const color: Color = option;
-      void findFen({ chessqueriesModelRef, videoRef, roi, setText, color })
+      void findFen({ modelRef, videoRef, roi, setText, color })
         .catch((error: unknown) => {
           console.error("Unable to infer the starting position", error);
           setText([t("position.detectFailed")]);

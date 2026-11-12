@@ -125,7 +125,6 @@
     "wasReset": "Reset to start position",
     "detecting": "Detecting moves",
     "fps": "{{fps}} FPS",
-    "fpsCpu": "{{fps}} FPS · CPU",
     "unavailable": "Camera unavailable",
     "needsHttps": "The camera needs a secure (https) connection",
     "blocked": "Camera access was blocked",
@@ -199,9 +198,7 @@
   },
   "detection": {
     "failed": "Piece detection failed",
-    "stopped": "Piece detection stopped. Please reload the page.",
-    "reloadFailed": "Unable to reload the model. Please reload the page.",
-    "gpuReset": "The GPU was reset. Reloading the model..."
+    "stopped": "Piece detection stopped. Please reload the page."
   },
   "engine": {
     "failed": "Unable to run Stockfish in this browser."
@@ -321,7 +318,7 @@
     },
     "licences": {
       "question": "What licences cover the board recognition model?",
-      "answer": "The model is a ChessQueries model with a MobileNetV4 encoder, downloaded from <hf>Hugging Face</hf>. Its weights are available under the <polyform>PolyForm Noncommercial License 1.0.0</polyform>. See the <notice>NOTICE</notice> for details."
+      "answer": "The model is a ChessQueries model with a MobileNetV4 encoder, published on <hf>Hugging Face</hf>. Its weights are available under the <polyform>PolyForm Noncommercial License 1.0.0</polyform>. See the <notice>NOTICE</notice> for details."
     },
     "openSource": {
       "question": "Is ChessCam open source?",
