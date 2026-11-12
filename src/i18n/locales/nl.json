@@ -125,7 +125,6 @@
     "wasReset": "Teruggezet naar de beginstelling",
     "detecting": "Zetten herkennen",
     "fps": "{{fps}} FPS",
-    "fpsCpu": "{{fps}} FPS · CPU",
     "unavailable": "Camera niet beschikbaar",
     "needsHttps": "De camera heeft een beveiligde (https-)verbinding nodig",
     "blocked": "Toegang tot de camera is geblokkeerd",
@@ -199,9 +198,7 @@
   },
   "detection": {
     "failed": "Stukherkenning mislukt",
-    "stopped": "De stukherkenning is gestopt. Laad de pagina opnieuw.",
-    "reloadFailed": "Kan het model niet opnieuw laden. Laad de pagina opnieuw.",
-    "gpuReset": "De GPU is opnieuw gestart. Het model wordt opnieuw geladen..."
+    "stopped": "De stukherkenning is gestopt. Laad de pagina opnieuw."
   },
   "engine": {
     "failed": "Kan Stockfish niet uitvoeren in deze browser."

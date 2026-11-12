@@ -11,7 +11,7 @@ import type { RefObject } from "react";
 
 // How often the FPS shown updates, in ms
 const FPS_INTERVAL = 1000;
-// Detections per second of video, to spare the GPU and battery.
+// Detections per second of video, to spare the CPU and battery.
 // Faster playback scales it, e.g. 16 FPS at 4x; the live camera plays at 1x.
 const MAX_FPS = 4;
 

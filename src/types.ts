@@ -10,7 +10,7 @@ interface PieceModelOutputs {
   centroids: Float32Array | null
 }
 
-// The piece model, on the GPU or in a CPU worker. A null video gives blank pixels, for the warm-up.
+// The piece model, in a CPU worker. A null video gives blank pixels, for the warm-up.
 interface PieceModel {
   run: (video: HTMLVideoElement | null, roi: Roi | null) => Promise<PieceModelOutputs>,
   delete: () => void

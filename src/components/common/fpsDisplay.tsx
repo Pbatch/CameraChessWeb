@@ -1,5 +1,4 @@
 import { useTranslation } from "react-i18next";
-import { getAccelerator } from "../../vision/pieceModel";
 
 // Detection speed over the video's top-right corner, clear of a corner marker when one is there
 const FpsDisplay = ({ fps, offset }: { fps: number | null, offset: number }) => {
@@ -9,7 +8,7 @@ const FpsDisplay = ({ fps, offset }: { fps: number | null, offset: number }) => 
   }
 
   return (
-    <div className="video-fps" style={{ right: offset }}>{t((getAccelerator() === "wasm") ? "camera.fpsCpu" : "camera.fps", { fps: fps.toFixed(1) })}</div>
+    <div className="video-fps" style={{ right: offset }}>{t("camera.fps", { fps: fps.toFixed(1) })}</div>
   )
 }
 

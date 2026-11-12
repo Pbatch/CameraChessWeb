@@ -125,7 +125,6 @@
     "wasReset": "Reiniciado a la posición inicial",
     "detecting": "Detectando jugadas",
     "fps": "{{fps}} FPS",
-    "fpsCpu": "{{fps}} FPS · CPU",
     "unavailable": "Cámara no disponible",
     "needsHttps": "La cámara necesita una conexión segura (https)",
     "blocked": "Se bloqueó el acceso a la cámara",
@@ -199,9 +198,7 @@
   },
   "detection": {
     "failed": "Falló la detección de piezas",
-    "stopped": "La detección de piezas se detuvo. Recarga la página.",
-    "reloadFailed": "No se pudo recargar el modelo. Recarga la página.",
-    "gpuReset": "La GPU se reinició. Recargando el modelo..."
+    "stopped": "La detección de piezas se detuvo. Recarga la página."
   },
   "engine": {
     "failed": "No se puede ejecutar Stockfish en este navegador."

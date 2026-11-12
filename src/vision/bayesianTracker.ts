@@ -48,7 +48,7 @@ export interface BayesianOptions {
 // temperature, and no setting of temperatures 2.0 to 4.0 and weights 0.4 to 0.83 times the temperature did better;
 // at 3.0, weights 1.8 and 3.0 needed 13 and 20. floor, moveChance, threshold and flipChance keep the values earlier
 // tuning gave them (see this file's git history), as they barely change the result. The model manages about 10
-// frames a second on a Pixel 7a's CPU, and the app's cap of 4 with WebGPU.
+// frames a second on a Pixel 7a's CPU, above the app's cap of 4.
 export const DEFAULT_BAYESIAN_OPTIONS: BayesianOptions = {
   provisional: true, moveChance: 0.01, temperature: 3.0, floor: 0.05, evidenceWeight: 2.5, threshold: 0.95,
   flipChance: 0.05

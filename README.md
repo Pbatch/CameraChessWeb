@@ -31,7 +31,7 @@ Do you have ideas, bugs to report or training footage? Join our [Discord Server]
 * **Broadcast**: stream a game to Lichess as you play
 * Export your games to Lichess, or save them as a PGN
 
-The app runs in your browser and works offline after the first visit. It is fastest on a device with WebGPU.
+The app runs in your browser and works offline after the first visit.
 See the FAQ in the app for camera setup and other help.
 
 ## Roadmap

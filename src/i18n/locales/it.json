@@ -125,7 +125,6 @@
     "wasReset": "Tornato alla posizione iniziale",
     "detecting": "Rilevamento delle mosse",
     "fps": "{{fps}} FPS",
-    "fpsCpu": "{{fps}} FPS · CPU",
     "unavailable": "Fotocamera non disponibile",
     "needsHttps": "La fotocamera richiede una connessione sicura (https)",
     "blocked": "L'accesso alla fotocamera è stato bloccato",
@@ -199,9 +198,7 @@
   },
   "detection": {
     "failed": "Rilevamento dei pezzi non riuscito",
-    "stopped": "Il rilevamento dei pezzi si è interrotto. Ricarica la pagina.",
-    "reloadFailed": "Impossibile ricaricare il modello. Ricarica la pagina.",
-    "gpuReset": "La GPU è stata reimpostata. Ricaricamento del modello..."
+    "stopped": "Il rilevamento dei pezzi si è interrotto. Ricarica la pagina."
   },
   "engine": {
     "failed": "Impossibile eseguire Stockfish in questo browser."
