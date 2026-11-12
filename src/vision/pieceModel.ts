@@ -3,6 +3,7 @@ import { type Accelerator, type CompiledModel, getGlobalLiteRt, isWebGPUSupporte
 import { version as LITERT_VERSION } from "@litertjs/core/package.json";
 import { MODEL_SIZE, LABEL_MAP, NUM_LABELS } from "../utils/constants";
 import { zeros } from "../utils/math";
+import modelFile from "../model.json";
 import type { PieceModel, PieceModelOutputs, CornerName, ModelRefs, Roi, VideoRef } from "../types";
 import type { WorkerCall, WorkerRequest, WorkerResponse } from "./pieceModelWorker";
 
@@ -12,8 +13,9 @@ const INPUT_SHAPE: number[] = [1, MODEL_SIZE, MODEL_SIZE, 4];
 const NUM_PROBS: number = 64 * CLASS_SYMBOLS.length;
 // Region corners clockwise from the top left when rank 8 is at the top
 const CORNERS: CornerName[] = ["a8", "h8", "h1", "a1"];
-// Pinned to a commit so a new upload cannot change the model under a deployed app
-const MODEL_URL: string = "https://huggingface.co/PBatch23888/chessq-chesscam/resolve/0c3de0dd34a5e1a60d69e942045fb6dc0f82aeb4/chessq-chesscam-mnv4m-320-v1-fp16.tflite";
+// Served by the site itself, as scripts/fetchModel.mjs puts it in public/models. A function, as tests import this
+// module where there is no document.
+const modelUrl = (): string => new URL(`models/${modelFile.file}`, document.baseURI).href;
 
 // Resizes the frame straight into the input buffer, one packed RGBA u32 per pixel.
 // Each output pixel averages a grid of bilinear taps over its footprint, like the canvas's high quality downscale.
@@ -222,7 +224,7 @@ const setWebGpuDevice = async () => {
 
 const loadWebGpu = async (): Promise<PieceModel> => {
   // fp16 is the fastest and does not need the shader-f16 WebGPU feature
-  const model: CompiledModel = await loadAndCompile(MODEL_URL, {
+  const model: CompiledModel = await loadAndCompile(modelUrl(), {
     accelerator: "webgpu",
     gpuOptions: { precision: "fp16" }
   });
@@ -303,7 +305,7 @@ const loadWorker = async (): Promise<PieceModel> => {
 
   try {
     // The worker's URL is not the page's, so the runtime's path is made absolute
-    await send({ type: "load", wasmUrl: new URL(wasmPath, document.baseURI).href, modelUrl: MODEL_URL });
+    await send({ type: "load", wasmUrl: new URL(wasmPath, document.baseURI).href, modelUrl: modelUrl() });
   } catch (error) {
     stop(error as Error);
     throw error;

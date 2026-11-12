@@ -7,7 +7,9 @@
     "node": ">=26"
   },
   "scripts": {
+    "prestart": "node scripts/fetchModel.mjs",
     "start": "vite",
+    "prebuild": "node scripts/fetchModel.mjs",
     "build": "npm test && npm run tsc && biome lint src --error-on-warnings && vite build",
     "lint": "biome lint src --error-on-warnings",
     "tsc": "tsc && tsc -p tsconfig.node.json",

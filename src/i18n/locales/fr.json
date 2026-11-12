@@ -321,7 +321,7 @@
     },
     "licences": {
       "question": "Quelles licences couvrent le modèle de reconnaissance de l'échiquier ?",
-      "answer": "Le modèle est un modèle ChessQueries avec un encodeur MobileNetV4, téléchargé depuis <hf>Hugging Face</hf>. Ses poids sont disponibles sous la <polyform>PolyForm Noncommercial License 1.0.0</polyform>. Consultez le fichier <notice>NOTICE</notice> pour plus de détails."
+      "answer": "Le modèle est un modèle ChessQueries avec un encodeur MobileNetV4, publié sur <hf>Hugging Face</hf>. Ses poids sont disponibles sous la <polyform>PolyForm Noncommercial License 1.0.0</polyform>. Consultez le fichier <notice>NOTICE</notice> pour plus de détails."
     },
     "openSource": {
       "question": "ChessCam est-il open source ?",

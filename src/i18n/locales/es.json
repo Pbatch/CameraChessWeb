@@ -321,7 +321,7 @@
     },
     "licences": {
       "question": "¿Qué licencias cubren el modelo de reconocimiento del tablero?",
-      "answer": "El modelo es un modelo ChessQueries con un codificador MobileNetV4, descargado de <hf>Hugging Face</hf>. Sus pesos están disponibles bajo la <polyform>PolyForm Noncommercial License 1.0.0</polyform>. Consulta el archivo <notice>NOTICE</notice> para más detalles."
+      "answer": "El modelo es un modelo ChessQueries con un codificador MobileNetV4, publicado en <hf>Hugging Face</hf>. Sus pesos están disponibles bajo la <polyform>PolyForm Noncommercial License 1.0.0</polyform>. Consulta el archivo <notice>NOTICE</notice> para más detalles."
     },
     "openSource": {
       "question": "¿ChessCam es de código abierto?",

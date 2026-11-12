@@ -321,7 +321,7 @@
     },
     "licences": {
       "question": "Welche Lizenzen gelten für das Modell zur Bretterkennung?",
-      "answer": "Das Modell ist ein ChessQueries-Modell mit einem MobileNetV4-Encoder und wird von <hf>Hugging Face</hf> heruntergeladen. Seine Gewichte sind unter der <polyform>PolyForm Noncommercial License 1.0.0</polyform> verfügbar. Details stehen in der <notice>NOTICE</notice>."
+      "answer": "Das Modell ist ein ChessQueries-Modell mit einem MobileNetV4-Encoder und ist auf <hf>Hugging Face</hf> veröffentlicht. Seine Gewichte sind unter der <polyform>PolyForm Noncommercial License 1.0.0</polyform> verfügbar. Details stehen in der <notice>NOTICE</notice>."
     },
     "openSource": {
       "question": "Ist ChessCam Open Source?",
