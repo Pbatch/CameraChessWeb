@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { findFen } from "../../vision/findFen";
 import { gameReset } from "../../slices/gameSlice";
-import type { Color } from "chessops/types";
+import type { Color } from "@chesscam/recorder";
 import type { ModelRefs, Roi, SetStringArray, VideoRef } from "../../types";
 import { Grid3x3 } from "lucide-react";
 import Dropdown, { DropdownItem } from "./dropdown";

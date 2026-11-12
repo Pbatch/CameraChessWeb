@@ -1,182 +1,66 @@
 import i18n from "../i18n";
-import { gameUpdate, makeUpdatePayload } from "../slices/gameSlice";
-import { invalidVideo } from "./detect";
-import { getOrientation, runPieceModel } from "./pieceModel";
-import { BeamTracker, PLAY_BEAM_OPTIONS, PLAY_TRACKER_OPTIONS } from "./beamTracker";
+import { createRecorder, type Game, type Model, type RecorderError } from "@chesscam/recorder";
 import { useStore } from "../store";
-import type {
-  Mode, ModelRefs, RoiRef, SetFps, SetOrientation, SetStringArray, VideoRef
-} from "../types";
+import type { Mode, SetFps, SetOrientation, SetStringArray } from "../types";
 import type { RefObject } from "react";
-
-// How often the FPS shown updates, in ms
-const FPS_INTERVAL = 1000;
-// Detections per second of video, to spare the CPU and battery.
-// Faster playback scales it, e.g. 16 FPS at 4x; the live camera plays at 1x.
-const MAX_FPS = 4;
 
 // Keeps the same array when the text is unchanged, so React skips re-rendering the page every frame
 const setTextIfChanged = (setText: SetStringArray, text: string[]) => {
   setText((prev) => ((prev.length === text.length) && prev.every((t, i) => t === text[i])) ? prev : text);
 }
 
+const errorText = (error: RecorderError): string[] => [i18n.t("detection.failed"),
+  (error.code === "worker-stopped") ? i18n.t("detection.stopped") : error.message];
+
 interface FindPiecesInput {
-  modelRef: ModelRefs["modelRef"],
-  videoRef: VideoRef,
-  roiRef: RoiRef,
-  playingRef: RefObject<boolean>,
+  model: Model,
+  video: HTMLVideoElement,
   setText: SetStringArray,
   setFps: SetFps,
   setOrientation: SetOrientation,
-  lastMoveRef: RefObject<string>,
   moveTextRef: RefObject<string>,
   mode: Mode
 }
 
-export const findPieces = ({ modelRef, videoRef, roiRef, playingRef, setText, setFps, setOrientation,
-  lastMoveRef, moveTextRef, mode }: FindPiecesInput) => {
-  // Follows several ways the game may have gone, so a move can still be corrected a few seconds on. Play mode sends
-  // moves to Lichess as they are shown and can't take any back, so it shows only final moves.
-  const makeTracker = () => (mode === "play") ? new BeamTracker(PLAY_TRACKER_OPTIONS, PLAY_BEAM_OPTIONS)
-    : new BeamTracker();
-  let tracker = makeTracker();
-  // A reset (upload mode) replaces the tracker, as its beliefs about the board no longer hold
-  let trackerResets: number = useStore.getState().trackerResets;
-  let direction: number[] | null = null;
-  let orientationKey: string = "";
-  let requestId: number;
-  // Detections started since the FPS was last shown, which is about once a second so it's readable
-  let fpsSince: number = 0;
-  let fpsFrames: number = 0;
-  let active = true;
-  // When the next detection may start
-  let nextRunTime: number = 0;
-  // Whether the video has shown a frame that has not been detected yet. Browsers without
-  // requestVideoFrameCallback cannot tell, so every frame counts as new.
-  let frameVideo: HTMLVideoElement | null = null;
-  let frameCallbackId: number | undefined;
-  let newFrame: boolean = true;
-  // A clock that stops while detection is paused, in ms. The tracker runs on it, so a pause neither counts as time
-  // for its settings nor uses up the time a move can still be corrected in, and record mode times moves on it, from
-  // where it was when detection last started on a game without moves.
-  let playClock: number = 0;
-  // Whether detection was running at the last frame, to clear the FPS shown when it stops
-  let running: boolean = false;
-  let lastTick: number | null = null;
-  let recordStart: number = 0;
+// Reads moves off the board with the recorder, which keeps its own copy of the game: its moves go to the store, and
+// the store's changes from elsewhere (a takeback, a new game, the Lichess opponent's moves) go back to it. Returns the
+// recorder, paused, to start, pause and give regions to, and a function that stops it.
+export const findPieces = ({ model, video, setText, setFps, setOrientation, moveTextRef, mode }: FindPiecesInput) => {
+  const initial = useStore.getState();
+  // Play mode sends moves to Lichess as they are shown and can't take any back, so it shows only final moves.
+  // Record mode times each move, for the PGN.
+  const recorder = createRecorder({
+    model, video, start: initial.game.start, timed: mode === "record", finalMovesOnly: mode === "play",
+    onUpdate: (game: Game) => {
+      useStore.setState({ game });
+    },
+    onDetect: () => {
+      setTextIfChanged(setText, [moveTextRef.current]);
+    },
+    onFps: setFps,
+    onOrientation: setOrientation,
+    onError: (error) => {
+      setTextIfChanged(setText, errorText(error));
+    }
+  });
+  recorder.setGame(initial.game);
 
-  const watchFrames = (video: HTMLVideoElement | null) => {
-    if (video === frameVideo) {
-      return;
+  let trackerResets: number = initial.trackerResets;
+  const unsubscribe = useStore.subscribe((state) => {
+    // A reset (upload mode) starts the tracker afresh, as its beliefs about the board no longer hold
+    if (state.trackerResets !== trackerResets) {
+      trackerResets = state.trackerResets;
+      recorder.reset(state.game.start);
     }
-    if (frameVideo !== null && frameCallbackId !== undefined) {
-      frameVideo.cancelVideoFrameCallback(frameCallbackId);
-    }
-    frameVideo = video;
-    frameCallbackId = undefined;
-    newFrame = true;
-    if (video === null || typeof video.requestVideoFrameCallback !== "function") {
-      return;
-    }
-    const onFrame = () => {
-      newFrame = true;
-      frameCallbackId = video.requestVideoFrameCallback(onFrame);
-    }
-    frameCallbackId = video.requestVideoFrameCallback(onFrame);
-  }
-
-  const loop = async () => {
-    try {
-      watchFrames(videoRef.current);
-      const now: number = performance.now();
-      if (playingRef.current === false) {
-        lastTick = null;
-        if (lastMoveRef.current === "") {
-          recordStart = playClock;
-        }
-      } else {
-        playClock += now - (lastTick ?? now);
-        lastTick = now;
-      }
-      if (playingRef.current === false || invalidVideo(videoRef)) {
-        // The tracker keeps its ways the game may have gone over a pause. It starts again only when the game is
-        // changed other than by it.
-        if (running) {
-          setFps(null);
-          fpsFrames = 0;
-          running = false;
-        }
-      } else if (newFrame && now >= nextRunTime) {
-        newFrame = (frameCallbackId === undefined);
-        const minFrameTime: number = 1000 / (MAX_FPS * (videoRef.current?.playbackRate || 1));
-        // Steps by the interval, so the frames a display ticks on do not round the rate down,
-        // but catches up by at most half an interval after a slow frame
-        nextRunTime = Math.max(nextRunTime + minFrameTime, now + minFrameTime / 2);
-        const startTime: number = performance.now();
-        // The real rate, from start to start, so it shows the cap and any time between detections
-        if (fpsFrames === 0) {
-          fpsSince = startTime;
-        } else if ((startTime - fpsSince) >= FPS_INTERVAL) {
-          setFps(1000 * fpsFrames / (startTime - fpsSince));
-          fpsSince = startTime;
-          fpsFrames = 0;
-        }
-        fpsFrames += 1;
-
-        const { update, direction: newDirection } = await runPieceModel(modelRef, videoRef, roiRef.current);
-        // A NaN would stay in the smoothed state for good, and no move scores above 0 against it.
-        // The finally below still queues the next frame.
-        if (!update.every((square) => square.every(Number.isFinite))) {
-          console.warn("Skipped a frame with non-finite probabilities");
-          return;
-        }
-        running = true;
-        const state = useStore.getState();
-        if (state.trackerResets !== trackerResets) {
-          trackerResets = state.trackerResets;
-          tracker = makeTracker();
-        }
-        const elapsed = (mode === "record") ? (playClock - recordStart) : undefined;
-        const shown = tracker.update(update, playClock, state.game);
-        if (shown !== null) {
-          // A corrected move is timed from when it was played, which may be a few seconds back
-          const ago = shown.times.map((time) => (time === null) ? null : playClock - time);
-          gameUpdate(makeUpdatePayload(shown.board), elapsed, ago);
-        }
-
-        // The first frame starts the smoothed direction, so it does not wait to climb from zero
-        if (newDirection?.every(Number.isFinite)) {
-          // Smoothed, so a board near 45 degrees does not flicker between orientations
-          direction = (direction === null) ? newDirection
-            : direction.map((d, i) => 0.5 * d + 0.5 * newDirection[i]);
-          const orientation = getOrientation(direction);
-          if (orientation.join() !== orientationKey) {
-            orientationKey = orientation.join();
-            setOrientation(orientation);
-          }
-        }
-        setTextIfChanged(setText, [moveTextRef.current]);
-      }
-    } catch (error) {
-      console.error("Piece detection failed", error);
-      setTextIfChanged(setText, [i18n.t("detection.failed"), (error instanceof Error) ? error.message : String(error)]);
-    } finally {
-      if (active) {
-        requestId = requestAnimationFrame(() => {
-          void loop();
-        });
-      }
-    }
-  }
-  requestId = requestAnimationFrame(() => {
-    void loop();
+    // Does nothing for the recorder's own moves, which the store already has
+    recorder.setGame(state.game);
   });
 
-  return () => {
-    active = false;
-    if (requestId) {
-      window.cancelAnimationFrame(requestId);
+  return {
+    recorder,
+    stop: () => {
+      unsubscribe();
+      recorder.destroy();
     }
-    watchFrames(null);
   };
-};
+}

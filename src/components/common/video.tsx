@@ -1,13 +1,13 @@
 import i18n from "../../i18n";
 import { findPieces } from "../../vision/findPieces";
 import { useEffect, useRef, useState } from "react";
+import { getMoveText, type Recorder } from "@chesscam/recorder";
 import { MEDIA_ASPECT_RATIO } from "../../utils/constants";
 import type {
-  CornerName, Game, Mode, ModelRefs, Roi, RoiRef, SetRoi,
+  CornerName, Game, Mode, ModelRefs, Roi, SetRoi,
   SetBoolean, SetStringArray, VideoRef
 } from "../../types";
 import { makeBoard, useGame } from "../../slices/gameSlice";
-import { getMoveText } from "../../chess/moves";
 import RoiSelector from "./roiSelector";
 import OrientationMarkers, { MARKER_DIAMETER } from "./orientationMarkers";
 import FpsDisplay from "./fpsDisplay";
@@ -20,15 +20,14 @@ import type { StartBlock } from "./cameraControls";
 const CONTROLS_HEIGHT = { upload: 52, camera: 40 };
 
 const Video = ({ modelRef, videoRef, playing,
-  setPlaying, playingRef, setText, mode, roi, setRoi, roiRef, selecting, setSelecting,
+  setPlaying, setText, mode, roi, setRoi, selecting, setSelecting,
   canPlay, setCanPlay, engineEnabled = false, startBlock = null }: {
     modelRef: ModelRefs["modelRef"],
     videoRef: VideoRef,
     playing: boolean,
     setPlaying: SetBoolean,
-    playingRef: React.RefObject<boolean>,
     setText: SetStringArray, mode: Mode,
-    roi: Roi | null, setRoi: SetRoi, roiRef: RoiRef,
+    roi: Roi | null, setRoi: SetRoi,
     selecting: boolean, setSelecting: SetBoolean,
     canPlay: boolean, setCanPlay: SetBoolean,
     // What the camera modes need chosen before detection can start
@@ -38,7 +37,7 @@ const Video = ({ modelRef, videoRef, playing,
   }) => {
   const game: Game = useGame();
 
-  const lastMoveRef = useRef<string>(game.lastMove);
+  const [recorder, setRecorder] = useState<Recorder | null>(null);
   const moveTextRef = useRef<string>("");
   const [orientation, setOrientation] = useState<CornerName[] | null>(null);
   // Cameras return whichever native mode is closest to the request, so the real shape is only known once frames arrive
@@ -51,13 +50,35 @@ const Video = ({ modelRef, videoRef, playing,
 
   useEffect(() => {
     moveTextRef.current = getMoveText(makeBoard(game));
-    lastMoveRef.current = game.lastMove;
   }, [game])
 
+  // The ModelLoader route holds this page back until the model has loaded, and the video element is always rendered
   useEffect(() => {
-    return findPieces({ modelRef, videoRef, roiRef, playingRef, setText, setFps, setOrientation,
-      lastMoveRef, moveTextRef, mode });
-  }, [mode, modelRef, playingRef, roiRef, setText, videoRef]);
+    const model = modelRef.current;
+    const video = videoRef.current;
+    if (model === null || video === null) {
+      return;
+    }
+    const found = findPieces({ model, video, setText, setFps, setOrientation, moveTextRef, mode });
+    setRecorder(found.recorder);
+    return () => {
+      setRecorder(null);
+      found.stop();
+    };
+  }, [mode, modelRef, setText, videoRef]);
+
+  // A new recorder (e.g. after the mode changes) gets the current values too
+  useEffect(() => {
+    if (playing) {
+      recorder?.start();
+    } else {
+      recorder?.pause();
+    }
+  }, [playing, recorder]);
+
+  useEffect(() => {
+    recorder?.setRoi(roi);
+  }, [recorder, roi]);
 
   useEffect(() => {
     const video = videoRef.current;

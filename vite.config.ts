@@ -99,6 +99,11 @@ export default defineConfig({
   server: {
     watch: { ignored: ["**/.venv/**"] },
   },
+  optimizeDeps: {
+    // Pre-bundling would move the recorder's code away from its worker file, which it loads by a URL relative to
+    // itself
+    exclude: ["@chesscam/recorder"]
+  },
   preview: {
     // Cross-origin isolation enables SharedArrayBuffer, so the CPU fallback can use wasm threads.
     // credentialless still allows CORS requests, such as the icons from jsDelivr.

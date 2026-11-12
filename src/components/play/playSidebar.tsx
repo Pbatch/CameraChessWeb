@@ -9,7 +9,7 @@ import { useEffect, useRef, useState } from "react";
 import { describeLichessError, isTransientError, LichessError, lichessPlayMove, lichessStreamGame } from "../../api/lichess";
 import { errorClear, errorShow } from "../../slices/errorSlice";
 import type { BoardStreamEvent } from "../../api/lichess";
-import type { Color } from "chessops/types";
+import type { Color } from "@chesscam/recorder";
 import { gameSync, useGame } from "../../slices/gameSlice";
 import { clockSet } from "../../slices/clockSlice";
 import GamesButton from "./gamesButton";

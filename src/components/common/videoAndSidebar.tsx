@@ -50,8 +50,6 @@ const VideoAndSidebar = ({ mode }: { mode: Mode }) => {
   const [gameSelected, setGameSelected] = useState<boolean>(false);
   
   const videoRef = useRef<HTMLVideoElement>(null);
-  const playingRef = useRef<boolean>(playing);
-  const roiRef = useRef<Roi | null>(roi);
 
   // Uploads play a file, and in portrait no video is shown
   const showCamera = (mode !== "upload") && !isPortrait;
@@ -120,14 +118,6 @@ const VideoAndSidebar = ({ mode }: { mode: Mode }) => {
   }, []);
 
   useEffect(() => {
-    playingRef.current = playing;
-  }, [playing]);
-
-  useEffect(() => {
-    roiRef.current = roi;
-  }, [roi]);
-
-  useEffect(() => {
     gameReset();
   }, []);
 
@@ -146,11 +136,9 @@ const VideoAndSidebar = ({ mode }: { mode: Mode }) => {
     setSelecting,
     canPlay,
     setCanPlay,
-    roiRef,
     modelRef: context.modelRef,
     videoRef,
     camera,
-    playingRef,
     mode,
     engineEnabled,
     startBlock,
