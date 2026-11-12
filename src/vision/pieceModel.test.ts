@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getOrientation, toDirection, toUpdate } from "./chessqueries";
+import { getOrientation, toDirection, toUpdate } from "./pieceModel";
 import { LABEL_MAP, NUM_LABELS, SQUARE_MAP } from "../utils/constants";
 import { MODEL_CLASSES, modelProbs, oneHotState } from "../test/helpers";
 

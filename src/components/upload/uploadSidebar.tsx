@@ -7,10 +7,10 @@ import type {
 } from "../../types";
 
 // Playback is in the controls over the video (videoControls.tsx)
-const UploadSidebar = ({ videoRef, chessqueriesModelRef,
+const UploadSidebar = ({ videoRef, modelRef,
   text, setText, playing, setPlaying, roi, setRoi, selecting, setSelecting, canPlay }: {
   videoRef: VideoRef,
-  chessqueriesModelRef: ModelRefs["chessqueriesModelRef"],
+  modelRef: ModelRefs["modelRef"],
   text: string[], setText: SetStringArray,
   playing: boolean, setPlaying: SetBoolean,
   roi: Roi | null, setRoi: SetRoi,
@@ -36,7 +36,7 @@ const UploadSidebar = ({ videoRef, chessqueriesModelRef,
         />
         <RoiButton roi={roi} setRoi={setRoi} selecting={selecting} setSelecting={setSelecting}
           canPlay={canPlay && !playing} />
-        <FenButton chessqueriesModelRef={chessqueriesModelRef} videoRef={videoRef} roi={roi} setText={setText}
+        <FenButton modelRef={modelRef} videoRef={videoRef} roi={roi} setText={setText}
           canPlay={canPlay && !playing} />
       </SidebarSection>
     </Sidebar>

@@ -1,6 +1,6 @@
 import i18n from "../i18n";
 import { invalidVideo } from "./detect";
-import { runChessqueries } from "./chessqueries";
+import { runPieceModel } from "./pieceModel";
 import { makeFen } from "chessops/fen";
 import { Chess, IllegalSetup } from "chessops/chess";
 import { emptySetup } from "chessops/setup";
@@ -12,7 +12,7 @@ import { gameReset } from "../slices/gameSlice";
 import type { ModelRefs, Roi, SetStringArray, VideoRef } from "../types";
 
 interface FindFenInput {
-  chessqueriesModelRef: ModelRefs["chessqueriesModelRef"],
+  modelRef: ModelRefs["modelRef"],
   videoRef: VideoRef,
   roi: Roi | null,
   setText: SetStringArray,
@@ -101,7 +101,7 @@ export const stateToBoard = (state: number[][]): Board => {
   return board;
 }
 
-export const findFen = async ({ chessqueriesModelRef, videoRef, roi,
+export const findFen = async ({ modelRef, videoRef, roi,
   setText, color }: FindFenInput) => {
   if (invalidVideo(videoRef)) {
     return;
@@ -112,7 +112,7 @@ export const findFen = async ({ chessqueriesModelRef, videoRef, roi,
     if (frame > 0) {
       await new Promise(requestAnimationFrame);
     }
-    const { update } = await runChessqueries(chessqueriesModelRef, videoRef, roi);
+    const { update } = await runPieceModel(modelRef, videoRef, roi);
     for (let i = 0; i < 64; i++) {
       for (let j = 0; j < NUM_LABELS; j++) {
         average[i][j] += update[i][j] / NUM_FRAMES;

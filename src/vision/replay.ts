@@ -1,5 +1,5 @@
 import { GameBoard } from "../chess/board";
-import { toUpdate } from "./chessqueries";
+import { toUpdate } from "./pieceModel";
 import { BeamTracker } from "./beamTracker";
 import type { Game } from "../types";
 import { START_FEN } from "../utils/constants";

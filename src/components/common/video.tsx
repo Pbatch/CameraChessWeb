@@ -19,10 +19,10 @@ import type { StartBlock } from "./cameraControls";
 // The controls' height over the video, in px, as in .video-controls: uploads have a seek bar above the buttons
 const CONTROLS_HEIGHT = { upload: 52, camera: 40 };
 
-const Video = ({ chessqueriesModelRef, videoRef, playing,
+const Video = ({ modelRef, videoRef, playing,
   setPlaying, playingRef, setText, mode, roi, setRoi, roiRef, selecting, setSelecting,
   canPlay, setCanPlay, engineEnabled = false, startBlock = null }: {
-    chessqueriesModelRef: ModelRefs["chessqueriesModelRef"],
+    modelRef: ModelRefs["modelRef"],
     videoRef: VideoRef,
     playing: boolean,
     setPlaying: SetBoolean,
@@ -55,9 +55,9 @@ const Video = ({ chessqueriesModelRef, videoRef, playing,
   }, [game])
 
   useEffect(() => {
-    return findPieces({ chessqueriesModelRef, videoRef, roiRef, playingRef, setText, setFps, setOrientation,
+    return findPieces({ modelRef, videoRef, roiRef, playingRef, setText, setFps, setOrientation,
       lastMoveRef, moveTextRef, mode });
-  }, [mode, chessqueriesModelRef, playingRef, roiRef, setText, videoRef]);
+  }, [mode, modelRef, playingRef, roiRef, setText, videoRef]);
 
   useEffect(() => {
     const video = videoRef.current;

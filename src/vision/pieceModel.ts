@@ -1,14 +1,14 @@
 import i18n from "../i18n";
 import { type Accelerator, type CompiledModel, getGlobalLiteRt, isWebGPUSupported, loadAndCompile, loadLiteRt, Tensor } from "@litertjs/core";
 import { version as LITERT_VERSION } from "@litertjs/core/package.json";
-import { CHESSQUERIES_SIZE, LABEL_MAP, NUM_LABELS } from "../utils/constants";
+import { MODEL_SIZE, LABEL_MAP, NUM_LABELS } from "../utils/constants";
 import { zeros } from "../utils/math";
-import type { Chessqueries, ChessqueriesOutputs, CornerName, ModelRefs, Roi, VideoRef } from "../types";
-import type { WorkerCall, WorkerRequest, WorkerResponse } from "./chessqueriesWorker";
+import type { PieceModel, PieceModelOutputs, CornerName, ModelRefs, Roi, VideoRef } from "../types";
+import type { WorkerCall, WorkerRequest, WorkerResponse } from "./pieceModelWorker";
 
 // Model classes, in output order
 const CLASS_SYMBOLS: string[] = [".", "P", "N", "B", "R", "Q", "K", "p", "n", "b", "r", "q", "k"];
-const INPUT_SHAPE: number[] = [1, CHESSQUERIES_SIZE, CHESSQUERIES_SIZE, 4];
+const INPUT_SHAPE: number[] = [1, MODEL_SIZE, MODEL_SIZE, 4];
 const NUM_PROBS: number = 64 * CLASS_SYMBOLS.length;
 // Region corners clockwise from the top left when rank 8 is at the top
 const CORNERS: CornerName[] = ["a8", "h8", "h1", "a1"];
@@ -26,18 +26,18 @@ struct Params { origin: vec2f, size: vec2f, taps: vec2f }
 
 @compute @workgroup_size(8, 8)
 fn main(@builtin(global_invocation_id) id: vec3u) {
-  if (id.x >= ${CHESSQUERIES_SIZE}u || id.y >= ${CHESSQUERIES_SIZE}u) {
+  if (id.x >= ${MODEL_SIZE}u || id.y >= ${MODEL_SIZE}u) {
     return;
   }
   let taps = vec2u(params.taps);
   var sum = vec3f(0.0);
   for (var j = 0u; j < taps.y; j++) {
     for (var i = 0u; i < taps.x; i++) {
-      let p = (vec2f(id.xy) + (vec2f(f32(i), f32(j)) + 0.5) / params.taps) / ${CHESSQUERIES_SIZE}.0;
+      let p = (vec2f(id.xy) + (vec2f(f32(i), f32(j)) + 0.5) / params.taps) / ${MODEL_SIZE}.0;
       sum += textureSampleLevel(frame, smp, params.origin + p * params.size, 0.0).rgb;
     }
   }
-  pixels[id.y * ${CHESSQUERIES_SIZE}u + id.x] = pack4x8unorm(vec4f(sum / f32(taps.x * taps.y), 1.0));
+  pixels[id.y * ${MODEL_SIZE}u + id.x] = pack4x8unorm(vec4f(sum / f32(taps.x * taps.y), 1.0));
 }`;
 
 interface GpuResize {
@@ -77,7 +77,7 @@ const toArray = async (output: Tensor): Promise<Float32Array> => {
   }
 }
 
-const blankPixels = (): Uint8Array<ArrayBuffer> => new Uint8Array(CHESSQUERIES_SIZE * CHESSQUERIES_SIZE * 4);
+const blankPixels = (): Uint8Array<ArrayBuffer> => new Uint8Array(MODEL_SIZE * MODEL_SIZE * 4);
 
 const getGpuResize = (device: GPUDevice): GpuResize => {
   if (gpuResize?.device !== device) {
@@ -110,7 +110,7 @@ const resizeOnGpu = (input: Tensor, video: HTMLVideoElement, roi: Roi | null) =>
   // The model was trained on square-resized images, so the aspect ratio is not kept
   device.queue.writeBuffer(params, 0, new Float32Array([
     region.x / width, region.y / height, region.width / width, region.height / height,
-    Math.max(1, Math.ceil(region.width / CHESSQUERIES_SIZE)), Math.max(1, Math.ceil(region.height / CHESSQUERIES_SIZE))
+    Math.max(1, Math.ceil(region.width / MODEL_SIZE)), Math.max(1, Math.ceil(region.height / MODEL_SIZE))
   ]));
   if (resize.frame?.width !== width || resize.frame?.height !== height) {
     resize.frame?.destroy();
@@ -134,7 +134,7 @@ const resizeOnGpu = (input: Tensor, video: HTMLVideoElement, roi: Roi | null) =>
   const pass: GPUComputePassEncoder = encoder.beginComputePass();
   pass.setPipeline(pipeline);
   pass.setBindGroup(0, bindGroup);
-  const groups: number = Math.ceil(CHESSQUERIES_SIZE / 8);
+  const groups: number = Math.ceil(MODEL_SIZE / 8);
   pass.dispatchWorkgroups(groups, groups);
   pass.end();
   device.queue.submit([encoder.finish()]);
@@ -179,7 +179,7 @@ const deleteGpuInput = () => {
 }
 
 // Output order is up to the converter, so they are told apart by size
-const toOutputs = (arrays: Float32Array[]): ChessqueriesOutputs => {
+const toOutputs = (arrays: Float32Array[]): PieceModelOutputs => {
   const probs = arrays.find((array) => array.length === NUM_PROBS);
   if (probs === undefined) {
     throw new Error("Model has no square probabilities");
@@ -187,13 +187,13 @@ const toOutputs = (arrays: Float32Array[]): ChessqueriesOutputs => {
   return { probs, centroids: arrays.find((array) => array.length === 64 * 2) ?? null };
 }
 
-const run = (model: CompiledModel, video: HTMLVideoElement | null, roi: Roi | null): Promise<ChessqueriesOutputs> => {
+const run = (model: CompiledModel, video: HTMLVideoElement | null, roi: Roi | null): Promise<PieceModelOutputs> => {
   const result = lastRun.then(() => runNow(model, video, roi));
   lastRun = result.catch(() => undefined);
   return result;
 }
 
-const runNow = async (model: CompiledModel, video: HTMLVideoElement | null, roi: Roi | null): Promise<ChessqueriesOutputs> => {
+const runNow = async (model: CompiledModel, video: HTMLVideoElement | null, roi: Roi | null): Promise<PieceModelOutputs> => {
   const outputs: Tensor[] = await model.run(await toInput(video, roi));
   return toOutputs(await Promise.all(outputs.map(toArray)));
 }
@@ -220,7 +220,7 @@ const setWebGpuDevice = async () => {
   getGlobalLiteRt().setWebGpuDevice(device);
 }
 
-const loadWebGpu = async (): Promise<Chessqueries> => {
+const loadWebGpu = async (): Promise<PieceModel> => {
   // fp16 is the fastest and does not need the shader-f16 WebGPU feature
   const model: CompiledModel = await loadAndCompile(MODEL_URL, {
     accelerator: "webgpu",
@@ -258,8 +258,8 @@ const loadWebGpu = async (): Promise<Chessqueries> => {
 const wasmPath: string = import.meta.env.DEV ? "/node_modules/@litertjs/core/wasm/" : `litert/${LITERT_VERSION}/`;
 
 // The CPU model runs in a worker, as each run blocks its thread for the whole inference
-const loadWorker = async (): Promise<Chessqueries> => {
-  const worker = new Worker(new URL("./chessqueriesWorker.ts", import.meta.url), { type: "module" });
+const loadWorker = async (): Promise<PieceModel> => {
+  const worker = new Worker(new URL("./pieceModelWorker.ts", import.meta.url), { type: "module" });
   const pending = new Map<number, { resolve: (arrays: Float32Array[]) => void, reject: (error: Error) => void }>();
   let nextId: number = 0;
   // Set once the worker has stopped, so later runs fail rather than wait forever
@@ -327,7 +327,7 @@ const hasGpuAdapter = async (): Promise<boolean> => {
   }
 }
 
-const loadChessqueries = async (): Promise<Chessqueries> => {
+const loadPieceModel = async (): Promise<PieceModel> => {
   if (await hasGpuAdapter()) {
     try {
       // JSPI lets WebGPU hand unsupported ops to the CPU
@@ -345,17 +345,17 @@ const loadChessqueries = async (): Promise<Chessqueries> => {
   return await loadWorker();
 }
 
-let loading: Promise<Chessqueries> | null = null;
+let loading: Promise<PieceModel> | null = null;
 
 // Loads the model once, however often it is called. Every caller's ref gets it, as a
 // remounted App (e.g. after a hot reload) asks again with a fresh, empty ref.
-export const loadChessqueriesOnce = (modelRef: ModelRefs["chessqueriesModelRef"]): Promise<void> => {
+export const loadPieceModelOnce = (modelRef: ModelRefs["modelRef"]): Promise<void> => {
   if (modelRef.current !== null) {
     return Promise.resolve();
   }
 
   if (loading === null) {
-    loading = loadChessqueries().catch((error: unknown) => {
+    loading = loadPieceModel().catch((error: unknown) => {
       loading = null;
       throw error;
     });
@@ -366,7 +366,7 @@ export const loadChessqueriesOnce = (modelRef: ModelRefs["chessqueriesModelRef"]
 }
 
 // Swaps in a model on a new device, or on the CPU if the GPU will not come back
-const recover = async (modelRef: ModelRefs["chessqueriesModelRef"], oldModel: Chessqueries) => {
+const recover = async (modelRef: ModelRefs["modelRef"], oldModel: PieceModel) => {
   // A run on the lost device may never settle
   await Promise.race([lastRun, new Promise((resolve) => setTimeout(resolve, RECOVERY_RUN_TIMEOUT))]);
   lastRun = Promise.resolve();
@@ -381,7 +381,7 @@ const recover = async (modelRef: ModelRefs["chessqueriesModelRef"], oldModel: Ch
   // Cleared first, so a loss of the new device is noticed too
   deviceLost = false;
 
-  let model: Chessqueries;
+  let model: PieceModel;
   try {
     await setWebGpuDevice();
     model = await loadWebGpu();
@@ -395,7 +395,7 @@ const recover = async (modelRef: ModelRefs["chessqueriesModelRef"], oldModel: Ch
 }
 
 // Starts a reload after the GPU is lost, and says why detection is paused meanwhile
-const checkDevice = (modelRef: ModelRefs["chessqueriesModelRef"]) => {
+const checkDevice = (modelRef: ModelRefs["modelRef"]) => {
   if (recoveryError !== null) {
     throw recoveryError;
   }
@@ -418,7 +418,7 @@ const checkDevice = (modelRef: ModelRefs["chessqueriesModelRef"]) => {
 // RGBA bytes as the model takes them, viewing the canvas data without a copy. Used on the CPU, and on WebGPU without external textures.
 const getPixels = (video: HTMLVideoElement, roi: Roi | null): Uint8Array<ArrayBuffer> => {
   if (canvas === null) {
-    canvas = new OffscreenCanvas(CHESSQUERIES_SIZE, CHESSQUERIES_SIZE);
+    canvas = new OffscreenCanvas(MODEL_SIZE, MODEL_SIZE);
   }
   const ctx = canvas.getContext("2d", { willReadFrequently: true });
   if (ctx === null) {
@@ -427,11 +427,11 @@ const getPixels = (video: HTMLVideoElement, roi: Roi | null): Uint8Array<ArrayBu
   // The model was trained on square-resized images, so the aspect ratio is not kept
   ctx.imageSmoothingQuality = "high";
   if (roi === null) {
-    ctx.drawImage(video, 0, 0, CHESSQUERIES_SIZE, CHESSQUERIES_SIZE);
+    ctx.drawImage(video, 0, 0, MODEL_SIZE, MODEL_SIZE);
   } else {
-    ctx.drawImage(video, roi.x, roi.y, roi.width, roi.height, 0, 0, CHESSQUERIES_SIZE, CHESSQUERIES_SIZE);
+    ctx.drawImage(video, roi.x, roi.y, roi.width, roi.height, 0, 0, MODEL_SIZE, MODEL_SIZE);
   }
-  const imageData: ImageData = ctx.getImageData(0, 0, CHESSQUERIES_SIZE, CHESSQUERIES_SIZE);
+  const imageData: ImageData = ctx.getImageData(0, 0, MODEL_SIZE, MODEL_SIZE);
   return new Uint8Array<ArrayBuffer>(imageData.data.buffer);
 }
 
@@ -477,8 +477,8 @@ export const toUpdate = (probs: Float32Array): number[][] => {
   return update;
 }
 
-export const runChessqueries = async (
-  modelRef: ModelRefs["chessqueriesModelRef"],
+export const runPieceModel = async (
+  modelRef: ModelRefs["modelRef"],
   videoRef: VideoRef,
   roi: Roi | null
 ): Promise<{ update: number[][], direction: number[] | null }> => {
