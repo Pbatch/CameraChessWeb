@@ -1,55 +1,15 @@
+import type { CornerName, Game, Model, Roi } from "@chesscam/recorder";
 import type { Analysis } from "./engine/stockfish";
 interface Study {
   id: string,
   name: string
 }
 
-// Square probabilities, and where each square query looked (null for models without that output)
-interface PieceModelOutputs {
-  probs: Float32Array,
-  centroids: Float32Array | null
-}
-
-// The piece model, in a CPU worker. A null video gives blank pixels, for the warm-up.
-interface PieceModel {
-  run: (video: HTMLVideoElement | null, roi: Roi | null) => Promise<PieceModelOutputs>,
-  delete: () => void
-}
-
 interface ModelRefs {
-  modelRef: React.RefObject<PieceModel | null>
+  modelRef: React.RefObject<Model | null>
 }
 
 type VideoRef = React.RefObject<HTMLVideoElement | null>;
-
-// Region of interest, in video pixels
-interface Roi {
-  x: number,
-  y: number,
-  width: number,
-  height: number
-}
-type RoiRef = React.RefObject<Roi | null>;
-
-type CornerName = "a8" | "h8" | "h1" | "a1";
-
-// The squares a move (or a move and its reply) changes, and the label each ends with
-interface SquaresData {
-  from: number[],
-  to: number[],
-  targets: number[]
-}
-// One move: its UCI (e.g. e2e4, e7e8q, castling as the king's move), which tells moves apart, and its squares
-interface MovesData extends SquaresData {
-  uci: string
-}
-// A first move, which is shown in the game so also has its SAN, and a reply to it with what the two change together.
-// Replies have no SAN, as working it out for every reply was most of the time spent making the pairs.
-interface MovesPair {
-  move1: MovesData & { san: string },
-  move2: MovesData | null,
-  moves: SquaresData | null
-}
 
 type Clock = {
   wtime: number;      // white's remaining time, in milliseconds
@@ -58,15 +18,6 @@ type Clock = {
   updatedAt: number;  // Date.now() at the moment these values arrived
   running: boolean;   // false when the game is paused or finished
 };
-
-interface Game {
-  fen: string,
-  moves: string,
-  start: string,
-  lastMove: string,
-  fromOpponent: boolean,
-  times: number[]     // record mode only: ms since recording started at each move, otherwise empty
-}
 
 interface User {
   token: string,
@@ -121,8 +72,7 @@ interface Camera {
 }
 
 export type { 
-  RootState, Study, Clock, User, EngineChoice, PieceModel, PieceModelOutputs, ModelRefs, SquaresData, MovesData, MovesPair, 
-  Game, ErrorSource, AppError,
+  RootState, Study, Clock, User, EngineChoice, ModelRefs, Game, ErrorSource, AppError,
   SetBoolean, SetStringArray, SetNumber, SetFps, Mode,
-  SetStudy, VideoRef, Roi, RoiRef, SetRoi, CornerName, SetOrientation, Camera
+  SetStudy, VideoRef, Roi, SetRoi, CornerName, SetOrientation, Camera
 }

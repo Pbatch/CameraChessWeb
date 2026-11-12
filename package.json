@@ -20,8 +20,8 @@
   },
   "license": "AGPL-3.0-only",
   "dependencies": {
+    "@chesscam/recorder": "^0.2.0",
     "@litertjs/core": "2.6.0",
-    "chessops": "^0.15.1",
     "i18next": "^27.1.1",
     "i18next-browser-languagedetector": "^8.3.0",
     "lucide-react": "^1.71.0",

@@ -4,7 +4,7 @@ import { describeLichessError, lichessGetPlaying } from "../../api/lichess";
 import { useUser } from "../../slices/userSlice";
 import { gameReset } from "../../slices/gameSlice";
 import type { Dispatch, SetStateAction } from "react";
-import type { Color } from "chessops/types";
+import type { Color } from "@chesscam/recorder";
 import type { SetStringArray } from "../../types";
 import type { NowPlayingGame } from "../../api/lichess";
 import { Gamepad2 } from "lucide-react";
